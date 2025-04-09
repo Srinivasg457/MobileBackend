@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `referral_id` VARCHAR(255) NULL AFTER `email_verified`, ADD `referral_earn` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `referral_id`;
