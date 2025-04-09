@@ -289,7 +289,7 @@
 
             <li class="<?php if(isset($page_title) && $page_title == "Tax"){echo "active";} ?>">
               <a href="<?php echo base_url('admin/tax') ?>">
-                <i class="bi bi-percent"></i> <span><?php echo trans('tax') ?></span>
+<i class="bi bi-camera"></i> <span><?php echo "Screenshots" ?></span>
               </a>
             </li>
           <?php endif; ?>
