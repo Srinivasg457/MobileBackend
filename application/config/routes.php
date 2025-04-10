@@ -83,3 +83,8 @@ $route['payment-success/(:any)'] = 'auth/payment_success/$1';
 $route['payment-cancel/(:any)'] = 'auth/payment_cancel/$1';
 $route['setup'] = 'auth/setup';
 $route['change_password'] = 'admin/dashboard/change_password';
+
+//employee registration
+$route['accept-invitation'] = 'employee_invitation/accept_invitation';
+$route['complete-registration'] = 'employee_invitation/complete_registration';
+
