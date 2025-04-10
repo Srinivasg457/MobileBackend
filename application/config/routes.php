@@ -85,6 +85,6 @@ $route['setup'] = 'auth/setup';
 $route['change_password'] = 'admin/dashboard/change_password';
 
 //employee registration
-$route['accept-invitation'] = 'employee_invitation/accept_invitation';
-$route['complete-registration'] = 'employee_invitation/complete_registration';
+$route['accept-invitation'] = 'Employee/accept_invitation';
+$route['complete-registration'] = 'Employee/complete_registration';
 

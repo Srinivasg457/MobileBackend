@@ -73,56 +73,24 @@ class ScreenshotController extends CI_Controller {
             ->set_status_header(201)
             ->set_output(json_encode(["status" => "success", "message" => "Screenshot stored successfully"]));
     }
-
-    //Get the list users screenshots based on org_id and user_id 
-    // public function get_screenshots() {
-    //     $org_id = $this->input->get_request_header('org_id', TRUE);
-    //     $user_id = $this->input->get_request_header('user_id', TRUE);
-    
-    //     if (empty($org_id) || empty($user_id)) {
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode(["status" => "error", "message" => "Missing org_id or user_id in headers"]));
-    //     }
-    
-    //     $this->db->select('screenshot_id, file_type, created_at');
-    //     $this->db->from('screenshots');
-    //     $this->db->where('org_id', $org_id);
-    //     $this->db->where('user_id', $user_id);
-    //     $this->db->where('status', 1);  // Only show visible screenshots
-    //     $this->db->order_by('created_at', 'DESC');
-    //     $query = $this->db->get();
-    
-    //     if ($query->num_rows() == 0) {
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(404)
-    //             ->set_output(json_encode(["status" => "error", "message" => "No screenshots found"]));
-    //     }
-    
-    //     $screenshots = [];
-    //     foreach ($query->result() as $row) {
-    //         $screenshots[] = [
-    //             'id' => $row->screenshot_id,
-    //             'image_url' => base_url("screenshot/get_image/".$row->screenshot_id),
-    //             'created_at' => $row->created_at
-    //         ];
-    //     }
-    
-    //     return $this->output->set_content_type('application/json')
-    //         ->set_status_header(200)
-    //         ->set_output(json_encode(["status" => "success", "screenshots" => $screenshots]));
-    // }
+    //get api for screeshots
     public function get_screenshots() {
-        $org_id = $this->input->get('org_id');   // Changed from get_request_header
-        $user_id = $this->input->get('user_id'); // Changed from get_request_header
-
+        $org_id = $this->input->get('org_id');
+        $user_id = $this->input->get('user_id');
+        $date = $this->input->get('date'); // Optional date in 'YYYY-MM-DD'
+    
         if (empty($org_id) || empty($user_id)) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
                 ->set_output(json_encode([
                     "status" => "error", 
-                    "message" => "Missing org_id or user_id in headers"
+                    "message" => "Missing org_id or user_id"
                 ]));
+        }
+    
+        // Default to today’s date if none is provided
+        if (empty($date)) {
+            $date = date('Y-m-d');
         }
     
         $this->db->select('screenshot_id, file_data, file_type, created_at');
@@ -130,6 +98,7 @@ class ScreenshotController extends CI_Controller {
         $this->db->where('org_id', $org_id);
         $this->db->where('user_id', $user_id);
         $this->db->where('status', 1);
+        $this->db->where('DATE(created_at)', $date); // 📅 Filter by date
         $this->db->order_by('created_at', 'DESC');
         $query = $this->db->get();
     
@@ -138,21 +107,19 @@ class ScreenshotController extends CI_Controller {
                 ->set_status_header(404)
                 ->set_output(json_encode([
                     "status" => "error", 
-                    "message" => "No screenshots found"
+                    "message" => "No screenshots found for date " . $date
                 ]));
         }
     
         $screenshots = [];
         foreach ($query->result() as $row) {
             $formatted_date = date('H:i:s', strtotime($row->created_at));
-            
-            // Encode binary data to base64
             $base64_image = base64_encode($row->file_data);
             $image_data_url = 'data:image/' . $row->file_type . ';base64,' . $base64_image;
     
             $screenshots[] = [
                 'id' => $row->screenshot_id,
-                'image_data' => $image_data_url, // This can be used directly in <img src="">
+                'image_data' => $image_data_url,
                 'created_at' => $formatted_date,
                 'display_text' => $formatted_date
             ];
@@ -162,9 +129,11 @@ class ScreenshotController extends CI_Controller {
             ->set_status_header(200)
             ->set_output(json_encode([
                 "status" => "success", 
-                "screenshots" => $screenshots
+                "screenshots" => $screenshots,
+                "date" => $date
             ]));
     }
+    
     
 
     //hard delete
