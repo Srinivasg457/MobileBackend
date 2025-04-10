@@ -83,56 +83,145 @@ class Hrm extends Home_Controller {
     }
 
 
-     public function employee_add()
-    {   
-        if($_POST)
-        {   
-            check_status();
+    //  public function employee_add()
+    // {   
+    //     if($_POST)
+    //     {   
+    //         check_status();
 
-            $id = $this->input->post('id', true);
+    //         $id = $this->input->post('id', true);
 
                
-                $data=array(
-                    'user_id' => user()->id,
-                    'business_id' => $this->business->uid,
-                    'name' => $this->input->post('name', true),
-                    'department_id' => $this->input->post('department', true),
-                    'email' => $this->input->post('email', true),
-                    'phone' => $this->input->post('phone', true),
-                    'address' => $this->input->post('address', true),
-                    'city' => $this->input->post('city', true),
-                    'country' => $this->input->post('country', true),
-                    'status' => $this->input->post('status', true),
-                    'created_at' => my_date_now()
-                );
-                $data = $this->security->xss_clean($data);
+    //             $data=array(
+    //                 'user_id' => user()->id,
+    //                 'business_id' => $this->business->uid,
+    //                 'name' => $this->input->post('name', true),
+    //                 'department_id' => $this->input->post('department', true),
+    //                 'email' => $this->input->post('email', true),
+    //                 'phone' => $this->input->post('phone', true),
+    //                 'address' => $this->input->post('address', true),
+    //                 'city' => $this->input->post('city', true),
+    //                 'country' => $this->input->post('country', true),
+    //                 'status' => $this->input->post('status', true),
+    //                 'created_at' => my_date_now()
+    //             );
+    //             $data = $this->security->xss_clean($data);
                 
-                //if id available info will be edited
-                if ($id != '') {
-                    $this->admin_model->edit_option($data, $id, 'employees');
-                    $this->session->set_flashdata('msg', trans('msg-updated')); 
-                } else {
-                    $id = $this->admin_model->insert($data, 'employees');
-                    $this->session->set_flashdata('msg', trans('msg-inserted')); 
-                }
+    //             //if id available info will be edited
+    //             if ($id != '') {
+    //                 $this->admin_model->edit_option($data, $id, 'employees');
+    //                 $this->session->set_flashdata('msg', trans('msg-updated')); 
+    //             } else {
+    //                 $id = $this->admin_model->insert($data, 'employees');
+    //                 $this->session->set_flashdata('msg', trans('msg-inserted')); 
+    //             }
 
 
-                // insert photos
-                if($_FILES['photo']['name'] != ''){
-                    $up_load = $this->admin_model->upload_image('1200');
-                    $data_img = array(
-                        'image' => $up_load['images'],
-                        'thumb' => $up_load['thumb']
-                    );
-                    $this->admin_model->edit_option($data_img, $id, 'employees');   
-                }
+    //             // insert photos
+    //             if($_FILES['photo']['name'] != ''){
+    //                 $up_load = $this->admin_model->upload_image('1200');
+    //                 $data_img = array(
+    //                     'image' => $up_load['images'],
+    //                     'thumb' => $up_load['thumb']
+    //                 );
+    //                 $this->admin_model->edit_option($data_img, $id, 'employees');   
+    //             }
 
-                redirect(base_url('admin/hrm/employee'));
+    //             redirect(base_url('admin/hrm/employee'));
 
             
-        }      
+    //     }      
         
-    }
+    // }
+
+    public function employee_add()
+{   
+    if ($_POST) {   
+        check_status();
+
+        $id = $this->input->post('id', true);
+
+        $data = array(
+            'user_id' => user()->id,
+            'business_id' => $this->business->uid,
+            'name' => $this->input->post('name', true),
+            'department_id' => $this->input->post('department', true),
+            'email' => $this->input->post('email', true),
+            'phone' => $this->input->post('phone', true),
+            'address' => $this->input->post('address', true),
+            'city' => $this->input->post('city', true),
+            'country' => $this->input->post('country', true),
+            'status' => $this->input->post('status', true),
+            'created_at' => my_date_now()
+        );
+
+        $data = $this->security->xss_clean($data);
+
+        if ($id != '') {
+            $this->admin_model->edit_option($data, $id, 'employees');
+            $this->session->set_flashdata('msg', trans('msg-updated')); 
+        } else {
+            $id = $this->admin_model->insert($data, 'employees');
+            $this->session->set_flashdata('msg', trans('msg-inserted')); 
+
+            // ✅ Generate invitation token
+            $token = uniqid();
+            $this->admin_model->edit_option(['invitation_token' => $token], $id, 'employees');
+
+            // ✅ Email config for Mailtrap
+            $config = array(
+                'protocol'    => 'smtp',
+                'smtp_host'   => 'smtp.gmail.com',
+                'smtp_port'   => 587,
+                'smtp_user'   => 'sabeer2002ahmed@gmail.com', // your Gmail
+                'smtp_pass'   => 'vivxkwqkkygmelzp',   // NOT your Gmail password!
+                'smtp_crypto' => 'tls',
+                'mailtype'    => 'html',
+                'charset'     => 'utf-8',
+                'newline'     => "\r\n",
+                'crlf'        => "\r\n"
+            );
+            
+
+            $this->load->library('email');
+            $this->email->initialize($config);
+
+            // ✅ Prepare invitation email
+            $to = $this->input->post('email', true);
+            $subject = 'You are invited to join Time Tracker';
+            $message = '<p>Hello ' . $this->input->post('name', true) . ',</p>';
+            $message .= '<p>You have been invited to register for Time Tracker. Please click the link below to register:</p>';
+            $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
+            $message .= '<p>If you did not expect this, you can ignore this email.</p>';
+            $message .= '<p>Regards,<br>Time Tracker Team</p>';
+
+            $this->email->to($to);
+            $this->email->from('sabeer2002ahmed@gmail.com', 'Time Tracker');
+            $this->email->subject($subject);
+            $this->email->message($message);
+
+            if ($this->email->send()) {
+                $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
+                $this->session->set_flashdata('msg', 'Employee added and invitation email sent.');
+            } else {
+                log_message('error', 'Email error: ' . $this->email->print_debugger());
+                $this->session->set_flashdata('error', 'Employee added but failed to send email.');
+            }
+        }
+
+        // ✅ Upload photo if available
+        if ($_FILES['photo']['name'] != '') {
+            $up_load = $this->admin_model->upload_image('1200');
+            $data_img = array(
+                'image' => $up_load['images'],
+                'thumb' => $up_load['thumb']
+            );
+            $this->admin_model->edit_option($data_img, $id, 'employees');   
+        }
+
+        redirect(base_url('admin/hrm/employee'));
+    }      
+}
 
     public function employee_edit($id)
     {  
