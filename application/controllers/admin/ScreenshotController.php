@@ -1,12 +1,19 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class ScreenshotController extends CI_Controller {
+class ScreenshotController extends Home_Controller {
 
     public function __construct() {
         parent::__construct();
         $this->load->database();
         $this->load->helper(['url', 'form']);
+    }
+
+    public function index(){
+        $data = array();
+        $data['page_title'] = 'User Screenshots';
+        $data['main_content'] = $this->load->view('admin/user_screenshot', $data, TRUE);
+        $this->load->view('admin/index', $data);
     }
 
 
