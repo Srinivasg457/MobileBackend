@@ -181,7 +181,7 @@
                 <button id="search-btn">
                     <i class="fa fa-search"></i>
                 </button>
-                <input type="date" value="2025-01-18">
+                <input type="date" id="datePicker" value="">
                 <select>
                     <option>Sort By</option>
                 </select>
@@ -220,30 +220,26 @@
                 $('#popupCard').fadeOut();
                 $('.container').fadeIn();
             }
-        </script>
 
-        <script>
-            // Fetch inline screenshots for a user
-            function fetchUserScreenshots(userId, orgId) {
+            function fetchUserScreenshots(employeeId, date = '') {
                 $.ajax({
-                    url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
+                    url: "<?= base_url('/admin/ScreenshotController/get_screenshots'); ?>",
                     type: "GET",
                     dataType: "json",
                     data: {
-                        user_id: userId,
-                        org_id: orgId
+                        employee_id: employeeId,
+                        date: date
                     },
                     success: function(response) {
-                        const container = $(`#user-${userId} .screenshot-row`);
-
+                        const container = $(`#user-${employeeId} .screenshot-row`);
                         if (response.status === "success" && response.screenshots.length > 0) {
                             let output_screen = "";
 
                             $.each(response.screenshots.slice(0, 6), function(index, screenshot) {
                                 output_screen += `
-                            <div class="timestamp-box">
+                            <div class="screenshot-card">
                                 <img src="${screenshot.image_data}" class="zoomable-screenshot" alt="Screenshot" width="200" style="cursor: pointer;">
-                                <div style="margin-top:10px; display: flex; align-items: center; gap: 120px;">
+                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
                                     <span>${screenshot.display_text}</span>
                                     <img 
                                         src="https://img.icons8.com/?size=50&id=4887&format=png" 
@@ -272,22 +268,18 @@
 
                                 if (confirm("Are you sure you want to delete this screenshot?")) {
                                     $.ajax({
-                                        url: "<?= base_url('admin/ScreenshotController/soft_delete_screenshot'); ?>",
+                                        url: "/admin/ScreenshotController/soft_delete_screenshot",
                                         type: "POST",
-                                        headers: {
-                                            'org_id': orgId,
-                                            'user_id': userId
-                                        },
                                         data: {
-                                            screenshot_id: screenshotId
+                                            screenshot_id: screenshotId,
+                                            employee_id: employeeId
                                         },
                                         success: function() {
                                             alert("Screenshot deleted successfully.");
-                                            fetchUserScreenshots(userId, orgId);
+                                            fetchUserScreenshots(employeeId, $('#datePicker').val());
                                         },
-                                        error: function(response) {
-                                            alert("Error deleting screenshot: " + response);
-                                            console.log(response);
+                                        error: function(xhr) {
+                                            alert("Error deleting screenshot: " + xhr.responseText);
                                         }
                                     });
                                 }
@@ -303,13 +295,13 @@
                 });
             }
 
-            // Handle 'See More' button click to open popup
+            // Popup Screenshot Loader
             $(document).on("click", ".see-more-button", function() {
                 $(".container").hide();
 
                 const name = $(this).data("name");
                 const id = $(this).data("id");
-                const orgId = 1;
+                const date = $('#datePicker').val();
 
                 $("#popupName").text(name);
                 $("#popupID").text(id);
@@ -321,18 +313,18 @@
                         type: "GET",
                         dataType: "json",
                         data: {
-                            user_id: id,
-                            org_id: orgId
+                            employee_id: id,
+                            date: date
                         },
                         success: function(response) {
                             if (response.status === "success" && response.screenshots.length > 0) {
-                                let output = "";
-                                let group = "";
+                                let output = "",
+                                    group = "";
 
                                 $.each(response.screenshots, function(index, screenshot) {
                                     group += `
                                 <div class="screenshot-card">
-                                    <img src="${screenshot.image_data}" class="zoomable-screenshot" alt="Screenshot" style="cursor: pointer;">
+                                    <img src="${screenshot.image_data}" class="see-zoomable-screenshot" alt="Screenshot" style="cursor: pointer;">
                                     <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
                                         <p>${screenshot.display_text}</p>
                                         <img 
@@ -344,7 +336,6 @@
                                         />
                                     </div>
                                 </div>`;
-
                                     if ((index + 1) % 12 === 0 || index === response.screenshots.length - 1) {
                                         output += `<div class="screenshot-row">${group}</div>`;
                                         group = "";
@@ -353,14 +344,13 @@
 
                                 $(".screenshot-container").html(output);
 
-                                $(".zoomable-screenshot").on('click', function() {
+                                $(".see-zoomable-screenshot").on('click', function() {
                                     $('#modal-image').attr('src', $(this).attr('src'));
                                     $('#screenshot-modal').fadeIn();
                                 });
 
                                 $('#close-modal').on('click', function() {
                                     $('#screenshot-modal').fadeOut();
-                                    $(".container").show();
                                 });
 
                                 $(".delete-screenshot").on('click', function() {
@@ -368,14 +358,11 @@
 
                                     if (confirm("Are you sure you want to delete this screenshot?")) {
                                         $.ajax({
-                                            url: "<?= base_url('admin/ScreenshotController/soft_delete_screenshot'); ?>",
+                                            url: "/admin/ScreenshotController/soft_delete_screenshot",
                                             type: "POST",
-                                            headers: {
-                                                'org_id': orgId,
-                                                'user_id': id
-                                            },
                                             data: {
-                                                screenshot_id: screenshotId
+                                                screenshot_id: screenshotId,
+                                                employee_id: id
                                             },
                                             success: function() {
                                                 alert("Screenshot deleted successfully.");
@@ -383,7 +370,6 @@
                                             },
                                             error: function(xhr) {
                                                 alert("Error deleting screenshot: " + xhr.responseText);
-                                                console.log(xhr.responseText);
                                             }
                                         });
                                     }
@@ -401,49 +387,49 @@
                 loadScreenshots();
             });
 
-            // Main user fetch and search logic
+            // Main fetch function with date and search
             $(document).ready(function() {
-                const orgId = 1;
+                function fetchUsers(search = '', date = '') {
+                    let endpoint = search ? '/admin/ScreenshotController/search_employees_by_name_by_user' : '/admin/ScreenshotController/list_employees_by_user';
 
-                function fetchUsers(orgId, search = '') {
                     $.ajax({
-                        url: `/admin/ScreenshotController/${search ? 'search_filter_by_names' : 'list_organization_users'}/${orgId}`,
+                        url: endpoint,
                         type: 'GET',
                         data: {
-                            search: search
+                            search: search,
+                            date: date
                         },
                         dataType: 'json',
                         success: function(response) {
                             let output = '';
-                            const users = response.users || [];
+                            const employees = response.employees || [];
 
-                            if (response.status === 'success' && users.length > 0) {
-                                $.each(users, function(index, user) {
+                            if (response.status === 'success' && employees.length > 0) {
+                                $.each(employees, function(index, employee) {
                                     output += `
-                                <div class="user-card" id="user-${user.id}">
+                                <div class="user-card" id="user-${employee.id}">
                                     <div class="user-info-line">
-                                        <div><span>Id:</span> ${user.id}</div>
-                                        <div><span>Name:</span> ${user.name || 'N/A'}</div>
-                                        <div><span>Designation:</span> ${user.designation || 'N/A'}</div>
-                                        <div><span>Productivity Level:</span> ${user.productivity || 'N/A'}%</div>
+                                        <div><span>Id:</span> ${employee.id}</div>
+                                        <div><span>Name:</span> ${employee.name || 'N/A'}</div>
+                                        <div><span>Designation:</span> ${employee.designation || 'N/A'}</div>
+                                        <div><span>Productivity Level:</span> ${employee.productivity || 'N/A'}%</div>
                                     </div>
                                     <div class="timestamp-boxes">
                                         <div class="screenshot-row"></div>
                                     </div>
                                     <div style="text-align: right;">
-                                        <button class="see-more-button" data-name="${user.name}" data-id="${user.id}">See More</button>
+                                        <button class="see-more-button" data-name="${employee.name}" data-id="${employee.id}">See More</button>
                                     </div>
                                 </div>`;
                                 });
 
                                 $(".card-container").html(output);
 
-                                // Load screenshots for each user
-                                users.forEach(function(user) {
-                                    fetchUserScreenshots(user.id, orgId);
+                                employees.forEach(function(employee) {
+                                    fetchUserScreenshots(employee.id, date);
                                 });
                             } else {
-                                $(".card-container").html("<p>No users found.</p>");
+                                $(".card-container").html("<p>No employees found.</p>");
                             }
                         },
                         error: function(xhr, status, error) {
@@ -453,18 +439,17 @@
                 }
 
                 // Initial fetch
-                fetchUsers(orgId);
+                fetchUsers();
 
-                // Live search
-                $('#search-name').on('input', function() {
-                    const keyword = $(this).val().trim();
-                    fetchUsers(orgId, keyword);
-                });
-
-                // Optional search button
-                $('#search-btn').on('click', function() {
+                // Search & Date filtering
+                function triggerFilter() {
                     const keyword = $('#search-name').val().trim();
-                    fetchUsers(orgId, keyword);
-                });
+                    const date = $('#datePicker').val();
+                    fetchUsers(keyword, date);
+                }
+
+                $('#search-name').on('input', triggerFilter);
+                $('#datePicker').on('change', triggerFilter);
+                $('#search-btn').on('click', triggerFilter);
             });
         </script>
