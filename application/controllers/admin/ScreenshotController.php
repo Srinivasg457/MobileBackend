@@ -98,8 +98,8 @@ class ScreenshotController extends Home_Controller {
 
     
     public function get_screenshots() {
-        $user_id = $this->input->get('user_id');
         $employee_id = $this->input->get('employee_id');
+        $user_id = $this->session->userdata('id');
         $date = $this->input->get('date'); // Optional date in 'YYYY-MM-DD'
 
         if (empty($user_id) && empty($employee_id)) {
@@ -212,43 +212,50 @@ class ScreenshotController extends Home_Controller {
             ->set_output(json_encode(["status" => "success", "message" => "Screenshot deleted successfully"]));
     }
 
- //soft delete
- public function soft_delete_screenshot($screenshot_id) {
-    $user_id = $this->input->get_request_header('user_id', TRUE);
-    $employee_id = $this->input->get_request_header('employee_id', TRUE);
+    public function soft_delete_screenshot()
+    {
+        $screenshot_id = $this->input->post('screenshot_id', true);
+        $employee_id = $this->input->post('employee_id', true);
+        $user_id = $this->session->userdata('user_id'); // or null if not logged in
 
-    // Validate inputs
-    if (empty($screenshot_id) || (empty($user_id) && empty($employee_id))) {
-        return $this->output
-            ->set_content_type('text/plain')
-            ->set_status_header(400)
-            ->set_output("Error: screenshot_id and either user_id or employee_id are required.");
+        // Validate inputs
+        if (empty($screenshot_id) || (empty($user_id) && empty($employee_id))) {
+            return $this->output
+                ->set_content_type('text/plain')
+                ->set_status_header(400)
+                ->set_output("Error: screenshot_id and either user_id or employee_id are required.");
+        }
+
+        // Build query
+        $this->db->where('screenshot_id', $screenshot_id);
+        if (!empty($user_id)) {
+            $this->db->where('user_id', $user_id);
+        }
+        if (!empty($employee_id)) {
+            $this->db->where('employee_id', $employee_id);
+        }
+
+        $this->db->update('screenshots', ['status' => -1]);
+
+        // Response
+        if ($this->db->affected_rows() > 0) {
+            return $this->output
+                ->set_content_type('text/plain')
+                ->set_status_header(200)
+                ->set_output("Soft deleted successfully.");
+        } else {
+            return $this->output
+                ->set_content_type('text/plain')
+                ->set_status_header(404)
+                ->set_output("Screenshot not found or already deleted.");
+        }
     }
 
-    // Soft delete
-    $this->db->where('screenshot_id', $screenshot_id);
-    if (!empty($user_id)) {
-        $this->db->where('user_id', $user_id);
-    }
-    if (!empty($employee_id)) {
-        $this->db->where('employee_id', $employee_id);
-    }
-    $this->db->update('screenshots', ['status' => -1]);
-
-    if ($this->db->affected_rows() > 0) {
-        return $this->output
-            ->set_content_type('text/plain')
-            ->set_status_header(200)
-            ->set_output("Soft deleted successfully.");
-    } else {
-        return $this->output
-            ->set_content_type('text/plain')
-            ->set_status_header(404)
-            ->set_output("Screenshot not found or already deleted.");
-    }
-}
     //list of employees based on user ID
-    public function list_employees_by_user($user_id) {
+    public function list_employees_by_user() {
+
+        $user_id = $this->session->userdata('id');
+
         // 1. Validate user ID
         if (empty($user_id) || !is_numeric($user_id)) {
             return $this->output
@@ -259,7 +266,7 @@ class ScreenshotController extends Home_Controller {
                     'message' => 'Valid user ID required'
                 ]));
         }
-
+        // $data['user'] = $this->User_model->get_user_by_id($user_id, "users");
         // 2. Get employees from the employees table matching the provided user_id
         $employees = $this->db
             ->select('id, name, email') // Select the employee details you need
@@ -275,7 +282,7 @@ class ScreenshotController extends Home_Controller {
                 ->set_output(json_encode([
                     'status' => 'success',
                     'user_id' => (int)$user_id,
-                    'employees' => $employees
+                    'employees' => $employees,
                 ]));
         } else {
             return $this->output
@@ -290,7 +297,8 @@ class ScreenshotController extends Home_Controller {
    
 
     //search employees by name based on user ID
-    public function search_employees_by_name_by_user($user_id) {
+    public function search_employees_by_name_by_user() {
+        $user_id = $this->session->userdata('id');
         // 1. Validate user ID
         if (empty($user_id) || !is_numeric($user_id)) {
             return $this->output
