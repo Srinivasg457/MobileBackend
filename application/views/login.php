@@ -1,54 +1,90 @@
 <main>
+    <style>
+        .toast-success {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #0FB783;
+            color: white;
+            padding: 15px 20px;
+            border-left: 6px solid #28a745;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
     <div class="container-fluid" id="login-area">
+        <?php if ($this->input->get('registered') == 1): ?>
+            <div id="toast-success" class="toast-success">
+                <strong>Registered successfully!</strong> You can now log in.
+            </div>
+        <?php endif; ?>
         <div class="row align-items-center">
             <div class="col-md-7 col-lg-7 mx-auto">
 
                 <?php if (settings()->type == 'demo'): ?>
-                  <div class="alert alert-light border-1 w-lg-50 mx-auto" role="alert">
-                    <div class="row paddingx-m">
-                      <div class="col-md-6">
-                        <h4 class="alert-heading text-primary">Admin Access</h4>
-                        <p class="mb-0">admin / 1234</p>
-                      </div>
-                      <div class="col-md-6">
-                        <h4 class="alert-heading text-primary">User Access</h4>
-                        <p class="mb-0">user / 1234</p>
-                      </div>
+                    <div class="alert alert-light border-1 w-lg-50 mx-auto" role="alert">
+                        <div class="row paddingx-m">
+                            <div class="col-md-6">
+                                <h4 class="alert-heading text-primary">Admin Access</h4>
+                                <p class="mb-0">admin / 1234</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h4 class="alert-heading text-primary">User Access</h4>
+                                <p class="mb-0">user / 1234</p>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 <?php endif ?>
 
                 <div class="login-form w-lg-50 mx-auto paddingx-m">
                     <p class="mb-3"><a class="site-logo" href="<?php echo base_url() ?>">
                             <img class="img-fluid" width="30%" src="<?php echo base_url($settings->logo) ?>" alt="demo" /></a></p>
-                  
+
                     <h1 class="text-darker bold"><?php echo trans('log-in-to') ?> <?php echo settings()->site_name ?></h1>
-                    <p class="text-secondary mt-0 mb-5"><?php echo trans('dont-have-an-account-yet') ?> <a href="<?php echo base_url('register'); ?><?php if(settings()->trial_days != 0){echo '?trial=start';}?>" class="text-primary"><?php echo trans('sign-up') ?></a></p>
+                    <p class="text-secondary mt-0 mb-5"><?php echo trans('dont-have-an-account-yet') ?> <a href="<?php echo base_url('register'); ?><?php if (settings()->trial_days != 0) {
+                                                                                                                                                        echo '?trial=start';
+                                                                                                                                                    } ?>" class="text-primary"><?php echo trans('sign-up') ?></a></p>
 
                     <div class="mb-4 mt-4">
-                        <div class="success text-success"></div><div class="error text-danger bg-danger-soft rounded-1 py-2 px-3" style="display: none;"></div><div class="warning text-warning"></div>
+                        <div class="success text-success"></div>
+                        <div class="error text-danger bg-danger-soft rounded-1 py-2 px-3" style="display: none;"></div>
+                        <div class="warning text-warning"></div>
                     </div>
 
                     <form class="form cozy" id="login-form" action="<?php echo base_url('auth/log'); ?>" data-validate-on="submit" novalidate>
                         <label class="form-label"><?php echo trans('email') ?></label>
                         <div class="form-group has-icon">
-                            <input type="text" id="login_username" name="user_name" class="form-control br-5"  required> <i class="icon bi bi-person-fill text-muted"></i>
+                            <input type="text" id="login_username" name="user_name" class="form-control br-5" required> <i class="icon bi bi-person-fill text-muted"></i>
                         </div>
 
                         <div class="form-group mb-0">
                             <label class="form-label"><?php echo trans('password') ?></label>
                             <div class="form-group has-icon mb-0">
-                                <input type="password" id="login_password" name="password" class="form-control br-5"  required> <i class="icon bi bi-lock-fill text-muted"></i>
+                                <input type="password" id="login_password" name="password" class="form-control br-5" required> <i class="icon bi bi-lock-fill text-muted"></i>
                             </div>
                             <div class="d-flex justify-content-end mt-1">
                                 <span><a href="#" class="text-dark small forgot_pass link text-muted"><?php echo trans('forgot-password') ?></a></span>
                             </div>
                         </div>
-                            
+
 
                         <div class="form-group d-flex align-items-center justify-content-between ">
                             <!-- csrf token -->
-                            <input type="hidden" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
+                            <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
                             <button type="submit" class="btn btn-primary br-5 signin_btn"><?php echo trans('sign-in') ?></button>
                         </div>
                     </form>
@@ -70,7 +106,7 @@
 
     <div class="container-fluid hide" id="forgot-area">
         <div class="row align-items-center">
-            
+
             <div class="col-md-7 col-lg-7 mx-auto">
                 <div class="w-lg-50 mx-auto paddingx-m">
                     <div class="row mb-3">
@@ -86,12 +122,14 @@
                         <p class="text-secondary mt-0 mb-4 mb-md-6"><?php echo trans('enter-your-email-bellow-to-retrieve-your-account-or') ?> <a href="#" class="text-primary bold back_login"><?php echo trans('login') ?></a></p>
                         <form class="cozy" id="lost-form" action="<?php echo base_url('auth/forgot_password'); ?>" data-validate-on="submit" novalidate>
                             <div class="form-group has-icon">
-                                <input type="text" id="register_email" name="email" class="form-control br-5" placeholder="<?php echo trans('your-registered-email') ?>" required> <i class="icon bi bi-envelope"></i></div>
+                                <input type="text" id="register_email" name="email" class="form-control br-5" placeholder="<?php echo trans('your-registered-email') ?>" required> <i class="icon bi bi-envelope"></i>
+                            </div>
                             <div class="form-group d-flex align-items-center justify-content-between">
                                 <!-- csrf token -->
-                                <input type="hidden" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
+                                <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
 
-                                <button type="submit" class="btn btn-primary br-5 ms-auto"><?php echo trans('submit') ?> <i class="bi bi-arrow-right ms-2"></i></button></div>
+                                <button type="submit" class="btn btn-primary br-5 ms-auto"><?php echo trans('submit') ?> <i class="bi bi-arrow-right ms-2"></i></button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -107,5 +145,14 @@
 
 
         </div>
+
     </div>
 </main>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('#toast-success').fadeOut('slow');
+        }, 5000); // Hide after 5 seconds
+    });
+</script>
