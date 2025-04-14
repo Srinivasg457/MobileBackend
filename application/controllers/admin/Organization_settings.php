@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Organization_settings extends CI_Controller {
+class Organization_settings extends Home_Controller {
 
     public function __construct()
     {
@@ -10,6 +10,13 @@ class Organization_settings extends CI_Controller {
         $this->load->database();
     }
 
+    public function index()
+    {
+        $data = array();
+        $data['page_title'] = 'Organization settings';
+        $data['main_content'] = $this->load->view('admin/organization_settings', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
     // Method to insert or update org settings for a user
     public function save_org_settings($user_id)
     {
