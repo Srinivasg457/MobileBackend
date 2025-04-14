@@ -189,7 +189,19 @@ class Auth_model extends CI_Model {
             return $result;
         }
     }
-
+   // check valid employee
+    function validate_employee(){
+        $this->db->select('*');
+        $this->db->from('employees');
+        $this->db->where('email', $this->input->post('user_name'));
+        $this->db->limit(1);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->row();
+        } else {
+            return FALSE;
+        }
+    }
 
     // check valid staff
     function validate_role()
@@ -256,6 +268,15 @@ class Auth_model extends CI_Model {
         return $this->email->send();
     }
 
+    public function is_employee()
+    {
+
+        if ($this->session->userdata('employee_id') && $this->session->userdata('is_employee')) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
 
 
 }
