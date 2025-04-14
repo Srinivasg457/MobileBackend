@@ -10,6 +10,13 @@ class Employee extends Home_Controller
         $this->load->helper('security');
         $this->load->library('form_validation');
     }
+     public function index(){
+        $data = array();
+        $data['page_title'] = 'Employee Dashboard';
+        $data['details'] = $this->session->userdata('employee_id');
+        $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
 
     // Step 1: Handle invitation link
     public function accept_invitation()

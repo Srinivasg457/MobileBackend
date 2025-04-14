@@ -194,7 +194,7 @@ class Auth extends Home_Controller
 
             $email = $this->input->post('email');
             $password = $this->input->post('password');
-            $auth_code = $this->input->post('auth_code'); // Assuming you'll have an input field for this
+            // $auth_code = $this->input->post('auth_code'); // Assuming you'll have an input field for this
 
             // 1. Check valid user in 'users' table
             $user = $this->auth_model->validate_user();
@@ -251,10 +251,11 @@ class Auth extends Home_Controller
                 }
             }
 
+         
             // 2. If 'users' authentication fails, check 'employees' table
-            $employee = $this->auth_model->validate_employee($email, $auth_code); // We need to create this model function
+            $employee = $this->auth_model->validate_employee(); // We need to create this model function
 
-            if (!empty($employee) && $employee->is_registered == 1) {
+            if (!empty($employee) && $employee->is_registered == 1 && password_verify($password, $employee->password)) {
                 $session_data_employee = array(
                     'employee_id' => $employee->id,
                     'employee_name' => $employee->name,
