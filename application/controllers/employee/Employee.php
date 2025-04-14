@@ -18,6 +18,14 @@ class Employee extends Home_Controller
         $this->load->view('admin/index', $data);
     }
 
+    public function screenshot(){
+        $data = array();
+        $data['page_title'] = 'Screenshots';
+        $data['user_id'] = $this->session->userdata('employee_id');
+        $data['main_content'] = $this->load->view('admin/employee/screenshot', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
+
     // Step 1: Handle invitation link
     public function accept_invitation()
     {

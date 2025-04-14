@@ -150,6 +150,17 @@ class ScreenshotController extends Home_Controller {
                     "message" => $message
                 ]));
         }
+        if ($query->num_rows() === 0) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode([
+                    "status" => "success",
+                    "screenshots" => [],
+                    "message" => "No screenshots found for employee ID {$employee_id} on {$date}",
+                    "date" => $date,
+                    "employee_id" => $employee_id
+                ]));
+        }
 
         $screenshots = [];
         foreach ($query->result() as $row) {
@@ -176,8 +187,71 @@ class ScreenshotController extends Home_Controller {
             ]));
     }
 
-     //hard delete
-     public function hard_delete_screenshot($screenshot_id) {
+    public function get_user_screenshots()
+    {
+        $employee_id = $this->session->userdata('employee_id');
+        $date = $this->input->get('date'); // Optional date in 'YYYY-MM-DD'
+
+        if (empty($employee_id)) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Missing employee_id"
+                ]));
+        }
+
+        // Default to today’s date if not provided
+        if (empty($date)) {
+            $date = date('Y-m-d');
+        }
+
+        $this->db->select('screenshot_id, file_data, file_type, created_at');
+        $this->db->from('screenshots');
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('status', 1);
+        $this->db->where('DATE(created_at)', $date); // Filter by date
+        $this->db->order_by('created_at', 'DESC');
+        $query = $this->db->get();
+
+        if ($query->num_rows() === 0) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode([
+                    "status" => "success",
+                    "screenshots" => [],
+                    "message" => "No screenshots found for employee ID {$employee_id} on {$date}",
+                    "date" => $date,
+                    "employee_id" => $employee_id
+                ]));
+        }
+
+        $screenshots = [];
+        foreach ($query->result() as $row) {
+            $formatted_date = date('H:i:s', strtotime($row->created_at));
+            $base64_image = base64_encode($row->file_data);
+            $image_data_url = 'data:image/' . $row->file_type . ';base64,' . $base64_image;
+
+            $screenshots[] = [
+                'id' => $row->screenshot_id,
+                'image_data' => $image_data_url,
+                'created_at' => $formatted_date,
+                'display_text' => $formatted_date
+            ];
+        }
+
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(200)
+            ->set_output(json_encode([
+                "status" => "success",
+                "screenshots" => $screenshots,
+                "date" => $date,
+                "employee_id" => $employee_id
+            ]));
+    }
+
+    //hard delete
+    public function hard_delete_screenshot($screenshot_id) {
         $user_id = $this->input->get_request_header('user_id', TRUE);
         $employee_id = $this->input->get_request_header('employee_id', TRUE);
 
