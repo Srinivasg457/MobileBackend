@@ -88,3 +88,4 @@ $route['change_password'] = 'admin/dashboard/change_password';
 $route['accept-invitation'] = 'Employee/accept_invitation';
 $route['complete-registration'] = 'Employee/complete_registration';
 
+$route['employeedashboard'] = 'EmployeeDashboard/index';
