@@ -384,6 +384,8 @@
                     <i class="bi bi-camera"></i> <span><?php echo "View Screenshots" ?></span>
                   </a>
                 </li>
+                </a>
+                </li>
               <?php endif; ?>
 
               <?php if (check_permissions(auth('role'), 'reports') == TRUE): ?>

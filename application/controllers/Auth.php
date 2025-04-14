@@ -58,6 +58,16 @@ class Auth extends Home_Controller
         $this->load->view('index', $data);
     }
 
+    // load employee register view Page
+    public function emp_register()
+    {
+        $data = array();
+        $data['page_title'] = 'Employee Register';
+        $data['page'] = 'Auth';
+        $data['main_content'] = $this->load->view('employee_register', $data, TRUE);
+        $this->load->view('index', $data);
+    }
+
     //register
     public function register()
     {   
