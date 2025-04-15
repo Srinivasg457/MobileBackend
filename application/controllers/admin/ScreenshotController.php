@@ -275,8 +275,8 @@ class ScreenshotController extends Home_Controller {
     //         ]));
     // }
     public function get_screenshots() {
-        $user_id = $this->input->get('user_id');
-        $employee_id = $this->input->get('employee_id');
+         $employee_id = $this->input->get('employee_id');
+        $user_id = $this->session->userdata('id');
         $date = $this->input->get('date');
     
         if (empty($user_id) && empty($employee_id)) {
