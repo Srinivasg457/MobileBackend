@@ -123,6 +123,15 @@ class Users extends Home_Controller {
                     $id = $this->admin_model->insert($udata, 'users');
                     $this->session->set_flashdata('msg', trans('inserted-successfully'));
 
+
+                    // Create user's screenshot folder
+                    $screenshot_dir = FCPATH . 'uploads/screenshots/' . $id;
+
+                if (!is_dir($screenshot_dir)) {
+                    mkdir($screenshot_dir, 0777, true); // 0777 is okay for local/dev
+                }
+
+
                     $rand_uid = substr(random_string('numeric', 5).mt_rand(), 0, 8);
                     $uid = ltrim($rand_uid, '0');
 
