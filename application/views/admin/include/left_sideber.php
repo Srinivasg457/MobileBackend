@@ -403,7 +403,14 @@
                                 echo "active";
                               } ?>">
                     <a href="<?php echo base_url('organization') ?>">
-                      <i class="bi bi-camera"></i> <span><?php echo "Organization settings" ?></span>
+                      <i class="bi bi-toggle-on"></i> <span><?php echo "Organization settings" ?></span>
+                    </a>
+                  </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Ex Organization settings") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('organization/org_exception') ?>">
+                      <i class="bi bi-tools"></i> <span><?php echo "Exception Organization settings" ?></span>
                     </a>
                   </li>
 
