@@ -84,7 +84,12 @@ $route['payment-cancel/(:any)'] = 'auth/payment_cancel/$1';
 $route['setup'] = 'auth/setup';
 $route['change_password'] = 'admin/dashboard/change_password';
 
-//employee registration
-$route['accept-invitation'] = 'Employee/accept_invitation';
-$route['complete-registration'] = 'Employee/complete_registration';
+//employee sites
+$route['accept-invitation'] = 'employee/Employee/accept_invitation';
+$route['complete-registration'] = 'employee/Employee/complete_registration';
 
+$route['employeedashboard'] = 'employee/Employee';
+$route['employeedashboard/screenshot'] = 'employee/Employee/screenshot';
+
+$route['organization'] = 'admin/Organization_settings';
+$route['organization/org_exception'] = 'admin/Organization_settings/org_exception_settings';
