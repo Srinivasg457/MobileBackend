@@ -11,6 +11,16 @@
 	    }
 	}
 
+//check employee
+if (!function_exists('is_employee')) {
+	function is_employee()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_employee();
+	}
+}
+
 	//check user
 	if (!function_exists('is_user')) 
 	{

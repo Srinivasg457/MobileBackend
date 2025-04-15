@@ -92,100 +92,193 @@ class Auth extends Home_Controller
     }
 
 
-    // login
+    // // login
+    // public function log()
+    // {
+
+    //     if($_POST){ 
+ 
+    //         // check valid user 
+    //         $user = $this->auth_model->validate_user();
+
+
+    //         if (empty($user)) {
+    //             echo json_encode(array('st'=>0));
+    //             exit();
+    //         }
+    //         if (!empty($user) && $user->status == 0) {
+    //             // account pending
+    //             echo json_encode(array('st'=>2));
+    //             exit();
+    //         }
+    //         if (!empty($user) && $user->status == 2) {
+    //             // account suspend
+    //             echo json_encode(array('st'=>3));
+    //             exit();
+    //         }
+            
+            
+
+    //         if ($user->role == 'user') {
+    //             $diff = date_difference($user->created_at);
+    //             if (!empty($user) && $user->email_verified == 0 && $this->settings->enable_email_verify == 1 && $diff < 2) {
+
+    //                 if ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') {
+    //                     $user_id = $user->parent_id;
+    //                 }else{
+    //                     $user_id = $user->id;
+    //                 }
+                
+    //                 $data = array(
+    //                     'id' => $user_id,
+    //                     'name' => $user->name,
+    //                     'slug' => $user->slug,
+    //                     'thumb' => $user->thumb,
+    //                     'email' =>$user->email,
+    //                     'role' =>$user->role,
+    //                     'parent' =>$user->id,
+    //                     'logged_in' => TRUE
+    //                 );
+    //                 $data = $this->security->xss_clean($data);
+    //                 $this->session->set_userdata($data); 
+                
+    //                 // email verify
+    //                 echo json_encode(array('st'=>4));
+    //                 exit();
+    //             }
+    //         }
+
+
+    //         if ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') {
+    //             $user_id = $user->parent_id;
+    //         }else{
+    //             $user_id = $user->id;
+    //         }
+
+    //         // if valid
+    //         if(password_verify($this->input->post('password'), $user->password)){
+               
+    //             $data = array(
+    //                 'id' => $user_id,
+    //                 'name' => $user->name,
+    //                 'slug' => $user->slug,
+    //                 'thumb' => $user->thumb,
+    //                 'email' =>$user->email,
+    //                 'role' =>$user->role,
+    //                 'parent' =>$user->id,
+    //                 'logged_in' => TRUE
+    //             );
+    //             $data = $this->security->xss_clean($data);
+    //             $this->session->set_userdata($data); 
+
+    //             // success notification 
+    //             if ($user->role == 'admin') {
+    //                 $url = base_url('admin/dashboard');
+    //             } else {
+    //                 $url = base_url('admin/dashboard/business');
+    //             }
+                
+    //             echo json_encode(array('st'=>1,'url'=> $url));
+    //         }else{ 
+    //             // if not user not valid
+    //             echo json_encode(array('st'=>0));
+    //         }
+            
+    //     }else{
+    //         $this->load->view('auth',$data);
+    //     }
+    // }
     public function log()
     {
+        if($_POST){
 
-        if($_POST){ 
- 
-            // check valid user 
+            $email = $this->input->post('email');
+            $password = $this->input->post('password');
+            // $auth_code = $this->input->post('auth_code'); // Assuming you'll have an input field for this
+
+            // 1. Check valid user in 'users' table
             $user = $this->auth_model->validate_user();
 
+            if (!empty($user)) {
+                if ($user->status == 0) {
+                    echo json_encode(array('st'=>2)); // account pending
+                    exit();
+                }
+                if ($user->status == 2) {
+                    echo json_encode(array('st'=>3)); // account suspend
+                    exit();
+                }
 
-            if (empty($user)) {
-                echo json_encode(array('st'=>0));
-                exit();
-            }
-            if (!empty($user) && $user->status == 0) {
-                // account pending
-                echo json_encode(array('st'=>2));
-                exit();
-            }
-            if (!empty($user) && $user->status == 2) {
-                // account suspend
-                echo json_encode(array('st'=>3));
-                exit();
-            }
-            
-            
-
-            if ($user->role == 'user') {
-                $diff = date_difference($user->created_at);
-                if (!empty($user) && $user->email_verified == 0 && $this->settings->enable_email_verify == 1 && $diff < 2) {
-
-                    if ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') {
-                        $user_id = $user->parent_id;
-                    }else{
-                        $user_id = $user->id;
+                if ($user->role == 'user') {
+                    $diff = date_difference($user->created_at);
+                    if ($user->email_verified == 0 && $this->settings->enable_email_verify == 1 && $diff < 2) {
+                        $user_id = ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') ? $user->parent_id : $user->id;
+                        $session_data = array(
+                            'id' => $user_id,
+                            'name' => $user->name,
+                            'slug' => $user->slug,
+                            'thumb' => $user->thumb,
+                            'email' => $user->email,
+                            'role' => $user->role,
+                            'parent' => $user->id,
+                            'logged_in' => TRUE
+                        );
+                        $session_data = $this->security->xss_clean($session_data);
+                        $this->session->set_userdata($session_data);
+                        echo json_encode(array('st'=>4)); // email verify
+                        exit();
                     }
-                
-                    $data = array(
+                }
+
+                if(password_verify($password, $user->password)){
+                    $user_id = ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') ? $user->parent_id : $user->id;
+                    $session_data = array(
                         'id' => $user_id,
                         'name' => $user->name,
                         'slug' => $user->slug,
                         'thumb' => $user->thumb,
-                        'email' =>$user->email,
-                        'role' =>$user->role,
-                        'parent' =>$user->id,
+                        'email' => $user->email,
+                        'role' => $user->role,
+                        'parent' => $user->id,
                         'logged_in' => TRUE
                     );
-                    $data = $this->security->xss_clean($data);
-                    $this->session->set_userdata($data); 
-                
-                    // email verify
-                    echo json_encode(array('st'=>4));
+                    $session_data = $this->security->xss_clean($session_data);
+                    $this->session->set_userdata($session_data);
+
+                    $url = ($user->role == 'admin') ? base_url('admin/dashboard') : base_url('admin/dashboard/business');
+                    echo json_encode(array('st'=>1,'url'=> $url));
                     exit();
                 }
             }
 
+         
+            // 2. If 'users' authentication fails, check 'employees' table
+            $employee = $this->auth_model->validate_employee(); // We need to create this model function
 
-            if ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') {
-                $user_id = $user->parent_id;
-            }else{
-                $user_id = $user->id;
-            }
-
-            // if valid
-            if(password_verify($this->input->post('password'), $user->password)){
-               
-                $data = array(
-                    'id' => $user_id,
-                    'name' => $user->name,
-                    'slug' => $user->slug,
-                    'thumb' => $user->thumb,
-                    'email' =>$user->email,
-                    'role' =>$user->role,
-                    'parent' =>$user->id,
-                    'logged_in' => TRUE
+            if (!empty($employee) && $employee->is_registered == 1 && password_verify($password, $employee->password)) {
+                $session_data_employee = array(
+                    'employee_id' => $employee->id,
+                    'employee_name' => $employee->name,
+                    'employee_email' => $employee->email,
+                    'business_id' => $employee->business_id,
+                    'department_id' => $employee->department_id,
+                    'employee_logged_in' => TRUE,
+                    'is_employee' => TRUE // Flag to identify as employee in session
                 );
-                $data = $this->security->xss_clean($data);
-                $this->session->set_userdata($data); 
+                $session_data_employee = $this->security->xss_clean($session_data_employee);
+                $this->session->set_userdata($session_data_employee);
 
-                // success notification 
-                if ($user->role == 'admin') {
-                    $url = base_url('admin/dashboard');
-                } else {
-                    $url = base_url('admin/dashboard/business');
-                }
-                
-                echo json_encode(array('st'=>1,'url'=> $url));
-            }else{ 
-                // if not user not valid
-                echo json_encode(array('st'=>0));
+                $url_employee = base_url('employeedashboard');
+                echo json_encode(array('st'=>1,'url'=> $url_employee));
+                exit();
             }
-            
-        }else{
-            $this->load->view('auth',$data);
+
+            // 3. If both authentications fail
+            echo json_encode(array('st'=>0)); // Invalid credentials
+            exit();
+
+        } else {
+            $this->load->view('auth'); // Assuming your login view is named 'login'
         }
     }
 
