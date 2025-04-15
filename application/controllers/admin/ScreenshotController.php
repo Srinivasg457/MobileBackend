@@ -10,6 +10,9 @@ class ScreenshotController extends Home_Controller {
     }
     public function index()
     {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+        }
         $data = array();
         $data['page_title'] = 'User Screenshots';
         $data['main_content'] = $this->load->view('admin/user_screenshot', $data, TRUE);

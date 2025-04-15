@@ -12,14 +12,31 @@ class Organization_settings extends Home_Controller {
 
     public function index()
     {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+        }
         $data = array();
         $data['page_title'] = 'Organization settings';
         $data['main_content'] = $this->load->view('admin/organization_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
-    // Method to insert or update org settings for a user
-    public function save_org_settings($user_id)
+
+    public function org_exception_settings()
     {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+        }
+        $data = array();
+        $data['page_title'] = 'Ex Organization settings';
+        $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
+
+
+    // Method to insert or update org settings for a user
+    public function save_org_settings()
+    {
+        $user_id = $this->session->userdata('id');
         // Get data from POST request (replace with actual form data)
         $data = [
             'user_id'               => $user_id,
@@ -56,8 +73,10 @@ class Organization_settings extends Home_Controller {
     }
 
     // Method to insert or update organization exception settings for a specific employee
-    public function save_org_exception_settings($user_id, $employee_id)
+    public function save_org_exception_settings($employee_id)
     {
+
+        $user_id = $this->session->userdata('id');
         // Get data from POST request (replace with actual form data)
         $data = [
             'user_id'               => $user_id,
@@ -99,8 +118,10 @@ class Organization_settings extends Home_Controller {
     }
 
     // Method to fetch org settings for a user
-    public function get_org_settings($user_id)
+    public function get_org_settings()
     {
+        $user_id = $this->session->userdata('id');
+
         $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
 
         if ($query->num_rows() > 0) {
@@ -111,8 +132,10 @@ class Organization_settings extends Home_Controller {
     }
 
     // Method to fetch organization exception settings for a specific user and employee
-    public function get_org_exception_settings($user_id, $employee_id)
+    public function get_org_exception_settings($employee_id)
     {
+        $user_id = $this->session->userdata('id');
+
         $query = $this->db->get_where('organization_exception_setting', [
             'user_id' => $user_id,
             'employee_id' => $employee_id
