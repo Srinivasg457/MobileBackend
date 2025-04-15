@@ -451,13 +451,20 @@ $config['global_xss_filtering'] = FALSE;
 | 'csrf_regenerate' = Regenerate token on every submission
 | 'csrf_exclude_uris' = Array of URIs which ignore CSRF checks
 */
-$config['csrf_protection'] = TRUE;
+$config['csrf_protection'] = FALSE;
 $config['csrf_token_name'] = 'csrf_test_name';
 $config['csrf_cookie_name'] = 'csrf_cookie_name';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = FALSE;
 //$config['csrf_exclude_uris'] = array();
-$config['csrf_exclude_uris'] = array('admin/ScreenshotController/store_screenshot', 'admin/ScreenshotController/get_screenshots', 'admin/ScreenshotController/soft_delete_screenshot','admin/Organization_settings/save_org_settings');
+$config['csrf_exclude_uris'] = array(
+    'admin/ScreenshotController/store_screenshot',
+    'admin/ScreenshotController/get_screenshots',
+    'admin/ScreenshotController/soft_delete_screenshot',
+    'admin/Organization_settings/save_org_settings',
+    'admin/Organization_settings/save_org_exception_settings',
+    'admin/Organization_settings/get_org_exception_settings'
+);
 
 
 /*
