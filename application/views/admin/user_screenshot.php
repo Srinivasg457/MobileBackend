@@ -4,7 +4,7 @@
             .popup {
                 display: none;
                 padding: 10px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); */
             }
 
             .cancel-btn {
@@ -101,6 +101,7 @@
                 border-radius: 8px;
                 background: #fff;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                width: 100%;
             }
 
             .screenshot-card {
@@ -231,6 +232,8 @@
                         date: date
                     },
                     success: function(response) {
+                        console.log(response);
+
                         const container = $(`#user-${employeeId} .screenshot-row`);
                         if (response.status === "success" && response.screenshots.length > 0) {
                             let output_screen = "";
@@ -238,7 +241,7 @@
                             $.each(response.screenshots.slice(0, 6), function(index, screenshot) {
                                 output_screen += `
                             <div class="screenshot-card">
-                                <img src="${screenshot.image_data}" class="zoomable-screenshot" alt="Screenshot" width="200" style="cursor: pointer;">
+                                <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" width="200" style="cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
                                     <span>${screenshot.display_text}</span>
                                     <img 
@@ -253,7 +256,7 @@
                             });
 
                             container.html(output_screen);
-
+                            $('#datePicker').val(response.date);
                             container.find('.zoomable-screenshot').on('click', function() {
                                 $('#modal-image').attr('src', $(this).attr('src'));
                                 $('#screenshot-modal').fadeIn();
@@ -319,23 +322,30 @@
                         success: function(response) {
                             if (response.status === "success" && response.screenshots.length > 0) {
                                 let output = "",
-                                    group = "";
+                                    group = "",
+                                    latestTime = null;
 
                                 $.each(response.screenshots, function(index, screenshot) {
                                     group += `
-                                <div class="screenshot-card">
-                                    <img src="${screenshot.image_data}" class="see-zoomable-screenshot" alt="Screenshot" style="cursor: pointer;">
-                                    <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                        <p>${screenshot.display_text}</p>
-                                        <img 
-                                            src="https://img.icons8.com/?size=50&id=4887&format=png" 
-                                            class="delete-screenshot" 
-                                            data-id="${screenshot.id}" 
-                                            alt="Delete" 
-                                            style="cursor: pointer; width: 20px; height: 20px;"
-                                        />
-                                    </div>
-                                </div>`;
+                    <div class="screenshot-card">
+                        <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="cursor: pointer;">
+                        <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                            <p>${screenshot.display_text}</p>
+                            <img 
+                                src="https://img.icons8.com/?size=50&id=4887&format=png" 
+                                class="delete-screenshot" 
+                                data-id="${screenshot.id}" 
+                                alt="Delete" 
+                                style="cursor: pointer; width: 20px; height: 20px;"
+                            />
+                        </div>
+                    </div>`;
+
+                                    // Get the latest timestamp
+                                    if (!latestTime || new Date(screenshot.timestamp) > new Date(latestTime)) {
+                                        latestTime = screenshot.timestamp;
+                                    }
+
                                     if ((index + 1) % 12 === 0 || index === response.screenshots.length - 1) {
                                         output += `<div class="screenshot-row">${group}</div>`;
                                         group = "";
@@ -366,7 +376,7 @@
                                             },
                                             success: function() {
                                                 alert("Screenshot deleted successfully.");
-                                                loadScreenshots();
+                                                loadScreenshots(); // reload
                                             },
                                             error: function(xhr) {
                                                 alert("Error deleting screenshot: " + xhr.responseText);
@@ -374,6 +384,22 @@
                                         });
                                     }
                                 });
+
+                                // Schedule next refresh from latest screenshot
+                                if (latestTime) {
+                                    if (nextFetchTimeout) clearTimeout(nextFetchTimeout);
+
+                                    const latestDate = new Date(latestTime);
+                                    const now = new Date();
+                                    const timeDiff = Math.max(0, (latestDate.getTime() + 5 * 60 * 1000) - now.getTime());
+
+                                    nextFetchTimeout = setTimeout(() => {
+                                        const currentDate = latestDate.toISOString().split("T")[0];
+                                        $('#datePicker').val(currentDate);
+                                        loadScreenshots(); // Auto-refresh
+                                    }, timeDiff);
+                                }
+
                             } else {
                                 $(".screenshot-container").html("<p>No screenshots available.</p>");
                             }
@@ -383,6 +409,7 @@
                         }
                     });
                 }
+
 
                 loadScreenshots();
             });
