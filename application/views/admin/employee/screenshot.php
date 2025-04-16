@@ -164,6 +164,8 @@
             }
 
             $(document).ready(function() {
+                let lastFetchedTime = null;
+
                 function fetchUserScreenshots(date = '') {
                     $.ajax({
                         url: "<?= base_url('/admin/ScreenshotController/get_user_screenshots'); ?>",
@@ -174,31 +176,54 @@
                         },
                         success: function(response) {
                             const container = $(".screenshot-row");
+                            console.log(response);
+
                             if (response.status === "success" && response.screenshots.length > 0) {
                                 let output_screen = "";
                                 $.each(response.screenshots, function(index, screenshot) {
                                     output_screen += `
-                                        <div class="screenshot-card">
-                                            <img src="${screenshot.image_data}" class="zoomable-screenshot" alt="Screenshot" style="cursor: pointer;">
-                                            <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                                <span>${screenshot.display_text}</span>
-                                            </div>
-                                        </div>`;
+                            <div class="screenshot-card">
+                                <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" style="cursor: pointer;">
+                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                   <span>${response.date}</span> <span>${screenshot.display_text}</span>
+                                </div>
+                            </div>`;
                                 });
+
                                 container.html(output_screen);
+                                $('#datePicker').val(response.date);
+
+                                // Modal handlers
                                 $('.zoomable-screenshot').on('click', function() {
                                     $('#modal-image').attr('src', $(this).attr('src'));
                                     $('#screenshot-modal').fadeIn();
                                 });
+
                                 $('#close-modal').on('click', function() {
                                     $('#screenshot-modal').fadeOut();
                                 });
+
+                                // Store latest time
+                                lastFetchedTime = response.screenshots[response.screenshots.length - 1].display_text;
                             } else {
                                 container.html("<p>No screenshots available.</p>");
+                                $('#datePicker').val(response.date);
                             }
+
+                            // Schedule next fetch after 5 seconds                            
+                            setTimeout(() => fetchUserScreenshots($('#datePicker').val()), 330000);
+                        },
+                        error: function(response) {
+                            console.log(response);
+                            setTimeout(() => fetchUserScreenshots($('#datePicker').val()), 330000);
                         }
                     });
                 }
+
+                $('#datePicker').on('change', function() {
+                    fetchUserScreenshots($(this).val());
+                });
+
 
                 // Load screenshots when date changes
                 $('#datePicker').on('change', function() {
