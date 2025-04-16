@@ -262,6 +262,7 @@ class Auth extends Home_Controller
                     'employee_email' => $employee->email,
                     'business_id' => $employee->business_id,
                     'department_id' => $employee->department_id,
+                    'employee_org_id' => $employee->user_id,
                     'employee_logged_in' => TRUE,
                     'is_employee' => TRUE // Flag to identify as employee in session
                 );

@@ -111,41 +111,81 @@ class Organization_settings extends Home_Controller {
 
         // Check for errors
         if ($this->db->affected_rows() > 0) {
-            echo "Exception settings saved successfully!";
+            echo "Employee settings saved successfully!";
         } else {
-            echo "Failed to save exception settings.";
+            echo "No changes in the saved employee settings.";
         }
     }
 
-    // Method to fetch org settings for a user
+    // // Method to fetch org settings for a user
+    // public function get_org_settings()
+    // {
+    //     $user_id = $this->session->userdata('id');
+
+    //     $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
+
+    //     if ($query->num_rows() > 0) {
+    //         echo json_encode($query->row_array());
+    //     } else {
+    //         echo json_encode(['error' => 'No settings found for this user.']);
+    //     }
+    // }
     public function get_org_settings()
-    {
-        $user_id = $this->session->userdata('id');
+{
+    $user_id = $this->input->get('user_id');
 
-        $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
-
-        if ($query->num_rows() > 0) {
-            echo json_encode($query->row_array());
-        } else {
-            echo json_encode(['error' => 'No settings found for this user.']);
-        }
+    if (!$user_id) {
+        echo json_encode(['error' => 'Missing user_id parameter.']);
+        return;
     }
 
-    // Method to fetch organization exception settings for a specific user and employee
+    $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
+
+    if ($query->num_rows() > 0) {
+        echo json_encode($query->row_array());
+    } else {
+        echo json_encode(['error' => 'No settings found for this user.']);
+    }
+}
+
+
+    // // Method to fetch organization exception settings for a specific user and employee
+    // public function get_org_exception_settings($employee_id)
+    // {
+    //     $user_id = $this->session->userdata('id');
+
+    //     $query = $this->db->get_where('organization_exception_setting', [
+    //         'user_id' => $user_id,
+    //         'employee_id' => $employee_id
+    //     ]);
+
+    //     if ($query->num_rows() > 0) {
+    //         echo json_encode($query->row_array());
+    //     } else {
+    //         echo json_encode(['error' => 'No exception settings found for this user and employee.']);
+    //     }
+    // }
     public function get_org_exception_settings($employee_id)
-    {
+{
         $user_id = $this->session->userdata('id');
+    // $employee_id = $this->input->get('employee_id');
 
-        $query = $this->db->get_where('organization_exception_setting', [
-            'user_id' => $user_id,
-            'employee_id' => $employee_id
-        ]);
-
-        if ($query->num_rows() > 0) {
-            echo json_encode($query->row_array());
-        } else {
-            echo json_encode(['error' => 'No exception settings found for this user and employee.']);
-        }
+    if (!$user_id || !$employee_id) {
+        echo json_encode(['error' => 'Missing user_id or employee_id parameter.']);
+        return;
     }
+
+    $query = $this->db->get_where('organization_exception_setting', [
+        'user_id' => $user_id,
+        'employee_id' => $employee_id
+    ]);
+
+    if ($query->num_rows() > 0) {
+        echo json_encode($query->row_array());
+    } else {
+        echo json_encode(['error' => 'No exception settings found for this user and employee.']);
+    }
+}
+
 }
 ?>

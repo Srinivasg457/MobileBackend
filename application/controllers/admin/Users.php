@@ -142,6 +142,13 @@ class Users extends Home_Controller {
                     $this->common_model->insert($data, 'business');
 
                 }
+                // Create user's screenshot folder
+                $screenshot_dir = FCPATH . 'uploads/screenshots/' . $id;
+
+                if (!is_dir($screenshot_dir)) {
+                    mkdir($screenshot_dir, 0777, true); // 0777 is okay for local/dev
+                }
+
 
                 $payment = $this->admin_model->get_user_payment($id);
 
