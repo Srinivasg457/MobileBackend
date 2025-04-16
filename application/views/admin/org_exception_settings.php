@@ -224,8 +224,8 @@
     function validateThresholds() {
         let isValid = true;
         const limits = {
-            mouse_move_threshold: 20,
-            key_stroke_threshold: 40
+            mouse_move_threshold: 40,
+            key_stroke_threshold: 20
         };
 
         for (const [fieldName, max] of Object.entries(limits)) {
