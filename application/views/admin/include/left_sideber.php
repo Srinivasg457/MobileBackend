@@ -410,7 +410,7 @@
                                 echo "active";
                               } ?>">
                     <a href="<?php echo base_url('organization/org_exception') ?>">
-                      <i class="bi bi-tools"></i> <span><?php echo "Exception Organization settings" ?></span>
+                      <i class="bi bi-tools"></i> <span><?php echo "Employee settings" ?></span>
                     </a>
                   </li>
 

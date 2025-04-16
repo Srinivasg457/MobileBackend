@@ -111,9 +111,9 @@ class Organization_settings extends Home_Controller {
 
         // Check for errors
         if ($this->db->affected_rows() > 0) {
-            echo "Exception settings saved successfully!";
+            echo "Employee settings saved successfully!";
         } else {
-            echo "Failed to save exception settings.";
+            echo "No changes in the saved employee settings.";
         }
     }
 
@@ -165,10 +165,10 @@ class Organization_settings extends Home_Controller {
     //         echo json_encode(['error' => 'No exception settings found for this user and employee.']);
     //     }
     // }
-    public function get_org_exception_settings()
+    public function get_org_exception_settings($employee_id)
 {
-    $user_id = $this->input->get('user_id');
-    $employee_id = $this->input->get('employee_id');
+        $user_id = $this->session->userdata('id');
+    // $employee_id = $this->input->get('employee_id');
 
     if (!$user_id || !$employee_id) {
         echo json_encode(['error' => 'Missing user_id or employee_id parameter.']);
