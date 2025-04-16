@@ -207,7 +207,7 @@ class ScreenshotController extends Home_Controller {
     //     $this->db->select('screenshot_id, file_data, file_type, created_at');
     //     $this->db->from('screenshots');
 
-    //     if (!empty($user_id)) {
+    //   git   if (!empty($user_id)) {
     //         $this->db->where('user_id', $user_id);
     //     }
 
@@ -276,6 +276,7 @@ class ScreenshotController extends Home_Controller {
     // }
     public function get_screenshots() {
          $employee_id = $this->input->get('employee_id');
+        // $user_id = $this->input->get('user_id');
         $user_id = $this->session->userdata('id');
         $date = $this->input->get('date');
     
