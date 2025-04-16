@@ -120,22 +120,51 @@ input:checked + .slider:before {
     transform: translateX(30px);
 }
 
-.slider::after {
-    content: 'OFF';
-    color: white;
-    font-size: 12px;
-    position: absolute;
-    right: 10px;
-    top: 7px;
-}
+    .slider::after {
+        content: 'OFF';
+        color: white;
+        font-size: 12px;
+        position: absolute;
+        right: 10px;
+        top: 7px;
+    }
 
-input:checked + .slider::after {
-    content: 'ON';
-    left: 10px;
-    right: auto;
-}
+    input:checked+.slider::after {
+        content: 'ON';
+        left: 10px;
+        right: auto;
+    }
+
+    .toast {
+        padding: 10px;
+        margin: 5px;
+        border-radius: 4px;
+        color: #fff;
+        min-width: 200px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast-success {
+        background-color: #28a745;
+    }
+
+    .toast-error {
+        background-color: #e74c3c;
+    }
+
+    .is-invalid {
+        border: 2px solid #e74c3c;
+        background-color: #fcebea;
+    }
+
+    #toast-container {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+    }
 </style>
-
+<div id="toast-container" style="position: fixed;top: 0;"></div>
 <div class="content-wrapper" style="min-height: 760.5px;">
     <section class="content">
         <div class="container mt-4">
@@ -245,6 +274,11 @@ input:checked + .slider::after {
 </div>
 
 <script>
+    function showToast(message, type) {
+        const toast = $(`<div class="toast toast-${type}">${message}</div>`);
+        $('#toast-container').append(toast);
+        setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
+    }
     $(document).ready(function() {
         // Initialize all toggle states
         function initializeToggleStates() {
@@ -306,10 +340,11 @@ input:checked + .slider::after {
                 method: "POST",
                 data: formData,
                 success: function(response) {
-                    alert('Settings saved successfully');
+                    console.log(response)
+                    showToast(`Settings saved successfully`, 'success');
                 },
                 error: function(xhr) {
-                    alert('Error saving settings: ' + xhr.responseText);
+                    showToast(`Error saving settings`, 'error');
                 }
             });
         });

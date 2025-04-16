@@ -349,6 +349,8 @@ class ScreenshotController extends Home_Controller {
     public function get_user_screenshots()
     {
         $employee_id = $this->session->userdata('employee_id');
+        $employee_org_id = $this->session->userdata('employee_org_id');
+
         $date = $this->input->get('date'); // Optional date in 'YYYY-MM-DD'
     
         if (empty($employee_id)) {
@@ -365,7 +367,7 @@ class ScreenshotController extends Home_Controller {
             $date = date('Y-m-d');
         }
     
-        $user_folder = $employee_id;
+        $user_folder = $employee_org_id;
         $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
     
         if (!is_dir($upload_path)) {
