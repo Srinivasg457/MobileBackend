@@ -346,12 +346,11 @@ class ScreenshotController extends Home_Controller {
     
     
     
-
     public function get_user_screenshots()
     {
         $employee_id = $this->session->userdata('employee_id');
         $date = $this->input->get('date'); // Optional date in 'YYYY-MM-DD'
-
+    
         if (empty($employee_id)) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
@@ -360,55 +359,62 @@ class ScreenshotController extends Home_Controller {
                     "message" => "Missing employee_id"
                 ]));
         }
-
+    
         // Default to today’s date if not provided
         if (empty($date)) {
             $date = date('Y-m-d');
         }
-
-        $this->db->select('screenshot_id, file_data, file_type, created_at');
-        $this->db->from('screenshots');
-        $this->db->where('employee_id', $employee_id);
-        $this->db->where('status', 1);
-        $this->db->where('DATE(created_at)', $date); // Filter by date
-        $this->db->order_by('created_at', 'DESC');
-        $query = $this->db->get();
-
-        if ($query->num_rows() === 0) {
+    
+        $user_folder = $employee_id;
+        $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
+    
+        if (!is_dir($upload_path)) {
             return $this->output->set_content_type('application/json')
-                ->set_status_header(200)
+                ->set_status_header(404)
                 ->set_output(json_encode([
-                    "status" => "success",
-                    "screenshots" => [],
-                    "message" => "No screenshots found for employee ID {$employee_id} on {$date}",
-                    "date" => $date,
-                    "employee_id" => $employee_id
+                    "status" => "error",
+                    "message" => "No screenshot folder found for employee ID {$employee_id}"
                 ]));
         }
-
+    
         $screenshots = [];
-        foreach ($query->result() as $row) {
-            $formatted_date = date('H:i:s', strtotime($row->created_at));
-            $base64_image = base64_encode($row->file_data);
-            $image_data_url = 'data:image/' . $row->file_type . ';base64,' . $base64_image;
-
-            $screenshots[] = [
-                'id' => $row->screenshot_id,
-                'image_data' => $image_data_url,
-                'created_at' => $formatted_date,
-                'display_text' => $formatted_date
-            ];
+        $files = scandir($upload_path);
+        $target_date = str_replace('-', '', $date); // 'YYYYMMDD'
+    
+        foreach ($files as $file) {
+            if (strpos($file, "screenshot_{$employee_id}") === 0 && strpos($file, $target_date) !== false) {
+                preg_match('/screenshot_(\d+)_(\d{8})_(\d{6})\.(\w{3,4})/', $file, $matches);
+    
+                if (isset($matches[2]) && isset($matches[3])) {
+                    $file_date = $matches[2];
+                    $file_time = $matches[3];
+    
+                    if ($file_date == $target_date) {
+                        $formatted_time = date('H:i:s', strtotime($file_time));
+                        $file_path = base_url("uploads/screenshots/{$user_folder}/{$file}");
+    
+                        $screenshots[] = [
+                            'file_name' => $file,
+                            'image_url' => $file_path,
+                            'created_at' => $formatted_time,
+                            'display_text' => $formatted_time
+                        ];
+                    }
+                }
+            }
         }
-
+    
         return $this->output->set_content_type('application/json')
             ->set_status_header(200)
             ->set_output(json_encode([
                 "status" => "success",
                 "screenshots" => $screenshots,
                 "date" => $date,
-                "employee_id" => $employee_id
+                "employee_id" => $employee_id,
+                "message" => empty($screenshots) ? "No screenshots found for employee ID {$employee_id} on {$date}" : null
             ]));
     }
+    
 
     //hard delete
     public function hard_delete_screenshot($screenshot_id) {
