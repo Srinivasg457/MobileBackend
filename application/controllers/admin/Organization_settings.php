@@ -108,7 +108,11 @@ class Organization_settings extends Home_Controller {
             // Insert new exception settings
             $this->db->insert('organization_exception_setting', $data);
         }
-
+              // ✅ Update settings_status in employees table to 2, based on user_id and employee_id
+              $this->db->where('id', $employee_id);
+              $this->db->where('user_id', $user_id);
+              $this->db->update('employees', ['settings_status' => 2]);
+              
         // Check for errors
         if ($this->db->affected_rows() > 0) {
             echo "Employee settings saved successfully!";
