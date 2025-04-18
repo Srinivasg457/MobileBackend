@@ -259,14 +259,15 @@
                     </div>
 
                     <!-- Timecards Interval -->
-                    <div class="col-md-6 form-group">
-                        <label class="form-label">Timecards Interval (mins):</label>
-                        <select name="timecards_time_interval" class="form-control target-input" id="timecards_time_interval">
+                    <div class="col-md-6">
+                        <label>Timecards Interval (mins):</label>
+                        <!-- <select name="timecards_time_interval" class="form-control interval-field">
                             <option value="1">1</option>
                             <option value="2">2</option>
-                            <option selected value="5">5</option>
+                            <option value="5">5</option>
                             <option value="10">10</option>
-                        </select>
+                        </select> -->
+                        <input type="text" name="timecards_time_interval" class="form-control interval-field" value="1" readonly>
                     </div>
                 </div>
 
