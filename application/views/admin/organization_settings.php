@@ -5,6 +5,11 @@
         opacity: 1;
     }
 
+
+    #orgSettingsForm {
+        max-width: 1000px;
+    }
+
     .toggle-switch {
         position: relative;
         width: 60px;
@@ -40,11 +45,11 @@
         transition: 0.4s;
     }
 
-    input:checked + .slider {
+    input:checked+.slider {
         background-color: #4CAF50;
     }
 
-    input:checked + .slider:before {
+    input:checked+.slider:before {
         transform: translateX(30px);
     }
 
@@ -57,7 +62,7 @@
         top: 7px;
     }
 
-    input:checked + .slider::after {
+    input:checked+.slider::after {
         content: 'ON';
         left: 10px;
         right: auto;
@@ -77,48 +82,51 @@
         background-color: #f8f9fa;
         opacity: 0.7;
     }
+
     .toggle-switch {
-    position: relative;
-    width: 60px;
-    height: 30px;
-    display: inline-block;
-}
+        position: relative;
+        width: 60px;
+        height: 30px;
+        display: inline-block;
+    }
 
-.toggle-switch input {
-    display: none;
-}
+    .toggle-switch input {
+        display: none;
+    }
 
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #f44336; /* Red color for OFF state */
-    border-radius: 34px;
-    transition: 0.4s;
-}
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #f44336;
+        /* Red color for OFF state */
+        border-radius: 34px;
+        transition: 0.4s;
+    }
 
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    border-radius: 50%;
-    transition: 0.4s;
-}
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        border-radius: 50%;
+        transition: 0.4s;
+    }
 
-input:checked + .slider {
-    background-color: #4CAF50; /* Green color for ON state */
-}
+    input:checked+.slider {
+        background-color: #4CAF50;
+        /* Green color for ON state */
+    }
 
-input:checked + .slider:before {
-    transform: translateX(30px);
-}
+    input:checked+.slider:before {
+        transform: translateX(30px);
+    }
 
     .slider::after {
         content: 'OFF';
@@ -184,7 +192,6 @@ input:checked + .slider:before {
                     <div class="col-md-6 form-group">
                         <label class="form-label">Screenshot Interval (mins):</label>
                         <select name="screenshot_time_interval" class="form-control target-input" id="screenshot_time_interval">
-                            <option value=""></option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option selected value="5">5</option>
@@ -205,7 +212,6 @@ input:checked + .slider:before {
                     <div class="col-md-6 form-group">
                         <label class="form-label">Webcam Interval (mins):</label>
                         <select name="webcam_time_interval" class="form-control target-input" id="webcam_time_interval">
-                            <option value=""></option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option selected value="5">5</option>
@@ -256,7 +262,6 @@ input:checked + .slider:before {
                     <div class="col-md-6 form-group">
                         <label class="form-label">Timecards Interval (mins):</label>
                         <select name="timecards_time_interval" class="form-control target-input" id="timecards_time_interval">
-                            <option value=""></option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option selected value="5">5</option>
@@ -279,59 +284,71 @@ input:checked + .slider:before {
         $('#toast-container').append(toast);
         setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
     }
+
     $(document).ready(function() {
-        // Initialize all toggle states
+        // Initialize toggle flags
         function initializeToggleStates() {
             $('.toggle-flag').each(function() {
                 const targetId = $(this).data('target');
                 const targetInput = $('#' + targetId);
-                
-                if (!$(this).is(':checked')) {
-                    // Store current value and clear input
-                    targetInput.data('previous-value', targetInput.val());
-                    
-                    if (targetInput.is('select')) {
-                        targetInput.val('');
-                    } else {
-                        targetInput.val('');
-                    }
-                    targetInput.prop('disabled', true);
-                }
+                const isChecked = $(this).is(':checked');
+                targetInput.prop('disabled', !isChecked);
             });
         }
 
-        // Handle toggle changes
         $('.toggle-flag').change(function() {
             const targetId = $(this).data('target');
             const targetInput = $('#' + targetId);
             const isChecked = $(this).is(':checked');
-
             targetInput.prop('disabled', !isChecked);
-
-            if (isChecked) {
-                // Restore previous value if it exists
-                if (targetInput.data('previous-value')) {
-                    targetInput.val(targetInput.data('previous-value'));
-                }
-            } else {
-                // Store current value and clear input
-                targetInput.data('previous-value', targetInput.val());
-                targetInput.val('');
-            }
         });
 
-        // Initialize on page load
         initializeToggleStates();
 
-        // Form submission
         $('#orgSettingsForm').on('submit', function(e) {
             e.preventDefault();
-            
-            // Prepare data - exclude disabled fields and empty values
+
+            let isValid = true;
+            $('.is-invalid').removeClass('is-invalid'); // Reset errors
+
+            // Validate required fields
+            $(this).find(':input').each(function() {
+                const $input = $(this);
+                if ($input.attr('name') && $input.val() === '') {
+                    $input.addClass('is-invalid');
+                    isValid = false;
+                }
+            });
+
+            // Validate Keystroke
+            const keystrokeVal = parseInt($('#key_stroke_threshold').val());
+            if (keystrokeVal > 40 || 0 >= keystrokeVal) {
+                $('#key_stroke_threshold').addClass('is-invalid');
+                showToast("Keystroke threshold must be between 1 and 40", "error");
+                isValid = false;
+            }
+
+            // Validate Mouse Movement
+            const mouseVal = parseInt($('#mouse_move_threshold').val());
+            if (mouseVal > 20 || 0 >= mouseVal) {
+                $('#mouse_move_threshold').addClass('is-invalid');
+                showToast("Mouse movement threshold must be between 1 and 20", "error");
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return;
+            }
+
+            // Prepare data for submission
             const formData = {};
-            $(this).find(':input').not(':disabled').each(function() {
-                if (this.name && $(this).val() !== '') {
-                    formData[this.name] = $(this).val();
+            $(this).find(':input').each(function() {
+                if (this.name) {
+                    if ($(this).hasClass('toggle-flag')) {
+                        formData[this.name] = $(this).is(':checked') ? 1 : 0;
+                    } else {
+                        formData[this.name] = $(this).val();
+                    }
                 }
             });
 
@@ -340,7 +357,7 @@ input:checked + .slider:before {
                 method: "POST",
                 data: formData,
                 success: function(response) {
-                    console.log(response)
+                    console.log(response);
                     showToast(`Settings saved successfully`, 'success');
                 },
                 error: function(xhr) {
