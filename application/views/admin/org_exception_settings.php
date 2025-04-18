@@ -176,14 +176,15 @@
                     </div>
                     <div class="col-md-6">
                         <label>Timecards Interval (mins):</label>
-                        <select name="timecards_time_interval" class="form-control interval-field">
+                        <!-- <select name="timecards_time_interval" class="form-control interval-field">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="5">5</option>
                             <option value="10">10</option>
-                        </select>
+                        </select> -->
+                        <input type="text" name="timecards_time_interval" class="form-control interval-field" value="1" readonly>
                     </div>
-                </div>
+                </div>  
 
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">Save Settings</button>
