@@ -100,6 +100,10 @@ class Organization_settings extends Home_Controller {
         ]);
 
         if ($query->num_rows() > 0) {
+            //   ✅ Update settings_status in employees table to 2, based on user_id and employee_id
+            $this->db->where('id', $employee_id);
+            $this->db->where('user_id', $user_id);
+            $this->db->update('employees', ['settings_status' => 2]);
             // Update existing exception settings
             $this->db->where('user_id', $user_id);
             $this->db->where('employee_id', $employee_id);
@@ -108,10 +112,6 @@ class Organization_settings extends Home_Controller {
             // Insert new exception settings
             $this->db->insert('organization_exception_setting', $data);
         }
-              // ✅ Update settings_status in employees table to 2, based on user_id and employee_id
-              $this->db->where('id', $employee_id);
-              $this->db->where('user_id', $user_id);
-              $this->db->update('employees', ['settings_status' => 2]);
               
         // Check for errors
         if ($this->db->affected_rows() > 0) {
