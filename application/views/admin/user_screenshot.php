@@ -149,9 +149,39 @@
                     max-width: none !important;
                 }
             }
+
+            .toast {
+                padding: 10px;
+                margin: 5px;
+                border-radius: 4px;
+                color: #fff;
+                min-width: 200px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .toast-success {
+                background-color: #28a745;
+            }
+
+            .toast-error {
+                background-color: #e74c3c;
+            }
+
+            .is-invalid {
+                border: 2px solid #e74c3c;
+                background-color: #fcebea;
+            }
+
+            #toast-container {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                z-index: 9999;
+            }
         </style>
 
         <!-- Popup Div -->
+        <div id="toast-container" style="position: fixed;top: 0;"></div>
         <div class="popup" id="popupCard">
             <div class="d-flex justify-content-between mb-5">
                 <h5><strong>Name:</strong> <span id="popupName"></span></h5>
@@ -194,7 +224,7 @@
         <!-- Modal for Screenshot Preview -->
         <div id="screenshot-modal" style="display: none; position: fixed; z-index: 1111; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); text-align: center; justify-content: center; align-items: center; flex-direction: column;">
             <span id="close-modal" style="position: absolute; top: 20px; right: 40px; font-size: 40px; color: white; cursor: pointer;">&times;</span>
-            <img id="modal-image" style="max-width: 90%; max-height: 90%; border: 5px solid white; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);">
+            <img id="modal-image" style="position: relative; top: 75px;max-width: 95%; max-height: 90%; border: 5px solid white; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);">
         </div>
 
         <!-- Delete Confirmation Modal -->
@@ -217,6 +247,12 @@
         </div>
 
         <script>
+            function showToast(message, type) {
+                const toast = $(`<div class="toast toast-${type}">${message}</div>`);
+                $('#toast-container').append(toast);
+                setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
+            }
+
             function closePopup() {
                 $('#popupCard').fadeOut();
                 $('.container').fadeIn();
@@ -224,7 +260,7 @@
 
             function fetchUserScreenshots(employeeId, date = '') {
                 console.log(employeeId);
-                
+
                 $.ajax({
                     url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
                     type: "GET",
@@ -235,7 +271,7 @@
                     },
                     success: function(response) {
                         console.log(response);
-
+                        $('#datePicker').val(response.date);
                         const container = $(`#user-${employeeId} .screenshot-row`);
                         if (response.status === "success" && response.screenshots.length > 0) {
                             let output_screen = "";
@@ -258,7 +294,6 @@
                             });
 
                             container.html(output_screen);
-                            $('#datePicker').val(response.date);
                             container.find('.zoomable-screenshot').on('click', function() {
                                 $('#modal-image').attr('src', $(this).attr('src'));
                                 $('#screenshot-modal').fadeIn();
@@ -280,11 +315,14 @@
                                             employee_id: employeeId
                                         },
                                         success: function() {
-                                            alert("Screenshot deleted successfully.");
+                                            showToast(`Screenshot deleted successfully.`, 'success');
+                                            // alert("Screenshot deleted successfully.");
                                             fetchUserScreenshots(employeeId, $('#datePicker').val());
                                         },
                                         error: function(xhr) {
-                                            alert("Error deleting screenshot: " + xhr.responseText);
+                                            // alert("Error deleting screenshot: " + xhr.responseText);
+                                            showToast(`Error while deleting screenshot.`, 'error');
+
                                         }
                                     });
                                 }
@@ -369,8 +407,8 @@
                                     const screenshotId = $(this).data("id");
 
                                     if (confirm("Are you sure you want to delete this screenshot?")) {
-                                        console.log(screenshotId,id);
-                                        
+                                        console.log(screenshotId, id);
+
                                         $.ajax({
                                             url: "/admin/ScreenshotController/soft_delete_screenshot",
                                             type: "POST",
@@ -379,12 +417,13 @@
                                                 employee_id: id
                                             },
                                             success: function() {
-                                                alert("Screenshot deleted successfully.");
+                                                showToast(`Screenshot deleted successfully.`, 'success');
                                                 loadScreenshots(); // reload
-                                                fetchUserScreenshots()
+                                                fetchUserScreenshots(id, date);
                                             },
                                             error: function(xhr) {
-                                                alert("Error deleting screenshot: " + xhr.responseText);
+                                                showToast(`Error while deleting screenshot.`, 'error');
+                                                // alert("Error deleting screenshot: " + xhr.responseText);
                                             }
                                         });
                                     }
