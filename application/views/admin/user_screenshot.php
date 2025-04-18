@@ -223,8 +223,10 @@
             }
 
             function fetchUserScreenshots(employeeId, date = '') {
+                console.log(employeeId);
+                
                 $.ajax({
-                    url: "<?= base_url('/admin/ScreenshotController/get_screenshots'); ?>",
+                    url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
                     type: "GET",
                     dataType: "json",
                     data: {
@@ -367,6 +369,8 @@
                                     const screenshotId = $(this).data("id");
 
                                     if (confirm("Are you sure you want to delete this screenshot?")) {
+                                        console.log(screenshotId,id);
+                                        
                                         $.ajax({
                                             url: "/admin/ScreenshotController/soft_delete_screenshot",
                                             type: "POST",
@@ -377,6 +381,7 @@
                                             success: function() {
                                                 alert("Screenshot deleted successfully.");
                                                 loadScreenshots(); // reload
+                                                fetchUserScreenshots()
                                             },
                                             error: function(xhr) {
                                                 alert("Error deleting screenshot: " + xhr.responseText);
