@@ -307,7 +307,14 @@ class ScreenshotController extends Home_Controller
             if (file_exists($full_path)) {
                 // Extract time from filename (or fallback to created_at)
                 preg_match('/screenshot_(\d+)_(\d{8})_(\d{6})\.(\w{3,4})/', $filename, $matches);
-                $formatted_time = isset($matches[3]) ? date('H:i:s', strtotime($matches[3])) : date('H:i:s', strtotime($row['created_at']));
+                // $formatted_time = isset($matches[3]) ? date('H:i:s', strtotime($matches[3])) : date('H:i:s', strtotime($row['created_at']));
+                $formatted_time = isset($matches[3])
+                    ? (new DateTime(substr($matches[3], 0, 2) . ':' . substr($matches[3], 2, 2) . ':' . substr($matches[3], 4, 2), new DateTimeZone('UTC')))
+                    ->setTimezone(new DateTimeZone('Asia/Kolkata'))
+                    ->format('H:i:s')
+                    : (new DateTime($row['created_at'], new DateTimeZone('UTC')))
+                    ->setTimezone(new DateTimeZone('Asia/Kolkata'))
+                    ->format('H:i:s');
 
                 $screenshots[] = [
                     'id' => $row['screenshot_id'],
@@ -385,8 +392,14 @@ class ScreenshotController extends Home_Controller
 
             if (file_exists($full_path)) {
                 preg_match('/screenshot_(\d+)_(\d{8})_(\d{6})\.(\w{3,4})/', $filename, $matches);
-                $formatted_time = isset($matches[3]) ? date('H:i:s', strtotime($matches[3])) : date('H:i:s', strtotime($row['created_at']));
-
+                // $formatted_time = isset($matches[3]) ? date('H:i:s', strtotime($matches[3])) : date('H:i:s', strtotime($row['created_at']));
+                $formatted_time = isset($matches[3])
+                    ? (new DateTime(substr($matches[3], 0, 2) . ':' . substr($matches[3], 2, 2) . ':' . substr($matches[3], 4, 2), new DateTimeZone('UTC')))
+                    ->setTimezone(new DateTimeZone('Asia/Kolkata'))
+                    ->format('H:i:s')
+                    : (new DateTime($row['created_at'], new DateTimeZone('UTC')))
+                    ->setTimezone(new DateTimeZone('Asia/Kolkata'))
+                    ->format('H:i:s');
                 $screenshots[] = [
                     'id' => $row['screenshot_id'],
                     'file_name' => $filename,
