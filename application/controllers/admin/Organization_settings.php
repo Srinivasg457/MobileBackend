@@ -49,7 +49,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
             'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
-            'timecards_time_interval' => $this->input->post('timecards_time_interval', TRUE)
+            'timecards_time_interval' => 1
         ];
 
         // Check if settings exist for this user
@@ -90,7 +90,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
             'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
-            'timecards_time_interval' => $this->input->post('timecards_time_interval', TRUE)
+            'timecards_time_interval' => 1
         ];
 
         // Check if exception settings exist for this user and employee
