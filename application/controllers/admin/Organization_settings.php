@@ -127,18 +127,18 @@ class Organization_settings extends Home_Controller {
     $self_login = $this->input->post('self_login') ? 1 : 0;
 
     $data = [
-        'user_id'               => $user_id,
-        'employee_id'           => $employee_id,
-        'screenshot_flag'       => $this->input->post('screenshot_flag', TRUE),
+        'user_id'                  => $user_id,
+        'employee_id'              => $employee_id,
+        'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
         'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
-        'webcam_flag'           => $this->input->post('webcam_flag', TRUE),
-        'webcam_time_interval'  => $this->input->post('webcam_time_interval', TRUE),
-        'mouse_move_flag'       => $this->input->post('mouse_move_flag', TRUE),
-        'mouse_move_threshold'  => $this->input->post('mouse_move_threshold', TRUE),
-        'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
-        'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
-        'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
-        'timecards_time_interval' => 1
+        'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
+        'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
+        'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
+        'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
+        'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
+        'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
+        'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
+        'timecards_time_interval'  => 1
     ];
 
     $employee_data = [
