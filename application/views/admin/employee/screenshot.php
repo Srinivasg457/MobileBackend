@@ -46,9 +46,9 @@
     }
 
     .screenshot-row {
-        display: flex;
+        /* display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 10px; */
         border: 1px solid #eee;
         padding: 15px;
         border-radius: 8px;
