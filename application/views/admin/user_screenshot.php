@@ -1,7 +1,7 @@
 <div class="content-wrapper">
     <section class="content" style="padding-top: 0;">
-    <style>
-    /* .main-sidebar {
+        <style>
+            /* .main-sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -261,7 +261,7 @@
                 </div>
             </div>
 
-            <div class="row screenshot-container"></div>
+            <div class="screenshot-container"></div>
         </div>
 
         <!-- Screenshot Section -->
@@ -357,7 +357,16 @@
                             });
 
                             container.html(output_screen);
+
+                            //  Show/Hide "See More" based on count
+                            if (response.screenshots.length > 6) {
+                                $(`#user-${employeeId} .see-more-button`).show();
+                            } else {
+                                $(`#user-${employeeId} .see-more-button`).hide();
+                            }
+
                             setTimeout(() => fetchUserScreenshots(employeeId, date), 60000);
+
                             container.find('.zoomable-screenshot').on('click', function() {
                                 $('#modal-image').attr('src', $(this).attr('src'));
                                 $('#screenshot-modal').fadeIn();
@@ -394,6 +403,7 @@
 
                         } else {
                             container.html("<p>No screenshots available.</p>");
+                            $(`#user-${employeeId} .see-more-button`).hide(); //  Also hide button if no screenshots
                         }
                     },
                     error: function(xhr, error) {
@@ -452,8 +462,8 @@
                             <div class="screenshot-visible" style="display: flex; flex-wrap: wrap; gap: 10px;">
                     `;
 
-                    groupScreenshots.slice(0, screenshotsPerGroup).forEach((screenshot) => {
-                        output += `
+                                    groupScreenshots.slice(0, screenshotsPerGroup).forEach((screenshot) => {
+                                        output += `
                             <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
@@ -497,8 +507,8 @@
                             </div> <!-- end hidden -->
                     `;
 
-                    if (groupScreenshots.length > screenshotsPerGroup) {
-                        output += `
+                                    if (groupScreenshots.length > screenshotsPerGroup) {
+                                        output += `
                             <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
                                 <button class="toggle-button" data-target="${groupId}-extra" style="padding: 6px 12px; font-size: 13px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">See More</button>
                             </div>

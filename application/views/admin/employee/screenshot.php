@@ -59,7 +59,7 @@
     }
 
     .screenshot-card {
-        flex: 1 1 calc(16.66% - 10px);
+        /* flex: 1 1 calc(16.66% - 10px); */
         background-color: #F4F6F9;
         border-radius: 6px;
         padding: 8px;
@@ -257,8 +257,8 @@ success: function (response) {
                 groupedScreenshots[groupLabel] = [];
             }
 
-            groupedScreenshots[groupLabel].push(screenshot);
-        });
+                                        groupedScreenshots[groupLabel].push(screenshot);
+                                    });
 
         $.each(groupedScreenshots, function (timeRange, groupScreenshots) {
             const groupId = `group-${timeRange.replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -299,9 +299,11 @@ success: function (response) {
 
             output_screen += `
                     </div> <!-- end hidden -->
-                    <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-                        <button class="toggle-button" data-target="${groupId}-extra" style="padding: 6px 12px; font-size: 13px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">See More</button>
-                    </div>
+                    ${groupScreenshots.length > screenshotsPerGroup ? `
+    <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+        <button class="toggle-button" data-target="${groupId}-extra" style="padding: 6px 12px; font-size: 13px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">See More</button>
+    </div>
+` : ''}
                 </div> <!-- end screenshot group -->
             `;
         });
