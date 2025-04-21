@@ -132,21 +132,21 @@ class Hrm extends Home_Controller {
             
     //     }      
         
-    // }
-
-    public function employee_add()
+public function employee_add()
 {   
     if ($_POST) {   
         check_status();
+        $this->load->database();
 
         $id = $this->input->post('id', true);
+        $email = $this->input->post('email', true);
 
         $data = array(
             'user_id' => user()->id,
             'business_id' => $this->business->uid,
             'name' => $this->input->post('name', true),
             'department_id' => $this->input->post('department', true),
-            'email' => $this->input->post('email', true),
+            'email' => $email,
             'phone' => $this->input->post('phone', true),
             'address' => $this->input->post('address', true),
             'city' => $this->input->post('city', true),
@@ -158,50 +158,66 @@ class Hrm extends Home_Controller {
         $data = $this->security->xss_clean($data);
 
         if ($id != '') {
-            $this->admin_model->edit_option($data, $id, 'employees');
-            $this->session->set_flashdata('msg', trans('msg-updated')); 
+            $this->db->where('id', $id)->update('employees', $data);
+            $this->session->set_flashdata('msg', trans('msg-updated'));
         } else {
-            $id = $this->admin_model->insert($data, 'employees');
-            $this->session->set_flashdata('msg', trans('msg-inserted')); 
+            // Case-insensitive email check
+            $this->db->where('LOWER(email)', strtolower($email));
+            $exists = $this->db->get('employees')->row();
 
-            // ✅ Generate invitation token
+            if ($exists) {
+                $this->session->set_flashdata('error', 'Email address already exists.');
+                redirect(base_url('admin/hrm/employee'));
+                return;
+            }
+
+            // Insert new employee
+            try {
+                $this->db->insert('employees', $data);
+                $id = $this->db->insert_id();
+                $this->session->set_flashdata('msg', trans('msg-inserted'));
+            } catch (Exception $e) {
+                log_message('error', 'Insert failed: ' . $e->getMessage());
+                $this->session->set_flashdata('error', 'Failed to add employee. Email may already exist.');
+                redirect(base_url('admin/hrm/employee'));
+                return;
+            }
+
+            // Generate and save invitation token
             $token = uniqid();
-            $this->admin_model->edit_option(['invitation_token' => $token], $id, 'employees');
+            $this->db->where('id', $id)->update('employees', ['invitation_token' => $token]);
 
-            // ✅ Email config for Mailtrap
+            // Send invitation email
             $config = array(
                 'protocol'    => 'smtp',
                 'smtp_host'   => 'smtp.gmail.com',
                 'smtp_port'   => 587,
-                'smtp_user'   => 'sabeer2002ahmed@gmail.com', // your Gmail
-                'smtp_pass'   => 'vivxkwqkkygmelzp',   // NOT your Gmail password!
+                'smtp_user'   => 'sabeer2002ahmed@gmail.com',
+                'smtp_pass'   => 'vivxkwqkkygmelzp',
                 'smtp_crypto' => 'tls',
                 'mailtype'    => 'html',
                 'charset'     => 'utf-8',
                 'newline'     => "\r\n",
                 'crlf'        => "\r\n"
             );
-            
 
             $this->load->library('email');
             $this->email->initialize($config);
 
-            // ✅ Prepare invitation email
-            $to = $this->input->post('email', true);
             $subject = 'You are invited to join Time Tracker';
-            $message = '<p>Hello ' . $this->input->post('name', true) . ',</p>';
-            $message .= '<p>You have been invited to register for Time Tracker. Please click the link below to register:</p>';
+            $message = '<p>Hello ' . $data['name'] . ',</p>';
+            $message .= '<p>You have been invited to register for Time Tracker. Click below to register:</p>';
             $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
             $message .= '<p>If you did not expect this, you can ignore this email.</p>';
             $message .= '<p>Regards,<br>Time Tracker Team</p>';
 
-            $this->email->to($to);
+            $this->email->to($email);
             $this->email->from('sabeer2002ahmed@gmail.com', 'Time Tracker');
             $this->email->subject($subject);
             $this->email->message($message);
 
             if ($this->email->send()) {
-                $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
+                $this->db->where('id', $id)->update('employees', ['invitation_sent_at' => my_date_now()]);
                 $this->session->set_flashdata('msg', 'Employee added and invitation email sent.');
             } else {
                 log_message('error', 'Email error: ' . $this->email->print_debugger());
@@ -209,19 +225,21 @@ class Hrm extends Home_Controller {
             }
         }
 
-        // ✅ Upload photo if available
-        if ($_FILES['photo']['name'] != '') {
-            $up_load = $this->admin_model->upload_image('1200');
+        // Upload photo if available
+        if (!empty($_FILES['photo']['name'])) {
+            $up_load = $this->admin_model->upload_image('1200'); // Optional: replace with inline logic if preferred
             $data_img = array(
                 'image' => $up_load['images'],
                 'thumb' => $up_load['thumb']
             );
-            $this->admin_model->edit_option($data_img, $id, 'employees');   
+            $this->db->where('id', $id)->update('employees', $data_img);
         }
 
         redirect(base_url('admin/hrm/employee'));
     }      
 }
+
+    
 
     public function employee_edit($id)
     {  
