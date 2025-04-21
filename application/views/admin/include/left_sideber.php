@@ -26,6 +26,13 @@
                 <i class="bi bi-camera"></i> <span><?php echo "View Screenshots" ?></span>
               </a>
             </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/activity_logs') ?>">
+                <i class="bi bi-clock-history"></i> <span><?php echo "Activity Log" ?></span>
+              </a>
+            </li>
 
           <?php else :  ?>
             <?php if (is_admin()): ?>

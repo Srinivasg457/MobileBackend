@@ -1,12 +1,22 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Activity_logs extends CI_Controller
+class Activity_logs extends Home_Controller
 {
     public function __construct()
     {
         parent::__construct();
         $this->load->database();
+    }
+
+    public function index(){
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+        }
+        $data = array();
+        $data['page_title'] = 'Activity Log';
+        $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
+        $this->load->view('admin/index', $data);
     }
     // public function check_activity_status()
     // {
