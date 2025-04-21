@@ -1,15 +1,15 @@
 <div class="content-wrapper">
     <section class="content" style="padding-top: 0;">
-       <style>
-        .main-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh; /* Full height of the viewport */
-  width: 250px;   /* Adjust width as needed */
-  z-index: 1000;  /* Make sure it stays on top */
-  overflow-y: auto; /* Optional: scroll if sidebar content is long */
-}
+    <style>
+    /* .main-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    z-index: 1000;
+    overflow-y: auto;
+    } */
 
 
     .popup {
@@ -323,7 +323,6 @@
             }
 
             function fetchUserScreenshots(employeeId, date = '') {
-                console.log(employeeId);
 
                 $.ajax({
                     url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
@@ -358,6 +357,7 @@
                             });
 
                             container.html(output_screen);
+                            setTimeout(() => fetchUserScreenshots(employeeId, date), 60000);
                             container.find('.zoomable-screenshot').on('click', function() {
                                 $('#modal-image').attr('src', $(this).attr('src'));
                                 $('#screenshot-modal').fadeIn();
@@ -423,7 +423,9 @@
             employee_id: id,
             date: date
         },
-        success: function (response) {
+        success: function(response) {
+            console.log(response);
+
             if (response.status === "success" && response.screenshots.length > 0) {
                 const screenshotsPerGroup = 12;
                 let output = "";
@@ -507,6 +509,7 @@
                 });
 
                 $(".screenshot-container").html(output);
+                setTimeout(() => loadScreenshots(), 60000);
 
                 // Zoom modal
                 $(".see-zoomable-screenshot").on('click', function () {
@@ -557,21 +560,22 @@
                     }
                 });
 
-                // Auto-refresh after 5 minutes from the latest timestamp
-                let latestTime = response.screenshots[response.screenshots.length - 1].timestamp;
-                if (latestTime) {
-                    if (nextFetchTimeout) clearTimeout(nextFetchTimeout);
+                                // Auto-refresh after 5 minutes from the latest timestamp
+                                // let latestTime = response.screenshots[response.screenshots.length - 1].timestamp;
+                                // if (latestTime) {
+                                //     if (nextFetchTimeout) clearTimeout(nextFetchTimeout);
 
-                    const latestDate = new Date(latestTime);
-                    const now = new Date();
-                    const timeDiff = Math.max(0, (latestDate.getTime() + 5 * 60 * 1000) - now.getTime());
+                                //     const latestDate = new Date(latestTime);
+                                //     const now = new Date();
+                                //     const timeDiff = 100;
+                                //      console.log("hii");
 
-                    nextFetchTimeout = setTimeout(() => {
-                        const currentDate = latestDate.toISOString().split("T")[0];
-                        $('#datePicker').val(currentDate);
-                        loadScreenshots(); // Auto-refresh
-                    }, timeDiff);
-                }
+                                //     nextFetchTimeout = setTimeout(() => {
+                                //         const currentDate = latestDate.toISOString().split("T")[0];
+                                //         $('#datePicker').val(currentDate);
+                                //         loadScreenshots(); // Auto-refresh
+                                //     }, timeDiff);
+                                // }
 
             } else {
                 $(".screenshot-container").html("<p>No screenshots available.</p>");
