@@ -184,6 +184,14 @@
                         </select> -->
                         <input type="text" name="timecards_time_interval" class="form-control interval-field" value="1" readonly>
                     </div>
+
+                  <div class="col-md-6">
+        <label>Self Login:</label><br>
+        <label class="switch">
+            <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
+            <span class="slider"></span>
+        </label>
+    </div>
                 </div>  
 
                 <div class="mt-3">
