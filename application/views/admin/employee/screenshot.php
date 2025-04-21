@@ -341,7 +341,7 @@ success: function (response) {
     }
 
     // Auto-refresh after 5.5 minutes
-    setTimeout(() => fetchUserScreenshots($('#datePicker').val()), 330000);
+    setTimeout(() => fetchUserScreenshots($('#datePicker').val()), 60000);
 }
 
 
@@ -349,7 +349,7 @@ success: function (response) {
 ,
                         error: function(response) {
                             console.log(response);
-                            setTimeout(() => fetchUserScreenshots($('#datePicker').val()), 330000);
+                            setTimeout(() => fetchUserScreenshots($('#datePicker').val()), 60000);
                         }
                     });
                 }
