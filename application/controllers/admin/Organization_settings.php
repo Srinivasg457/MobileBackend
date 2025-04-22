@@ -10,7 +10,7 @@ class Organization_settings extends Home_Controller {
         $this->load->database();
     }
 
-    public function index()
+    public function index(): void
     {
         if (!$this->session->userdata('logged_in')) {
             redirect('login');

@@ -72,21 +72,60 @@ class Timecards_manual extends CI_Controller {
         }
     }
 
-    /**
-     * (Optional) Fetch manual timecards for an employee
-     */
     public function get_timecards() {
-        $employee_id = $this->input->get('employee_id');
-
-        if (!$employee_id) {
-            echo "Employee ID is required.";
+        $employee_id     = $this->input->get('employee_id');
+        $approval_status = $this->input->get('approved'); // 'approved' or 'unapproved'
+        $user_id         = $this->session->userdata('id'); // Logged-in org/admin user
+        $mode            = $this->input->get('mode'); // 'update' or null
+        $manual_id       = $this->input->get('manual_id'); // required if mode is update
+    
+        if (!$user_id) {
+            echo "Unauthorized access: user not logged in.";
             return;
         }
-
-        $this->db->where('employee_id', $employee_id);
+    
+        // --- Handle update ---
+        if ($mode === 'update') {
+            if (!$manual_id || !$approval_status) {
+                echo "manual_id and approved status required for update.";
+                return;
+            }
+    
+            $approved_value = ($approval_status === 'approved') ? 1 : 0;
+    
+            $this->db->where('manual_id', $manual_id);
+            $this->db->where('user_id', $user_id); // Extra check for security
+            $this->db->update('timecards_manual', [
+                'approved'    => $approved_value,
+                'approved_by' => $user_id
+            ]);
+    
+            if ($this->db->affected_rows() > 0) {
+                echo "Timecard status updated successfully.";
+            } else {
+                echo "No update performed (maybe already updated or invalid ID).";
+            }
+            return;
+        }
+    
+        // --- Handle fetch ---
+        $this->db->where('user_id', $user_id);
+    
+        if ($employee_id) {
+            $this->db->where('employee_id', $employee_id);
+        }
+    
+        if ($approval_status === 'approved') {
+            $this->db->where('approved', 1);
+        } elseif ($approval_status === 'unapproved') {
+            $this->db->where('approved', 0);
+        }
+    
         $query = $this->db->get('timecards_manual');
         $results = $query->result();
-
+    
         echo json_encode($results);
     }
+    
+    
 }
