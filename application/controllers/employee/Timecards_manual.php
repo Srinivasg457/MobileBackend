@@ -8,7 +8,7 @@ class Timecards_manual extends CI_Controller {
         $this->load->database();  // Load the database
     }
 
-    /**
+    /*
      * Create a manual timecard for an employee (by admin/org user)
      */
     public function create_timecard() {
