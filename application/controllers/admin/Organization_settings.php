@@ -49,7 +49,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
             'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
-            'timecards_time_interval' => 1
+            'timecards_time_interval' => 5
         ];
 
         // Check if settings exist for this user
@@ -138,7 +138,7 @@ class Organization_settings extends Home_Controller {
         'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
         'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
         'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
-        'timecards_time_interval'  => 1
+        'timecards_time_interval'  => 5
     ];
 
     $employee_data = [
