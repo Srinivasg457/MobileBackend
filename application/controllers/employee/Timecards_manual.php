@@ -78,8 +78,8 @@ class Timecards_manual extends Home_Controller {
      * Get or update timecards manually
      */
     public function get_timecards() {
-        $user_id         = $this->session->userdata('id'); // Must always come from session
-        $employee_id     = $this->input->get('employee_id');
+         $user_id     = $this->session->userdata('employee_org_id');
+        $employee_id = $this->session->userdata('employee_id');
         $approval_status = $this->input->get('approved'); // approved/unapproved
         $mode            = $this->input->get('mode'); // 'update' or null
         $manual_id       = $this->input->get('manual_id');
@@ -133,4 +133,17 @@ class Timecards_manual extends Home_Controller {
     $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);
     $this->load->view('admin/index', $data);
     }
+       public function get_timecards_by_employee() {
+    $employee_id = $this->session->userdata('employee_id');
+    
+    if ($employee_id) {
+        $this->db->where('employee_id', $employee_id);
+        $this->db->order_by('manual_id', 'DESC'); // Change 'id' to your preferred column
+        $query = $this->db->get('timecards_manual');
+        echo json_encode($query->result());
+    } else {
+        echo json_encode(['error' => 'Employee ID not found in session']);
+    }
+}
+
 }

@@ -1,125 +1,4 @@
 <div id="toast-container" style="position: fixed;top: 0;"></div>
-<div class="content-wrapper">
-  <div class="manual-entry-container">
-    <h2>Manual Entry</h2>
-
-    <div class="entry-header">
-      <label>Employee
-        <input type="text" placeholder="Enter employee name" />
-      </label>
-      <label>Date
-        <input type="date" />
-      </label>
-      <label>Timezone
-        <select>
-          <option>IST</option>
-          <option>GMT</option>
-          <option>PST</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="status-boxes">
-      <div class="status-box active">Active <strong>06 hrs 30 min</strong></div>
-      <div class="status-box inactive">Inactive <strong>1 hr 0 min</strong></div>
-      <div class="status-box manual">Manual <strong>1 hr 0 min</strong></div>
-      <div class="status-box meeting">Meeting <strong>00:00</strong></div>
-    </div>
-
-    <h3>Timeline</h3>
-    <table class="timeline-table">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Project</th>
-          <th>Task</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>12:00 - 12:30</td>
-          <td>Lorem</td>
-          <td>Ipsum</td>
-          <td>Active</td>
-        </tr>
-        <tr>
-          <td>12:30 - 12:32</td>
-          <td>Lorem</td>
-          <td>Ipsum</td>
-          <td>Idle</td>
-        </tr>
-        <tr>
-          <td>12:32 - 12:45</td>
-          <td>Lorem</td>
-          <td>Ipsum</td>
-          <td>Manual</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>Logs</h3>
-    <table class="log-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Period</th>
-          <th>Duration</th>
-          <th>Task</th>
-          <th>Note</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>18/05/2025</td>
-          <td>12:00 - 12:30</td>
-          <td>30 min</td>
-          <td>Lorem</td>
-          <td>Lorem</td>
-          <td>Requested</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="manual-button-wrap">
-      <button class="manual-add-btn" onclick="openModal()">➕ Add Manual Entry</button>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div class="manual-modal" id="manualModal">
-    <div class="manual-modal-overlay" onclick="closeModal()"></div>
-    <div class="manual-modal-content">
-      <h3>Add Manual Entry</h3>
-      <div class="manual-entry-form" id="manualEntryForm">
-        <div class="form-row">
-          <label>Start Time <input type="time" id="timestamp_start" required /></label>
-          <label>End Time <input type="time" id="timestamp_end" required /></label>
-        </div>
-        <div class="form-row">
-          <label>Project
-            <input type="text" value="Lorem" readonly />
-          </label>
-          <label>Task
-            <select disabled>
-              <option selected>Ipsum</option>
-              <option>Dolor</option>
-            </select>
-          </label>
-        </div>
-        <div class="form-row full-width">
-          <label for="notes">Notes</label>
-          <textarea id="reason" rows="2" placeholder="Enter notes" class="textarea-full" required></textarea>
-        </div>
-        <div class="form-actions">
-          <button type="button" id="saveManualBtn" class="save-btn">Save</button>
-          <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 <style>
   .toast {
     padding: 10px;
@@ -347,7 +226,207 @@
       width: 90%;
     }
   }
+  .truncated-reason {
+  cursor: pointer;
+  position: relative;
+}
+
+.truncated-reason:hover::after {
+  content: attr(data-fulltext);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 1000;
+  background-color: #000;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  width: 700px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
 </style>
+<div class="content-wrapper">
+  <div class="manual-entry-container">
+    <h2>Activity</h2>
+
+    <div class="entry-header">
+      <label>Employee
+        <input type="text" placeholder="Enter employee name" />
+      </label>
+      <label>Date
+        <input type="date" />
+      </label>
+      <label>Timezone
+        <select>
+          <option>IST</option>
+          <option>GMT</option>
+          <option>PST</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="status-boxes">
+      <div class="status-box active">Active <strong>06 hrs 30 min</strong></div>
+      <div class="status-box inactive">Inactive <strong>1 hr 0 min</strong></div>
+      <div class="status-box manual">Manual <strong>1 hr 0 min</strong></div>
+      <div class="status-box meeting">Meeting <strong>00:00</strong></div>
+    </div>
+
+    <h3>Timeline</h3>
+    <table class="timeline-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Project</th>
+          <th>Task</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>12:00 - 12:30</td>
+          <td>Lorem</td>
+          <td>Ipsum</td>
+          <td>Active</td>
+        </tr>
+        <tr>
+          <td>12:30 - 12:32</td>
+          <td>Lorem</td>
+          <td>Ipsum</td>
+          <td>Idle</td>
+        </tr>
+        <tr>
+          <td>12:32 - 12:45</td>
+          <td>Lorem</td>
+          <td>Ipsum</td>
+          <td>Manual</td>
+        </tr>
+      </tbody>
+    </table>
+
+   <h3>Manual Entry Logs</h3>
+<table class="log-table">
+<thead>
+  <tr>
+    <th>S.No</th>
+    <th>Start Time</th>
+    <th>End Time</th>
+    <th>Duration (minutes)</th>
+    <th>Reason</th>
+    <th>Status</th>
+  </tr>
+</thead>
+
+  <tbody id="log-data">
+    <!-- Data from database will go here -->
+  </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+  $.ajax({
+    url: '<?= base_url("employee/Timecards_manual/get_timecards_by_employee") ?>',
+    method: 'GET',
+    dataType: 'json',
+    success: function(response) {
+      if (response.error) {
+        $('#log-data').html('<tr><td colspan="6">' + response.error + '</td></tr>');
+      } else {
+        // Sort by ID in descending order (assuming higher IDs are newer)
+        // If you have a created_at field, use that instead:
+        // response.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        response.sort((a, b) => b.id - a.id);
+
+        let html = '';
+        let counter = 1;
+
+        response.forEach(function(row) {
+          let duration = 'N/A';
+
+          if (row.timestamp_start && row.timestamp_end) {
+            let start = new Date(`1970-01-01T${row.timestamp_start}`);
+            let end = new Date(`1970-01-01T${row.timestamp_end}`);
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+              const diffMs = end - start;
+              const diffMins = Math.floor(diffMs / 60000);
+              duration = `${diffMins} minutes`;
+            }
+          }
+
+          let reasonText = row.reason || '';
+          let isTruncated = reasonText.length > 50;
+          let truncatedReason = isTruncated 
+            ? reasonText.substring(0, 50) + '...' 
+            : reasonText;
+
+          let tooltipAttr = isTruncated 
+            ? `class="truncated-reason" data-fulltext="${reasonText.replace(/"/g, '&quot;')}"` 
+            : '';
+
+          html += `
+            <tr>
+              <td>${counter}</td>
+              <td>${row.timestamp_start}</td>
+              <td>${row.timestamp_end}</td>
+              <td>${duration}</td>
+              <td ${tooltipAttr}>${truncatedReason}</td>
+              <td>${row.approved == 1 ? 'Approved' : 'Pending'}</td>
+            </tr>`;
+
+          counter++;
+        });
+        $('#log-data').html(html);
+      }
+    },
+    error: function() {
+      $('#log-data').html('<tr><td colspan="6">Error loading data</td></tr>');
+    }
+  });
+});
+</script>
+
+
+
+    <div class="manual-button-wrap">
+      <button class="manual-add-btn" onclick="openModal()">➕ Add Manual Entry</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="manual-modal" id="manualModal">
+    <div class="manual-modal-overlay" onclick="closeModal()"></div>
+    <div class="manual-modal-content">
+      <h3>Add Manual Entry</h3>
+      <div class="manual-entry-form" id="manualEntryForm">
+        <div class="form-row">
+          <label>Start Time <input type="time" id="timestamp_start" required /></label>
+          <label>End Time <input type="time" id="timestamp_end" required /></label>
+        </div>
+        <div class="form-row">
+          <label>Project
+            <input type="text" value="Lorem" readonly />
+          </label>
+          <label>Task
+            <select disabled>
+              <option selected>Ipsum</option>
+              <option>Dolor</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row full-width">
+          <label for="notes">Notes</label>
+          <textarea id="reason" rows="2" placeholder="Enter notes" class="textarea-full" required></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="saveManualBtn" class="save-btn">Save</button>
+          <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
   function openModal() {
@@ -414,7 +493,7 @@
       success: function(response) {
         showToast(response, 'success');
         closeModal();
-        // Optional: reload data via AJAX
+        location.reload();
       },
       error: function(xhr, status, error) {
         console.error(error);
