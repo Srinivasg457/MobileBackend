@@ -29,7 +29,7 @@
             <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
                           echo "active";
                         } ?>">
-              <a href="<?php echo base_url('admin/activity_logs') ?>">
+              <a href="<?php echo base_url('employee/Timecards_manual') ?>">
                 <i class="bi bi-clock-history"></i> <span><?php echo "Activity Log" ?></span>
               </a>
             </li>
