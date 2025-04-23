@@ -1,22 +1,35 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Timecards_manual extends CI_Controller {
+class Timecards_manual extends Home_Controller {
 
     public function __construct() {
         parent::__construct();
         $this->load->database();
+
+    }
+     public function index(){
+        // if (!$this->session->userdata('logged_in')) {
+        //     redirect('login');
+        // }
+        $data = array();
+        $data['page_title'] = 'Activity Log';
+        $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
+        $this->load->view('admin/index', $data);
     }
 
     /*
      * Create a manual timecard for an employee (by admin/org user)
      */
     public function create_timecard() {
-        $user_id         = $this->session->userdata('id'); // From session
-        $employee_id     = $this->input->post('employee_id');
+        $user_id     = $this->session->userdata('employee_org_id');
+        $employee_id = $this->session->userdata('employee_id');
         $timestamp_start = $this->input->post('timestamp_start');
         $timestamp_end   = $this->input->post('timestamp_end');
         $reason          = $this->input->post('reason');
+
+        
+
 
         if (!$user_id || !$employee_id || !$timestamp_start || !$timestamp_end || !$reason) {
             echo "All fields are required: employee_id, timestamp_start, timestamp_end, reason.";
