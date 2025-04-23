@@ -28,9 +28,6 @@ class Timecards_manual extends Home_Controller {
         $timestamp_end   = $this->input->post('timestamp_end');
         $reason          = $this->input->post('reason');
 
-        
-
-
         if (!$user_id || !$employee_id || !$timestamp_start || !$timestamp_end || !$reason) {
             echo "All fields are required: employee_id, timestamp_start, timestamp_end, reason.";
             return;
@@ -129,5 +126,11 @@ class Timecards_manual extends Home_Controller {
 
         $query = $this->db->get('timecards_manual');
         echo json_encode($query->result());
+    }
+
+     public function approve(){
+        $data['page_title'] = 'Time_Approval';
+    $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);
+    $this->load->view('admin/index', $data);
     }
 }

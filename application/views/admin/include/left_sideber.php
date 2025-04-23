@@ -406,6 +406,12 @@
                       <i class="bi bi-camera"></i> <span><?php echo "View Screenshots" ?></span>
                     </a>
                   </li>
+                 <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") { echo "active"; } ?>">
+                        <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
+                          <i class="bi bi-clock"></i> <span><?php echo "Time Approval" ?></span>
+                        </a>
+                </li>
+
                   <li class="<?php if (isset($page_title) && $page_title == "Organization settings") {
                                 echo "active";
                               } ?>">
