@@ -10,9 +10,9 @@ class Activity_logs extends Home_Controller
     }
 
     public function index(){
-        if (!$this->session->userdata('logged_in')) {
-            redirect('login');
-        }
+        // if (!$this->session->userdata('logged_in')) {
+        //     redirect('login');
+        // }
         $data = array();
         $data['page_title'] = 'Activity Log';
         $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
