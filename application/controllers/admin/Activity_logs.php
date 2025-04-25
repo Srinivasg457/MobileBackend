@@ -223,6 +223,65 @@ private function get_closest_interval($dynamic_interval, $valid_intervals)
     return $closest;
 }
 
+public function get_activity()
+{
+    // Get inputs from GET request (query parameters)
+    $employee_id = $this->input->get('employee_id');
+    $user_id = $this->input->get('user_id'); // fallback for Postman or URL query params
+    $date = $this->input->get('date'); // Get the date from the query parameter (if provided)
 
-    
+    // If no date is provided, use today's date
+    if (empty($date)) {
+        $date = date('Y-m-d'); // Default to today
+    }
+
+    // Validate inputs
+    if (empty($employee_id) || empty($user_id)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => false,
+                'message' => 'Missing employee_id or user_id'
+            ]));
+    }
+
+    // Check if the combination of user_id and employee_id exists in the screenshots table with the given date and non-null screenshot_id
+    $this->db->select('screenshot_id'); // Selecting screenshot_id to check if the record exists
+    $this->db->from('screenshots');
+    $this->db->where('user_id', $user_id); // Matching user_id
+    $this->db->where('employee_id', $employee_id); // Matching employee_id
+    $this->db->where('DATE(created_at)', $date); // Ensure the date is the provided or default date
+    $this->db->where('screenshot_id IS NOT NULL'); // Check for non-null screenshot_id
+    $query = $this->db->get();
+
+    // If no record exists for this user_id and employee_id combination, return an error
+    if ($query->num_rows() == 0) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => false,
+                'message' => 'Invalid user_id or employee_id, or no data available for the selected date'
+            ]));
+    }
+
+    // Query the screenshots table using user_id and employee_id to get data with non-null screenshot_id
+    $this->db->select('user_id, employee_id, overall_activity_percent, is_active, screenshot_id');
+    $this->db->from('screenshots');
+    $this->db->where('user_id', $user_id);
+    $this->db->where('employee_id', $employee_id);
+    $this->db->where('DATE(created_at)', $date); // Ensure the date is the provided or default date
+    $this->db->where('screenshot_id IS NOT NULL'); // Ensure screenshot_id is not null
+    $query = $this->db->get();
+    $result = $query->result_array();
+
+    // Return response
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode([
+            'status' => true,
+            'data' => $result
+        ]));
+}
+
+
 }
