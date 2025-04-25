@@ -13,6 +13,8 @@ class Timecards_manual extends Home_Controller {
         //     redirect('login');
         // }
         $data = array();
+        $data['employee_id'] = $this->session->userdata('employee_id');
+        $data['employee_org_id'] = $this->session->userdata('employee_org_id');
         $data['page_title'] = 'Activity Log';
         $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -55,7 +57,7 @@ class Timecards_manual extends Home_Controller {
      */
     public function approve_timecard() {
         $manual_id   = $this->input->post('manual_id');
-        $approved_by = $this->session->userdata('id'); // From session
+        $approved_by = $this->session->userdata("id"); // From session
 
         if (!$manual_id || !$approved_by) {
             echo "Manual ID and session are required.";
@@ -78,8 +80,8 @@ class Timecards_manual extends Home_Controller {
      * Get or update timecards manually
      */
     public function get_timecards() {
-         $user_id     = $this->session->userdata('employee_org_id');
-        $employee_id = $this->session->userdata('employee_id');
+        $user_id     = $this->input->get('employee_org_id');
+        $employee_id = $this->input->get('employee_id');
         $approval_status = $this->input->get('approved'); // approved/unapproved
         $mode            = $this->input->get('mode'); // 'update' or null
         $manual_id       = $this->input->get('manual_id');

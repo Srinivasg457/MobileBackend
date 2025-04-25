@@ -1,5 +1,23 @@
 <div id="toast-container" style="position: fixed;top: 0;"></div>
 <style>
+  .status-approved {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .status-pending {
+    color: #856404;
+    background-color: #fff3cd;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-align: center;
+  }
+
   .toast {
     padding: 10px;
     margin: 5px;
@@ -226,24 +244,25 @@
       width: 90%;
     }
   }
-  .truncated-reason {
-  cursor: pointer;
-  position: relative;
-}
 
-.truncated-reason:hover::after {
-  content: attr(data-fulltext);
-  position: absolute;
-  left: 0;
-  top: 100%;
-  z-index: 1000;
-  background-color: #000;
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  width: 700px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
+  .truncated-reason {
+    cursor: pointer;
+    position: relative;
+  }
+
+  .truncated-reason:hover::after {
+    content: attr(data-fulltext);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 1000;
+    background-color: #000;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: 700px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
 </style>
 <div class="content-wrapper">
   <div class="manual-entry-container">
@@ -304,92 +323,27 @@
       </tbody>
     </table>
 
-   <h3>Manual Entry Logs</h3>
-<table class="log-table">
-<thead>
-  <tr>
-    <th>S.No</th>
-    <th>Start Time</th>
-    <th>End Time</th>
-    <th>Duration (minutes)</th>
-    <th>Reason</th>
-    <th>Status</th>
-  </tr>
-</thead>
+    <h3>Manual Entry Logs</h3>
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Duration (minutes)</th>
+          <th>Reason</th>
+          <th>Status</th>
+        </tr>
+      </thead>
 
-  <tbody id="log-data">
-    <!-- Data from database will go here -->
-  </tbody>
-</table>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-  $.ajax({
-    url: '<?= base_url("employee/Timecards_manual/get_timecards_by_employee") ?>',
-    method: 'GET',
-    dataType: 'json',
-    success: function(response) {
-      if (response.error) {
-        $('#log-data').html('<tr><td colspan="6">' + response.error + '</td></tr>');
-      } else {
-        // Sort by ID in descending order (assuming higher IDs are newer)
-        // If you have a created_at field, use that instead:
-        // response.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        response.sort((a, b) => b.id - a.id);
-
-        let html = '';
-        let counter = 1;
-
-        response.forEach(function(row) {
-          let duration = 'N/A';
-
-          if (row.timestamp_start && row.timestamp_end) {
-            let start = new Date(`1970-01-01T${row.timestamp_start}`);
-            let end = new Date(`1970-01-01T${row.timestamp_end}`);
-            if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-              const diffMs = end - start;
-              const diffMins = Math.floor(diffMs / 60000);
-              duration = `${diffMins} minutes`;
-            }
-          }
-
-          let reasonText = row.reason || '';
-          let isTruncated = reasonText.length > 50;
-          let truncatedReason = isTruncated 
-            ? reasonText.substring(0, 50) + '...' 
-            : reasonText;
-
-          let tooltipAttr = isTruncated 
-            ? `class="truncated-reason" data-fulltext="${reasonText.replace(/"/g, '&quot;')}"` 
-            : '';
-
-          html += `
-            <tr>
-              <td>${counter}</td>
-              <td>${row.timestamp_start}</td>
-              <td>${row.timestamp_end}</td>
-              <td>${duration}</td>
-              <td ${tooltipAttr}>${truncatedReason}</td>
-              <td>${row.approved == 1 ? 'Approved' : 'Pending'}</td>
-            </tr>`;
-
-          counter++;
-        });
-        $('#log-data').html(html);
-      }
-    },
-    error: function() {
-      $('#log-data').html('<tr><td colspan="6">Error loading data</td></tr>');
-    }
-  });
-});
-</script>
-
-
+      <tbody id="log-data">
+        <!-- Data from database will go here -->
+      </tbody>
+    </table>
 
     <div class="manual-button-wrap">
-      <button class="manual-add-btn" onclick="openModal()">➕ Add Manual Entry</button>
+      <button class="manual-add-btn" onclick="openModal()"><i class="fa fa-plus-circle" aria-hidden="true"></i>
+        Add Manual Entry</button>
     </div>
   </div>
 
@@ -436,8 +390,78 @@ $(document).ready(function() {
   function closeModal() {
     document.getElementById('manualModal').classList.remove('show');
   }
-</script>
-<script>
+
+  $(document).ready(function() {
+    fetchTimecards(); // Initial call
+  });
+
+  function fetchTimecards() {
+    const employeeId = <?= $employee_id ?>;
+    const employeeOrgId = <?= $employee_org_id ?>
+
+    $.ajax({
+      url: '<?= base_url("employee/Timecards_manual/get_timecards_by_employee") ?>',
+      method: 'GET',
+      data: {
+        employee_id: employeeId,
+        employee_org_id: employeeOrgId
+      }, // Send it as query param
+      dataType: 'json',
+      success: function(response) {
+        if (response.error) {
+          $('#log-data').html('<tr><td colspan="6">' + response.error + '</td></tr>');
+        } else {
+          response.sort((a, b) => b.id - a.id);
+
+          let html = '';
+          let counter = 1;
+
+          response.forEach(function(row) {
+            let duration = 'N/A';
+
+            if (row.timestamp_start && row.timestamp_end) {
+              let start = new Date(`1970-01-01T${row.timestamp_start}`);
+              let end = new Date(`1970-01-01T${row.timestamp_end}`);
+              if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+                const diffMs = end - start;
+                const diffMins = Math.floor(diffMs / 60000);
+                duration = `${diffMins} minutes`;
+              }
+            }
+
+            let reasonText = row.reason || '';
+            let isTruncated = reasonText.length > 50;
+            let truncatedReason = isTruncated ? reasonText.substring(0, 50) + '...' : reasonText;
+
+            let tooltipAttr = isTruncated ?
+              `class="truncated-reason" data-fulltext="${reasonText.replace(/"/g, '&quot;')}"` :
+              '';
+
+            html += `
+            <tr>
+              <td>${counter}</td>
+              <td>${row.timestamp_start}</td>
+              <td>${row.timestamp_end}</td>
+              <td>${duration}</td>
+              <td ${tooltipAttr}>${truncatedReason}</td>
+              <td class="${row.approved == 1 ? 'status-approved' : 'status-pending'}">
+                ${row.approved == 1 ? 'Approved' : 'Pending'}
+              </td>
+            </tr>`;
+
+            counter++;
+          });
+
+          $('#log-data').html(html);
+        }
+      },
+      error: function() {
+        $('#log-data').html('<tr><td colspan="6">Error loading data</td></tr>');
+      }
+    });
+  }
+
+
   function showToast(message, type) {
     const toast = $(`<div class="toast toast-${type}">${message}</div>`);
     $('#toast-container').append(toast);
@@ -493,7 +517,7 @@ $(document).ready(function() {
       success: function(response) {
         showToast(response, 'success');
         closeModal();
-        location.reload();
+        fetchTimecards();
       },
       error: function(xhr, status, error) {
         console.error(error);
