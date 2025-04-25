@@ -2,7 +2,7 @@
 <style>
   .status-approved {
     color: #155724;
-    background-color: #d4edda;
+    /* background-color: #d4edda; */
     padding: 4px 8px;
     border-radius: 4px;
     font-weight: 600;
@@ -11,7 +11,7 @@
 
   .status-pending {
     color: #856404;
-    background-color: #fff3cd;
+    /* background-color: #fff3cd;  */
     padding: 4px 8px;
     border-radius: 4px;
     font-weight: 600;
@@ -444,7 +444,7 @@
               <td>${row.timestamp_end}</td>
               <td>${duration}</td>
               <td ${tooltipAttr}>${truncatedReason}</td>
-              <td class="${row.approved == 1 ? 'status-approved' : 'status-pending'}">
+              <td class="${row.approved == 1 ? 'text-success' : 'text-warning'}">
                 ${row.approved == 1 ? 'Approved' : 'Pending'}
               </td>
             </tr>`;
@@ -524,5 +524,8 @@
         showToast('Something went wrong. Try again.', 'error');
       }
     });
+    $('#timestamp_start').val('');
+    $('#timestamp_end').val('');
+    $('#reason').val('');
   });
 </script>
