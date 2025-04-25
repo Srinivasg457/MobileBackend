@@ -1,5 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class Hrm extends Home_Controller {
 
     public function __construct()
@@ -306,6 +307,157 @@ public function employee_add()
         }
         
     }
+    public function employee_import()
+{
+    check_status();
+    $this->load->database();
+
+    if (!empty($_FILES['import_file']['name'])) {
+        $config['upload_path'] = './uploads/';
+        $config['allowed_types'] = 'csv|xls|xlsx';
+        $config['max_size'] = 10000;
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload('import_file')) {
+            $this->session->set_flashdata('error', $this->upload->display_errors());
+            redirect(base_url('admin/hrm/employee'));
+            return;
+        }
+
+        $fileData = $this->upload->data();
+        $filePath = './uploads/' . $fileData['file_name'];
+
+        // Determine file type and load using PhpSpreadsheet
+        $spreadsheet = IOFactory::load($filePath);
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        $header = array_map('strtolower', array_map('trim', $rows[0])); // First row is header
+        unset($rows[0]); // Remove header from data rows
+
+        $duplicateEmails = [];
+
+        foreach ($rows as $row) {
+            $employeeData = array_combine($header, $row);
+            $email = strtolower(trim($employeeData['email']));
+
+            // Check for duplicates
+            $this->db->where('LOWER(email)', $email);
+            if ($this->db->get('employees')->row()) {
+                $duplicateEmails[] = $email;
+                continue;
+            }
+
+            $data = array(
+                'user_id' => user()->id,
+                'business_id' => $this->business->uid,
+                'name' => $employeeData['name'],
+                'department_id' => $employeeData['department_id'],
+                'email' => $email,
+                'phone' => $employeeData['phone'],
+                'address' => $employeeData['address'],
+                'city' => $employeeData['city'],
+                'country' => $employeeData['country'],
+                'status' => 1,
+                'created_at' => my_date_now()
+            );
+
+            $this->db->insert('employees', $data);
+            $id = $this->db->insert_id();
+
+            $token = uniqid();
+            $this->db->where('id', $id)->update('employees', ['invitation_token' => $token]);
+
+            // Send invitation email
+            $this->_send_invitation_email($data['name'], $email, $token);
+        }
+
+        unlink($filePath); // Clean up
+
+        if (!empty($duplicateEmails)) {
+            $this->session->set_flashdata('error', 'These emails already exist and were skipped: ' . implode(', ', $duplicateEmails));
+        } else {
+            $this->session->set_flashdata('msg', 'Employees imported successfully.');
+        }
+
+        redirect(base_url('admin/hrm/employee'));
+    }
+}
+
+
+public function download_sample_excel()
+{
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // Set headings
+    $sheet->setCellValue('A1', 'name');
+    $sheet->setCellValue('B1', 'department_id');
+    $sheet->setCellValue('C1', 'email');
+    $sheet->setCellValue('D1', 'phone');
+    $sheet->setCellValue('E1', 'address');
+    $sheet->setCellValue('F1', 'city');
+    $sheet->setCellValue('G1', 'country');
+
+    // Add sample row
+    $sheet->setCellValue('A2', 'John Doe');
+    $sheet->setCellValue('B2', '1');
+    $sheet->setCellValue('C2', 'john@example.com');
+    $sheet->setCellValue('D2', '1234567890');
+    $sheet->setCellValue('E2', '123 Main St');
+    $sheet->setCellValue('F2', 'New York');
+    $sheet->setCellValue('G2', 'USA');
+
+    // Send file to browser
+    $filename = 'employee_sample.xlsx';
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    header('Cache-Control: max-age=0');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('php://output');
+    exit;
+}
+
+// Reuse email logic as a helper method
+private function _send_invitation_email($name, $email, $token)
+{
+    $config = array(
+        'protocol'    => 'smtp',
+        'smtp_host'   => 'smtp.gmail.com',
+        'smtp_port'   => 587,
+        'smtp_user'   => 'sabeer2002ahmed@gmail.com',
+        'smtp_pass'   => 'vivxkwqkkygmelzp',
+        'smtp_crypto' => 'tls',
+        'mailtype'    => 'html',
+        'charset'     => 'utf-8',
+        'newline'     => "\r\n",
+        'crlf'        => "\r\n"
+    );
+
+    $this->load->library('email');
+    $this->email->initialize($config);
+
+    $subject = 'You are invited to join Time Tracker';
+    $message = '<p>Hello ' . $name . ',</p>';
+    $message .= '<p>You have been invited to register for Time Tracker. Click below to register:</p>';
+    $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
+    $message .= '<p>If you did not expect this, you can ignore this email.</p>';
+    $message .= '<p>Regards,<br>Time Tracker Team</p>';
+
+    $this->email->to($email);
+    $this->email->from('sabeer2002ahmed@gmail.com', 'Time Tracker');
+    $this->email->subject($subject);
+    $this->email->message($message);
+
+    if ($this->email->send()) {
+        $this->db->where('email', $email)->update('employees', ['invitation_sent_at' => my_date_now()]);
+    } else {
+        log_message('error', 'Email failed: ' . $this->email->print_debugger());
+    }
+}
+
 
     public function attendance_edit($id)
     {  
