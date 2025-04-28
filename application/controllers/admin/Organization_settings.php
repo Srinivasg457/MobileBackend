@@ -21,7 +21,7 @@ class Organization_settings extends Home_Controller {
         $this->load->view('admin/index', $data);
     }
 
-    public function org_exception_settings()
+    public function org_exception_settings(): void
     {
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
