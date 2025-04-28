@@ -123,6 +123,20 @@ class Users extends Home_Controller {
                     $id = $this->admin_model->insert($udata, 'users');
                     $this->session->set_flashdata('msg', trans('inserted-successfully'));
 
+                    $screenshot_dir = FCPATH . 'uploads/screenshots/' . $id;
+                    if (!is_dir($screenshot_dir)) {
+                        $created = mkdir($screenshot_dir, 0777, true); // Create the directory
+                        if (!$created) {
+                            // Log the error or handle it appropriately.  Important!
+                            log_message('error', "Failed to create directory: " . $screenshot_dir);
+                            $this->session->set_flashdata('error', "Failed to create user directory.  Please check permissions.");
+                            //  Consider a rollback of the user creation if the folder is critical.
+                            //  redirect(base_url('admin/users')); //removed redirect
+                            //  return;
+                        }
+                    }       
+
+
                     $rand_uid = substr(random_string('numeric', 5).mt_rand(), 0, 8);
                     $uid = ltrim($rand_uid, '0');
 
@@ -142,14 +156,7 @@ class Users extends Home_Controller {
                     $this->common_model->insert($data, 'business');
 
                 }
-                // Create user's screenshot folder
-                $screenshot_dir = FCPATH . 'uploads/screenshots/' . $id;
-
-                if (!is_dir($screenshot_dir)) {
-                    mkdir($screenshot_dir, 0777, true); // 0777 is okay for local/dev
-                }
-
-
+               
                 $payment = $this->admin_model->get_user_payment($id);
 
                 $plan = $this->input->post('package', true);
