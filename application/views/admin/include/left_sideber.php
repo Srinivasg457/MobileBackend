@@ -33,6 +33,13 @@
                 <i class="bi bi-clock-history"></i> <span><?php echo "Activity Log" ?></span>
               </a>
             </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('employee/report') ?>">
+                <i class="bi bi-file-bar-graph"></i> <span><?php echo "Report" ?></span>
+              </a>
+            </li>
 
           <?php else :  ?>
             <?php if (is_admin()): ?>
@@ -406,11 +413,13 @@
                       <i class="bi bi-camera"></i> <span><?php echo "View Screenshots" ?></span>
                     </a>
                   </li>
-                 <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") { echo "active"; } ?>">
-                        <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
-                          <i class="bi bi-clock"></i> <span><?php echo "Time Approval" ?></span>
-                        </a>
-                </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
+                      <i class="bi bi-clock"></i> <span><?php echo "Time Approval" ?></span>
+                    </a>
+                  </li>
 
                   <li class="<?php if (isset($page_title) && $page_title == "Organization settings") {
                                 echo "active";
