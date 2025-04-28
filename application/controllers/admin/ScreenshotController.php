@@ -134,10 +134,12 @@ class ScreenshotController extends Home_Controller
     
         // Capture overall_activity_percent and is_active from POST data
         $overall_activity_percent = $this->input->get_request_header('overall_activity_percent', TRUE);
-        if($overall_activity_percent<50){
-            $is_active =0;
-        }else{
+        if($overall_activity_percent>70){
+            $is_active =2;
+        }else if($overall_activity_percent>=50 && $overall_activity_percent<=70){
             $is_active =1;
+        }else{
+            $is_active =0;
         }
         
     
