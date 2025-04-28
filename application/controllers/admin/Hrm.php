@@ -133,9 +133,10 @@ class Hrm extends Home_Controller {
     //             redirect(base_url('admin/hrm/employee'));
 
             
-    //     }      
-        
-public function employee_add()
+    //     }     
+    
+    
+    public function employee_add()
 {   
     if ($_POST) {   
         check_status();
@@ -164,27 +165,19 @@ public function employee_add()
             $this->db->where('id', $id)->update('employees', $data);
             $this->session->set_flashdata('msg', trans('msg-updated'));
         } else {
-            // Case-insensitive email check
+            // Check if email exists
             $this->db->where('LOWER(email)', strtolower($email));
             $exists = $this->db->get('employees')->row();
 
             if ($exists) {
                 $this->session->set_flashdata('error', 'Email address already exists.');
                 redirect(base_url('admin/hrm/employee'));
-                return;
+                exit; // Important
             }
 
             // Insert new employee
-            try {
-                $this->db->insert('employees', $data);
-                $id = $this->db->insert_id();
-                $this->session->set_flashdata('msg', trans('msg-inserted'));
-            } catch (Exception $e) {
-                log_message('error', 'Insert failed: ' . $e->getMessage());
-                $this->session->set_flashdata('error', 'Failed to add employee. Email may already exist.');
-                redirect(base_url('admin/hrm/employee'));
-                return;
-            }
+            $this->db->insert('employees', $data);
+            $id = $this->db->insert_id();
 
             // Generate and save invitation token
             $token = uniqid();
@@ -219,30 +212,30 @@ public function employee_add()
             $this->email->subject($subject);
             $this->email->message($message);
 
+            
             if ($this->email->send()) {
-                $this->db->where('id', $id)->update('employees', ['invitation_sent_at' => my_date_now()]);
+                $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
                 $this->session->set_flashdata('msg', 'Employee added and invitation email sent.');
             } else {
                 log_message('error', 'Email error: ' . $this->email->print_debugger());
                 $this->session->set_flashdata('error', 'Employee added but failed to send email.');
             }
         }
-
-        // Upload photo if available
-        if (!empty($_FILES['photo']['name'])) {
-            $up_load = $this->admin_model->upload_image('1200'); // Optional: replace with inline logic if preferred
+ 
+        // ✅ Upload photo if available
+        if ($_FILES['photo']['name'] != '') {
+            $up_load = $this->admin_model->upload_image('1200');
             $data_img = array(
                 'image' => $up_load['images'],
                 'thumb' => $up_load['thumb']
             );
-            $this->db->where('id', $id)->update('employees', $data_img);
+            $this->admin_model->edit_option($data_img, $id, 'employees');   
         }
 
         redirect(base_url('admin/hrm/employee'));
+        exit; // Important to stop further execution
     }      
-}
-
-    
+}   
 
     public function employee_edit($id)
     {  
