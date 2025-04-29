@@ -33,7 +33,7 @@
                 <i class="bi bi-clock-history"></i> <span><?php echo "Activity Log" ?></span>
               </a>
             </li>
-            <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
+            <li class="<?php if (isset($page_title) && $page_title == "Report") {
                           echo "active";
                         } ?>">
               <a href="<?php echo base_url('employee/report') ?>">
@@ -411,6 +411,13 @@
                               } ?>">
                     <a href="<?php echo base_url('admin/ScreenshotController') ?>">
                       <i class="bi bi-camera"></i> <span><?php echo "View Screenshots" ?></span>
+                    </a>
+                  </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/Activity_logs') ?>">
+                      <i class="bi bi-file-bar-graph"></i> <span><?php echo "Activity Log" ?></span>
                     </a>
                   </li>
                   <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
