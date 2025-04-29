@@ -318,12 +318,36 @@
             }
 
             function closePopup() {
-                $('#popupCard').fadeOut();
-                $('.container').fadeIn();
+                $('#popupCard').hide();
+                $('.container').show();
+            }
+            //    let activityDataArray = [];
+
+            function fetchOverallActivityPercentage(employeeId, date = '') {
+                activityDataArray = [];
+                $.ajax({
+                    url: "<?= base_url('admin/Activity_logs/get_activity'); ?>",
+                    method: 'GET',
+                    dataType: 'json',
+                    data: {
+                        date: date,
+                        employee_id: employeeId
+                    },
+                    success: function(response) {
+                        console.log('Activity Data:', response);
+                        if (response.status === true) {
+                            activityDataArray = response.data; // save the array globally
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching activity data:', error);
+                    }
+                });
+                return;
             }
 
             function fetchUserScreenshots(employeeId, date = '') {
-
+                fetchOverallActivityPercentage(employeeId, date);
                 $.ajax({
                     url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
                     type: "GET",
@@ -340,11 +364,14 @@
                             let output_screen = "";
 
                             $.each(response.screenshots.slice(0, 6), function(index, screenshot) {
+                                const matchingActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
+                                const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? 'N/A') : 'N/A'
                                 output_screen += `
                             <div class="screenshot-card">
                                 <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" width="200" style="cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                    <span>${screenshot.display_text}</span>
+                                <span>${overallActivity}%</span>    
+                                <span>${screenshot.display_text}</span>
                                     <img 
                                         src="https://img.icons8.com/?size=50&id=4887&format=png" 
                                         class="delete-screenshot" 
@@ -424,7 +451,8 @@
                 $("#popupID").text(id);
                 $("#popupCard").fadeIn();
 
-   function loadScreenshots() {
+function loadScreenshots() {
+    fetchOverallActivityPercentage(id, date);
     $.ajax({
         url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
         type: "GET",
@@ -463,11 +491,13 @@
                     `;
 
                                     groupScreenshots.slice(0, screenshotsPerGroup).forEach((screenshot) => {
+                                        const matchingActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
+                                        const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? 'N/A') : 'N/A';
                                         output += `
                             <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                    <p>${screenshot.display_text}</p>
+                                    <span>${overallActivity}%</span>  <p>${screenshot.display_text}</p>
                                     <img 
                                         src="https://img.icons8.com/?size=50&id=4887&format=png" 
                                         class="delete-screenshot" 
@@ -485,12 +515,14 @@
                             <div class="screenshot-hidden" id="${groupId}-extra" style="display: none; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
                     `;
 
-                    groupScreenshots.slice(screenshotsPerGroup).forEach((screenshot) => {
-                        output += `
+                                    groupScreenshots.slice(screenshotsPerGroup).forEach((screenshot) => {
+                                        const matchingActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
+                                        const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? 'N/A') : 'N/A';
+                                        output += `
                             <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                    <p>${screenshot.display_text}</p>
+                                   <span>${overallActivity}%</span> <p>${screenshot.display_text}</p>
                                     <img 
                                         src="https://img.icons8.com/?size=50&id=4887&format=png" 
                                         class="delete-screenshot" 
@@ -602,6 +634,8 @@
 
                 loadScreenshots();
             });
+            let activityDataArray = []; // store activity data globally
+
 
             // Main fetch function with date and search
             $(document).ready(function() {

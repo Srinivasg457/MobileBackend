@@ -227,7 +227,7 @@ public function get_activity()
 {
     // Get inputs from GET request (query parameters)
     $employee_id = $this->session->userdata('employee_id')??$this->input->get('employee_id');
-    $user_id = $this->session->userdata('employee_org_id')??$this->input->get('user_id'); // fallback for Postman or URL query params
+    $user_id = $this->session->userdata('employee_org_id')??$this->session->userdata('id'); // fallback for Postman or URL query params
     $date = $this->input->get('date'); // Get the date from the query parameter (if provided)
 
     // If no date is provided, use today's date
