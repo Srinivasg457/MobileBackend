@@ -189,15 +189,17 @@ class ScreenshotController extends Home_Controller
         }
     
         // Insert record into DB with overall_activity_percent and is_active
-        $data = [
-            'user_id' => $user_id,
-            'employee_id' => $employee_id,
-            'file_path' => $relative_path,
-            'file_type' => $file_extension,
-            'created_at' => date('Y-m-d H:i:s'),
-            'overall_activity_percent' => $overall_activity_percent,
-            'is_active' => $is_active
-        ];
+       $dt = new DateTime("now", new DateTimeZone('Asia/Kolkata'));
+$data = [
+    'user_id' => $user_id,
+    'employee_id' => $employee_id,
+    'file_path' => $relative_path,
+    'file_type' => $file_extension,
+    'created_at' => $dt->format('Y-m-d H:i:s'), // IST time
+    'overall_activity_percent' => $overall_activity_percent,
+    'is_active' => $is_active
+];
+
     
         if (!$this->db->insert('screenshots', $data)) {
             $error = $this->db->error();
