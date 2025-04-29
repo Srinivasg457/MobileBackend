@@ -265,7 +265,7 @@ public function get_activity()
     }
 
     // Query the screenshots table using user_id and employee_id to get data with non-null screenshot_id
-    $this->db->select('user_id, employee_id, overall_activity_percent, is_active, screenshot_id');
+    $this->db->select('user_id, employee_id, overall_activity_percent, is_active, screenshot_id,created_at');
     $this->db->from('screenshots');
     $this->db->where('user_id', $user_id);
     $this->db->where('employee_id', $employee_id);

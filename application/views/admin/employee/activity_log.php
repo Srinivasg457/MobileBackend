@@ -263,7 +263,105 @@
     width: 700px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
+/* .timeline-yellow {
+    background-color: orange;
+}
+
+.timeline-red {
+    background-color: grey;
+}
+
+.timeline-lightgreen {
+    background-color: greenyellow;
+}
+
+.timeline-darkgreen {
+    background-color: green; 
+} */
+
+
+/* .timeline-yellow {
+    background-color: yellow;
+}
+
+.timeline-lightgreen {
+    background-color: lightgreen;
+}
+
+.timeline-darkgreen {
+    background-color: darkgreen;
+}
+
+.timeline-red {
+    background-color: red;
+} */
+
+
 </style>
+
+<script>
+$(document).ready(function () {
+    $.ajax({
+        url: "<?= base_url('/admin/Activity_logs/get_activity'); ?>",
+        type: 'GET',
+        dataType: 'json',
+        success: function (response) {
+            if (response.status && response.data.length > 0) {
+                const timelineTrack = $('#timeline-track');
+                const startHour = 8; // 08:00 AM
+                const endHour = 20; // 08:00 PM
+                const totalMinutes = (endHour - startHour) * 60;
+
+                response.data.forEach(function (item) {
+                    const createdAt = new Date(item.created_at);
+                    const hour = createdAt.getHours();
+                    const minutes = createdAt.getMinutes();
+                    const totalTimeInMinutes = (hour * 60 + minutes) - (startHour * 60);
+
+                    // Skip if the time is outside 08:00 - 20:00
+                    if (totalTimeInMinutes < 0 || totalTimeInMinutes > totalMinutes) return;
+
+                    let blockColorClass = '';
+                    if (item.is_active == '1') {
+                        blockColorClass = 'timeline-yellow';
+                    } else if (item.is_active == '2') {
+                        blockColorClass = 'timeline-lightgreen';
+                    } else if (item.is_active == '3') {
+                        blockColorClass = 'timeline-darkgreen';
+                    } else {
+                        blockColorClass = 'timeline-red';
+                    }
+
+                    const blockWidthPercent = (5 / totalMinutes) * 100; // Each block represents 5 minutes
+                    const leftPositionPercent = (totalTimeInMinutes / totalMinutes) * 100;
+
+                    const block = $('<div></div>')
+                        .addClass('activity-block')
+                        .addClass(blockColorClass)
+                        .css({
+                            'position': 'absolute',
+                            'left': leftPositionPercent + '%',
+                            'width': blockWidthPercent + '%',
+                            'height': '100%'
+                        });
+
+                    timelineTrack.append(block);
+                });
+            } else {
+                alert('No activity data found.');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            alert('Failed to fetch activity data.');
+        }
+    });
+});
+</script>
+
+
+
+
 <div class="content-wrapper">
   <div class="manual-entry-container">
     <h2>Activity</h2>
@@ -291,37 +389,151 @@
       <div class="status-box meeting">Meeting <strong>00:00</strong></div>
     </div>
 
-    <h3>Timeline</h3>
-    <table class="timeline-table">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Project</th>
-          <th>Task</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>12:00 - 12:30</td>
-          <td>Lorem</td>
-          <td>Ipsum</td>
-          <td>Active</td>
-        </tr>
-        <tr>
-          <td>12:30 - 12:32</td>
-          <td>Lorem</td>
-          <td>Ipsum</td>
-          <td>Idle</td>
-        </tr>
-        <tr>
-          <td>12:32 - 12:45</td>
-          <td>Lorem</td>
-          <td>Ipsum</td>
-          <td>Manual</td>
-        </tr>
-      </tbody>
-    </table>
+    <h3>Activity</h3>
+<style>
+    .container {
+        background-color: white;
+        border-radius: 4px;
+        padding: 40px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin: 0 auto;
+        width: auto;
+       border: 1px solid #ddd;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .view-options {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .legend {
+        display: flex;
+        gap: 15px;
+        font-size: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        color: #555;
+    }
+
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        margin-right: 5px;
+        border-radius: 2px;
+    }
+    .timeline-container {
+        position: relative;
+        height: 50px;
+        border: 1px solid #ccc;
+        margin-top: 20px;
+    }
+
+   
+
+    .time-labels {
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    #timeline-track {
+        position: relative;
+        height: 100%;
+        background-color: #f5f5f5;
+    }
+
+    .time-marker {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 1px;
+        background-color: #000;
+        font-size: 12px;
+        color: #333;
+    }
+
+    .time-marker::after {
+        content: attr(data-time);
+        position: absolute;
+        top: 100%;
+        left: -15px;
+        margin-top: 6px;
+        white-space: nowrap;
+    }
+
+   
+
+    .timeline-yellow { background-color: #ffe066; }
+    .timeline-lightgreen { background-color: #00FF00; }
+    .timeline-red { background-color: red; }
+</style>
+
+<div class="container">
+   
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color .timeline-lightgreen" style="background-color: #00FF00;"></div>
+            <span>Active</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color .timeline-yellow" style="background-color: #ffe066;"></div>
+            <span>Moderate Active</span>
+        </div>
+        <!-- <div class="legend-item">
+            <div class="legend-color timeline-darkgreen"></div>
+            <span>High Active</span>
+        </div> -->
+        <div class="legend-item">
+            <div class="legend-color timeline-red"></div>
+            <span>Inactive</span>
+        </div>
+    </div>
+
+    <div class="timeline-container">
+        <!-- <div class="time-row"> -->
+            <div id="timeline-track">
+                <!-- Dynamic blocks will be added here -->
+
+                <!-- Static time markers (08:00 to 20:00) -->
+                <!-- Each hour = 100% / 12 = 8.33% -->
+                <div class="time-marker" style="left: 0%;" data-time="08:00"></div>
+                <div class="time-marker" style="left: 8.33%;" data-time="09:00"></div>
+                <div class="time-marker" style="left: 16.66%;" data-time="10:00"></div>
+                <div class="time-marker" style="left: 25%;" data-time="11:00"></div>
+                <div class="time-marker" style="left: 33.33%;" data-time="12:00"></div>
+                <div class="time-marker" style="left: 41.66%;" data-time="13:00"></div>
+                <div class="time-marker" style="left: 50%;" data-time="14:00"></div>
+                <div class="time-marker" style="left: 58.33%;" data-time="15:00"></div>
+                <div class="time-marker" style="left: 66.66%;" data-time="16:00"></div>
+                <div class="time-marker" style="left: 75%;" data-time="17:00"></div>
+                <div class="time-marker" style="left: 83.33%;" data-time="18:00"></div>
+                <div class="time-marker" style="left: 91.66%;" data-time="19:00"></div>
+                <div class="time-marker" style="left: 100%;" data-time="20:00"></div>
+            </div>
+        <!-- </div> -->
+    </div>
+</div>
+
 
     <h3>Manual Entry Logs</h3>
     <table class="log-table">
