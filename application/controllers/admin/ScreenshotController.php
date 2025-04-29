@@ -189,16 +189,15 @@ class ScreenshotController extends Home_Controller
         }
     
         // Insert record into DB with overall_activity_percent and is_active
-       $dt = new DateTime("now", new DateTimeZone('Asia/Kolkata'));
-$data = [
-    'user_id' => $user_id,
-    'employee_id' => $employee_id,
-    'file_path' => $relative_path,
-    'file_type' => $file_extension,
-    'created_at' => $dt->format('Y-m-d H:i:s'), // IST time
-    'overall_activity_percent' => $overall_activity_percent,
-    'is_active' => $is_active
-];
+             $data = [
+            'user_id' => $user_id,
+            'employee_id' => $employee_id,
+            'file_path' => $relative_path,
+            'file_type' => $file_extension,
+            'created_at' => date('Y-m-d H:i:s'),
+            'overall_activity_percent' => $overall_activity_percent,
+            'is_active' => $is_active
+        ];
 
     
         if (!$this->db->insert('screenshots', $data)) {
@@ -343,9 +342,14 @@ $data = [
             if (file_exists($full_path)) {
                 // Extract time from filename (or fallback to created_at)
                 preg_match('/screenshot_(\d+)_(\d{8})_(\d{6})\.(\w{3,4})/', $filename, $matches);
-            $formatted_time = isset($matches[3])
-                ? substr($matches[3], 0, 2) . ':' . substr($matches[3], 2, 2) . ':' . substr($matches[3], 4, 2)
-                : date('H:i:s', strtotime($row['created_at']));  // Use the existing created_at without any timezone conversion
+                // $formatted_time = isset($matches[3]) ? date('H:i:s', strtotime($matches[3])) : date('H:i:s', strtotime($row['created_at']));
+                $formatted_time = isset($matches[3])
+                    ? (new DateTime(substr($matches[3], 0, 2) . ':' . substr($matches[3], 2, 2) . ':' . substr($matches[3], 4, 2), new DateTimeZone('UTC')))
+                    ->setTimezone(new DateTimeZone('Asia/Kolkata'))
+                    ->format('H:i:s')
+                    : (new DateTime($row['created_at'], new DateTimeZone('UTC')))
+                    ->setTimezone(new DateTimeZone('Asia/Kolkata'))
+                    ->format('H:i:s');
 
                 $screenshots[] = [
                     'id' => $row['screenshot_id'],
