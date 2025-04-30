@@ -136,4 +136,3 @@ $autoload['model'] = array('auth_model', 'admin_model', 'common_model', 'email_m
 
 
 
-$autoload['helper'] = ['permission'];
