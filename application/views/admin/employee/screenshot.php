@@ -304,6 +304,9 @@
 
                                                 output_screen +=
                                                     `<div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
+
+                                         let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
+
     <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
     <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
         <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
@@ -317,7 +320,7 @@
                     stroke="#e6e6e6"
                     stroke-width="4"
                 />
-                <!-- Dynamic green arc, starts at 90 degrees (right side) -->
+                <!-- Dynamic green arc -->
                 <path 
                     d="M18 2.0845
                        a 15.9155 15.9155 0 0 1 0 31.831"
@@ -331,22 +334,27 @@
                         transform: translate(-50%, -50%);
                         font-size: 10px; font-weight: bold;">
                 ${overallActivity}%
-                                </div>
-                            </div>
-                            <span>${screenshot.display_text}</span>
-                                </div>
-                            </div>
-                        `;
-                                            });
+
+
+            </div>
+        </div>
+        <span>${timeWithoutSeconds}</span>
+    </div>
+</div>`;
+
+                                        });
+
 
                                             output_screen += `
                             </div> <!-- end visible -->
                             <div class="screenshot-hidden" id="${groupId}-extra" style="display: none; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
                     `;
 
+
                                             groupScreenshots.slice(screenshotsPerGroup).forEach((screenshot) => {
                                                 const matchingActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
                                                 const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
+
 
                                                 output_screen += `
                             <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">

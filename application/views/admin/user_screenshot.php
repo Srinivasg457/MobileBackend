@@ -377,6 +377,7 @@
                                     const overallActivity = isNaN(parseFloat(overallActivityRaw)) ? 0 : Math.min(100, parseFloat(overallActivityRaw));
 
                                     output_screen += `
+
     <div class="screenshot-card" style="width: 200px; margin: 5px;">
         <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" width="100%" style="cursor: pointer;">
         <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
@@ -406,7 +407,7 @@
                     ${overallActivityRaw}%
                 </div>
             </div>
-            <span>${screenshot.display_text}</span>
+            <span>${timeWithoutSeconds}</span>
             <img 
                 src="https://img.icons8.com/?size=50&id=4887&format=png" 
                 class="delete-screenshot" 
@@ -417,7 +418,9 @@
             />
         </div>
     </div>`;
+
                                 });
+
 
 
                                 container.html(output_screen);
@@ -579,6 +582,7 @@
                             </div>
                         `;
                                         });
+
 
                                         output += `
                             </div> <!-- end visible -->
