@@ -301,11 +301,10 @@
                                                 // Find the corresponding activity percent
                                                 const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
                                                 const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
+                                                let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
 
                                                 output_screen +=
                                                     `<div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
-
-                                         let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
 
     <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
     <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
@@ -342,7 +341,7 @@
     </div>
 </div>`;
 
-                                        });
+                                            });
 
 
                                             output_screen += `
