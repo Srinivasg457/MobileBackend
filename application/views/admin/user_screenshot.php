@@ -367,8 +367,9 @@
     const matchingActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
     const overallActivityRaw = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
     const overallActivity = isNaN(parseFloat(overallActivityRaw)) ? 0 : Math.min(100, parseFloat(overallActivityRaw));
+let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
 
-    output_screen += `
+output_screen += `
     <div class="screenshot-card" style="width: 200px; margin: 5px;">
         <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" width="100%" style="cursor: pointer;">
         <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
@@ -398,7 +399,7 @@
                     ${overallActivityRaw}%
                 </div>
             </div>
-            <span>${screenshot.display_text}</span>
+            <span>${timeWithoutSeconds}</span>
             <img 
                 src="https://img.icons8.com/?size=50&id=4887&format=png" 
                 class="delete-screenshot" 
@@ -408,6 +409,7 @@
             />
         </div>
     </div>`;
+
 });
 
 
@@ -521,47 +523,51 @@ function loadScreenshots() {
                                     groupScreenshots.slice(0, screenshotsPerGroup).forEach((screenshot) => {
                                         const matchingActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
                                         const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
-                                        output += `
-                            <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
-                                <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
-                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                    <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-            <svg viewBox="0 0 36 36" width="40" height="40">
-                <!-- Grey background circle -->
-                <path 
-                    d="M18 2.0845
-                       a 15.9155 15.9155 0 0 1 0 31.831
-                       a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#e6e6e6"
-                    stroke-width="4"
-                />
-                <!-- Dynamic green arc, starts at 90 degrees (right side) -->
-                <path 
-                    d="M18 2.0845
-                       a 15.9155 15.9155 0 0 1 0 31.831"
-                    fill="none"
-                    stroke="green"
-                    stroke-width="4"
-                    stroke-dasharray="${overallActivity}, 100"
-                />
-            </svg>
-            <div style="position: absolute; top: 50%; left: 50%; 
-                        transform: translate(-50%, -50%);
-                        font-size: 10px; font-weight: bold;">
-                ${overallActivity}%
-                                </div>
-                            </div> <p>${screenshot.display_text}</p>
-                                    <img 
-                                        src="https://img.icons8.com/?size=50&id=4887&format=png" 
-                                        class="delete-screenshot" 
-                                        data-id="${screenshot.id}" 
-                                        alt="Delete" 
-                                        style="cursor: pointer; width: 20px; height: 20px;"
-                                    />
-                                </div>
-                            </div>
-                        `;
+                                        let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
+
+output += `
+    <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
+        <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
+        <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+            <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                <svg viewBox="0 0 36 36" width="40" height="40">
+                    <!-- Grey background circle -->
+                    <path 
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#e6e6e6"
+                        stroke-width="4"
+                    />
+                    <!-- Dynamic green arc, starts at 90 degrees (right side) -->
+                    <path 
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831"
+                        fill="none"
+                        stroke="green"
+                        stroke-width="4"
+                        stroke-dasharray="${overallActivity}, 100"
+                    />
+                </svg>
+                <div style="position: absolute; top: 50%; left: 50%; 
+                            transform: translate(-50%, -50%);
+                            font-size: 10px; font-weight: bold;">
+                    ${overallActivity}%
+                </div>
+            </div> 
+            <p>${timeWithoutSeconds}</p>
+            <img 
+                src="https://img.icons8.com/?size=50&id=4887&format=png" 
+                class="delete-screenshot" 
+                data-id="${screenshot.id}" 
+                alt="Delete" 
+                style="cursor: pointer; width: 20px; height: 20px;"
+            />
+        </div>
+    </div>
+`;
+
                     });
 
                     output += `
