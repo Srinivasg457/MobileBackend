@@ -113,7 +113,7 @@ class ScreenshotController extends Home_Controller
 
         $user_id = $this->input->get_request_header('user_id', TRUE);
         $employee_id = $this->input->get_request_header('employee_id', TRUE);
-        $provided_timestamp = $this->input->get_request_header('timestamp', TRUE); // Get timestamp from header
+        $provided_timestamp = $this->input->get_request_header('timestamp', TRUE);
 
         if (empty($user_id) || empty($employee_id) || empty($provided_timestamp)) {
             $missing_fields = [];
@@ -149,7 +149,7 @@ class ScreenshotController extends Home_Controller
         }
 
 
-        // Validate overall_activity_percent (it should be a valid number)
+        // Validate overall_activity_percent
         if (!is_numeric($overall_activity_percent) || $overall_activity_percent < 0 || $overall_activity_percent > 100) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
@@ -159,8 +159,8 @@ class ScreenshotController extends Home_Controller
                 ]));
         }
 
-        // Validate is_active (should be 0 or 1)
-        if (!in_array($is_active, [0, 1, 2], true)) { // Assuming you might have a state 2
+        // Validate is_active
+        if (!in_array($is_active, [0, 1, 2], true)) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
                 ->set_output(json_encode([
@@ -169,10 +169,10 @@ class ScreenshotController extends Home_Controller
                 ]));
         }
 
-        // Validate the provided timestamp format (you might need more robust validation)
+        // Validate the provided timestamp format
         try {
             $timestamp_object = new DateTime($provided_timestamp);
-            $formatted_timestamp = $timestamp_object->format('Y-m-d H:i:s');
+            $formatted_timestamp = $timestamp_object->format('Ymd_His'); // Change format here
         } catch (Exception $e) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
@@ -190,10 +190,9 @@ class ScreenshotController extends Home_Controller
             mkdir($upload_path, 0755, true);
         }
 
-        // Get file extension and construct file name with the provided timestamp
+        // Get file extension and construct file name
         $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
-        $timestamp_part = str_replace(['-', ':', ' '], '', $formatted_timestamp); // Sanitize for filename
-        $file_name = "screenshot_{$employee_id}_{$timestamp_part}." . $file_extension;
+        $file_name = "screenshot_{$employee_id}_{$formatted_timestamp}." . $file_extension; // Use formatted timestamp
 
         $full_path = $upload_path . $file_name;
         $relative_path = "uploads/screenshots/{$user_id}/{$file_name}";
@@ -207,13 +206,13 @@ class ScreenshotController extends Home_Controller
                 ]));
         }
 
-        // Insert record into DB with the provided timestamp
+        // Insert record into DB
         $data = [
             'user_id' => $user_id,
             'employee_id' => $employee_id,
             'file_path' => $relative_path,
             'file_type' => $file_extension,
-            'created_at' => $formatted_timestamp, // Use the timestamp from the header
+            'created_at' => date('Y-m-d H:i:s', strtotime($provided_timestamp)), // Use original timestamp value
             'overall_activity_percent' => $overall_activity_percent,
             'is_active' => $is_active
         ];
@@ -237,6 +236,7 @@ class ScreenshotController extends Home_Controller
                 "file_path" => $relative_path
             ]));
     }
+
     
     //     public function get_screenshots() {
     //          $employee_id = $this->input->get('employee_id');
