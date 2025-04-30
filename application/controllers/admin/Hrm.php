@@ -222,7 +222,7 @@ class Hrm extends Home_Controller {
             }
         }
  
-        // ✅ Upload photo if available
+        //  Upload photo if available
         if ($_FILES['photo']['name'] != '') {
             $up_load = $this->admin_model->upload_image('1200');
             $data_img = array(

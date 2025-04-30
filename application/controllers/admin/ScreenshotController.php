@@ -110,19 +110,25 @@ class ScreenshotController extends Home_Controller
                     "message" => "Invalid request method"
                 ]));
         }
-    
+
         $user_id = $this->input->get_request_header('user_id', TRUE);
         $employee_id = $this->input->get_request_header('employee_id', TRUE);
-    
-        if (empty($user_id) || empty($employee_id)) {
+        $provided_timestamp = $this->input->get_request_header('timestamp', TRUE); // Get timestamp from header
+
+        if (empty($user_id) || empty($employee_id) || empty($provided_timestamp)) {
+            $missing_fields = [];
+            if (empty($user_id)) $missing_fields[] = 'user_id';
+            if (empty($employee_id)) $missing_fields[] = 'employee_id';
+            if (empty($provided_timestamp)) $missing_fields[] = 'timestamp';
+
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
                 ->set_output(json_encode([
                     "status" => "error",
-                    "message" => "Missing user_id or employee_id in headers"
+                    "message" => "Missing required fields in headers: " . implode(', ', $missing_fields)
                 ]));
         }
-    
+
         if (empty($_FILES['screenshot']['tmp_name'])) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
@@ -131,7 +137,7 @@ class ScreenshotController extends Home_Controller
                     "message" => "No file uploaded"
                 ]));
         }
-    
+
         // Capture overall_activity_percent and is_active from POST data
         $overall_activity_percent = $this->input->get_request_header('overall_activity_percent', TRUE);
         if($overall_activity_percent>60){
@@ -141,9 +147,9 @@ class ScreenshotController extends Home_Controller
         }else{
             $is_active =0;
         }
-        
-    
-        // Validate overall_activity_percent (it should be avalid number)
+
+
+        // Validate overall_activity_percent (it should be a valid number)
         if (!is_numeric($overall_activity_percent) || $overall_activity_percent < 0 || $overall_activity_percent > 100) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
@@ -152,33 +158,46 @@ class ScreenshotController extends Home_Controller
                     "message" => "Invalid value for overall_activity_percent. It should be a number between 0 and 100."
                 ]));
         }
-    
+
         // Validate is_active (should be 0 or 1)
-        if (!in_array($is_active, [0, 1], true)) {
+        if (!in_array($is_active, [0, 1, 2], true)) { // Assuming you might have a state 2
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
                 ->set_output(json_encode([
                     "status" => "error",
-                    "message" => "Invalid value for is_active. It should be either 0 or 1."
+                    "message" => "Invalid value for is_active. It should be either 0, 1, or 2."
                 ]));
         }
-    
+
+        // Validate the provided timestamp format (you might need more robust validation)
+        try {
+            $timestamp_object = new DateTime($provided_timestamp);
+            $formatted_timestamp = $timestamp_object->format('Y-m-d H:i:s');
+        } catch (Exception $e) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Invalid timestamp format. Please use a format that DateTime can parse."
+                ]));
+        }
+
         // Define upload path using user_id
         $upload_path = FCPATH . "uploads/screenshots/{$user_id}/";
-    
+
         // Create the directory if it doesn't exist
         if (!is_dir($upload_path)) {
             mkdir($upload_path, 0755, true);
         }
-    
-        // Get file extension and construct file name with timestamp
+
+        // Get file extension and construct file name with the provided timestamp
         $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
-        $timestamp = date('Ymd_His');
-        $file_name = "screenshot_{$employee_id}_{$timestamp}." . $file_extension;
-    
+        $timestamp_part = str_replace(['-', ':', ' '], '', $formatted_timestamp); // Sanitize for filename
+        $file_name = "screenshot_{$employee_id}_{$timestamp_part}." . $file_extension;
+
         $full_path = $upload_path . $file_name;
         $relative_path = "uploads/screenshots/{$user_id}/{$file_name}";
-    
+
         if (!move_uploaded_file($_FILES['screenshot']['tmp_name'], $full_path)) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(500)
@@ -187,19 +206,18 @@ class ScreenshotController extends Home_Controller
                     "message" => "Failed to move uploaded file"
                 ]));
         }
-    
-        // Insert record into DB with overall_activity_percent and is_active
-             $data = [
+
+        // Insert record into DB with the provided timestamp
+        $data = [
             'user_id' => $user_id,
             'employee_id' => $employee_id,
             'file_path' => $relative_path,
             'file_type' => $file_extension,
-            'created_at' => date('Y-m-d H:i:s'),
+            'created_at' => $formatted_timestamp, // Use the timestamp from the header
             'overall_activity_percent' => $overall_activity_percent,
             'is_active' => $is_active
         ];
 
-    
         if (!$this->db->insert('screenshots', $data)) {
             $error = $this->db->error();
             return $this->output->set_content_type('application/json')
@@ -210,7 +228,7 @@ class ScreenshotController extends Home_Controller
                     "error" => $error
                 ]));
         }
-    
+
         return $this->output->set_content_type('application/json')
             ->set_status_header(201)
             ->set_output(json_encode([
