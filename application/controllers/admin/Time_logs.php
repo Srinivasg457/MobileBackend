@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Time_logs extends CI_Controller { // Change Your_controller to your actual controller name
+class Time_logs extends CI_Controller { 
 
     public function __construct() {
         parent::__construct();
