@@ -420,49 +420,18 @@
       </label>
     </div>
 
-  <div class="status-boxes">
-  <div class="status-box active">Active <strong id="active-time">00 hrs 00 min</strong></div>
-  <div class="status-box inactive">Inactive <strong>1 hr 0 min</strong></div>
-  <div class="status-box manual">Manual <strong>00:00</strong></div>
-  <div class="status-box meeting">Meeting <strong>00:00</strong></div>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  $(document).ready(function () {
-    $.ajax({
-      url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
-      type: 'GET',
-      dataType: 'json',
-      success: function (response) {
-        if (response.status && response.data.length > 0) {
-          const data = response.data[0];
+    <div class="status-boxes">
+      <div class="status-box active">Active <strong id="active-time">00 hrs 00 min</strong></div>
+      <div class="status-box inactive">Inactive <strong>0 hr 0 min</strong></div>
+      <div class="status-box manual">Manual <strong>00:00</strong></div>
+      <div class="status-box meeting">Meeting <strong>00:00</strong></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
 
-          // Active time
-          const activeParts = data.total_active_time.split(':');
-          const activeHours = parseInt(activeParts[0]);
-          const activeMinutes = parseInt(activeParts[1]);
-          const activeFormatted = `${activeHours.toString().padStart(2, '0')} hrs ${activeMinutes.toString().padStart(2, '0')} min`;
-          $('#active-time').text(activeFormatted);
-
-          // Inactive time
-          const idleParts = data.total_idle_time.split(':');
-          const idleHours = parseInt(idleParts[0]);
-          const idleMinutes = parseInt(idleParts[1]);
-          const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
-
-          // Update the second .status-box strong tag (Inactive)
-          $('.status-box.inactive strong').text(idleFormatted);
-        } else {
-          $('#active-time').text("00 hrs 00 min");
-          $('.status-box.inactive strong').text("00 hrs 00 min");
-        }
-      },
-      error: function () {
-        alert('Failed to load time log data.');
-      }
-    });
-  });
-</script>
+      });
+    </script>
 
 
 
@@ -651,6 +620,38 @@
         $('#log-data').html('<tr><td colspan="6">Error loading data</td></tr>');
       }
     });
+    $.ajax({
+      url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+      type: 'GET',
+      dataType: 'json',
+      success: function(response) {
+        if (response.status && response.data.length > 0) {
+          const data = response.data[0];
+
+          // Active time
+          const activeParts = data.total_active_time.split(':');
+          const activeHours = parseInt(activeParts[0]);
+          const activeMinutes = parseInt(activeParts[1]);
+          const activeFormatted = `${activeHours.toString().padStart(2, '0')} hrs ${activeMinutes.toString().padStart(2, '0')} min`;
+          $('#active-time').text(activeFormatted);
+
+          // Inactive time
+          const idleParts = data.total_idle_time.split(':');
+          const idleHours = parseInt(idleParts[0]);
+          const idleMinutes = parseInt(idleParts[1]);
+          const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
+
+          // Update the second .status-box strong tag (Inactive)
+          $('.status-box.inactive strong').text(idleFormatted);
+        } else {
+          $('#active-time').text("00 hrs 00 min");
+          $('.status-box.inactive strong').text("00 hrs 00 min");
+        }
+      },
+      error: function() {
+        alert('Failed to load time log data.');
+      }
+    });
   }
 
 
@@ -780,6 +781,41 @@
       error: function(xhr, status, error) {
         console.error('AJAX Error:', status, error);
         alert('Failed to fetch activity data.');
+      }
+    });
+    $.ajax({
+      url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+      type: 'GET',
+      dataType: 'json',
+      data: {
+        date: date1
+      },
+      success: function(response) {
+        if (response.status && response.data.length > 0) {
+          const data = response.data[0];
+
+          // Active time
+          const activeParts = data.total_active_time.split(':');
+          const activeHours = parseInt(activeParts[0]);
+          const activeMinutes = parseInt(activeParts[1]);
+          const activeFormatted = `${activeHours.toString().padStart(2, '0')} hrs ${activeMinutes.toString().padStart(2, '0')} min`;
+          $('#active-time').text(activeFormatted);
+
+          // Inactive time
+          const idleParts = data.total_idle_time.split(':');
+          const idleHours = parseInt(idleParts[0]);
+          const idleMinutes = parseInt(idleParts[1]);
+          const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
+
+          // Update the second .status-box strong tag (Inactive)
+          $('.status-box.inactive strong').text(idleFormatted);
+        } else {
+          $('#active-time').text("00 hrs 00 min");
+          $('.status-box.inactive strong').text("00 hrs 00 min");
+        }
+      },
+      error: function() {
+        alert('Failed to load time log data.');
       }
     });
   }
