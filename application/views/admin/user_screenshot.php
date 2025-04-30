@@ -375,6 +375,7 @@
                                     const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
                                     const overallActivityRaw = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
                                     const overallActivity = isNaN(parseFloat(overallActivityRaw)) ? 0 : Math.min(100, parseFloat(overallActivityRaw));
+                                    let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
 
                                     output_screen += `
 
@@ -539,6 +540,8 @@
                                         groupScreenshots.slice(0, screenshotsPerGroup).forEach((screenshot) => {
                                             const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
                                             const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
+                                            let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
+
                                             output += `
                             <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
@@ -569,7 +572,7 @@
                         font-size: 10px; font-weight: bold;">
                 ${overallActivity}%
                                 </div>
-                            </div> <p>${screenshot.display_text}</p>
+                            </div> <p>${timeWithoutSeconds}</p>
                                     <img 
                                         src="https://img.icons8.com/?size=50&id=4887&format=png" 
                                         class="delete-screenshot" 
@@ -592,11 +595,13 @@
                                         groupScreenshots.slice(screenshotsPerGroup).forEach((screenshot) => {
                                             const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
                                             const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? 'N/A') : 'N/A';
+                                            let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
+
                                             output += `
                             <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                   <span>${overallActivity}%</span> <p>${screenshot.display_text}</p>
+                                   <span>${overallActivity}%</span> <p>${timeWithoutSeconds}</p>
                                     <img 
                                         src="https://img.icons8.com/?size=50&id=4887&format=png" 
                                         class="delete-screenshot" 
