@@ -39,10 +39,13 @@
 
             .search-row input,
             .search-row select {
-                padding: 8px;
-                font-size: 14px;
+                padding: 10px;
+                font-size: 15px;
                 width: 100%;
                 max-width: 300px;
+                box-sizing: border-box;
+                border: 1px solid #ccc;
+                border-radius: 8px;
             }
 
             .screenshot-row {
@@ -116,6 +119,8 @@
             }
 
             #modal-image {
+                position: relative;
+                top: 75px;
                 max-width: 90%;
                 max-height: 90%;
                 border: 5px solid white;
@@ -207,7 +212,7 @@
 
             <!-- Filter only by date -->
             <div class="search-row">
-                <input type="date" id="datePicker" value="">
+              Date:  <input type="date" id="datePicker" value="">
             </div>
 
             <!-- Main Screenshot Row for Logged-in User -->
@@ -309,24 +314,28 @@
     <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
     <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
         <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-            <svg viewBox="0 0 36 36" width="40" height="40">
-                <!-- Grey background circle -->
-                <path 
-                    d="M18 2.0845
-                       a 15.9155 15.9155 0 0 1 0 31.831
-                       a 15.9155 15.9155 0 0 1 0 -31.831"
+                     <svg viewBox="0 0 36 36" width="40" height="40">
+                    <!-- Background circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
                     fill="none"
                     stroke="#e6e6e6"
                     stroke-width="4"
-                />
-                <!-- Dynamic green arc -->
-                <path 
-                    d="M18 2.0845
-                       a 15.9155 15.9155 0 0 1 0 31.831"
+                    />
+                    
+                    <!-- Progress circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
                     fill="none"
                     stroke="green"
                     stroke-width="4"
-                    stroke-dasharray="${overallActivity}, 100"
+                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
+                    stroke-dashoffset="25"  <!-- makes it start from top -->
+                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
                 />
             </svg>
             <div style="position: absolute; top: 50%; left: 50%; 

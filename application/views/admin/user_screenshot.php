@@ -52,11 +52,13 @@
 
             .search-row input,
             .search-row select {
-                padding: 8px;
-                font-size: 14px;
+                padding: 10px;
+                font-size: 15px;
                 width: 100%;
                 max-width: 100%;
                 box-sizing: border-box;
+                border: 1px solid #ccc;
+                border-radius: 8px;
             }
 
             .card-container {
@@ -67,7 +69,7 @@
             }
 
             .user-card {
-                border: 1px solid #ccc;
+                /* border: 1px solid #ccc; */
                 padding: 15px;
                 border-radius: 6px;
                 box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
@@ -255,7 +257,7 @@
                 </button>
             </div>
 
-            <div class="container" style="display: none;">
+            <div class="container box" style="display: none;">
                 <div class="header">
                     <h3>Screenshots</h3>
                 </div>
@@ -272,11 +274,11 @@
 
             <!-- Search Filters -->
             <div class="search-row">
-                <input type="text" id="search-name" placeholder="Search Users / Department">
+                Name: <input type="text" id="search-name" placeholder="Search Users / Department">
                 <!-- <button id="search-btn"> -->
                 <!-- <i class="fa fa-search"></i> -->
                 </button>
-                <input type="date" id="datePicker" value="">
+                Date: <input type="date" id="datePicker" value="">
                 <select>
                     <option>Sort By</option>
                 </select>
@@ -383,28 +385,34 @@
         <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" width="100%" style="cursor: pointer;">
         <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
             <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                <svg viewBox="0 0 36 36" width="40" height="40">
-                    <path 
-                        d="M18 2.0845
-                           a 15.9155 15.9155 0 0 1 0 31.831
-                           a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#e6e6e6"
-                        stroke-width="4"
+                  <svg viewBox="0 0 36 36" width="40" height="40">
+                    <!-- Background circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
+                    fill="none"
+                    stroke="#e6e6e6"
+                    stroke-width="4"
                     />
-                    <path 
-                        d="M18 2.0845
-                           a 15.9155 15.9155 0 0 1 0 31.831"
-                        fill="none"
-                        stroke="green"
-                        stroke-width="4"
-                        stroke-dasharray="${overallActivity}, 100"
-                        transform="rotate(-0 18 18)"
+                    
+                    <!-- Progress circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
+                    fill="none"
+                    stroke="green"
+                    stroke-width="4"
+                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
+                    stroke-dashoffset="25"  <!-- makes it start from top -->
+                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
                     />
                 </svg>
                 <div style="position: absolute; top: 50%; left: 50%; 
                             transform: translate(-50%, -50%);
-                            font-size: 10px; font-weight: bold;">
+                            font-size: 10px; font-weight: bold;" 
+                            data-toggle="tooltip" data-placement="top" title="${overallActivityRaw}%">
                     ${overallActivityRaw}%
                 </div>
             </div>
@@ -532,8 +540,8 @@
                                     $.each(groupedScreenshots, function(timeRange, groupScreenshots) {
                                         const groupId = `group-${timeRange.replace(/[^a-zA-Z0-9]/g, "")}`;
                                         output += `
-                        <div class="screenshot-group" style="border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 30px;">
-                            <div style="font-weight: bold; margin-bottom: 10px;">Time: ${timeRange}</div>
+                        <div class="screenshot-group box" style="border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 30px;">
+                            <div class="box-header" style="font-weight: bold; margin-bottom: 10px;">Time: ${timeRange}</div>
                             <div class="screenshot-visible" style="display: flex; flex-wrap: wrap; gap: 10px;">
                     `;
 
@@ -547,29 +555,34 @@
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
                                     <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-            <svg viewBox="0 0 36 36" width="40" height="40">
-                <!-- Grey background circle -->
-                <path 
-                    d="M18 2.0845
-                       a 15.9155 15.9155 0 0 1 0 31.831
-                       a 15.9155 15.9155 0 0 1 0 -31.831"
+                     <svg viewBox="0 0 36 36" width="40" height="40">
+                    <!-- Background circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
                     fill="none"
                     stroke="#e6e6e6"
                     stroke-width="4"
-                />
-                <!-- Dynamic green arc, starts at 90 degrees (right side) -->
-                <path 
-                    d="M18 2.0845
-                       a 15.9155 15.9155 0 0 1 0 31.831"
+                    />
+                    
+                    <!-- Progress circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
                     fill="none"
                     stroke="green"
                     stroke-width="4"
-                    stroke-dasharray="${overallActivity}, 100"
+                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
+                    stroke-dashoffset="25"  <!-- makes it start from top -->
+                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
                 />
             </svg>
             <div style="position: absolute; top: 50%; left: 50%; 
                         transform: translate(-50%, -50%);
                         font-size: 10px; font-weight: bold;">
+                        data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
                 ${overallActivity}%
                                 </div>
                             </div> <p>${timeWithoutSeconds}</p>
@@ -608,6 +621,7 @@
                                         data-id="${screenshot.id}" 
                                         alt="Delete" 
                                         style="cursor: pointer; width: 20px; height: 20px;"
+                                        data-toggle="tooltip" data-placement="top" title="Delete"
                                     />
                                 </div>
                             </div>
@@ -743,8 +757,8 @@
                             if (response.status === 'success' && employees.length > 0) {
                                 $.each(employees, function(index, employee) {
                                     output += `
-                                <div class="user-card" id="user-${employee.id}">
-                                    <div class="user-info-line">
+                                <div class="user-card box" id="user-${employee.id}">
+                                    <div class="user-info-line box-header">
                                         <div><span>Id:</span> ${employee.id}</div>
                                         <div><span>Name:</span> ${employee.name || 'N/A'}</div>
                                         <div><span>Designation:</span> ${employee.designation || 'N/A'}</div>
