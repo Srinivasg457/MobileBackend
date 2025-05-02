@@ -264,7 +264,7 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
 
-  .container {
+  .activity-container {
     background-color: white;
     border-radius: 4px;
     padding: 40px;
@@ -366,6 +366,20 @@
     background-color: red;
   }
 
+  .custom-tooltip {
+    position: absolute;
+    top: -40px;
+    z-index: 9999;
+    width: max-content;
+    background-color: white;
+    /* color: white; */
+    padding: 5px;
+    /* box-shadow: rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(17, 17, 26, 0.1) 0px 0px 8px; */
+    border-radius: 5px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+      rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  }
+
   /* .timeline-yellow {
     background-color: orange;
 }
@@ -422,7 +436,7 @@
 
     <div class="status-boxes">
       <div class="status-box active">Active <strong id="active-time">00 hrs 00 min</strong></div>
-      <div class="status-box inactive">Inactive <strong>0 hr 0 min</strong></div>
+      <div class="status-box inactive">Inactive <strong>00 hrs 00 min</strong></div>
       <div class="status-box manual">Manual <strong>00:00</strong></div>
       <div class="status-box meeting">Meeting <strong>00:00</strong></div>
     </div>
@@ -436,7 +450,7 @@
 
 
     <h3>Activity</h3>
-    <div class="container">
+    <div class="activity-container">
 
 
       <div class="legend">
@@ -762,6 +776,22 @@
             const blockWidthPercent = (5 / totalMinutes) * 100;
             const leftPositionPercent = (totalTimeInMinutes / totalMinutes) * 100;
 
+            // Calculate end time by adding 5 minutes
+            const endAt = new Date(createdAt.getTime() + 5 * 60000);
+
+            // Format time as HH:MM AM/PM
+            const formatTime = date =>
+              date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+
+            const timeLabel = `${formatTime(createdAt)} to ${formatTime(endAt)}`;
+            const tooltip = $('<div></div>')
+              .addClass('custom-tooltip')
+              .text(timeLabel)
+              .hide(); // Initially hidden
+
             const block = $('<div></div>')
               .addClass('activity-block')
               .addClass(blockColorClass)
@@ -770,7 +800,14 @@
                 'left': leftPositionPercent + '%',
                 'width': blockWidthPercent + '%',
                 'height': '100%'
-              });
+              }).append(tooltip).hover(
+                function() {
+                  tooltip.show();
+                },
+                function() {
+                  tooltip.hide();
+                }
+              );
 
             timelineTrack.append(block);
           });
