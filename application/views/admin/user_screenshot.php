@@ -411,7 +411,7 @@
                 </svg>
                 <div style="position: absolute; top: 50%; left: 50%; 
                             transform: translate(-50%, -50%);
-                            font-size: 10px; font-weight: bold;" 
+                            font-size: 10px; font-weight: bold;cursor: pointer;" 
                             data-toggle="tooltip" data-placement="top" title="${overallActivityRaw}%">
                     ${overallActivityRaw}%
                 </div>
@@ -581,7 +581,7 @@
             </svg>
             <div style="position: absolute; top: 50%; left: 50%; 
                         transform: translate(-50%, -50%);
-                        font-size: 10px; font-weight: bold;">
+                        font-size: 10px; font-weight: bold;cursor: pointer;"
                         data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
                 ${overallActivity}%
                                 </div>
