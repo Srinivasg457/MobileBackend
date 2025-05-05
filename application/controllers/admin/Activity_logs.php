@@ -286,9 +286,9 @@ public function get_activity()
 
 public function get_employee_activity()
 {
-    // Get parameters from request
-    $employee_id = 2; // Default or from session
-    $user_id = 3;     // Default or from session
+        // Get parameters from request
+    $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+    $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id'); // fallback for Postman or URL query params
     $date = $this->input->get('date') ?? date('Y-m-d');
     $from_time = $this->input->get('from_time') ?? '00:00:00';
     $to_time = $this->input->get('to_time') ?? '23:59:59';
