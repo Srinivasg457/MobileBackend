@@ -420,6 +420,13 @@
                       <i class="bi bi-file-bar-graph"></i> <span><?php echo "Activity Log" ?></span>
                     </a>
                   </li>
+                     <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/Activity_logs/get_index') ?>">
+                      <i class="bi bi-clock"></i> <span><?php echo "Time Cards" ?></span>
+                    </a>
+                  </li>
                   <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
                                 echo "active";
                               } ?>">
