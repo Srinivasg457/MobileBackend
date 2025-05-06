@@ -17,9 +17,10 @@ class EmployeeRoles extends Home_Controller {
     }
 
     /**
-     * Creates a new role for a specific department.
+     * Creates a new role for a specific organization and department.
      */
     public function create_role() {
+        $this->form_validation->set_rules('user_id', 'Organization ID', 'required|integer');
         $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
         $this->form_validation->set_rules('role_name', 'Role Name', 'required|max_length[100]');
         $this->form_validation->set_rules('description', 'Description', 'trim|max_length[500]');
@@ -28,22 +29,25 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response(400, 'Validation failed', ['errors' => $this->form_validation->error_array()]);
         }
 
+        $user_id = $this->input->post('user_id');
         $department_id = $this->input->post('department_id');
         $role_name = $this->input->post('role_name', TRUE);
+        $description = $this->input->post('description', TRUE); // Get description
 
         $existing = $this->db
-            ->where(['department_id' => $department_id, 'role_name' => $role_name])
+            ->where(['user_id' => $user_id, 'department_id' => $department_id, 'role_name' => $role_name])
             ->get('employee_roles')
             ->row();
 
         if ($existing) {
-            return $this->json_response(409, 'Role already exists in this department');
+            return $this->json_response(409, 'Role already exists in this organization and department');
         }
 
         $data = [
+            'user_id' => $user_id,
             'department_id' => $department_id,
             'role_name' => $role_name,
-            'description' => $this->input->post('description', TRUE)
+            'description' => $description
         ];
 
         $this->db->trans_start();
@@ -62,9 +66,10 @@ class EmployeeRoles extends Home_Controller {
     }
 
     /**
-     * Creates a new permission for a specific department.
+     * Creates a new permission for a specific organization and department.
      */
     public function create_permission() {
+        $this->form_validation->set_rules('user_id', 'Organization ID', 'required|integer');
         $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
         $this->form_validation->set_rules('permission_name', 'Permission Name', 'required|max_length[100]');
         $this->form_validation->set_rules('description', 'Description', 'trim|max_length[500]');
@@ -73,22 +78,25 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response(400, 'Validation failed', ['errors' => $this->form_validation->error_array()]);
         }
 
+        $user_id = $this->input->post('user_id');
         $department_id = $this->input->post('department_id');
         $permission_name = $this->input->post('permission_name', TRUE);
+        $description = $this->input->post('description', TRUE); // Get description
 
         $existing = $this->db
-            ->where(['department_id' => $department_id, 'permission_name' => $permission_name])
+            ->where(['user_id' => $user_id, 'department_id' => $department_id, 'permission_name' => $permission_name])
             ->get('employee_permissions')
             ->row();
 
         if ($existing) {
-            return $this->json_response(409, 'Permission already exists in this department');
+            return $this->json_response(409, 'Permission already exists in this organization and department');
         }
 
         $data = [
+            'user_id' => $user_id,
             'department_id' => $department_id,
             'permission_name' => $permission_name,
-            'description' => $this->input->post('description', TRUE)
+            'description' => $description
         ];
 
         $this->db->trans_start();
@@ -129,9 +137,9 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response(404, 'Role or permission not found');
         }
 
-        // Ensure that the role and permission belong to the same department
-        if ($role->department_id !== $permission->department_id) {
-            return $this->json_response(400, 'Role and permission belong to different departments');
+        // Ensure that the role and permission belong to the same organization and department
+        if ($role->user_id !== $permission->user_id || $role->department_id !== $permission->department_id) {
+            return $this->json_response(400, 'Role and permission belong to different organizations or departments');
         }
 
         $existing = $this->db
@@ -172,12 +180,13 @@ class EmployeeRoles extends Home_Controller {
     }
 
     /**
-     * Gets all roles with their assigned permissions for a specific department.
+     * Gets all roles with their assigned permissions for a specific organization and department.
      */
     public function get_roles_with_permissions() {
+        $user_id = $this->input->get('user_id');
         $department_id = $this->input->get('department_id');
-        if (!$department_id) {
-            return $this->json_response(400, 'department_id is required');
+        if (!$user_id || !$department_id) {
+            return $this->json_response(400, 'user_id and department_id are required');
         }
 
         $query = $this->db
@@ -193,6 +202,7 @@ class EmployeeRoles extends Home_Controller {
             ->from('employee_roles er')
             ->join('employee_role_permission erp', 'er.id = erp.role_id', 'left')
             ->join('employee_permissions ep', 'erp.permission_id = ep.id', 'left')
+            ->where('er.user_id', $user_id)
             ->where('er.department_id', $department_id)
             ->order_by('er.role_name, ep.permission_name')
             ->get();
@@ -219,7 +229,7 @@ class EmployeeRoles extends Home_Controller {
             }
         }
 
-        return $this->json_response(200, 'Roles with permissions fetched for department', array_values($roles));
+        return $this->json_response(200, 'Roles with permissions fetched for organization and department', array_values($roles));
     }
 
     private function json_response($status_code, $message, $data = []) {
@@ -233,3 +243,4 @@ class EmployeeRoles extends Home_Controller {
             ]));
     }
 }
+
