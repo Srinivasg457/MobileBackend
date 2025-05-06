@@ -1,14 +1,19 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class EmployeeRoles extends CI_Controller {
+class EmployeeRoles extends Home_Controller {
 
     public function __construct() {
         parent::__construct();
         $this->load->database();
         $this->load->library('form_validation');
     }
-
+    public function role_permission(){
+        $data = array();
+        $data['page_title'] = 'Create Roles & Permission';
+        $data['main_content'] = $this->load->view('admin/employee/hrm/role_permission', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
     public function create_role() {
         $this->form_validation->set_rules('user_id', 'User ID', 'required|integer');
         $this->form_validation->set_rules('role_name', 'Role Name', 'required|max_length[100]');
