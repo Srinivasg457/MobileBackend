@@ -420,18 +420,25 @@
                       <i class="bi bi-file-bar-graph"></i> <span><?php echo "Activity Log" ?></span>
                     </a>
                   </li>
-                     <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
+                  <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
                                 echo "active";
                               } ?>">
                     <a href="<?php echo base_url('admin/Activity_logs/get_index') ?>">
                       <i class="bi bi-clock"></i> <span><?php echo "Time Cards" ?></span>
                     </a>
                   </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/Monitoring_room') ?>">
+                      <i class="bi bi-eye"></i> <span><?php echo "Live Monitoring" ?></span>
+                    </a>
+                  </li>
                   <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
                                 echo "active";
                               } ?>">
                     <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
-                      <i class="bi bi-clock"></i> <span><?php echo "Time Approval" ?></span>
+                      <i class="bi-clipboard-check"></i> <span><?php echo "Time Approval" ?></span>
                     </a>
                   </li>
 
