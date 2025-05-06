@@ -102,4 +102,15 @@ class Home_Controller extends MY_Controller
         return false;
     }
 
+    protected function json_response($status, $message, $data = []) {
+        return $this->output
+            ->set_status_header($status)
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => $status < 400 ? 'success' : 'error',
+                'message' => $message,
+                'data' => $data
+            ]));
+    }
+
 }
