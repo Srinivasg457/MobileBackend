@@ -6,8 +6,8 @@ class EmployeeRoles extends Home_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->database();
-        // $this->load->library('form_validation');
-        // $this->load->helper('url'); // Load the URL helper
+        $this->load->library('form_validation');
+        $this->load->helper('url'); // Load the URL helper
     }
 
     public function role_permission() {
@@ -258,19 +258,6 @@ class EmployeeRoles extends Home_Controller {
      * Common method to get input data regardless of content type
      * @return array
      */
-    private function get_input_data() {
-        $content_type = $this->input->server('CONTENT_TYPE');
-        if (strpos($content_type, 'application/json') !== false) {
-            $json = file_get_contents('php://input');
-            $input = json_decode($json, true);
-            if (!is_array($input)) {
-                // Handle the error, for example:
-                return $this->json_response(400, 'Invalid JSON data.');
-            }
-            return $input;
-        } else {
-            return $this->input->post();
-        }
-    }
+   
 
 }
