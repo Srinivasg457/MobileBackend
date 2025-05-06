@@ -2,6 +2,7 @@
 <div class="content-wrapper">
 
 
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,26 +12,56 @@
       margin-top: 1rem;
       color: green;
     }
+    #localVideo {
+      width: 320px;
+      height: 240px;
+      border: 1px solid black;
+      margin-top: 1rem;
+    }
   </style>
 
 
   <h1>Screen Sharing</h1>
   <button onclick="startSharing()">Start Share</button>
-  <p id="status">Connecting to server...</p>
+  <p id="status">Connecting to signaling server...</p>
+  <video id="localVideo" autoplay muted></video>
 
   <script>
     let socket;
+    let localStream;
+    let peerConnection;
     const statusEl = document.getElementById("status");
+    const localVideo = document.getElementById("localVideo");
+    const websocketUrl = "ws://127.0.0.1:3000"; // Ensure your server is running here
 
-    function connectWebSocket() {
-      socket = new WebSocket("ws://your-server-ip:3000"); // Replace with your actual WebSocket server address
+    async function connectWebSocket() {
+      socket = new WebSocket(websocketUrl);
 
       socket.onopen = () => {
-        statusEl.textContent = "Connected to server.";
+        statusEl.textContent = "Connected to signaling server.";
       };
 
-      socket.onmessage = (event) => {
-        console.log("Message from server:", event.data);
+      socket.onmessage = async (event) => {
+        try {
+          const message = JSON.parse(event.data);
+
+          if (message.type === 'answer') {
+            console.log('Received answer:', message);
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(message.answer));
+            statusEl.textContent = "Peer connection established.";
+          } else if (message.type === 'candidate') {
+            console.log('Received ICE candidate:', message);
+            if (peerConnection) {
+              await peerConnection.addIceCandidate(message.candidate);
+            }
+          } else if (message.type === 'viewer_connected') {
+            statusEl.textContent = "Viewer connected. Initiating media sharing...";
+            await startMedia();
+            await createOffer();
+          }
+        } catch (error) {
+          console.error("Error processing message from server:", error);
+        }
       };
 
       socket.onerror = (error) => {
@@ -39,21 +70,69 @@
       };
 
       socket.onclose = () => {
-        statusEl.textContent = "Disconnected from server.";
+        statusEl.textContent = "Disconnected from signaling server.";
       };
     }
 
-    function startSharing() {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: "start_share", userId: 123 })); // Replace userId dynamically if needed
-        statusEl.textContent = "Share request sent.";
-      } else {
-        statusEl.textContent = "WebSocket not connected.";
+    async function startMedia() {
+      try {
+        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+        localVideo.srcObject = localStream;
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+      } catch (error) {
+        console.error("Error accessing screen media:", error);
+        statusEl.textContent = "Failed to access screen.";
       }
+    }
+
+    async function createPeerConnection() {
+      peerConnection = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          // Add more STUN/TURN servers as needed for better connectivity
+        ],
+      });
+
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
+        }
+      };
+
+      peerConnection.oniceconnectionstatechange = () => {
+        if (peerConnection.iceConnectionState === 'failed' ||
+            peerConnection.iceConnectionState === 'disconnected' ||
+            peerConnection.iceConnectionState === 'closed') {
+          statusEl.textContent = "Peer connection failed.";
+          // Potentially attempt to reconnect or notify the user
+        }
+      };
+    }
+
+    async function createOffer() {
+      try {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        socket.send(JSON.stringify({ type: 'offer', offer: offer }));
+        statusEl.textContent = "Offer sent to viewer.";
+      } catch (error) {
+        console.error("Error creating offer:", error);
+        statusEl.textContent = "Failed to create offer.";
+      }
+    }
+
+    async function startSharing() {
+      statusEl.textContent = "Requesting screen share...";
+      await createPeerConnection();
+      // Inform the server that this user wants to start sharing
+      socket.send(JSON.stringify({ type: "start_share_request", userId: 123 })); // Server needs to handle this
+      // The server should then notify a viewer (potentially based on userId or a room ID)
+      // and the viewer will initiate the connection, leading to the 'viewer_connected' message here.
     }
 
     window.onload = connectWebSocket;
   </script>
+
 
 
 </div>
