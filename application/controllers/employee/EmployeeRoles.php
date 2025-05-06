@@ -6,7 +6,8 @@ class EmployeeRoles extends Home_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->database();
-        $this->load->library('form_validation');
+        // $this->load->library('form_validation');
+        // $this->load->helper('url'); // Load the URL helper
     }
 
     public function role_permission() {
@@ -20,22 +21,33 @@ class EmployeeRoles extends Home_Controller {
      * Creates a new role for a specific organization and department.
      */
     public function create_role() {
+        // Use the common input retrieval
+        $input = $this->get_input_data();
+
+        // Validation rules
         $this->form_validation->set_rules('user_id', 'Organization ID', 'required|integer');
         $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
         $this->form_validation->set_rules('role_name', 'Role Name', 'required|max_length[100]');
         $this->form_validation->set_rules('description', 'Description', 'trim|max_length[500]');
 
         if ($this->form_validation->run() === FALSE) {
-            return $this->json_response(400, 'Validation failed', ['errors' => $this->form_validation->error_array()]);
+            return $this->json_response(400, 'Validation failed', [
+                'errors' => $this->form_validation->error_array()
+            ]);
         }
 
-        $user_id = $this->input->post('user_id');
-        $department_id = $this->input->post('department_id');
-        $role_name = $this->input->post('role_name', TRUE);
-        $description = $this->input->post('description', TRUE); // Get description
+        $user_id = $input['user_id'];
+        $department_id = $input['department_id'];
+        $role_name = $input['role_name'];
+        $description = isset($input['description']) ? $input['description'] : null;
 
+        // Check for existing role
         $existing = $this->db
-            ->where(['user_id' => $user_id, 'department_id' => $department_id, 'role_name' => $role_name])
+            ->where([
+                'user_id' => $user_id,
+                'department_id' => $department_id,
+                'role_name' => $role_name
+            ])
             ->get('employee_roles')
             ->row();
 
@@ -56,19 +68,24 @@ class EmployeeRoles extends Home_Controller {
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === FALSE) {
+            log_message('error', 'Database error: ' . $this->db->error()['message']); // Log the error
             return $this->json_response(500, 'Database operation failed');
         }
 
         return $this->json_response(201, 'Role created successfully', [
             'role_id' => $role_id,
-            'role_name' => $data['role_name']
+            'role_name' => $role_name
         ]);
     }
+
 
     /**
      * Creates a new permission for a specific organization and department.
      */
     public function create_permission() {
+        // Use the common input retrieval
+        $input = $this->get_input_data();
+
         $this->form_validation->set_rules('user_id', 'Organization ID', 'required|integer');
         $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
         $this->form_validation->set_rules('permission_name', 'Permission Name', 'required|max_length[100]');
@@ -78,10 +95,10 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response(400, 'Validation failed', ['errors' => $this->form_validation->error_array()]);
         }
 
-        $user_id = $this->input->post('user_id');
-        $department_id = $this->input->post('department_id');
-        $permission_name = $this->input->post('permission_name', TRUE);
-        $description = $this->input->post('description', TRUE); // Get description
+        $user_id = $input['user_id'];
+        $department_id = $input['department_id'];
+        $permission_name = $input['permission_name'];
+        $description = isset($input['description']) ? $input['description'] : null;
 
         $existing = $this->db
             ->where(['user_id' => $user_id, 'department_id' => $department_id, 'permission_name' => $permission_name])
@@ -105,6 +122,7 @@ class EmployeeRoles extends Home_Controller {
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === FALSE) {
+             log_message('error', 'Database error: ' . $this->db->error()['message']); // Log the error
             return $this->json_response(500, 'Database operation failed');
         }
 
@@ -118,6 +136,9 @@ class EmployeeRoles extends Home_Controller {
      * Assigns a permission to a specific role.
      */
     public function assign_permission_to_role() {
+        // Use the common input retrieval
+        $input = $this->get_input_data();
+
         $this->form_validation->set_rules('role_id', 'Role ID', 'required|integer');
         $this->form_validation->set_rules('permission_id', 'Permission ID', 'required|integer');
         $this->form_validation->set_rules('is_granted', 'Is Granted', 'required|in_list[0,1]');
@@ -126,9 +147,9 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response(400, 'Validation failed', ['errors' => $this->form_validation->error_array()]);
         }
 
-        $role_id = $this->input->post('role_id');
-        $permission_id = $this->input->post('permission_id');
-        $is_granted = $this->input->post('is_granted');
+        $role_id = $input['role_id'];
+        $permission_id = $input['permission_id'];
+        $is_granted = $input['is_granted'];
 
         $role = $this->db->get_where('employee_roles', ['id' => $role_id])->row();
         $permission = $this->db->get_where('employee_permissions', ['id' => $permission_id])->row();
@@ -169,6 +190,7 @@ class EmployeeRoles extends Home_Controller {
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === FALSE) {
+             log_message('error', 'Database error: ' . $this->db->error()['message']); // Log the error
             return $this->json_response(500, 'Database operation failed');
         }
 
@@ -232,15 +254,23 @@ class EmployeeRoles extends Home_Controller {
         return $this->json_response(200, 'Roles with permissions fetched for organization and department', array_values($roles));
     }
 
-    private function json_response($status_code, $message, $data = []) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header($status_code)
-            ->set_output(json_encode([
-                'status' => $status_code < 300 ? 'success' : 'error',
-                'message' => $message,
-                'data' => $data
-            ]));
+    /**
+     * Common method to get input data regardless of content type
+     * @return array
+     */
+    private function get_input_data() {
+        $content_type = $this->input->server('CONTENT_TYPE');
+        if (strpos($content_type, 'application/json') !== false) {
+            $json = file_get_contents('php://input');
+            $input = json_decode($json, true);
+            if (!is_array($input)) {
+                // Handle the error, for example:
+                return $this->json_response(400, 'Invalid JSON data.');
+            }
+            return $input;
+        } else {
+            return $this->input->post();
+        }
     }
-}
 
+}
