@@ -430,13 +430,13 @@
                             renderAreaChart(labels, mouseMovements, keystrokes, timestamps);
                         } else {
                             showNoDataMessage();
-                            $('#hourButtons').hide();
+                            // $('#hourButtons').hide();
                         }
                     } else {
                         showNoDataMessage();
                         $('#totalKeystrokes').text('0');
                         $('#totalMouseMovement').text('0');
-                        $('#hourButtons').hide();
+                        // $('#hourButtons').hide();
                     }
                 },
                 error: function(xhr, status, error) {
