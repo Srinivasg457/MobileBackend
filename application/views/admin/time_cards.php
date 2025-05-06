@@ -343,112 +343,152 @@
 
 
         function fetchActivityData(fromTime = null, toTime = null) {
-            const employee = $('#employeeSelect').val();
-            const date = $('#datePicker').val();
+    const employee = $('#employeeSelect').val();
+    const date = $('#datePicker').val();
 
-            const selectedDate = new Date(date);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            selectedDate.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
 
-            const formatTime = (dateObj) => {
-                return dateObj.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                });
-            };
+    const formatTime = (dateObj) => {
+        return dateObj.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    };
 
-            // Handle full day vs hourly range
-            if (selectedDate < today) {
-                if (!fromTime || !toTime) {
-                    fromTime = "09:00";
-                    toTime = "13:00";
-                }
-                $('#hourButtons').hide();
-            } else {
-                $('#hourButtons').show();
-                if (!fromTime || !toTime) {
-                    const now = new Date();
-                    const defaultFrom = new Date(now.getTime() - (60 * 60 * 1000));
-                    fromTime = formatTime(defaultFrom);
-                    toTime = formatTime(now);
-                }
-            }
-
-            console.log(`Fetching from ${fromTime} to ${toTime}`);
-
-            $('#activityChart').hide();
-            $('#noDataMessage').hide();
-            $('#loadingIndicator').show();
-
-            $.ajax({
-                url: "<?= base_url('admin/Activity_logs/get_employee_activity'); ?>",
-                method: 'GET',
-                dataType: 'json',
-                data: {
-                    date: date,
-                    from_time: fromTime,
-                    to_time: toTime,
-                    employee_id: employee
-                },
-                success: function(response) {
-                    $('#loadingIndicator').hide();
-
-                    if (response.status && response.data && response.data.length > 0) {
-                        $('#noDataMessage').hide();
-                        $('#totalKeystrokes').text(response.totals.keystrokes);
-                        $('#totalMouseMovement').text(response.totals.mouse_movement);
-
-                        const labels = [];
-                        const mouseMovements = [];
-                        const keystrokes = [];
-                        const timestamps = [];
-
-                        response.data.forEach(item => {
-                            try {
-                                if (!item.created_at) return;
-                                const dateObj = new Date(item.created_at);
-                                const time = formatTime(dateObj);
-                                if (time) {
-                                    labels.push(time);
-                                    mouseMovements.push(parseInt(item.total_mouse_movement || 0));
-                                    keystrokes.push(parseInt(item.total_keystrokes || 0));
-                                    timestamps.push(dateObj.toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        second: '2-digit',
-                                        hour12: false
-                                    }));
-                                }
-                            } catch (e) {
-                                console.error('Error processing data item:', e, item);
-                            }
-                        });
-
-                        if (labels.length > 0) {
-                            renderAreaChart(labels, mouseMovements, keystrokes, timestamps);
-                        } else {
-                            showNoDataMessage();
-                            // $('#hourButtons').hide();
-                        }
-                    } else {
-                        showNoDataMessage();
-                        $('#totalKeystrokes').text('0');
-                        $('#totalMouseMovement').text('0');
-                        // $('#hourButtons').hide();
-                    }
-                },
-                error: function(xhr, status, error) {
-                    $('#loadingIndicator').hide();
-                    showNoDataMessage();
-                    $('#hourButtons').hide();
-                    console.error('Error fetching employee activity data:', error);
-                    $('#totalKeystrokes').text('0');
-                    $('#totalMouseMovement').text('0');
-                }
-            });
+    // Handle full day vs hourly range
+    if (selectedDate < today) {
+        if (!fromTime || !toTime) {
+            fromTime = "09:00";
+            toTime = "13:00";
         }
+        $('#hourButtons').hide();
+    } else {
+        $('#hourButtons').show();
+        if (!fromTime || !toTime) {
+            const now = new Date();
+            const defaultFrom = new Date(now.getTime() - (60 * 60 * 1000));
+            fromTime = formatTime(defaultFrom);
+            toTime = formatTime(now);
+        }
+    }
+
+    console.log(`Fetching from ${fromTime} to ${toTime}`);
+
+    $('#activityChart').hide();
+    $('#noDataMessage').hide();
+    $('#loadingIndicator').show();
+
+    $.ajax({
+        url: "<?= base_url('admin/Activity_logs/get_employee_activity'); ?>",
+        method: 'GET',
+        dataType: 'json',
+        data: {
+            date: date,
+            from_time: fromTime,
+            to_time: toTime,
+            employee_id: employee
+        },
+        success: function(response) {
+            $('#loadingIndicator').hide();
+
+            if (response.status && response.data && response.data.length > 0) {
+                $('#noDataMessage').hide();
+                $('#totalKeystrokes').text(response.totals.keystrokes);
+                $('#totalMouseMovement').text(response.totals.mouse_movement);
+
+                // Create a complete time series for the selected range
+                const [fromHours, fromMinutes] = fromTime.split(':').map(Number);
+                const [toHours, toMinutes] = toTime.split(':').map(Number);
+                
+                const startDate = new Date(selectedDate);
+                startDate.setHours(fromHours, fromMinutes, 0, 0);
+                
+                const endDate = new Date(selectedDate);
+                endDate.setHours(toHours, toMinutes, 0, 0);
+                
+                // Generate all possible time points (every minute)
+                const allTimePoints = [];
+                let currentTime = new Date(startDate);
+                
+                while (currentTime <= endDate) {
+                    allTimePoints.push(new Date(currentTime));
+                    currentTime.setMinutes(currentTime.getMinutes() + 1);
+                }
+                
+                // Create a map of existing data points for quick lookup
+                const dataMap = {};
+                response.data.forEach(item => {
+                    if (item.created_at) {
+                        const dateObj = new Date(item.created_at);
+                        const timeKey = dateObj.toLocaleTimeString([], {
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: false
+                        });
+                        dataMap[timeKey] = {
+                            mouse: parseInt(item.total_mouse_movement || 0),
+                            keys: parseInt(item.total_keystrokes || 0),
+                            timestamp: dateObj.toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: false
+                            })
+                        };
+                    }
+                });
+                
+                // Build complete datasets with 0 values for missing times
+                const labels = [];
+                const mouseMovements = [];
+                const keystrokes = [];
+                const timestamps = [];
+                
+                allTimePoints.forEach(time => {
+                    const timeKey = time.toLocaleTimeString([], {
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false
+                    });
+                    
+                    labels.push(timeKey);
+                    
+                    if (dataMap[timeKey]) {
+                        mouseMovements.push(dataMap[timeKey].mouse);
+                        keystrokes.push(dataMap[timeKey].keys);
+                        timestamps.push(dataMap[timeKey].timestamp);
+                    } else {
+                        mouseMovements.push(0);
+                        keystrokes.push(0);
+                        timestamps.push(timeKey + ':00'); // Add seconds for consistency
+                    }
+                });
+
+                if (labels.length > 0) {
+                    renderAreaChart(labels, mouseMovements, keystrokes, timestamps);
+                } else {
+                    showNoDataMessage();
+                }
+            } else {
+                showNoDataMessage();
+                $('#totalKeystrokes').text('0');
+                $('#totalMouseMovement').text('0');
+            }
+        },
+        error: function(xhr, status, error) {
+            $('#loadingIndicator').hide();
+            showNoDataMessage();
+            $('#hourButtons').hide();
+            console.error('Error fetching employee activity data:', error);
+            $('#totalKeystrokes').text('0');
+            $('#totalMouseMovement').text('0');
+        }
+    });
+}
 
 
         function showNoDataMessage() {
@@ -460,131 +500,135 @@
             }
         }
 
-        function renderAreaChart(labels, mouseData, keyData, timestamps) {
-            $('#activityChart').show();
+function renderAreaChart(labels, mouseData, keyData, timestamps) {
+    $('#activityChart').show();
 
-            // Destroy existing chart if it exists
-            if (chart) {
-                chart.destroy();
+    if (chart) {
+        chart.destroy();
+    }
+
+    const date = $('#datePicker').val();
+    const displayDate = new Date(date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    var options = {
+        series: [{
+            name: 'Mouse Movement',
+            data: mouseData
+        }, {
+            name: 'Keystrokes',
+            data: keyData
+        }],
+        chart: {
+            height: 400,
+            type: 'area', // Changed back to area chart
+            toolbar: {
+                show: true,
+                tools: {
+                    download: false
+                }
+            },
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 800
+            },
+            stacked: false
+        },
+        colors: ['#4e73df', '#1cc88a'],
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'straight', // Keep straight lines for clear gaps
+            width: 2
+        },
+        fill: {
+            type: 'gradient', // Restore gradient fill
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.3,
+                stops: [0, 100]
             }
-
-            const date = $('#datePicker').val();
-
-            // Format date for display
-            const displayDate = new Date(date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-
-            var options = {
-                series: [{
-                    name: 'Mouse Movement',
-                    data: mouseData
-                }, {
-                    name: 'Keystrokes',
-                    data: keyData
-                }],
-                chart: {
-                    height: 400,
-                    type: 'area',
-                    toolbar: {
-                        show: true,
-                        tools: {
-                            download: false
-                        }
-                    },
-                    animations: {
-                        enabled: true,
-                        easing: 'easeinout',
-                        speed: 800
-                    }
+        },
+        legend: {
+            position: 'top'
+        },
+        xaxis: {
+            categories: labels,
+            labels: {
+                formatter: function(value) {
+                    return value;
                 },
-                colors: ['#4e73df', '#1cc88a'],
-                dataLabels: {
-                    enabled: false
+                style: {
+                    colors: '#6c757d'
                 },
-                stroke: {
-                    curve: 'smooth',
-                    width: 2
-                },
-                fill: {
-                    type: 'gradient',
-                    gradient: {
-                        shadeIntensity: 1,
-                        opacityFrom: 0.7,
-                        opacityTo: 0.3,
-                        stops: [0, 100]
-                    }
-                },
-                legend: {
-                    position: 'top'
-                },
-                xaxis: {
-                    categories: labels,
-                    labels: {
-                        formatter: function(value) {
-                            // Return the time value as is (already formatted)
-                            return value;
-                        },
-                        style: {
-                            colors: '#6c757d'
-                        },
-                        rotate: 0,
-                        hideOverlappingLabels: true
-                    },
-                    title: {
-                        text: 'Time (24-hour format)'
-                    },
-                    tooltip: {
-                        enabled: true
-                    }
-                },
-                yaxis: {
-                    min: 0,
-                    title: {
-                        text: 'Activity Count'
-                    },
-                    labels: {
-                        style: {
-                            colors: '#6c757d'
-                        }
-                    }
-                },
-                title: {
-                    text: `Employee Activity (${displayDate} ${labels[0]} - ${labels[labels.length-1]})`,
-                    align: 'left',
-                    style: {
-                        fontSize: '16px',
-                        color: '#5a5c69'
-                    }
-                },
-                tooltip: {
-                    shared: true,
-                    intersect: false,
-                    custom: function({
-                        series,
-                        seriesIndex,
-                        dataPointIndex,
-                        w
-                    }) {
-                        const timestamp = timestamps[dataPointIndex];
-                        return `<div class="apexcharts-tooltip-custom">
+                rotate: 0,
+                hideOverlappingLabels: true
+            },
+            title: {
+                text: 'Time (24-hour format)'
+            },
+            tooltip: {
+                enabled: true
+            }
+        },
+        yaxis: {
+            min: 0,
+            title: {
+                text: 'Activity Count'
+            },
+            labels: {
+                style: {
+                    colors: '#6c757d'
+                }
+            }
+        },
+        title: {
+            text: `Employee Activity (${displayDate} ${labels[0]} - ${labels[labels.length-1]})`,
+            align: 'left',
+            style: {
+                fontSize: '16px',
+                color: '#5a5c69'
+            }
+        },
+        tooltip: {
+            shared: true,
+            intersect: false,
+            custom: function({
+                series,
+                seriesIndex,
+                dataPointIndex,
+                w
+            }) {
+                const timestamp = timestamps[dataPointIndex];
+                return `<div class="apexcharts-tooltip-custom">
                     <div><strong>Time:</strong> ${timestamp}</div>
                     <div><strong style="color:#4E73DF">Mouse Movement:</strong> ${series[0][dataPointIndex]}</div>
                     <div><strong style="color:#1CC88A">Keystrokes:</strong> ${series[1][dataPointIndex]}</div>
                 </div>`;
-                    }
-                },
-                grid: {
-                    borderColor: '#e3e6f0',
-                    strokeDashArray: 3
-                }
-            };
-
-            chart = new ApexCharts(document.querySelector("#activityChart"), options);
-            chart.render();
+            }
+        },
+        grid: {
+            borderColor: '#e3e6f0',
+            strokeDashArray: 3
+        },
+        markers: {
+            size: 0, // Remove markers completely
+            hover: {
+                size: 0
+            }
         }
+    };
+
+    chart = new ApexCharts(document.querySelector("#activityChart"), options);
+    chart.render();
+}
+
     </script>
 </div>
