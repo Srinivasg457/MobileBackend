@@ -57,6 +57,140 @@
         justify-content: end;
     }
 </style>
+<style>
+    /* Existing styles remain the same */
+    .toast {
+        padding: 10px;
+        margin: 5px;
+        border-radius: 4px;
+        color: #fff;
+        min-width: 200px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast-success {
+        background-color: #28a745;
+    }
+
+    .toast-error {
+        background-color: #e74c3c;
+    }
+
+    #toast-container {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+    }
+
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    .tableDiv {
+        background-color: white;
+        min-height: 100vh;
+        padding: 10px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+        background: #fafafa;
+        font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 30px;
+        justify-content: end;
+    }
+
+    /* New mobile-responsive styles */
+    @media (max-width: 768px) {
+        .row {
+            flex-direction: column;
+            margin: 15px auto !important;
+        }
+        
+        .col-lg-6 {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        #employee-select {
+            width: 100%;
+        }
+        
+        .btn-group {
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+        
+        .btn-group button {
+            flex: 1 0 100px;
+            margin: 5px 0 !important;
+        }
+        
+        .log-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .content-wrapper h3 {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .tableDiv {
+            padding: 5px;
+        }
+        
+        th, td {
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .btn-group button {
+            width: 100%;
+        }
+        
+        #toast-container {
+            left: 10px;
+            right: 10px;
+            top: 10px;
+        }
+        
+        .toast {
+            min-width: auto;
+            width: calc(100% - 20px);
+        }
+    }
+</style>
 
 <div id="toast-container"></div>
 

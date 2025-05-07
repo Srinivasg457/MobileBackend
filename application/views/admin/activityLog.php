@@ -392,40 +392,89 @@
             rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     }
 
-    /* .timeline-yellow {
-    background-color: orange;
-}
 
-.timeline-red {
-    background-color: grey;
-}
-
-.timeline-lightgreen {
-    background-color: greenyellow;
-}
-
-.timeline-darkgreen {
-    background-color: green; 
-} */
-
-
-    /* .timeline-yellow {
-    background-color: yellow;
-}
-
-.timeline-lightgreen {
-    background-color: lightgreen;
-}
-
-.timeline-darkgreen {
-    background-color: darkgreen;
-}
-
-.timeline-red {
-    background-color: red;
-} */
 </style>
 
+<style>
+    
+    /* Mobile Responsive Additions Only */
+@media (max-width: 768px) {
+    .manual-entry-container {
+        padding: 15px;
+    }
+
+    .entry-header {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .status-boxes {
+        gap: 12px;
+    }
+
+    .status-box {
+        flex: 1 1 calc(50% - 12px);
+        padding: 15px;
+    }
+
+    .activity-container,
+    .container {
+        padding: 20px;
+    }
+
+    .timeline-container {
+        height: 40px;
+    }
+
+    .time-marker::after {
+        font-size: 10px;
+    }
+
+    .legend {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .manual-entry-container {
+        padding: 12px;
+    }
+
+    .status-box {
+        flex: 1 1 100%;
+    }
+
+    .timeline-container {
+        height: 35px;
+    }
+
+    .time-marker:nth-child(odd)::after {
+        content: '';
+    }
+
+    .custom-tooltip {
+        font-size: 12px;
+        max-width: 150px;
+        white-space: normal;
+    }
+
+    /* Ensure dropdowns are touch-friendly */
+    select {
+        padding: 12px 14px;
+    }
+}
+
+/* Timeline bar mobile optimization */
+@media (max-width: 768px) {
+    .activity-block {
+        min-width: 2px !important;
+    }
+
+    #timeline-track {
+        height: 100%;
+    }
+}
+</style>
 <div class="content-wrapper">
     <div class="manual-entry-container">
         <h2>Activity</h2>
