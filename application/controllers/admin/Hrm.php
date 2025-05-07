@@ -200,12 +200,60 @@ class Hrm extends Home_Controller {
             $this->load->library('email');
             $this->email->initialize($config);
 
-            $subject = 'You are invited to join Time Tracker';
-            $message = '<p>Hello ' . $data['name'] . ',</p>';
-            $message .= '<p>You have been invited to register for Time Tracker. Click below to register:</p>';
-            $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
-            $message .= '<p>If you did not expect this, you can ignore this email.</p>';
-            $message .= '<p>Regards,<br>Time Tracker Team</p>';
+            // $subject = 'You are invited to join Time Tracker';
+            // $message = '<p>Hello ' . $data['name'] . ',</p>';
+            // $message .= '<p>You have been invited to register for Time Tracker. Click below to register:</p>';
+            // $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
+            // $message .= '<p>If you did not expect this, you can ignore this email.</p>';
+            // $message .= '<p>Regards,<br>Time Tracker Team</p>';
+            $subject = 'You are invited to join Workroom';
+
+$message = '
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Invitation</title>
+</head>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+          <tr>
+            <td align="center" style="background-color: #4CAF50; padding: 20px;">
+              <img width="100" src="' . base_url('uploads/thumbnail/2_thumb-100x100.png') . '" alt="Workroom" style="display:block; margin:0 auto;">
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px; font-family: Arial, sans-serif;">
+              <p style="font-size: 16px; color: #333; font-family: Arial, sans-serif;">Hello ' . $data['name'] . ',</p>
+              <p style="font-size: 16px; color: #333; font-family: Arial, sans-serif;">
+                You have been invited to register for <strong>Workroom</strong>. Click the button below to complete your registration:
+              </p>
+              <p style="text-align: center; margin: 30px 0;">
+                <a href="' . base_url('accept-invitation?token=' . $token) . '" style="background-color: #4CAF50; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 16px; font-family: Arial, sans-serif;">
+                  Accept Invitation
+                </a>
+              </p>
+              <p style="font-size: 14px; color: #555; font-family: Arial, sans-serif;">
+                If you did not expect this email, you can safely ignore it.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f1f1f1; text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+              <p style="margin: 0; font-size: 14px; color: #777; font-family: Arial, sans-serif;">Regards,<br>Workroom Team</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>';
+
+            
 
             $this->email->to($email);
             $this->email->from('sabeer2002ahmed@gmail.com', 'Time Tracker');
