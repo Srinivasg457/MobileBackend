@@ -242,14 +242,33 @@
                     font-size: 13px;
                     min-width: 180px;
                 }
+
+                .screenshot-row,
+                .screenshot-visible,
+                .screenshot-hidden {
+                    justify-content: center;
+                }
+
             }
+            .screenshot-card {
+  width: calc(100% / 6 - 10px);
+  box-sizing: border-box;
+}
+
+/* For mobile responsiveness (adjust max-width as needed) */
+@media (max-width: 768px) {
+  .screenshot-card {
+    width: 200px;
+  }
+}
+
         </style>
 
 
         <!-- Popup Div -->
         <div id="toast-container" style="position: fixed;top: 0;"></div>
         <div class="popup" id="popupCard">
-            <div class="d-flex justify-content-between mb-5">
+            <div class="d-flex justify-content-between align-items-baseline mb-5">
                 <h5><strong>Name:</strong> <span id="popupName"></span></h5>
                 <h5><strong>User ID:</strong> <span id="popupID"></span></h5>
                 <button class="cancel-btn" onclick="closePopup()">
@@ -274,7 +293,7 @@
 
             <!-- Search Filters -->
             <div class="search-row">
-                Name: <input type="text" id="search-name" placeholder="Search Users / Department">
+                Employee: <input type="text" id="search-name" placeholder="Search Users / Department">
                 <!-- <button id="search-btn"> -->
                 <!-- <i class="fa fa-search"></i> -->
                 </button>
@@ -551,7 +570,7 @@
                                             let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
 
                                             output += `
-                            <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
+                            <div class="screenshot-card"  box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
                                     <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
@@ -611,7 +630,7 @@
                                             let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
 
                                             output += `
-                            <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
+                            <div class="screenshot-card" box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
                                    <span>${overallActivity}%</span> <p>${timeWithoutSeconds}</p>
@@ -759,10 +778,10 @@
                                     output += `
                                 <div class="user-card box" id="user-${employee.id}">
                                     <div class="user-info-line box-header">
-                                        <div><span>Id:</span> ${employee.id}</div>
-                                        <div><span>Name:</span> ${employee.name || 'N/A'}</div>
-                                        <div><span>Designation:</span> ${employee.designation || 'N/A'}</div>
-                                        <div><span>Productivity Level:</span> ${employee.productivity || 'N/A'}%</div>
+                                        <div><i class="bi bi-hash"></i> <span> Id:</span> ${employee.id}</div>
+                                        <div><i class="bi bi-person-fill"></i> <span> Name:</span> ${employee.name || 'N/A'}</div>
+                                        <div><i class="bi bi-briefcase-fill"></i> <span> Designation:</span> ${employee.designation || 'N/A'}</div>
+                                        <div><i class="bi bi-bar-chart-fill"></i> <span> Productivity Level:</span> ${employee.productivity || 'N/A'}%</div>
                                     </div>
                                     <div class="timestamp-boxes">
                                         <div class="screenshot-row"></div>
