@@ -8,6 +8,18 @@ class EmployeeRoles extends Home_Controller {
         $this->load->database();
     }
 
+    public function index()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+        }
+        $data = array();
+        $data['page_title'] = 'Create Roles & Permission';
+        $data['departments'] = $this->admin_model->get_by_user('departments');
+        $data['main_content'] = $this->load->view('admin/employee/hrm/role_permission', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
+
     /**
      * Creates a new role for a specific organization and department.
      */

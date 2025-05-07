@@ -1,4 +1,11 @@
 <style>
+    [type=checkbox]:checked,
+    [type=checkbox]:not(:checked) {
+        position: static;
+        left: none;
+        opacity: 9999;
+    }
+
     .toast {
         padding: 10px;
         margin: 5px;
@@ -27,23 +34,43 @@
         right: 10px;
         z-index: 9999;
     }
+
+    .rolesandpermission .role {
+        height: 475px;
+        overflow-y: auto;
+    }
+
+    .permission-table {
+        width: 100%;
+    }
+
+    .permission-table th {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+    }
+
+    .select-all-container {
+        margin-bottom: 15px;
+    }
 </style>
-<div id="toast-container" style="position: fixed;top: 0;"></div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- Roles & Permissions Form -->
 <div class="content-wrapper">
     <h2>Roles & Permissions</h2>
-    <div class="">
-        <div class="container mt-5" style="min-width: 600px;">
-            <div class="card shadow-lg">
-                <div class="card-body">
-                    <div class="card-title d-flex justify-content-between">
-                        <h5><i class="bi bi-person-plus"></i>Create Role </h5> <button type="button" class="btn btn-secondary mt-3 w-100%" id="cancelBtn">
-                            <i class="bi bi-x-circle"></i> Cancel
-                        </button>
-                    </div>
-
-                    <form id="createRoleForm">
+    <form id="createPermissionForm">
+        <div class="row rolesandpermission">
+            <!-- Role Form -->
+            <div class="col-lg-6 mt-5">
+                <div class="card shadow-lg role">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-person-plus"></i> Select Role</h5>
                         <div class="mb-4">
-                            <label for="role_name" class="form-label">Role Name:</label>
+                            <label for="role_name" class="form-label">Role Name</label>
                             <select class="form-control" id="role_name" name="role_name" required>
                                 <option value="">-- Select Role --</option>
                                 <option value="TeamLead">Team Lead (TL)</option>
@@ -53,261 +80,298 @@
                             </select>
                         </div>
                         <div class="mb-4">
-                            <label for="description" class="form-label">Description:</label>
-                            <textarea class="form-control" id="description" name="description" maxlength="500" rows="3"></textarea>
+                            <label class="form-label">Department</label>
+                            <select class="form-control" name="department" required>
+                                <option value="">-- Select Department --</option>
+                                <?php foreach ($departments as $department): ?>
+                                    <option value="<?= html_escape($department->id); ?>"
+                                        <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
+                                        <?= html_escape($department->name); ?>
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100% my-5">
-                            <i class="bi bi-person-plus"></i> Create Role
-                        </button>
-                    </form>
+                        <div class="mb-4">
+                            <label for="role_description" class="form-label">Role Description</label>
+                            <textarea class="form-control" id="role_description" name="role_description" maxlength="500" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissions Form -->
+            <div class="col-lg-6 mt-5">
+                <div class="card shadow-lg role">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-shield-plus"></i> Assign Permission to Role</h5>
+                        <div class="mb-4">
+                            <div id="feature-access-list" class="mt-4">
+                                <!-- Features table will be loaded here via JavaScript -->
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>Loading features...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4 hide">
+                            <label for="permission_description" class="form-label">Permission Description</label>
+                            <textarea class="form-control" id="permission_description" name="permission_description" maxlength="500" rows="3"></textarea>
+                        </div>
+                        <div class="my-4 d-flex justify-content-end">
+                            <button type="button" class="btn btn-secondary mx-2" id="cancelBtn">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-success mx-2">
+                                <i class="bi bi-shield-plus"></i> Create
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="container mt-5" style="min-width: 600px;">
-            <div class="card shadow-lg">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-shield-plus"></i>Create Permission</h5>
-                    <form id="createPermissionForm">
-                        <div class="my-5">
-                            <label for="user_id" class="form-label">Selected Role:</label><span id="selected-role"></span>
-                        </div>
-
-                        <div class="my-5">
-                            <label for="description" class="form-label">Enter Permission:</label>
-                            <input class="form-control" id="permission_name" name="permission_name" placeholder="Enter the Permission">
-                        </div>
-                        <div class="my-5">
-                            <label for="role_permissions" class="form-label fw-bold">Permissions List:</label>
-                            <div class="mb-5 hide" id="TeamLead">
-                                <div class="d-flex flex-column">
-                                    <div class="m-5 ">
-                                        <label class="form-check-label" for="perm1">
-                                            <i class="bi bi-check-lg text-success"></i> View and assign tasks to team members
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="perm2">
-                                            <i class="bi bi-check-lg text-success"></i> Create/update project timelines
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="perm3">
-                                            <i class="bi bi-check-lg text-success"></i> Approve or request changes in tasks/stories
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="perm4">
-                                            <i class="bi bi-check-lg text-success"></i> View overall project status and reports
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-5 hide" id="HR">
-                                <div class="d-flex flex-column">
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="hr_perm1">
-                                            <i class="bi bi-check-lg text-success"></i> View and manage employee profiles
-                                        </label>
-                                    </div>
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="hr_perm3">
-                                            <i class="bi bi-check-lg text-success"></i> Manage attendance and leave requests
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="hr_perm4">
-                                            <i class="bi bi-check-lg text-success"></i> Monitor employee performance and reports
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-5 hide" id="Employee">
-                                <div class="d-flex flex-column">
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="emp_perm1">
-                                            <i class="bi bi-check-lg text-success"></i> View Screenshots
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="emp_perm2">
-                                            <i class="bi bi-check-lg text-success"></i> Submit work updates
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="emp_perm3">
-                                            <i class="bi bi-check-lg text-success"></i> Apply for leave
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="emp_perm4">
-                                            <i class="bi bi-check-lg text-success"></i> View Activity and Reports
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-5 hide" id="ProjectManager">
-                                <div class="d-flex flex-column">
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="pm_perm1">
-                                            <i class="bi bi-check-lg text-success"></i> Create and manage projects
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="pm_perm2">
-                                            <i class="bi bi-check-lg text-success"></i> Assign teams and define roles
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="pm_perm3">
-                                            <i class="bi bi-check-lg text-success"></i> Monitor task progress and deadlines
-                                        </label>
-                                    </div>
-
-                                    <div class="m-5">
-                                        <label class="form-check-label" for="pm_perm4">
-                                            <i class="bi bi-check-lg text-success"></i> Generate and review project reports
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        <div class="my-5">
-                            <label for="description" class="form-label">Description:</label>
-                            <textarea class="form-control" id="description" name="description" maxlength="500" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100% my-5">
-                            <i class="bi bi-shield-plus"></i> Create Permission
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    </form>
 </div>
+
 <script>
     function showToast(message, type) {
         const toast = $(`<div class="toast toast-${type}">${message}</div>`);
         $('#toast-container').append(toast);
-        setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
+        setTimeout(() => toast.fadeOut(500, () => toast.remove()), 2000);
     }
 
-    let storedRoleData = null;
+    let storedRoleId = null;
+    let allFeatures = [];
 
     $(document).ready(function() {
-        // Initially disable permission form
-        $('#createPermissionForm :input').prop('disabled', true);
-        const userId = <?php echo json_encode($this->session->userdata('id')); ?>;
+        loadFeatures();
+        const userId = <?= json_encode($this->session->userdata('id')); ?>;
 
-        // Step 1: Validate and store role data
-        $('#createRoleForm').on('submit', function(e) {
-            e.preventDefault();
+        // Initialize the feature table
+        function initializeFeatureTable(features) {
+            const container = $('#feature-access-list');
+            container.empty();
 
-            const form = this;
-            if (!form.checkValidity()) {
-                showToast("select the role", "error")
-                $(form).addClass('was-validated');
+            if (features.length === 0) {
+                container.html('<div class="alert alert-info">No features available</div>');
                 return;
             }
 
-            storedRoleData = {
-                user_id: userId,
-                role_name: $('#role_name').val().trim(),
-                description: $('#createRoleForm #description').val().trim()
-            };
+            let table = `
+                <table class="table table-bordered permission-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center">
+                                <input type="checkbox" id="selectAllFeatures">
+                            </th>
+                            <th>Feature</th>
+                            <th class="text-center">
+                                <input type="checkbox" id="selectAllRead"> Read
+                            </th>
+                            <th class="text-center">
+                                <input type="checkbox" id="selectAllWrite"> Write
+                            </th>
+                            <th class="text-center">
+                                <input type="checkbox" id="selectAllAction"> Action
+                            </th>
+                            <th class="text-center">
+                                <input type="checkbox" id="selectAllDelete"> Delete
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
 
-            // Disable Role form
-            $('#createRoleForm :input').prop('disabled', true);
+            features.forEach((feature) => {
+                table += `
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" class="feature-selector" data-feature-id="${feature.id}">
+                        </td>
+                        <td>
+                            ${feature.feature_name}
+                            <input type="hidden" name="feature_id[]" value="${feature.id}" />
+                        </td>
+                        <td class="text-center">
+                            <input class="form-check-input read-checkbox" type="checkbox" 
+                                   name="access[${feature.id}][is_read]" value="1" disabled>
+                        </td>
+                        <td class="text-center">
+                            <input class="form-check-input write-checkbox" type="checkbox" 
+                                   name="access[${feature.id}][is_write]" value="1" disabled>
+                        </td>
+                        <td class="text-center">
+                            <input class="form-check-input action-checkbox" type="checkbox" 
+                                   name="access[${feature.id}][is_action]" value="1" disabled>
+                        </td>
+                        <td class="text-center">
+                            <input class="form-check-input delete-checkbox" type="checkbox" 
+                                   name="access[${feature.id}][is_delete]" value="1" disabled>
+                        </td>
+                    </tr>`;
+            });
 
-            // Enable Permission form
-            $('#createPermissionForm :input').prop('disabled', false);
+            table += `</tbody></table>`;
+            container.append(table);
 
-            // Update UI
-            $('#selected-role').text(storedRoleData.role_name);
-            $(`#${storedRoleData.role_name.replace(/\s+/g, '')}`).removeClass('hide');
-        });
+            // Select all features checkbox
+            $('#selectAllFeatures').change(function() {
+                const isChecked = $(this).prop('checked');
+                $('.feature-selector').prop('checked', isChecked).trigger('change');
+            });
 
-        // Step 2: Submit Permission form
+            // Enable/disable permission checkboxes when feature is selected/deselected
+            $(document).on('change', '.feature-selector', function() {
+                const featureId = $(this).data('feature-id');
+                const isChecked = $(this).is(':checked');
+
+                $(`input[name^="access[${featureId}]"]`)
+                    .prop('disabled', !isChecked)
+                    .prop('checked', isChecked ? $(`input[name^="access[${featureId}]"]`).prop('checked') : false);
+            });
+
+            // Select all checkboxes for each permission type
+            $('#selectAllRead').change(function() {
+                const isChecked = $(this).prop('checked');
+                $('.read-checkbox:not(:disabled)').prop('checked', isChecked);
+            });
+
+            $('#selectAllWrite').change(function() {
+                const isChecked = $(this).prop('checked');
+                $('.write-checkbox:not(:disabled)').prop('checked', isChecked);
+            });
+
+            $('#selectAllAction').change(function() {
+                const isChecked = $(this).prop('checked');
+                $('.action-checkbox:not(:disabled)').prop('checked', isChecked);
+            });
+
+            $('#selectAllDelete').change(function() {
+                const isChecked = $(this).prop('checked');
+                $('.delete-checkbox:not(:disabled)').prop('checked', isChecked);
+            });
+        }
+
+        function loadFeatures() {
+            $.ajax({
+                url: "<?= base_url('employee/EmployeeRoles/get_app_features') ?>",
+                method: "GET",
+                dataType: "json",
+                success: function(response) {
+                    if (response.status === "success") {
+                        allFeatures = response.data.features;
+                        initializeFeatureTable(allFeatures);
+                    } else {
+                        showToast("No features found.", "error");
+                        $('#feature-access-list').html('<div class="alert alert-info">No features available</div>');
+                    }
+                },
+                error: function() {
+                    showToast("Failed to fetch features.", "error");
+                    $('#feature-access-list').html('<div class="alert alert-danger">Failed to load features</div>');
+                }
+            });
+        }
+
         $('#createPermissionForm').on('submit', function(e) {
             e.preventDefault();
 
-            if (!storedRoleData) {
-                showToast("Please create role first", "error");
+            const role_name = $('#role_name').val();
+            const department_id = $('select[name="department"]').val();
+            const role_description = $('#role_description').val();
+
+            if (!role_name || !department_id) {
+                showToast('Please fill out all required fields in Role form.', 'error');
                 return;
             }
 
-            // First call create_role API
             $.ajax({
-                url: "<?php echo base_url('/employee/EmployeeRoles/create_role'); ?>",
-                method: 'POST',
-                data: storedRoleData,
-                success: function(response) {
-                    showToast(response.message, "success");
-
-                    const permissionData = {
-                        user_id: userId,
-                        permission_name: $('#createPermissionForm #permission_name').val().trim(),
-                        description: $('#createPermissionForm #description').val().trim()
-                    };
-
-                    // Call create_permission API
-                    $.ajax({
-                        url: "<?php echo base_url('employee/EmployeeRoles/create_permission'); ?>",
-                        method: 'POST',
-                        data: JSON.stringify(permissionData),
-                        contentType: 'application/json',
-                        success: function() {
-                            showToast("Permission created successfully", "success");
-                            $('#createRoleForm')[0].reset();
-                            $('#createPermissionForm')[0].reset();
-                            $('#createRoleForm :input').prop('disabled', false).removeClass('was-validated');
-                            $('#createPermissionForm :input').prop('disabled', true);
-                            $('#selected-role').text('');
-                            $('#permission_name').val('');
-                            $('.hide').addClass('hide');
-                            storedRoleData = null;
-                        },
-                        error: function() {
-                            showToast("Failed to create permission", "error");
-                        }
-                    });
+                url: "<?= base_url('/employee/EmployeeRoles/create_role'); ?>",
+                method: "POST",
+                data: {
+                    user_id: userId,
+                    department_id: department_id,
+                    role_name: role_name,
+                    description: role_description
                 },
-                error: function(xhr) {
-                    let msg = 'Something went wrong';
-                    showToast(msg, "error")
-                    if (xhr.responseJSON && xhr.responseJSON.errors) {
-                        msg = Object.values(xhr.responseJSON.errors).join('<br>');
-                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
-                        msg = xhr.responseJSON.message;
+                success: function(response) {
+                    if (response.status === 'success' || response.status === 201) {
+                        showToast(response.message, 'success');
+                        storedRoleId = response.role_id || response.data?.role_id;
+                        submitPermissions(storedRoleId);
+                    } else {
+                        showToast(response.message || 'Role creation failed.', 'error');
                     }
-                    showToast(msg, 'error');
-                    $('#createRoleForm :input').prop('disabled', false);
-                    $('#createPermissionForm :input').prop('disabled', true);
-                    $('#permission_name').val('');
+                },
+                error: function() {
+                    showToast('Server error while creating role.', 'error');
                 }
             });
         });
 
-        // Cancel button resets both forms
+        function submitPermissions(roleId) {
+            const selectedFeatures = $('.feature-selector:checked');
+            const features = [];
+
+            if (selectedFeatures.length === 0) {
+                showToast('Please select at least one feature.', 'error');
+                return;
+            }
+
+            selectedFeatures.each(function() {
+                const feature_id = $(this).data('feature-id');
+                const access = $(`input[name^="access[${feature_id}]"]:checked`);
+                const permissions = {
+                    feature_id: parseInt(feature_id),
+                    is_read: 0,
+                    is_write: 0,
+                    is_action: 0,
+                    is_delete: 0
+                };
+
+                access.each(function() {
+                    const permType = $(this).attr('name').match(/\[(.*?)\]$/)[1];
+                    permissions[permType] = 1;
+                });
+
+                features.push(permissions);
+            });
+
+            if (!roleId) {
+                showToast('Role not created properly.', 'error');
+                return;
+            }
+
+            console.log("Submitting permissions:", features);
+
+            $.ajax({
+                url: "<?= base_url('employee/EmployeeRoles/store_role_feature_access'); ?>",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    role_id: roleId,
+                    features: features
+                }),
+                success: function(response) {
+                    if (response.status === 'success' || response.status === 201) {
+                        showToast(response.message, 'success');
+                        $('#createPermissionForm')[0].reset();
+                        storedRoleId = null;
+                        initializeFeatureTable(allFeatures);
+                    } else {
+                        showToast(response.message || 'Permission assignment failed.', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Server error while assigning permission.', 'error');
+                }
+            });
+        }
+
         $('#cancelBtn').on('click', function() {
-            $('#createRoleForm')[0].reset();
             $('#createPermissionForm')[0].reset();
-            $('#createRoleForm :input').prop('disabled', false).removeClass('was-validated');
-            $('#createPermissionForm :input').prop('disabled', true);
-            $('#selected-role').text('');
-            $('.hide').addClass('hide');
-            storedRoleData = null;
+            storedRoleId = null;
+            initializeFeatureTable(allFeatures);
         });
     });
 </script>

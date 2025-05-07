@@ -571,7 +571,7 @@
                       <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
                                     echo "active";
                                   } ?>">
-                        <a href="<?php echo base_url('employee/EmployeeRoles/role_permission') ?>">
+                        <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
                           <i class="bi bi-person-plus"></i> <span><?php echo "Roles & Permissions" ?></span>
                         </a>
                       </li>
