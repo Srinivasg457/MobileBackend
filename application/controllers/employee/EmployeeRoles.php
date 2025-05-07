@@ -115,6 +115,55 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response($e->getCode(), $e->getMessage());
         }
     }
+    public function get_roles_dropdown() {
+        $input = $this->get_input_data();
+        $this->form_validation->set_data($input);
+
+        // Validate user_id and department_id
+        $this->form_validation->set_data($input);
+        $this->form_validation->set_rules('user_id', 'User ID', 'required|integer');
+        $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
+    
+        if ($this->form_validation->run() === FALSE) {
+            return $this->json_response(400, 'Validation failed', [
+                'errors' => $this->form_validation->error_array()
+            ]);
+        }
+    
+        $user_id = $input['user_id'];
+        $department_id = $input['department_id'];
+    
+        try {
+            // Fetch roles filtered by user_id and department_id
+            $this->db->select('id, role_name');
+            $this->db->where([
+                'user_id' => $user_id,
+                'department_id' => $department_id
+            ]);
+            $this->db->order_by('role_name', 'asc');
+            $query = $this->db->get('employee_roles');
+    
+            if ($query === FALSE) {
+                log_message('error', 'Database error: ' . $this->db->error()['message']);
+                throw new Exception('Database query failed', 500);
+            }
+    
+            $roles = $query->result();
+    
+            if (empty($roles)) {
+                return $this->json_response(404, 'No roles found');
+            }
+    
+            return $this->json_response(200, 'Roles fetched successfully', [
+                'roles' => $roles
+            ]);
+    
+        } catch (Exception $e) {
+            log_message('error', 'Exception: ' . $e->getMessage());
+            return $this->json_response($e->getCode(), $e->getMessage());
+        }
+    }
+    
     
     public function store_role_feature_access() {
         // Get input data
