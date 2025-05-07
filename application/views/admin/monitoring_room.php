@@ -1,138 +1,396 @@
-<!-- share_view.php -->
 <div class="content-wrapper">
-
-
-
+  <section class="content">
+ 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2980b9;
+      --success-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --light-color: #ecf0f1;
+      --dark-color: #2c3e50;
+      --text-color: #333;
+      --text-light: #7f8c8d;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --transition: all 0.3s ease;
     }
-    #status {
-      margin-top: 1rem;
-      color: green;
+
+  
+
+    h2 {
+      margin-bottom: 25px;
+      color: var(--dark-color);
+      font-weight: 600;
+      font-size: 28px;
     }
-    #localVideo {
-      width: 320px;
-      height: 240px;
-      border: 1px solid black;
-      margin-top: 1rem;
+
+    .toolbar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .toolbar input[type="text"],
+    .toolbar select {
+      padding: 10px 15px;
+      border-radius: var(--border-radius);
+      border: 1px solid #ddd;
+      font-size: 14px;
+      background-color: white;
+      transition: var(--transition);
+    width:30%}
+
+    .toolbar input[type="text"]:focus,
+    .toolbar select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    .card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  gap: 25px;
+}
+
+
+    .card {
+      background-color: #fff;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .card .image-container {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .card img.thumbnail {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .card .video-call-icon {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 36px;
+      height: 36px;
+      background-color: white;
+      padding: 7px;
+      border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      transition: var(--transition);
+    }
+
+    .card .video-call-icon:hover {
+      transform: scale(1.1);
+    }
+
+    .card-content {
+      padding: 5px;
+    }
+
+    .card-content h3 {
+      margin: 0 0 5px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--dark-color);
+    }
+
+    .card-content p {
+      margin: 0 0 10px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    .status {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0 5px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+
+    .status span {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-icon {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .active {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+
+    .inactive {
+      color: var(--danger-color);
+      font-weight: 500;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      width: 80%;
+      max-width: 900px;
+      border-radius: var(--border-radius);
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from {opacity: 0; transform: translateY(-60%);}
+      to {opacity: 1; transform: translateY(-50%);}
+    }
+
+    .modal-content video {
+      width: 100%;
+      height: auto;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .modal-info {
+      padding: 15px;
+      background-color: white;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+
+    .modal-info h3 {
+      margin: 0 0 5px;
+      color: var(--dark-color);
+    }
+
+    .modal-info p {
+      margin: 0;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    .close {
+      color: white;
+      position: absolute;
+      top: -40px;
+      right: 0;
+      font-size: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 10000;
+      opacity: 0.8;
+      transition: var(--transition);
+    }
+
+    .close:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    @media(max-width: 768px) {
+      .modal-content {
+        width: 95%;
+      }
+
+      .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+    }
+
+    @media(max-width: 480px) {
+      .toolbar {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .toolbar input[type="text"],
+      .toolbar select {
+        width: 100%;
+      }
     }
   </style>
 
 
-  <h1>Screen Sharing</h1>
-  <button onclick="startSharing()">Start Share</button>
-  <p id="status">Connecting to signaling server...</p>
-  <video id="localVideo" autoplay muted></video>
+  <h2>Live Monitoring Dashboard</h2>
+
+  <div class="toolbar">
+    <input type="text" placeholder="Search employees by name or ID...">
+    <select>
+      <option value="">Sort by</option>
+      <option value="name">Name (A-Z)</option>
+      <option value="active">Active Hours (High-Low)</option>
+      <option value="inactive">Inactive Hours (High-Low)</option>
+    </select>
+  </div>
+
+<div class="card-grid">
+  <!-- Card 1 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Veena Ramamoorthy', 'ID: 57001')">
+      <img src="https://www.bleepstatic.com/content/hl-images/2022/01/26/Windows_11_HDR.jpg" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Veena Ramamoorthy</h3>
+      <p>ID: 57001</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Ravi Kumar', 'ID: 57002')">
+      <img src="https://code.visualstudio.com/assets/docs/editor/accessibility/zoomed-in.png" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Ravi Kumar</h3>
+      <p>ID: 57002</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:45 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:15 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Nisha Patel', 'ID: 57003')">
+      <img src="https://media.licdn.com/dms/image/v2/D4E12AQGwGxCOQEtydA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1686749902757?e=2147483647&v=beta&t=F0_A4kcAK7B2ItAgPjLOj7bRlmcgVJmwhk8vKmU3Qw8" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Nisha Patel</h3>
+      <p>ID: 57003</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 07:00 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 00:30 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Amit Sharma', 'ID: 57004')">
+      <img src="https://kinsta.com/wp-content/uploads/2021/09/linux-commands-1024x512.jpg" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Amit Sharma</h3>
+      <p>ID: 57004</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 04:50 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 02:10 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 5 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Divya Menon', 'ID: 57005')">
+      <img src="https://code.visualstudio.com/assets/docs/editor/accessibility/high-contrast.png" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Divya Menon</h3>
+      <p>ID: 57005</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:00 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 6 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Suresh Raina', 'ID: 57006')">
+      <img src="https://cdn.mos.cms.futurecdn.net/f5kTB9Cb3HSGjfPiiTcobK.jpg" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Suresh Raina</h3>
+      <p>ID: 57006</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:30 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:30 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Modal -->
+  <div id="videoModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeVideoModal()">&times;</span>
+      <video id="modalVideo" controls autoplay></video>
+      <div class="modal-info">
+        <h3 id="modalName"></h3>
+        <p id="modalId"></p>
+      </div>
+    </div>
+  </div>
 
   <script>
-    let socket;
-    let localStream;
-    let peerConnection;
-    const statusEl = document.getElementById("status");
-    const localVideo = document.getElementById("localVideo");
-    const websocketUrl = "ws://127.0.0.1:3000"; // Ensure your server is running here
-
-    async function connectWebSocket() {
-      socket = new WebSocket(websocketUrl);
-
-      socket.onopen = () => {
-        statusEl.textContent = "Connected to signaling server.";
-      };
-
-      socket.onmessage = async (event) => {
-        try {
-          const message = JSON.parse(event.data);
-
-          if (message.type === 'answer') {
-            console.log('Received answer:', message);
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(message.answer));
-            statusEl.textContent = "Peer connection established.";
-          } else if (message.type === 'candidate') {
-            console.log('Received ICE candidate:', message);
-            if (peerConnection) {
-              await peerConnection.addIceCandidate(message.candidate);
-            }
-          } else if (message.type === 'viewer_connected') {
-            statusEl.textContent = "Viewer connected. Initiating media sharing...";
-            await startMedia();
-            await createOffer();
-          }
-        } catch (error) {
-          console.error("Error processing message from server:", error);
-        }
-      };
-
-      socket.onerror = (error) => {
-        statusEl.textContent = "WebSocket error occurred.";
-        console.error("WebSocket error:", error);
-      };
-
-      socket.onclose = () => {
-        statusEl.textContent = "Disconnected from signaling server.";
-      };
+    function openVideoModal(videoUrl, name, id) {
+      document.getElementById("modalVideo").src = videoUrl;
+      document.getElementById("modalName").innerText = name;
+      document.getElementById("modalId").innerText = id;
+      document.getElementById("videoModal").style.display = "block";
     }
 
-    async function startMedia() {
-      try {
-        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-        localVideo.srcObject = localStream;
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-      } catch (error) {
-        console.error("Error accessing screen media:", error);
-        statusEl.textContent = "Failed to access screen.";
+    function closeVideoModal() {
+      const modal = document.getElementById("videoModal");
+      modal.style.display = "none";
+      document.getElementById("modalVideo").pause();
+      document.getElementById("modalVideo").src = "";
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById("videoModal");
+      if (event.target === modal) {
+        closeVideoModal();
       }
     }
-
-    async function createPeerConnection() {
-      peerConnection = new RTCPeerConnection({
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          // Add more STUN/TURN servers as needed for better connectivity
-        ],
-      });
-
-      peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-          socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
-        }
-      };
-
-      peerConnection.oniceconnectionstatechange = () => {
-        if (peerConnection.iceConnectionState === 'failed' ||
-            peerConnection.iceConnectionState === 'disconnected' ||
-            peerConnection.iceConnectionState === 'closed') {
-          statusEl.textContent = "Peer connection failed.";
-          // Potentially attempt to reconnect or notify the user
-        }
-      };
-    }
-
-    async function createOffer() {
-      try {
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        socket.send(JSON.stringify({ type: 'offer', offer: offer }));
-        statusEl.textContent = "Offer sent to viewer.";
-      } catch (error) {
-        console.error("Error creating offer:", error);
-        statusEl.textContent = "Failed to create offer.";
-      }
-    }
-
-    async function startSharing() {
-      statusEl.textContent = "Requesting screen share...";
-      await createPeerConnection();
-      // Inform the server that this user wants to start sharing
-      socket.send(JSON.stringify({ type: "start_share_request", userId: 123 })); // Server needs to handle this
-      // The server should then notify a viewer (potentially based on userId or a room ID)
-      // and the viewer will initiate the connection, leading to the 'viewer_connected' message here.
-    }
-
-    window.onload = connectWebSocket;
   </script>
 
 
-
+  </section>
 </div>
