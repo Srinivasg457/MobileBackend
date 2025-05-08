@@ -383,7 +383,6 @@
     function closeVideoModal() {
       const modal = document.getElementById("videoModal");
       modal.style.display = "none";
-      document.getElementById("modalVideo").pause();
       document.getElementById("modalVideo").src = "";
     }
  
@@ -401,7 +400,7 @@
     <button id="startShare">Start Screen Share</button>
 
     <script>
-        const ws = new WebSocket('ws://localhost:8090');
+const ws = new WebSocket('wss://work-room.io:8090')
         let peerConnection;
 
         const config = {
