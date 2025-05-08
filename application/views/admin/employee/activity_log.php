@@ -263,7 +263,124 @@
     width: 700px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
-/* .timeline-yellow {
+
+  .activity-container {
+    background-color: white;
+    border-radius: 4px;
+    padding: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    width: auto;
+    border: 1px solid #ddd;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .view-options {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .legend {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    color: #555;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    border-radius: 2px;
+  }
+
+  .timeline-container {
+    position: relative;
+    height: 50px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+  }
+
+
+
+  .time-labels {
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  #timeline-track {
+    position: relative;
+    height: 100%;
+    background-color: #f5f5f5;
+  }
+
+  .time-marker {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 1px;
+    background-color: #000;
+    font-size: 12px;
+    color: #333;
+  }
+
+  .time-marker::after {
+    content: attr(data-time);
+    position: absolute;
+    top: 100%;
+    left: -15px;
+    margin-top: 6px;
+    white-space: nowrap;
+  }
+
+  .timeline-yellow {
+    background-color: #ffe066;
+  }
+
+  .timeline-lightgreen {
+    background-color: #00FF00;
+  }
+
+  .timeline-red {
+    background-color: red;
+  }
+
+  .custom-tooltip {
+    position: absolute;
+    top: -40px;
+    z-index: 9999;
+    width: max-content;
+    background-color: white;
+    /* color: white; */
+    padding: 5px;
+    /* box-shadow: rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(17, 17, 26, 0.1) 0px 0px 8px; */
+    border-radius: 5px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+      rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  }
+
+  /* .timeline-yellow {
     background-color: orange;
 }
 
@@ -280,7 +397,7 @@
 } */
 
 
-/* .timeline-yellow {
+  /* .timeline-yellow {
     background-color: yellow;
 }
 
@@ -295,83 +412,18 @@
 .timeline-red {
     background-color: red;
 } */
-
-
 </style>
-
-<script>
-$(document).ready(function () {
-    $.ajax({
-        url: "<?= base_url('/admin/Activity_logs/get_activity'); ?>",
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status && response.data.length > 0) {
-                const timelineTrack = $('#timeline-track');
-                const startHour = 8; // 08:00 AM
-                const endHour = 20; // 08:00 PM
-                const totalMinutes = (endHour - startHour) * 60;
-
-                response.data.forEach(function (item) {
-                    const createdAt = new Date(item.created_at);
-                    const hour = createdAt.getHours();
-                    const minutes = createdAt.getMinutes();
-                    const totalTimeInMinutes = (hour * 60 + minutes) - (startHour * 60);
-
-                    // Skip if the time is outside 08:00 - 20:00
-                    if (totalTimeInMinutes < 0 || totalTimeInMinutes > totalMinutes) return;
-
-                    let blockColorClass = '';
-                    if (item.is_active == '1') {
-                        blockColorClass = 'timeline-yellow';
-                    } else if (item.is_active == '2') {
-                        blockColorClass = 'timeline-lightgreen';
-                    } else if (item.is_active == '3') {
-                        blockColorClass = 'timeline-darkgreen';
-                    } else {
-                        blockColorClass = 'timeline-red';
-                    }
-
-                    const blockWidthPercent = (5 / totalMinutes) * 100; // Each block represents 5 minutes
-                    const leftPositionPercent = (totalTimeInMinutes / totalMinutes) * 100;
-
-                    const block = $('<div></div>')
-                        .addClass('activity-block')
-                        .addClass(blockColorClass)
-                        .css({
-                            'position': 'absolute',
-                            'left': leftPositionPercent + '%',
-                            'width': blockWidthPercent + '%',
-                            'height': '100%'
-                        });
-
-                    timelineTrack.append(block);
-                });
-            } else {
-                alert('No activity data found.');
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error('AJAX Error:', status, error);
-            alert('Failed to fetch activity data.');
-        }
-    });
-});
-</script>
-
-
-
 
 <div class="content-wrapper">
   <div class="manual-entry-container">
     <h2>Activity</h2>
 
     <div class="entry-header">
-      <label>Employee
+      <label class="hide">Employee
         <input type="text" placeholder="Enter employee name" />
       </label>
       <label>Date
-        <input type="date" />
+        <input type="date" id="datePicker" value="">
       </label>
       <label>Timezone
         <select>
@@ -383,156 +435,67 @@ $(document).ready(function () {
     </div>
 
     <div class="status-boxes">
-      <div class="status-box active">Active <strong>06 hrs 30 min</strong></div>
-      <div class="status-box inactive">Inactive <strong>1 hr 0 min</strong></div>
-      <div class="status-box manual">Manual <strong>1 hr 0 min</strong></div>
+      <div class="status-box active">Active <strong id="active-time">00 hrs 00 min</strong></div>
+      <div class="status-box inactive">Inactive <strong>00 hrs 00 min</strong></div>
+      <div class="status-box manual">Manual <strong>00:00</strong></div>
       <div class="status-box meeting">Meeting <strong>00:00</strong></div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
+
+      });
+    </script>
+
+
 
     <h3>Activity</h3>
-<style>
-    .container {
-        background-color: white;
-        border-radius: 4px;
-        padding: 40px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin: 0 auto;
-        width: auto;
-       border: 1px solid #ddd;
-    }
+    <div class="activity-container">
 
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
-    }
 
-    .title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .view-options {
-        font-size: 14px;
-        color: #666;
-    }
-
-    .legend {
-        display: flex;
-        gap: 15px;
-        font-size: 12px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        color: #555;
-    }
-
-    .legend-color {
-        width: 12px;
-        height: 12px;
-        margin-right: 5px;
-        border-radius: 2px;
-    }
-    .timeline-container {
-        position: relative;
-        height: 50px;
-        border: 1px solid #ccc;
-        margin-top: 20px;
-    }
-
-   
-
-    .time-labels {
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    #timeline-track {
-        position: relative;
-        height: 100%;
-        background-color: #f5f5f5;
-    }
-
-    .time-marker {
-        position: absolute;
-        top: 0;
-        height: 100%;
-        width: 1px;
-        background-color: #000;
-        font-size: 12px;
-        color: #333;
-    }
-
-    .time-marker::after {
-        content: attr(data-time);
-        position: absolute;
-        top: 100%;
-        left: -15px;
-        margin-top: 6px;
-        white-space: nowrap;
-    }
-
-   
-
-    .timeline-yellow { background-color: #ffe066; }
-    .timeline-lightgreen { background-color: #00FF00; }
-    .timeline-red { background-color: red; }
-</style>
-
-<div class="container">
-   
-
-    <div class="legend">
+      <div class="legend">
         <div class="legend-item">
-            <div class="legend-color .timeline-lightgreen" style="background-color: #00FF00;"></div>
-            <span>Active</span>
+          <div class="legend-color .timeline-lightgreen" style="background-color: #00FF00;"></div>
+          <span>Active</span>
         </div>
         <div class="legend-item">
-            <div class="legend-color .timeline-yellow" style="background-color: #ffe066;"></div>
-            <span>Moderate Active</span>
+          <div class="legend-color .timeline-yellow" style="background-color: #ffe066;"></div>
+          <span>Moderate Active</span>
         </div>
         <!-- <div class="legend-item">
             <div class="legend-color timeline-darkgreen"></div>
             <span>High Active</span>
         </div> -->
         <div class="legend-item">
-            <div class="legend-color timeline-red"></div>
-            <span>Inactive</span>
+          <div class="legend-color timeline-red"></div>
+          <span>Inactive</span>
         </div>
-    </div>
+      </div>
 
-    <div class="timeline-container">
+      <div class="timeline-container">
         <!-- <div class="time-row"> -->
-            <div id="timeline-track">
-                <!-- Dynamic blocks will be added here -->
+        <div id="timeline-track">
+          <!-- Dynamic blocks will be added here -->
 
-                <!-- Static time markers (08:00 to 20:00) -->
-                <!-- Each hour = 100% / 12 = 8.33% -->
-                <div class="time-marker" style="left: 0%;" data-time="08:00"></div>
-                <div class="time-marker" style="left: 8.33%;" data-time="09:00"></div>
-                <div class="time-marker" style="left: 16.66%;" data-time="10:00"></div>
-                <div class="time-marker" style="left: 25%;" data-time="11:00"></div>
-                <div class="time-marker" style="left: 33.33%;" data-time="12:00"></div>
-                <div class="time-marker" style="left: 41.66%;" data-time="13:00"></div>
-                <div class="time-marker" style="left: 50%;" data-time="14:00"></div>
-                <div class="time-marker" style="left: 58.33%;" data-time="15:00"></div>
-                <div class="time-marker" style="left: 66.66%;" data-time="16:00"></div>
-                <div class="time-marker" style="left: 75%;" data-time="17:00"></div>
-                <div class="time-marker" style="left: 83.33%;" data-time="18:00"></div>
-                <div class="time-marker" style="left: 91.66%;" data-time="19:00"></div>
-                <div class="time-marker" style="left: 100%;" data-time="20:00"></div>
-            </div>
+          <!-- Static time markers (08:00 to 20:00) -->
+          <!-- Each hour = 100% / 12 = 8.33% -->
+          <div class="time-marker" style="left: 0%;" data-time="08:00"></div>
+          <div class="time-marker" style="left: 8.33%;" data-time="09:00"></div>
+          <div class="time-marker" style="left: 16.66%;" data-time="10:00"></div>
+          <div class="time-marker" style="left: 25%;" data-time="11:00"></div>
+          <div class="time-marker" style="left: 33.33%;" data-time="12:00"></div>
+          <div class="time-marker" style="left: 41.66%;" data-time="13:00"></div>
+          <div class="time-marker" style="left: 50%;" data-time="14:00"></div>
+          <div class="time-marker" style="left: 58.33%;" data-time="15:00"></div>
+          <div class="time-marker" style="left: 66.66%;" data-time="16:00"></div>
+          <div class="time-marker" style="left: 75%;" data-time="17:00"></div>
+          <div class="time-marker" style="left: 83.33%;" data-time="18:00"></div>
+          <div class="time-marker" style="left: 91.66%;" data-time="19:00"></div>
+          <div class="time-marker" style="left: 100%;" data-time="20:00"></div>
+        </div>
         <!-- </div> -->
+      </div>
     </div>
-</div>
 
 
     <h3>Manual Entry Logs</h3>
@@ -671,6 +634,38 @@ $(document).ready(function () {
         $('#log-data').html('<tr><td colspan="6">Error loading data</td></tr>');
       }
     });
+    $.ajax({
+      url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+      type: 'GET',
+      dataType: 'json',
+      success: function(response) {
+        if (response.status && response.data.length > 0) {
+          const data = response.data[0];
+
+          // Active time
+          const activeParts = data.total_active_time.split(':');
+          const activeHours = parseInt(activeParts[0]);
+          const activeMinutes = parseInt(activeParts[1]);
+          const activeFormatted = `${activeHours.toString().padStart(2, '0')} hrs ${activeMinutes.toString().padStart(2, '0')} min`;
+          $('#active-time').text(activeFormatted);
+
+          // Inactive time
+          const idleParts = data.total_idle_time.split(':');
+          const idleHours = parseInt(idleParts[0]);
+          const idleMinutes = parseInt(idleParts[1]);
+          const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
+
+          // Update the second .status-box strong tag (Inactive)
+          $('.status-box.inactive strong').text(idleFormatted);
+        } else {
+          $('#active-time').text("00 hrs 00 min");
+          $('.status-box.inactive strong').text("00 hrs 00 min");
+        }
+      },
+      error: function() {
+        alert('Failed to load time log data.');
+      }
+    });
   }
 
 
@@ -740,4 +735,137 @@ $(document).ready(function () {
     $('#timestamp_end').val('');
     $('#reason').val('');
   });
+
+  function fetchActivity(date1) {
+    const timelineTrack = $('#timeline-track');
+    timelineTrack.find('.activity-block').remove(); // 🧹 Clear existing activity blocks
+
+    $.ajax({
+      url: "<?= base_url('/admin/Activity_logs/get_activity'); ?>",
+      type: 'GET',
+      dataType: 'json',
+      data: {
+        date: date1
+      },
+      success: function(response) {
+        if (response.status && response.data.length > 0) {
+          const startHour = 8; // 08:00 AM
+          const endHour = 20; // 08:00 PM
+          const totalMinutes = (endHour - startHour) * 60;
+
+          response.data.forEach(function(item) {
+            const createdAt = new Date(item.created_at);
+            const hour = createdAt.getHours();
+            const minutes = createdAt.getMinutes();
+            const totalTimeInMinutes = (hour * 60 + minutes) - (startHour * 60);
+
+            // Skip if the time is outside 08:00 - 20:00
+            if (totalTimeInMinutes < 0 || totalTimeInMinutes > totalMinutes) return;
+
+            let blockColorClass = '';
+            if (item.is_active == '1') {
+              blockColorClass = 'timeline-yellow';
+            } else if (item.is_active == '2') {
+              blockColorClass = 'timeline-lightgreen';
+            } else if (item.is_active == '3') {
+              blockColorClass = 'timeline-darkgreen';
+            } else {
+              blockColorClass = 'timeline-red';
+            }
+
+            const blockWidthPercent = (5 / totalMinutes) * 100;
+            const leftPositionPercent = (totalTimeInMinutes / totalMinutes) * 100;
+
+            // Calculate end time by adding 5 minutes
+            const endAt = new Date(createdAt.getTime() + 5 * 60000);
+
+            // Format time as HH:MM AM/PM
+            const formatTime = date =>
+              date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+
+            const timeLabel = `${formatTime(createdAt)} to ${formatTime(endAt)}`;
+            const tooltip = $('<div></div>')
+              .addClass('custom-tooltip')
+              .text(timeLabel)
+              .hide(); // Initially hidden
+
+            const block = $('<div></div>')
+              .addClass('activity-block')
+              .addClass(blockColorClass)
+              .css({
+                'position': 'absolute',
+                'left': leftPositionPercent + '%',
+                'width': blockWidthPercent + '%',
+                'height': '100%'
+              }).append(tooltip).hover(
+                function() {
+                  tooltip.show();
+                },
+                function() {
+                  tooltip.hide();
+                }
+              );
+
+            timelineTrack.append(block);
+          });
+        } else {
+          showToast('No activity data found.', "error")
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('AJAX Error:', status, error);
+        alert('Failed to fetch activity data.');
+      }
+    });
+    $.ajax({
+      url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+      type: 'GET',
+      dataType: 'json',
+      data: {
+        date: date1
+      },
+      success: function(response) {
+        if (response.status && response.data.length > 0) {
+          const data = response.data[0];
+
+          // Active time
+          const activeParts = data.total_active_time.split(':');
+          const activeHours = parseInt(activeParts[0]);
+          const activeMinutes = parseInt(activeParts[1]);
+          const activeFormatted = `${activeHours.toString().padStart(2, '0')} hrs ${activeMinutes.toString().padStart(2, '0')} min`;
+          $('#active-time').text(activeFormatted);
+
+          // Inactive time
+          const idleParts = data.total_idle_time.split(':');
+          const idleHours = parseInt(idleParts[0]);
+          const idleMinutes = parseInt(idleParts[1]);
+          const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
+
+          // Update the second .status-box strong tag (Inactive)
+          $('.status-box.inactive strong').text(idleFormatted);
+        } else {
+          $('#active-time').text("00 hrs 00 min");
+          $('.status-box.inactive strong').text("00 hrs 00 min");
+        }
+      },
+      error: function() {
+        alert('Failed to load time log data.');
+      }
+    });
+  }
+  $(document).ready(function() {
+    const today = new Date().toISOString().split('T')[0];
+    $('#datePicker').val(today);
+    fetchActivity();
+
+  });
+
+  function triggerFilter() {
+    const date = $('#datePicker').val();
+    fetchActivity(date)
+  }
+  $('#datePicker').on('change', triggerFilter);
 </script>

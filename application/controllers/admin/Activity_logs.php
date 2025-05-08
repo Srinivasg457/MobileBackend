@@ -9,15 +9,16 @@ class Activity_logs extends Home_Controller
         $this->load->database();
     }
 
-    // public function index(){
-    //     // if (!$this->session->userdata('logged_in')) {
-    //     //     redirect('login');
-    //     // }
-    //     $data = array();
-    //     $data['page_title'] = 'Activity Log';
-    //     $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
-    //     $this->load->view('admin/index', $data);
-    // }
+    public function index()
+    {
+        // if (!$this->session->userdata('logged_in')) {
+        //     redirect('login');
+        // }
+        $data = array();
+        $data['page_title'] = 'Activity Log Admin';
+        $data['main_content'] = $this->load->view('admin/activityLog', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
     // public function check_activity_status()
     // {
     //     $employee_id = $this->input->get('employee_id', true);
@@ -283,5 +284,66 @@ public function get_activity()
         ]));
 }
 
+public function get_employee_activity()
+{
+        // Get parameters from request
+    $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+    $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id'); // fallback for Postman or URL query params
+    $date = $this->input->get('date') ?? date('Y-m-d');
+    $from_time = $this->input->get('from_time') ?? '00:00:00';
+    $to_time = $this->input->get('to_time') ?? '23:59:59';
 
+    // Convert to datetime format
+    $start_datetime = $date . ' ' . $from_time;
+    $end_datetime = $date . ' ' . $to_time;
+
+    // Query to get sum of keystrokes and mouse movements for the period
+    $this->db->select('
+        SUM(total_keystrokes) as total_keystrokes,
+        SUM(total_mouse_movement) as total_mouse_movement,
+        DATE_FORMAT(created_at, "%H:%i") as time,
+        created_at
+    ');
+    $this->db->from('Employee_Activity');
+    $this->db->where('employee_id', $employee_id);
+    $this->db->where('user_id', $user_id);
+    $this->db->where('created_at >=', $start_datetime);
+    $this->db->where('created_at <=', $end_datetime);
+    $this->db->group_by('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")'); // Group by minute
+    $this->db->order_by('created_at');
+    
+    $query = $this->db->get();
+    $result = $query->result_array();
+
+    // Calculate totals for the entire period
+    $total_keystrokes = 0;
+    $total_mouse_movement = 0;
+    foreach ($result as $row) {
+        $total_keystrokes += $row['total_keystrokes'];
+        $total_mouse_movement += $row['total_mouse_movement'];
+    }
+
+    // Return the data
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode([
+            'status' => !empty($result),
+            'data' => $result,
+            'totals' => [
+                'keystrokes' => $total_keystrokes,
+                'mouse_movement' => $total_mouse_movement
+            ],
+            'message' => empty($result) ? 'No activity data available for the selected time range.' : ''
+        ]));
+}
+public function get_index()
+    {
+        // if (!$this->session->userdata('logged_in')) {
+        //     redirect('login');
+        // }
+        $data = array();
+        $data['page_title'] = 'employee_activity';
+        $data['main_content'] = $this->load->view('admin/time_cards', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
 }

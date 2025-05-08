@@ -33,7 +33,7 @@
                 <i class="bi bi-clock-history"></i> <span><?php echo "Activity Log" ?></span>
               </a>
             </li>
-            <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
+            <li class="<?php if (isset($page_title) && $page_title == "Report") {
                           echo "active";
                         } ?>">
               <a href="<?php echo base_url('employee/report') ?>">
@@ -413,11 +413,32 @@
                       <i class="bi bi-camera"></i> <span><?php echo "View Screenshots" ?></span>
                     </a>
                   </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/Activity_logs') ?>">
+                      <i class="bi bi-file-bar-graph"></i> <span><?php echo "Activity Log" ?></span>
+                    </a>
+                  </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/Activity_logs/get_index') ?>">
+                      <i class="bi bi-clock"></i> <span><?php echo "Time Cards" ?></span>
+                    </a>
+                  </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/Monitoring_room') ?>">
+                      <i class="bi bi-eye"></i> <span><?php echo "Live Monitoring" ?></span>
+                    </a>
+                  </li>
                   <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
                                 echo "active";
                               } ?>">
                     <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
-                      <i class="bi bi-clock"></i> <span><?php echo "Time Approval" ?></span>
+                      <i class="bi-clipboard-check"></i> <span><?php echo "Time Approval" ?></span>
                     </a>
                   </li>
 
@@ -544,6 +565,14 @@
                                   } ?>">
                         <a href="<?php echo base_url('admin/hrm/salary') ?>">
                           <i class="bi bi-currency-exchange"></i> <span><?php echo trans('salary') ?></span>
+                        </a>
+                      </li>
+
+                      <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
+                                    echo "active";
+                                  } ?>">
+                        <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
+                          <i class="bi bi-person-plus"></i> <span><?php echo "Roles & Permissions" ?></span>
                         </a>
                       </li>
 
