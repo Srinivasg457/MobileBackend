@@ -383,7 +383,6 @@
     function closeVideoModal() {
       const modal = document.getElementById("videoModal");
       modal.style.display = "none";
-      document.getElementById("modalVideo").src = "";
     }
  
     window.onclick = function(event) {
