@@ -429,7 +429,8 @@ public function delete_role()
     header('Content-Type: application/json');
 
     // Get user_id from session
-    $user_id = $this->session->userdata('user_id');
+    $user_id = $this->session->userdata('user_id') ?? $this->input->get('user_id');
+
     if (!$user_id) {
         http_response_code(401);
         echo json_encode([
@@ -439,22 +440,20 @@ public function delete_role()
         return;
     }
 
-    // Parse input data for DELETE (you need to manually handle php://input)
-    parse_str(file_get_contents('php://input'), $data);
-
-    $role_id = isset($data['role_id']) ? intval($data['role_id']) : null;
-    $department_id = isset($data['department_id']) ? intval($data['department_id']) : null;
+    // Get role_id and department_id from query parameters
+    $role_id = $this->input->get('role_id');
+    $department_id = $this->input->get('department_id');
 
     if (!$role_id || !$department_id) {
         http_response_code(400);
         echo json_encode([
             'status' => false,
-            'message' => 'Missing role_id or department_id.'
+            'message' => 'Missing required parameters: role_id or department_id.'
         ]);
         return;
     }
 
-    // Verify role ownership
+    // Verify role belongs to user and department
     $role = $this->db->where('id', $role_id)
                      ->where('user_id', $user_id)
                      ->where('department_id', $department_id)
@@ -465,23 +464,23 @@ public function delete_role()
         http_response_code(404);
         echo json_encode([
             'status' => false,
-            'message' => 'Role not found or unauthorized access.'
+            'message' => 'Role not found or access denied.'
         ]);
         return;
     }
 
-    // Prevent deletion if role is assigned to employees
+    // Check if role is assigned to any employee
     $assigned = $this->db->where('role_id', $role_id)->limit(1)->get('employees')->row();
     if ($assigned) {
         http_response_code(409);
         echo json_encode([
             'status' => false,
-            'message' => 'Cannot delete: Role is assigned to employees.'
+            'message' => 'Cannot delete: Role is assigned to one or more employees.'
         ]);
         return;
     }
 
-    // Delete the role
+    // Proceed to delete
     if ($this->db->delete('employee_roles', ['id' => $role_id])) {
         echo json_encode([
             'status' => true,
@@ -489,12 +488,15 @@ public function delete_role()
         ]);
     } else {
         http_response_code(500);
+        $db_error = $this->db->error();
         echo json_encode([
             'status' => false,
-            'message' => 'Failed to delete role.'
+            'message' => 'Failed to delete role. Database error.',
+            'error' => $db_error['message'] ?? 'Unknown error'
         ]);
     }
 }
+
 
     
 
