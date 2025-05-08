@@ -103,6 +103,8 @@
                                     <option value="ProjectManager">Project Manager</option>
                                     <option value="HR">HR Manager</option>
                                     <option value="Employee">Employee</option>
+                                    <option value="ter">Intern</option>
+
                                 </select>
                             </div>
                             <div class="mb-4">
@@ -159,6 +161,87 @@
             </div>
         </form>
     </div>
+    <!-- role and permission creating model -->
+    <div id="edit_role_permssion_area" class="hide">
+        <div class="box-header">
+            <h3>
+                Edit Roles & Permission
+                <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_bulk"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
+            </h3>
+        </div>
+        <form id="createPermissionForm">
+            <div class="row rolesandpermission">
+                <!-- Role Form -->
+                <div class="col-lg-6">
+                    <div class="card shadow-lg role">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-person-plus"></i> Select Role</h5>
+                            <div class="mb-4">
+                                <label for="role_name" class="form-label">Role Name</label>
+                                <select class="form-control" id="role_name" name="role_name" required>
+                                    <option value="">-- Select Role --</option>
+                                    <option value="TeamLead">Team Lead (TL)</option>
+                                    <option value="ProjectManager">Project Manager</option>
+                                    <option value="HR">HR Manager</option>
+                                    <option value="Employee">Employee</option>
+                                    <option value="ter">Intern</option>
+
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Department</label>
+                                <select class="form-control" name="department" required>
+                                    <option value="">-- Select Department --</option>
+                                    <?php foreach ($departments as $department): ?>
+                                        <option value="<?= html_escape($department->id); ?>"
+                                            <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
+                                            <?= html_escape($department->name); ?>
+                                        </option>
+                                    <?php endforeach ?>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="role_description" class="form-label">Role Description</label>
+                                <textarea class="form-control" id="role_description" name="role_description" maxlength="500" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Permissions Form -->
+                <div class="col-lg-6">
+                    <div class="card shadow-lg role">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-shield-plus"></i> Assign Permission to Role</h5>
+                            <div class="mb-4">
+                                <div id="feature-access-list" class="mt-4">
+                                    <!-- Features table will be loaded here via JavaScript -->
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p>Loading features...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-4 hide">
+                                <label for="permission_description" class="form-label">Permission Description</label>
+                                <textarea class="form-control" id="permission_description" name="permission_description" maxlength="500" rows="3"></textarea>
+                            </div>
+                            <div class="my-4 d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary mx-2" id="cancelBtn">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </button>
+                                <button type="submit" class="btn btn-success mx-2">
+                                    <i class="fa fa-check"></i> Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 
 
     <div class="list_area container">
@@ -187,47 +270,13 @@
     </div>
 </div>
 
+
 <script>
     function showToast(message, type) {
         const toast = $(`<div class="toast toast-${type}">${message}</div>`);
         $('#toast-container').append(toast);
         setTimeout(() => toast.fadeOut(500, () => toast.remove()), 2000);
     }
-
-    $(document).off('click', '.delete-role-btn').on('click', '.delete-role-btn', function(e) {
-        e.preventDefault();
-
-        const userId = $(this).data('id');
-        const departmentId = $(this).data('department-id');
-        const role = $(this).data('role');
-console.log("depId: " + departmentId);
-console.log("userId: " + userId);
-
-
-        if (confirm(`Are you sure you want to delete the role "${role}" for this employee?`)) {
-            $.ajax({
-                url: "<?= base_url('/employee/EmployeeRoles/delete_role'); ?>",
-                method: "POST",
-                dataType: "json",
-                data: {
-                    user_id: userId,
-                    department_id: departmentId,
-                },
-                success: function(response) {
-                    if (response.status === 200 || response.status === 'success') {
-                        alert('Role deleted successfully.');
-                        loadUserRolePermissions(userId); // Refresh table
-                    } else {
-                        alert(response.message || 'Failed to delete role.');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                    alert('Error deleting role.');
-                }
-            });
-        }
-    });
 
     function loadUserRolePermissions(userId) {
         $.ajax({
@@ -299,11 +348,11 @@ console.log("userId: " + userId);
                                 </a>
                             </td>
                              <td class="actions" width="15%">
-                                <a href="<?= base_url('admin/hrm/employee_edit/') ?>${userId}" class="on-default edit-row text-primary" data-placement="top" title="Edit">
+                                 <a href="#" class="on-default edit-row  edit_row_button" data-placement="top" title="Edit">
                                     <i class="fa fa-pencil"></i>
                                 </a>
                                <a href="#" 
-                                    class="on-default remove-row text-danger delete-role-btn" 
+                                    class="on-default remove-row  delete-role-btn" 
                                     data-val="employee" 
                                     data-id="${userId}" 
                                     data-department-id="${role.department_id}" 
@@ -320,18 +369,18 @@ console.log("userId: " + userId);
                         <tr>
                             <td>${index++}</td>
                             <td>${role.role_name}</td>
-                            <td><em>No features assigned</em></td>
+                            <td><i class="bi bi-pencil-square text-muted" title="No features to update" style="cursor: not-allowed;">No feature to update</i></td>
                             <td>
-                                <a href="#" class="view-permissions text-muted" title="No Permissions">
+                                <a href="#" class="view-permissions  text-muted" title="No Permissions">
                                     <i class="bi bi-eye-slash" style="font-size: 1.5rem;"></i>
                                 </a>
                             </td>
                            <td class="actions" width="15%">
-                                <a href="<?= base_url('admin/hrm/employee_edit/') ?>${userId}" class="on-default edit-row text-primary" data-placement="top" title="Edit">
+                                <a href="#" class="on-default edit_row_button" data-placement="top" title="Edit">
                                     <i class="fa fa-pencil"></i>
                                 </a>
                                 <a href="#" 
-                                    class="on-default remove-row text-danger delete-role-btn" 
+                                    class="on-default remove-row delete-role-btn" 
                                     data-val="employee" 
                                     data-id="${userId}" 
                                     data-department-id="${role.department_id}" 
@@ -356,7 +405,7 @@ console.log("userId: " + userId);
                             $('#permissionsContent').html('<p>No permissions found for this role.</p>');
                         } else {
                             let tableHtml = `
-                            <h6>Role: ${role}</h6>
+                            <h6><i class="bi bi-person-gear" title="Role"></i> Role: ${role}</h6>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped">
                                     <thead>
@@ -374,10 +423,10 @@ console.log("userId: " + userId);
                                 tableHtml += `
                                 <tr>
                                     <td>${feature.name}</td>
-                                    <td>${feature.read ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
-                                    <td>${feature.write ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
-                                    <td>${feature.action ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
-                                    <td>${feature.delete ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td>${feature.read == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td>${feature.write == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td>${feature.action == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td>${feature.delete == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
                                 </tr>`;
                             });
 
@@ -399,7 +448,46 @@ console.log("userId: " + userId);
         });
     }
 
+    $(document).off('click', '.delete-role-btn').on('click', '.delete-role-btn', function(e) {
+        e.preventDefault();
 
+        const userId = $(this).data('id');
+        const departmentId = $(this).data('department-id');
+        const role = $(this).data('role');
+        console.log("depId: " + departmentId);
+        console.log("userId: " + userId);
+
+
+        if (confirm(`Are you sure you want to delete the role "${role}" for this employee?`)) {
+            $.ajax({
+                url: "<?= base_url('/employee/EmployeeRoles/delete_role'); ?>",
+                method: "POST",
+                dataType: "json",
+                data: {
+                    user_id: userId,
+                    department_id: departmentId,
+                },
+                success: function(response) {
+                    if (response.status === 200 || response.status === 'success') {
+                        alert('Role deleted successfully.');
+                        loadUserRolePermissions(userId); // Refresh table
+                    } else {
+                        alert(response.message || 'Failed to delete role.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    alert('Error deleting role.');
+                }
+            });
+        }
+    });
+    $(document).off('click', '.edit_row_button').on('click', '.edit_row_button', function(e) {
+        console.log("hii");
+        e.preventDefault();
+        $('#edit_role_permssion_area').show();
+        $('.list_area').hide();
+    });
     let storedRoleId = null;
     let allFeatures = [];
 
@@ -652,7 +740,9 @@ console.log("userId: " + userId);
         $('.cancel_bulk').on('click', function(e) {
             e.preventDefault();
             $('#create_role_permssion_area  ').hide();
+            $('#edit_role_permssion_area  ').hide();
             $('.list_area').show();
         });
+
     });
 </script>
