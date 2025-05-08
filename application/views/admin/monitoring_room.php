@@ -1,7 +1,4 @@
-<div class="content-wrapper">
-  <section class="content">
- 
-  <style>
+<style>
     :root {
       --primary-color: #3498db;
       --secondary-color: #2980b9;
@@ -15,16 +12,14 @@
       --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       --transition: all 0.3s ease;
     }
-
-  
-
+ 
     h2 {
       margin-bottom: 25px;
       color: var(--dark-color);
       font-weight: 600;
       font-size: 28px;
     }
-
+ 
     .toolbar {
       display: flex;
       gap: 15px;
@@ -32,7 +27,7 @@
       flex-wrap: wrap;
       justify-content: space-between;
     }
-
+ 
     .toolbar input[type="text"],
     .toolbar select {
       padding: 10px 15px;
@@ -42,21 +37,21 @@
       background-color: white;
       transition: var(--transition);
     width:30%}
-
+ 
     .toolbar input[type="text"]:focus,
     .toolbar select:focus {
       outline: none;
       border-color: var(--primary-color);
       box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
     }
-
+ 
     .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* 3 columns */
   gap: 25px;
 }
-
-
+ 
+ 
     .card {
       background-color: #fff;
       border-radius: var(--border-radius);
@@ -66,23 +61,23 @@
       flex-direction: column;
       transition: var(--transition);
     }
-
+ 
     .card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
-
+ 
     .card .image-container {
       position: relative;
       cursor: pointer;
     }
-
+ 
     .card img.thumbnail {
       width: 100%;
       height: 200px;
       object-fit: cover;
     }
-
+ 
     .card .video-call-icon {
       position: absolute;
       top: 15px;
@@ -95,28 +90,28 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.2);
       transition: var(--transition);
     }
-
+ 
     .card .video-call-icon:hover {
       transform: scale(1.1);
     }
-
+ 
     .card-content {
       padding: 5px;
     }
-
+ 
     .card-content h3 {
       margin: 0 0 5px;
       font-size: 18px;
       font-weight: 600;
       color: var(--dark-color);
     }
-
+ 
     .card-content p {
       margin: 0 0 10px;
       color: var(--text-light);
       font-size: 14px;
     }
-
+ 
     .status {
       display: flex;
       justify-content: space-between;
@@ -124,31 +119,31 @@
       padding-top: 10px;
       border-top: 1px solid #eee;
     }
-
+ 
     .status span {
       font-size: 14px;
       display: flex;
       align-items: center;
       gap: 5px;
     }
-
+ 
     .status-icon {
       width: 12px;
       height: 12px;
       border-radius: 50%;
       display: inline-block;
     }
-
+ 
     .active {
       color: var(--success-color);
       font-weight: 500;
     }
-
+ 
     .inactive {
       color: var(--danger-color);
       font-weight: 500;
     }
-
+ 
     .modal {
       display: none;
       position: fixed;
@@ -161,7 +156,7 @@
       background-color: rgba(0,0,0,0.8);
       backdrop-filter: blur(5px);
     }
-
+ 
     .modal-content {
       background-color: #fefefe;
       margin: auto;
@@ -174,35 +169,35 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       animation: modalFadeIn 0.3s ease-out;
     }
-
+ 
     @keyframes modalFadeIn {
       from {opacity: 0; transform: translateY(-60%);}
       to {opacity: 1; transform: translateY(-50%);}
     }
-
+ 
     .modal-content video {
       width: 100%;
       height: auto;
       border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
-
+ 
     .modal-info {
       padding: 15px;
       background-color: white;
       border-radius: 0 0 var(--border-radius) var(--border-radius);
     }
-
+ 
     .modal-info h3 {
       margin: 0 0 5px;
       color: var(--dark-color);
     }
-
+ 
     .modal-info p {
       margin: 0;
       color: var(--text-light);
       font-size: 14px;
     }
-
+ 
     .close {
       color: white;
       position: absolute;
@@ -215,38 +210,43 @@
       opacity: 0.8;
       transition: var(--transition);
     }
-
+ 
     .close:hover {
       opacity: 1;
       transform: scale(1.1);
     }
-
+ 
     @media(max-width: 768px) {
       .modal-content {
         width: 95%;
       }
-
+ 
       .card-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       }
     }
-
+ 
     @media(max-width: 480px) {
       .toolbar {
         flex-direction: column;
         gap: 10px;
       }
-
+ 
       .toolbar input[type="text"],
       .toolbar select {
         width: 100%;
       }
     }
-  </style>
+    video { width: 100%; max-width: 100%; border: 1px solid #ccc; }
+    button { margin: 10px 0; padding: 10px 20px; }
+</style>
 
 
+<div class="content-wrapper">
+  <section class="content">
+ 
   <h2>Live Monitoring Dashboard</h2>
-
+ 
   <div class="toolbar">
     <input type="text" placeholder="Search employees by name or ID...">
     <select>
@@ -256,7 +256,7 @@
       <option value="inactive">Inactive Hours (High-Low)</option>
     </select>
   </div>
-
+ 
 <div class="card-grid">
   <!-- Card 1 -->
   <div class="card">
@@ -273,7 +273,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Card 2 -->
   <div class="card">
     <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Ravi Kumar', 'ID: 57002')">
@@ -289,7 +289,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Card 3 -->
   <div class="card">
     <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Nisha Patel', 'ID: 57003')">
@@ -305,7 +305,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Card 4 -->
   <div class="card">
     <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Amit Sharma', 'ID: 57004')">
@@ -321,7 +321,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Card 5 -->
   <div class="card">
     <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Divya Menon', 'ID: 57005')">
@@ -337,7 +337,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Card 6 -->
   <div class="card">
     <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Suresh Raina', 'ID: 57006')">
@@ -354,35 +354,39 @@
     </div>
   </div>
 </div>
-
-
+ 
+ 
   <!-- Modal -->
   <div id="videoModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeVideoModal()">&times;</span>
-      <video id="modalVideo" controls autoplay></video>
+      <video id="remoteVideo" autoplay playsinline></video>
       <div class="modal-info">
         <h3 id="modalName"></h3>
         <p id="modalId"></p>
       </div>
     </div>
   </div>
+ 
+  </section>
+</div>
 
-  <script>
+
+<script>
     function openVideoModal(videoUrl, name, id) {
-      document.getElementById("modalVideo").src = videoUrl;
       document.getElementById("modalName").innerText = name;
       document.getElementById("modalId").innerText = id;
       document.getElementById("videoModal").style.display = "block";
+      playVideo(id) 
     }
-
+ 
     function closeVideoModal() {
       const modal = document.getElementById("videoModal");
       modal.style.display = "none";
       document.getElementById("modalVideo").pause();
       document.getElementById("modalVideo").src = "";
     }
-
+ 
     window.onclick = function(event) {
       const modal = document.getElementById("videoModal");
       if (event.target === modal) {
@@ -392,5 +396,86 @@
   </script>
 
 
-  </section>
-</div>
+<body>
+
+    <button id="startShare">Start Screen Share</button>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:8090');
+        let peerConnection;
+
+        const config = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        ws.onopen = () => {
+            console.log('WebSocket connected to server');
+        };
+
+        ws.onmessage = async (event) => {
+            const msg = JSON.parse(event.data);
+            console.log('Received message:', msg);
+
+            if (msg.type === 'error') {
+                console.error('Server error:', msg.message);
+                alert('Error: ' + msg.message);
+            } else if (msg.type === 'offer') {
+                peerConnection = new RTCPeerConnection(config);
+
+                peerConnection.ontrack = (event) => {
+                    console.log('Received remote stream with tracks:', event.streams[0].getTracks());
+                    document.getElementById('remoteVideo').srcObject = event.streams[0];
+                };
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        console.log('Sending ICE candidate:', event.candidate);
+                        ws.send(JSON.stringify({ type: 'candidate', data: event.candidate }));
+                    }
+                };
+
+                peerConnection.oniceconnectionstatechange = () => {
+                    console.log('ICE connection state:', peerConnection.iceConnectionState);
+                };
+
+                peerConnection.onconnectionstatechange = () => {
+                    console.log('Connection state:', peerConnection.connectionState);
+                };
+
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(msg.data));
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    console.log('Sending answer:', answer);
+                    ws.send(JSON.stringify({ type: 'answer', data: answer }));
+                } catch (err) {
+                    console.error('Error handling offer:', err);
+                }
+            } else if (msg.type === 'candidate' && peerConnection) {
+                try {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(msg.data));
+                } catch (err) {
+                    console.error('Error adding ICE candidate:', err);
+                }
+            }
+        };
+
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket connection closed');
+        };
+
+        function playVideo(id){
+          const data = {
+            employee_id: 8,
+            type: 'request-share'
+          };
+          ws.send(JSON.stringify(data));
+       }
+    </script>
