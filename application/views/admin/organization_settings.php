@@ -171,6 +171,10 @@
         right: 10px;
         z-index: 9999;
     }
+          .content-wrapper{
+    height: unset !important;
+    min-height: unset !important;
+}
 </style>
 <div id="toast-container" style="position: fixed;top: 0;"></div>
 <div class="content-wrapper" style="min-height: 760.5px;">

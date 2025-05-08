@@ -90,6 +90,10 @@
         right: 10px;
         z-index: 9999;
     }
+            .content-wrapper{
+    height: unset !important;
+    min-height: unset !important;
+}
 </style>
 
 <div class="content-wrapper">

@@ -463,6 +463,10 @@
         padding: 12px 14px;
     }
 }
+      .content-wrapper{
+    height: unset !important;
+    min-height: unset !important;
+}
 
 /* Timeline bar mobile optimization */
 @media (max-width: 768px) {
