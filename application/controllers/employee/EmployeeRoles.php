@@ -175,213 +175,152 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response($e->getCode(), $e->getMessage());
         }
     }
-    
-    // public function store_role_feature_access() {
-    //     // Get the raw input stream
-    //     $request_body = $this->input->raw_input_stream;
-    
-    //     // Decode the JSON data
-    //     $input = json_decode($request_body, TRUE);
-    
-    //     // Check if decoding was successful and if $input is an array
-    //     if ($input === NULL || !is_array($input)) {
-    //         return $this->json_response(400, 'Invalid JSON format in request body');
-    //     }
-    
-    //     // Validate role_id only with form_validation
-    //     $this->form_validation->set_data(['role_id' => $input['role_id'] ?? null]);
-    //     $this->form_validation->set_rules('role_id', 'Role ID', 'required|integer');
-    
-    //     if ($this->form_validation->run() === FALSE) {
-    //         return $this->json_response(400, 'Validation failed', [
-    //             'errors' => $this->form_validation->error_array()
-    //         ]);
-    //     }
-    
-    //     // Validate features manually
-    //     if (!isset($input['features']) || !is_array($input['features']) || empty($input['features'])) {
-    //         return $this->json_response(400, 'Validation failed', [
-    //             'errors' => ['features' => 'The Features field is required and must be a non-empty array.']
-    //         ]);
-    //     }
-    
-    //     $role_id = $input['role_id'];
-    //     $features = $input['features'];
-    //     $insert_data = [];
-    //     $errors = [];
-    
-    //     // Check if the role exists
-    //     $role_exists = $this->db->where('id', $role_id)->get('employee_roles')->row();
-    //     if (!$role_exists) {
-    //         return $this->json_response(404, 'Role ID does not exist');
-    //     }
-    
-    //     // Validate each feature
-    //     foreach ($features as $key => $feature) {
-    //         $this->form_validation->set_data($feature);
-    //         $this->form_validation->set_rules('feature_id', 'Feature ID', 'required|integer');
-    //         $this->form_validation->set_rules('is_read', 'Read Permission', 'required|integer');
-    //         $this->form_validation->set_rules('is_write', 'Write Permission', 'required|integer');
-    //         $this->form_validation->set_rules('is_action', 'Action Permission', 'required|integer');
-    //         $this->form_validation->set_rules('is_delete', 'Delete Permission', 'required|integer');
-    
-    //         if ($this->form_validation->run() === FALSE) {
-    //             $errors['features'][$key] = $this->form_validation->error_array();
-    //             continue;
-    //         }
-    
-    //         // Check if feature exists
-    //         $feature_exists = $this->db->where('id', $feature['feature_id'])->get('app_features')->row();
-    //         if (!$feature_exists) {
-    //             $errors['features'][$key]['feature_id'] = 'Feature ID ' . $feature['feature_id'] . ' does not exist';
-    //             continue;
-    //         }
-    
-    //         $insert_data[] = [
-    //             'role_id' => $role_id,
-    //             'feature_id' => $feature['feature_id'],
-    //             'is_read' => $feature['is_read'],
-    //             'is_write' => $feature['is_write'],
-    //             'is_action' => $feature['is_action'],
-    //             'is_delete' => $feature['is_delete']
-    //         ];
-    //     }
-    
-    //     // If there are validation errors
-    //     if (!empty($errors)) {
-    //         return $this->json_response(400, 'Validation failed for one or more features', ['errors' => $errors]);
-    //     }
-    
-    //     // Start DB transaction
-    //     $this->db->trans_start();
-    //     $this->db->where('role_id', $role_id)->delete('role_feature_access');
-    
-    //     if (!empty($insert_data)) {
-    //         $this->db->insert_batch('role_feature_access', $insert_data);
-    //     }
-    
-    //     $this->db->trans_complete();
-    
-    //     if ($this->db->trans_status() === FALSE) {
-    //         log_message('error', 'Database error: ' . json_encode($this->db->error()));
-    //         return $this->json_response(500, 'Failed to store role feature access');
-    //     }
-    
-    //     return $this->json_response(201, 'Role feature access stored successfully for multiple features');
-    // }
-   
 
-   
-
-
-    //for update and insert same logic
-    
     public function store_role_feature_access() {
-        $request_body = $this->input->raw_input_stream;
-        $input = json_decode($request_body, TRUE);
+        try {
+            $request_body = $this->input->raw_input_stream;
+            $input = json_decode($request_body, TRUE);
     
-        if ($input === NULL || !is_array($input)) {
-            return $this->json_response(400, 'Invalid JSON format in request body');
-        }
+            // Validate input format
+            if ($input === NULL || !is_array($input)) {
+                log_message('error', 'Invalid JSON format in request body: ' . $request_body);
+                return $this->json_response(400, 'Invalid JSON format. Please ensure the request body is correctly formatted.');
+            }
     
-        // Validate role_id and user_id
-        $this->form_validation->set_data([
-            'role_id' => $input['role_id'] ?? null,
-            'user_id' => $input['user_id'] ?? null
-        ]);
-        $this->form_validation->set_rules('role_id', 'Role ID', 'required|integer');
-        $this->form_validation->set_rules('user_id', 'User ID', 'required|integer');
-    
-        if ($this->form_validation->run() === FALSE) {
-            return $this->json_response(400, 'Validation failed', [
-                'errors' => $this->form_validation->error_array()
+            // Validate role_id, user_id, and employee_id
+            $this->form_validation->set_data([
+                'role_id' => $input['role_id'] ?? null,
+                'user_id' => $input['user_id'] ?? null,
+                'employee_id' => $input['employee_id'] ?? null
             ]);
-        }
-    
-        if (!isset($input['features']) || !is_array($input['features']) || empty($input['features'])) {
-            return $this->json_response(400, 'Validation failed', [
-                'errors' => ['features' => 'The Features field is required and must be a non-empty array.']
-            ]);
-        }
-    
-        $role_id = $input['role_id'];
-        $user_id = $input['user_id'];
-        $features = $input['features'];
-        $errors = [];
-    
-        $role_exists = $this->db->where('id', $role_id)->get('employee_roles')->row();
-        if (!$role_exists) {
-            return $this->json_response(404, 'Role ID does not exist');
-        }
-    
-        $user_exists = $this->db->where('id', $user_id)->get('users')->row();
-        if (!$user_exists) {
-            return $this->json_response(404, 'User ID does not exist');
-        }
-    
-        $this->db->trans_start();
-    
-        foreach ($features as $key => $feature) {
-            $this->form_validation->set_data($feature);
-            $this->form_validation->set_rules('feature_id', 'Feature ID', 'required|integer');
-            $this->form_validation->set_rules('is_read', 'Read Permission', 'required|integer');
-            $this->form_validation->set_rules('is_write', 'Write Permission', 'required|integer');
-            $this->form_validation->set_rules('is_action', 'Action Permission', 'required|integer');
-            $this->form_validation->set_rules('is_delete', 'Delete Permission', 'required|integer');
+            $this->form_validation->set_rules('role_id', 'Role ID', 'required|integer');
+            $this->form_validation->set_rules('user_id', 'User ID', 'required|integer');
+            $this->form_validation->set_rules('employee_id', 'Employee ID', 'required|integer');
     
             if ($this->form_validation->run() === FALSE) {
-                $errors['features'][$key] = $this->form_validation->error_array();
-                continue;
+                $errors = $this->form_validation->error_array();
+                log_message('error', 'Validation failed for role_id, user_id, employee_id: ' . json_encode($errors));
+                return $this->json_response(400, 'Validation failed. Please ensure all required fields are provided correctly.', ['errors' => $errors]);
             }
     
-            $feature_id = $feature['feature_id'];
-    
-            $feature_exists = $this->db->where('id', $feature_id)->get('app_features')->row();
-            if (!$feature_exists) {
-                $errors['features'][$key]['feature_id'] = 'Feature ID ' . $feature_id . ' does not exist';
-                continue;
+            // Check for features
+            if (!isset($input['features']) || !is_array($input['features']) || empty($input['features'])) {
+                log_message('error', 'The Features field is required and must be a non-empty array.');
+                return $this->json_response(400, 'The Features field is required and must be a non-empty array.');
             }
     
-            // Data to insert or update
-            $data = [
-                'is_read' => $feature['is_read'],
-                'is_write' => $feature['is_write'],
-                'is_action' => $feature['is_action'],
-                'is_delete' => $feature['is_delete']
-            ];
+            $role_id = $input['role_id'];
+            $user_id = $input['user_id'];
+            $employee_id = $input['employee_id'];
+            $features = $input['features'];
+            $errors = [];
     
-            // Check if the entry exists
-            $existing = $this->db->get_where('role_feature_access', [
-                'role_id' => $role_id,
-                'user_id' => $user_id,
-                'feature_id' => $feature_id
-            ])->row();
-    
-            if ($existing) {
-                // Update existing record
-                $this->db->where('id', $existing->id)->update('role_feature_access', $data);
-            } else {
-                // Insert new record
-                $data['role_id'] = $role_id;
-                $data['user_id'] = $user_id;
-                $data['feature_id'] = $feature_id;
-                $this->db->insert('role_feature_access', $data);
+            // Check if role exists
+            $role_exists = $this->db->where('id', $role_id)->get('employee_roles')->row();
+            if (!$role_exists) {
+                log_message('error', 'Role ID does not exist: ' . $role_id);
+                return $this->json_response(404, 'Role does not exist. Please verify the Role ID.');
             }
+    
+            // Check if user exists
+            $user_exists = $this->db->where('id', $user_id)->get('users')->row();
+            if (!$user_exists) {
+                log_message('error', 'User ID does not exist: ' . $user_id);
+                return $this->json_response(404, 'User does not exist. Please verify the User ID.');
+            }
+    
+            // Check if employee exists
+            $employee_exists = $this->db->where('id', $employee_id)->get('employees')->row();
+            if (!$employee_exists) {
+                log_message('error', 'Employee ID does not exist: ' . $employee_id);
+                return $this->json_response(404, 'Employee does not exist. Please verify the Employee ID.');
+            }
+    
+            // Process features
+            $this->db->trans_start();
+    
+            foreach ($features as $key => $feature) {
+                // Validate feature data
+                $this->form_validation->set_data($feature);
+                $this->form_validation->set_rules('feature_id', 'Feature ID', 'required|integer');
+                $this->form_validation->set_rules('is_read', 'Read Permission', 'required|integer');
+                $this->form_validation->set_rules('is_write', 'Write Permission', 'required|integer');
+                $this->form_validation->set_rules('is_action', 'Action Permission', 'required|integer');
+                $this->form_validation->set_rules('is_delete', 'Delete Permission', 'required|integer');
+    
+                if ($this->form_validation->run() === FALSE) {
+                    $errors['features'][$key] = $this->form_validation->error_array();
+                    continue;
+                }
+    
+                $feature_id = $feature['feature_id'];
+    
+                // Check if feature exists
+                $feature_exists = $this->db->where('id', $feature_id)->get('app_features')->row();
+                if (!$feature_exists) {
+                    $errors['features'][$key]['feature_id'] = 'Feature ID ' . $feature_id . ' does not exist';
+                    continue;
+                }
+    
+                // Prepare data to insert or update
+                $data = [
+                    'is_read' => $feature['is_read'],
+                    'is_write' => $feature['is_write'],
+                    'is_action' => $feature['is_action'],
+                    'is_delete' => $feature['is_delete'],
+                    'employee_id' => $employee_id
+                ];
+    
+                // Check if the entry already exists
+                $existing = $this->db->get_where('role_feature_access', [
+                    'role_id' => $role_id,
+                    'user_id' => $user_id,
+                    'feature_id' => $feature_id,
+                    'employee_id' => $employee_id
+                ])->row();
+    
+                if ($existing) {
+                    // Update existing record
+                    $this->db->where('id', $existing->id)->update('role_feature_access', $data);
+                } else {
+                    // Insert new record
+                    $data['role_id'] = $role_id;
+                    $data['user_id'] = $user_id;
+                    $data['feature_id'] = $feature_id;
+                    $this->db->insert('role_feature_access', $data);
+                }
+            }
+    
+            // Complete transaction
+            $this->db->trans_complete();
+    
+            // Check if transaction was successful
+            if ($this->db->trans_status() === FALSE) {
+                $db_error = $this->db->error();
+                log_message('error', 'Database error during transaction: ' . json_encode($db_error));
+                return $this->json_response(500, 'An internal server error occurred while storing role feature access. Please contact support.', [
+                    'error' => 'Database error: ' . $db_error['message'],
+                    'code' => $db_error['code']
+                ]);
+            }
+    
+            // Return success response
+            if (!empty($errors)) {
+                log_message('warning', 'Some features failed validation: ' . json_encode($errors));
+                return $this->json_response(400, 'Validation failed for one or more features', ['errors' => $errors]);
+            }
+    
+            return $this->json_response(201, 'Role feature access stored successfully for multiple features');
+        } catch (Exception $e) {
+            // Catch unexpected exceptions
+            log_message('error', 'Unexpected error occurred: ' . $e->getMessage());
+            return $this->json_response(500, 'An unexpected error occurred. Please try again later.', [
+                'error' => 'Internal server error: ' . $e->getMessage(),
+                'code' => $e->getCode()
+            ]);
         }
-    
-        $this->db->trans_complete();
-    
-        if (!empty($errors)) {
-            return $this->json_response(400, 'Validation failed for one or more features', ['errors' => $errors]);
-        }
-    
-        if ($this->db->trans_status() === FALSE) {
-            log_message('error', 'Database error: ' . json_encode($this->db->error()));
-            return $this->json_response(500, 'Failed to store role feature access');
-        }
-    
-        return $this->json_response(201, 'Role feature access stored successfully for multiple features');
     }
+    
 
 
    public function get_user_role_feature_permissions() {
