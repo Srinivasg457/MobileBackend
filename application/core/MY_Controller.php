@@ -113,4 +113,83 @@ class Home_Controller extends MY_Controller
             ]));
     }
 
+    
+    public function check_permission($employee_id, $permission_type) {
+        // Validate the permission type
+        $valid_permission_types = ['read', 'write', 'action', 'delete'];
+        if (!in_array($permission_type, $valid_permission_types)) {
+            return $this->json_response(400, 'Invalid permission type provided.');
+        }
+    
+        // Fetch the employee record from the employees table
+        $employee = $this->ci->db->where('id', $employee_id)->get('employees')->row();
+    
+        // Check if the employee exists
+        if (!$employee) {
+            return $this->json_response(404, 'Employee not found.');
+        }
+    
+        // Check if the employee has an associated role
+        if (!$employee->role_id) {
+            return $this->json_response(404, 'Employee does not have an assigned role.');
+        }
+    
+        // Fetch the features linked to the employee's role
+        $features = $this->ci->db->where('role_id', $employee->role_id)
+                                 ->get('app_features')
+                                 ->result();
+    
+        // If no features are found for the role
+        if (empty($features)) {
+            return $this->json_response(404, 'No features associated with this role.');
+        }
+    
+        // Iterate through the features to check for permissions
+        foreach ($features as $feature) {
+            // Fetch the role-feature access for the given feature and employee's user_id
+            $access = $this->ci->db->where('role_id', $employee->role_id)
+                                   ->where('feature_id', $feature->id)
+                                   ->where('user_id', $employee->user_id) // Assuming user_id is linked to employees
+                                   ->get('role_feature_access')
+                                   ->row();
+    
+            // Check if access entry exists for this feature
+            if (!$access) {
+                // No access entry for this feature, continue to next feature
+                continue;
+            }
+    
+            // Check permission based on the provided permission_type
+            switch ($permission_type) {
+                case 'read':
+                    if ($access->is_read) {
+                        return $this->json_response(200, 'Permission Granted');
+                    }
+                    break;
+                case 'write':
+                    if ($access->is_write) {
+                        return $this->json_response(200, 'Permission Granted');
+                    }
+                    break;
+                case 'action':
+                    if ($access->is_action) {
+                        return $this->json_response(200, 'Permission Granted');
+                    }
+                    break;
+                case 'delete':
+                    if ($access->is_delete) {
+                        return $this->json_response(200, 'Permission Granted');
+                    }
+                    break;
+                default:
+                    return $this->json_response(400, 'Invalid permission type');
+            }
+        }
+    
+        // If no matching permission was found
+        return $this->json_response(403, 'Access Denied: You do not have the required permission for this action.');
+    }
+    
+    
+
 }
