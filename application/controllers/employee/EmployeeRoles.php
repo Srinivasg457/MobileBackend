@@ -388,6 +388,77 @@ class EmployeeRoles extends Home_Controller {
     return $this->json_response(200, 'Data fetched successfully', $result);
 }
 
+public function delete_role()
+{
+    header('Content-Type: application/json');
+
+    // Get user_id from session
+    $user_id = $this->session->userdata('user_id');
+    if (!$user_id) {
+        http_response_code(401);
+        echo json_encode([
+            'status' => false,
+            'message' => 'Unauthorized access.'
+        ]);
+        return;
+    }
+
+    // Parse input data for DELETE (you need to manually handle php://input)
+    parse_str(file_get_contents('php://input'), $data);
+
+    $role_id = isset($data['role_id']) ? intval($data['role_id']) : null;
+    $department_id = isset($data['department_id']) ? intval($data['department_id']) : null;
+
+    if (!$role_id || !$department_id) {
+        http_response_code(400);
+        echo json_encode([
+            'status' => false,
+            'message' => 'Missing role_id or department_id.'
+        ]);
+        return;
+    }
+
+    // Verify role ownership
+    $role = $this->db->where('id', $role_id)
+                     ->where('user_id', $user_id)
+                     ->where('department_id', $department_id)
+                     ->get('employee_roles')
+                     ->row();
+
+    if (!$role) {
+        http_response_code(404);
+        echo json_encode([
+            'status' => false,
+            'message' => 'Role not found or unauthorized access.'
+        ]);
+        return;
+    }
+
+    // Prevent deletion if role is assigned to employees
+    $assigned = $this->db->where('role_id', $role_id)->limit(1)->get('employees')->row();
+    if ($assigned) {
+        http_response_code(409);
+        echo json_encode([
+            'status' => false,
+            'message' => 'Cannot delete: Role is assigned to employees.'
+        ]);
+        return;
+    }
+
+    // Delete the role
+    if ($this->db->delete('employee_roles', ['id' => $role_id])) {
+        echo json_encode([
+            'status' => true,
+            'message' => 'Role deleted successfully.'
+        ]);
+    } else {
+        http_response_code(500);
+        echo json_encode([
+            'status' => false,
+            'message' => 'Failed to delete role.'
+        ]);
+    }
+}
 
     
 
