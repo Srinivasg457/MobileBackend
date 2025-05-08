@@ -2,6 +2,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
+        .content-wrapper{
+    height: unset !important;
+    min-height: unset !important;
+}
+
         #activityChart {
             max-width: 100%;
             height: 400px;
