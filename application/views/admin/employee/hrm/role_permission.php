@@ -62,6 +62,25 @@
 <!-- Roles & Permissions Form -->
 <div class="content-wrapper">
     <h2>Roles & Permissions</h2>
+    <!-- Feature Details Modal -->
+    <div class="modal fade" id="featureDetailsModal" tabindex="-1" aria-labelledby="featureDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="featureDetailsModalLabel">Feature Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group" id="feature-details-list">
+                        <!-- Feature items will be injected here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- role and permission creating model -->
     <div id="create_role_permssion_area" class="hide">
         <div class="box-header">
             <h3>
@@ -154,11 +173,11 @@
                         <th>#</th>
                         <th>Role Name</th>
                         <th>Feature Name</th>
-                        <th>Read</th>
-                        <th>Write</th>
+                        <th>View</th>
+                        <!-- <th>Write</th> -->
                         <th>Action</th>
-                        <th>Delete</th>
-                        <th>Edit & Delete</th>
+                        <!-- <th>Delete</th>
+                        <th>Edit & Delete</th> -->
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -175,6 +194,41 @@
         setTimeout(() => toast.fadeOut(500, () => toast.remove()), 2000);
     }
 
+    $(document).off('click', '.delete-role-btn').on('click', '.delete-role-btn', function(e) {
+        e.preventDefault();
+
+        const userId = $(this).data('id');
+        const departmentId = $(this).data('department-id');
+        const role = $(this).data('role');
+console.log("depId: " + departmentId);
+console.log("userId: " + userId);
+
+
+        if (confirm(`Are you sure you want to delete the role "${role}" for this employee?`)) {
+            $.ajax({
+                url: "<?= base_url('/employee/EmployeeRoles/delete_role'); ?>",
+                method: "POST",
+                dataType: "json",
+                data: {
+                    user_id: userId,
+                    department_id: departmentId,
+                },
+                success: function(response) {
+                    if (response.status === 200 || response.status === 'success') {
+                        alert('Role deleted successfully.');
+                        loadUserRolePermissions(userId); // Refresh table
+                    } else {
+                        alert(response.message || 'Failed to delete role.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    alert('Error deleting role.');
+                }
+            });
+        }
+    });
+
     function loadUserRolePermissions(userId) {
         $.ajax({
             url: "<?= base_url('/employee/EmployeeRoles/get_user_role_feature_permissions'); ?>",
@@ -190,50 +244,150 @@
                     var tbody = $('#user-role-table tbody');
                     tbody.empty(); // Clear old rows
 
+                    // Create modal div if it doesn't exist
+                    if ($('#permissionsModal').length === 0) {
+                        $('body').append(`
+                        <div class="modal fade" id="permissionsModal" tabindex="-1" role="dialog" aria-labelledby="permissionsModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="permissionsModalLabel">Role Permissions</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="permissionsContent"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    }
+
                     let index = 1;
 
                     response.data.forEach(function(role) {
+                        let featureNames = [];
+                        let featureDetails = [];
+
                         if (role.features.length > 0) {
                             role.features.forEach(function(feature) {
-                                var row = `
-                                <tr>
-                                    <td>${index++}</td>
-                                    <td>${role.role_name}</td>
-                                    <td>${feature.feature_name}</td>
-                                    <td>${feature.is_read == '1' ? '<i class="bi bi-check2" style="color: green; font-weight: bold; font-size: x-large;"></i>' : '<i class="bi bi-x-lg" style="color: red; font-weight: bold; font-size: x-large;"></i>'}</td>
-                                    <td>${feature.is_write == '1' ? '<i class="bi bi-check2" style="color: green; font-weight: bold; font-size: x-large;"></i>' : '<i class="bi bi-x-lg" style="color: red; font-weight: bold; font-size: x-large;"></i>'}</td>
-                                    <td>${feature.is_action == '1' ? '<i class="bi bi-check2" style="color: green; font-weight: bold; font-size: x-large;"></i>' : '<i class="bi bi-x-lg" style="color: red; font-weight: bold; font-size: x-large;"></i>'}</td>
-                                    <td>${feature.is_delete == '1' ? '<i class="bi bi-check2" style="color: green; font-weight: bold; font-size: x-large;"></i>' : '<i class="bi bi-x-lg" style="color: red; font-weight: bold; font-size: x-large;"s></i>'}</td>
-                                    <td class="actions" width="15%">
-                                        <a href="<?= base_url('admin/hrm/employee_edit') ?>${userId}" class="on-default edit-row text-primary" data-placement="top" title="Edit">
-                                            <i class="fa fa-pencil"></i>
-                                        </a>
-                                        <a data-val="employee" data-id="${userId}" href="<?= base_url('admin/hrm/employee_delete/') ?>${userId}" class="on-default remove-row delete_item text-danger" data-toggle="tooltip" data-placement="top" title="Delete">
-                                            <i class="fa fa-trash-o"></i>
-                                        </a>
-                                    </td>
-                                </tr>`;
-                                tbody.append(row);
+                                featureNames.push(feature.feature_name);
+                                featureDetails.push({
+                                    name: feature.feature_name,
+                                    read: feature.is_read,
+                                    write: feature.is_write,
+                                    action: feature.is_action,
+                                    delete: feature.is_delete
+                                });
                             });
+
+                            const row = `
+                        <tr>
+                            <td>${index++}</td>
+                            <td>${role.role_name}</td>
+                            <td>
+                                <div>${featureNames.join(', ')}</div>
+                            </td>
+                            <td>
+                                <a href="#" class="view-permissions" data-role="${role.role_name}" data-features='${JSON.stringify(featureDetails)}' title="View Permissions">
+                                    <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
+                                </a>
+                            </td>
+                             <td class="actions" width="15%">
+                                <a href="<?= base_url('admin/hrm/employee_edit/') ?>${userId}" class="on-default edit-row text-primary" data-placement="top" title="Edit">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                               <a href="#" 
+                                    class="on-default remove-row text-danger delete-role-btn" 
+                                    data-val="employee" 
+                                    data-id="${userId}" 
+                                    data-department-id="${role.department_id}" 
+                                    data-role="${role.role_name}" 
+                                    title="Delete">
+                                    <i class="fa fa-trash-o"></i>
+                                    </a>
+
+                            </td>
+                        </tr>`;
+                            tbody.append(row);
                         } else {
-                            // Handle roles with no features
-                            var row = `
-                            <tr>
-                                <td>${index++}</td>
-                                <td>${role.role_name}</td>
-                                <td colspan="5"><em>No features assigned</em></td>
-                                <td class="actions" width="15%">
-                                    <a href="<?= base_url('admin/hrm/employee_edit/') ?>${userId}" class="on-default edit-row text-primary" data-placement="top" title="Edit">
-                                        <i class="fa fa-pencil"></i>
+                            const row = `
+                        <tr>
+                            <td>${index++}</td>
+                            <td>${role.role_name}</td>
+                            <td><em>No features assigned</em></td>
+                            <td>
+                                <a href="#" class="view-permissions text-muted" title="No Permissions">
+                                    <i class="bi bi-eye-slash" style="font-size: 1.5rem;"></i>
+                                </a>
+                            </td>
+                           <td class="actions" width="15%">
+                                <a href="<?= base_url('admin/hrm/employee_edit/') ?>${userId}" class="on-default edit-row text-primary" data-placement="top" title="Edit">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <a href="#" 
+                                    class="on-default remove-row text-danger delete-role-btn" 
+                                    data-val="employee" 
+                                    data-id="${userId}" 
+                                    data-department-id="${role.department_id}" 
+                                    data-role="${role.role_name}" 
+                                    title="Delete">
+                                    <i class="fa fa-trash-o"></i>
                                     </a>
-                                    <a data-val="employee" data-id="${userId}" href="<?= base_url('admin/hrm/employee_delete/') ?>${userId}" class="on-default remove-row delete_item text-danger" data-toggle="tooltip" data-placement="top" title="Delete">
-                                        <i class="fa fa-trash-o"></i>
-                                    </a>
-                                </td>
-                            </tr>`;
+
+                            </td>
+                        </tr>`;
                             tbody.append(row);
                         }
                     });
+
+                    // Add click event for view icons
+                    $(document).off('click', '.view-permissions').on('click', '.view-permissions', function(e) {
+                        e.preventDefault();
+                        const role = $(this).data('role');
+                        const features = $(this).data('features');
+
+                        if (!features || features.length === 0) {
+                            $('#permissionsContent').html('<p>No permissions found for this role.</p>');
+                        } else {
+                            let tableHtml = `
+                            <h6>Role: ${role}</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Feature</th>
+                                            <th>Read</th>
+                                            <th>Write</th>
+                                            <th>Action</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+
+                            features.forEach(feature => {
+                                tableHtml += `
+                                <tr>
+                                    <td>${feature.name}</td>
+                                    <td>${feature.read ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td>${feature.write ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td>${feature.action ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td>${feature.delete ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                </tr>`;
+                            });
+
+                            tableHtml += `</tbody></table></div>`;
+                            $('#permissionsContent').html(tableHtml);
+                        }
+
+                        $('#permissionsModal').modal('show');
+                    });
+
                 } else {
                     alert(response.message || 'No data found.');
                 }
@@ -402,7 +556,8 @@
                 success: function(response) {
                     if (response.status === 'success' || response.status === 201) {
                         showToast(response.message, 'success');
-                        storedRoleId = response.role_id || response.data?.role_id;
+                        storedRoleId = response.role_id || (response.data?.role_id ?? null);
+                        console.log("Created Role ID:", storedRoleId);
                         submitPermissions(storedRoleId);
                     } else {
                         showToast(response.message || 'Role creation failed.', 'error');
@@ -410,6 +565,8 @@
                 },
                 error: function() {
                     showToast('Server error while creating role.', 'error');
+                    console.log("Created Role ID:", storedRoleId);
+
                 }
             });
         });
@@ -425,7 +582,6 @@
 
             selectedFeatures.each(function() {
                 const feature_id = $(this).data('feature-id');
-                const access = $(`input[name^="access[${feature_id}]"]:checked`);
                 const permissions = {
                     feature_id: parseInt(feature_id),
                     is_read: 0,
@@ -434,20 +590,26 @@
                     is_delete: 0
                 };
 
-                access.each(function() {
-                    const permType = $(this).attr('name').match(/\[(.*?)\]$/)[1];
-                    permissions[permType] = 1;
+                // Collect all permissions for this feature
+                $(`input[name^="access[${feature_id}]"]:checked`).each(function() {
+                    const name = $(this).attr('name'); // access[1][is_read]
+                    const match = name.match(/\[(\w+)\]$/); // get is_read
+                    if (match && match[1]) {
+                        permissions[match[1]] = 1;
+                    }
                 });
 
                 features.push(permissions);
             });
+            console.log("Role ID:", roleId);
+            console.log("User ID:", userId);
+            console.log("Submitting permissions:", features);
+
 
             if (!roleId) {
                 showToast('Role not created properly.', 'error');
                 return;
             }
-
-            console.log("Submitting permissions:", features);
 
             $.ajax({
                 url: "<?= base_url('employee/EmployeeRoles/store_role_feature_access'); ?>",
@@ -455,6 +617,7 @@
                 contentType: "application/json",
                 data: JSON.stringify({
                     role_id: roleId,
+                    user_id: userId,
                     features: features
                 }),
                 success: function(response) {
@@ -462,12 +625,14 @@
                         showToast(response.message, 'success');
                         $('#createPermissionForm')[0].reset();
                         storedRoleId = null;
-                        initializeFeatureTable(allFeatures);
+                        initializeFeatureTable(allFeatures); // Reload table if needed
                     } else {
                         showToast(response.message || 'Permission assignment failed.', 'error');
                     }
                 },
-                error: function() {
+                error: function(re) {
+                    console.log(re);
+
                     showToast('Server error while assigning permission.', 'error');
                 }
             });
@@ -478,8 +643,6 @@
             storedRoleId = null;
             initializeFeatureTable(allFeatures);
         });
-    });
-    $(document).ready(function() {
         $('.create_role_permssion').on('click', function(e) {
             e.preventDefault();
             $('#create_role_permssion_area').show();
