@@ -471,7 +471,7 @@ const ws = new WebSocket('wss://work-room.io:8090')
 
         function playVideo(id){
           const data = {
-            employee_id: 2,
+            employee_id: 8,
             type: 'request-share'
           };
           ws.send(JSON.stringify(data));
