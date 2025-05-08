@@ -62,76 +62,110 @@
 <!-- Roles & Permissions Form -->
 <div class="content-wrapper">
     <h2>Roles & Permissions</h2>
-    <form id="createPermissionForm">
-        <div class="row rolesandpermission">
-            <!-- Role Form -->
-            <div class="col-lg-6 mt-5">
-                <div class="card shadow-lg role">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-person-plus"></i> Select Role</h5>
-                        <div class="mb-4">
-                            <label for="role_name" class="form-label">Role Name</label>
-                            <select class="form-control" id="role_name" name="role_name" required>
-                                <option value="">-- Select Role --</option>
-                                <option value="TeamLead">Team Lead (TL)</option>
-                                <option value="ProjectManager">Project Manager</option>
-                                <option value="HR">HR Manager</option>
-                                <option value="Employee">Employee</option>
-                            </select>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label">Department</label>
-                            <select class="form-control" name="department" required>
-                                <option value="">-- Select Department --</option>
-                                <?php foreach ($departments as $department): ?>
-                                    <option value="<?= html_escape($department->id); ?>"
-                                        <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
-                                        <?= html_escape($department->name); ?>
-                                    </option>
-                                <?php endforeach ?>
-                            </select>
-                        </div>
-                        <div class="mb-4">
-                            <label for="role_description" class="form-label">Role Description</label>
-                            <textarea class="form-control" id="role_description" name="role_description" maxlength="500" rows="3"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Permissions Form -->
-            <div class="col-lg-6 mt-5">
-                <div class="card shadow-lg role">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-shield-plus"></i> Assign Permission to Role</h5>
-                        <div class="mb-4">
-                            <div id="feature-access-list" class="mt-4">
-                                <!-- Features table will be loaded here via JavaScript -->
-                                <div class="text-center py-5">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p>Loading features...</p>
-                                </div>
+    <div id="create_role_permssion_area" class="hide">
+        <div class="box-header">
+            <h3>
+                Create Roles & Permission
+                <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_bulk"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
+            </h3>
+        </div>
+        <form id="createPermissionForm">
+            <div class="row rolesandpermission">
+                <!-- Role Form -->
+                <div class="col-lg-6">
+                    <div class="card shadow-lg role">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-person-plus"></i> Select Role</h5>
+                            <div class="mb-4">
+                                <label for="role_name" class="form-label">Role Name</label>
+                                <select class="form-control" id="role_name" name="role_name" required>
+                                    <option value="">-- Select Role --</option>
+                                    <option value="TeamLead">Team Lead (TL)</option>
+                                    <option value="ProjectManager">Project Manager</option>
+                                    <option value="HR">HR Manager</option>
+                                    <option value="Employee">Employee</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Department</label>
+                                <select class="form-control" name="department" required>
+                                    <option value="">-- Select Department --</option>
+                                    <?php foreach ($departments as $department): ?>
+                                        <option value="<?= html_escape($department->id); ?>"
+                                            <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
+                                            <?= html_escape($department->name); ?>
+                                        </option>
+                                    <?php endforeach ?>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="role_description" class="form-label">Role Description</label>
+                                <textarea class="form-control" id="role_description" name="role_description" maxlength="500" rows="3"></textarea>
                             </div>
                         </div>
-                        <div class="mb-4 hide">
-                            <label for="permission_description" class="form-label">Permission Description</label>
-                            <textarea class="form-control" id="permission_description" name="permission_description" maxlength="500" rows="3"></textarea>
-                        </div>
-                        <div class="my-4 d-flex justify-content-end">
-                            <button type="button" class="btn btn-secondary mx-2" id="cancelBtn">
-                                <i class="bi bi-x-circle"></i> Cancel
-                            </button>
-                            <button type="submit" class="btn btn-success mx-2">
-                                <i class="bi bi-shield-plus"></i> Create
-                            </button>
+                    </div>
+                </div>
+
+                <!-- Permissions Form -->
+                <div class="col-lg-6">
+                    <div class="card shadow-lg role">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-shield-plus"></i> Assign Permission to Role</h5>
+                            <div class="mb-4">
+                                <div id="feature-access-list" class="mt-4">
+                                    <!-- Features table will be loaded here via JavaScript -->
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p>Loading features...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-4 hide">
+                                <label for="permission_description" class="form-label">Permission Description</label>
+                                <textarea class="form-control" id="permission_description" name="permission_description" maxlength="500" rows="3"></textarea>
+                            </div>
+                            <div class="my-4 d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary mx-2" id="cancelBtn">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </button>
+                                <button type="submit" class="btn btn-success mx-2">
+                                    <i class="bi bi-shield-plus"></i> Create
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </form>
+    </div>
+
+
+    <div class="list_area container">
+        <h3 class="box-title"><?php echo "roles" ?> <a href="#" class="pull-right btn btn-info btn-sm rounded create_role_permssion mx-5">
+                <i class="fa fa-plus"></i> Create Role & Permission</a>
+        </h3>
+
+        <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
+            <table class="table table-hover cushover" id="user-role-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Role Name</th>
+                        <th>Feature Name</th>
+                        <th>Read</th>
+                        <th>Write</th>
+                        <th>Action</th>
+                        <th>Delete</th>
+                        <th>Edit & Delete</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
-    </form>
+
+    </div>
 </div>
 
 <script>
@@ -141,13 +175,84 @@
         setTimeout(() => toast.fadeOut(500, () => toast.remove()), 2000);
     }
 
+    function loadUserRolePermissions(userId) {
+        $.ajax({
+            url: "<?= base_url('/employee/EmployeeRoles/get_user_role_feature_permissions'); ?>",
+            method: 'GET',
+            dataType: "json",
+            data: {
+                user_id: userId
+            },
+            success: function(response) {
+                console.log(response);
+
+                if (response.status === 200 || response.status === 'success') {
+                    var tbody = $('#user-role-table tbody');
+                    tbody.empty(); // Clear old rows
+
+                    let index = 1;
+
+                    response.data.forEach(function(role) {
+                        if (role.features.length > 0) {
+                            role.features.forEach(function(feature) {
+                                var row = `
+                                <tr>
+                                    <td>${index++}</td>
+                                    <td>${role.role_name}</td>
+                                    <td>${feature.feature_name}</td>
+                                    <td>${feature.is_read == '1' ? '<i class="bi bi-check2" style="color: green; font-weight: bold; font-size: x-large;"></i>' : '<i class="bi bi-x-lg" style="color: red; font-weight: bold; font-size: x-large;"></i>'}</td>
+                                    <td>${feature.is_write == '1' ? '<i class="bi bi-check2" style="color: green; font-weight: bold; font-size: x-large;"></i>' : '<i class="bi bi-x-lg" style="color: red; font-weight: bold; font-size: x-large;"></i>'}</td>
+                                    <td>${feature.is_action == '1' ? '<i class="bi bi-check2" style="color: green; font-weight: bold; font-size: x-large;"></i>' : '<i class="bi bi-x-lg" style="color: red; font-weight: bold; font-size: x-large;"></i>'}</td>
+                                    <td>${feature.is_delete == '1' ? '<i class="bi bi-check2" style="color: green; font-weight: bold; font-size: x-large;"></i>' : '<i class="bi bi-x-lg" style="color: red; font-weight: bold; font-size: x-large;"s></i>'}</td>
+                                    <td class="actions" width="15%">
+                                        <a href="<?= base_url('admin/hrm/employee_edit') ?>${userId}" class="on-default edit-row text-primary" data-placement="top" title="Edit">
+                                            <i class="fa fa-pencil"></i>
+                                        </a>
+                                        <a data-val="employee" data-id="${userId}" href="<?= base_url('admin/hrm/employee_delete/') ?>${userId}" class="on-default remove-row delete_item text-danger" data-toggle="tooltip" data-placement="top" title="Delete">
+                                            <i class="fa fa-trash-o"></i>
+                                        </a>
+                                    </td>
+                                </tr>`;
+                                tbody.append(row);
+                            });
+                        } else {
+                            // Handle roles with no features
+                            var row = `
+                            <tr>
+                                <td>${index++}</td>
+                                <td>${role.role_name}</td>
+                                <td colspan="5"><em>No features assigned</em></td>
+                                <td class="actions" width="15%">
+                                    <a href="<?= base_url('admin/hrm/employee_edit/') ?>${userId}" class="on-default edit-row text-primary" data-placement="top" title="Edit">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <a data-val="employee" data-id="${userId}" href="<?= base_url('admin/hrm/employee_delete/') ?>${userId}" class="on-default remove-row delete_item text-danger" data-toggle="tooltip" data-placement="top" title="Delete">
+                                        <i class="fa fa-trash-o"></i>
+                                    </a>
+                                </td>
+                            </tr>`;
+                            tbody.append(row);
+                        }
+                    });
+                } else {
+                    alert(response.message || 'No data found.');
+                }
+            },
+            error: function(err) {
+                console.error('Error:', err);
+                alert('Something went wrong while fetching data.');
+            }
+        });
+    }
+
+
     let storedRoleId = null;
     let allFeatures = [];
 
     $(document).ready(function() {
         loadFeatures();
         const userId = <?= json_encode($this->session->userdata('id')); ?>;
-
+        loadUserRolePermissions(userId);
         // Initialize the feature table
         function initializeFeatureTable(features) {
             const container = $('#feature-access-list');
@@ -372,6 +477,19 @@
             $('#createPermissionForm')[0].reset();
             storedRoleId = null;
             initializeFeatureTable(allFeatures);
+        });
+    });
+    $(document).ready(function() {
+        $('.create_role_permssion').on('click', function(e) {
+            e.preventDefault();
+            $('#create_role_permssion_area').show();
+            $('.list_area').hide();
+        });
+
+        $('.cancel_bulk').on('click', function(e) {
+            e.preventDefault();
+            $('#create_role_permssion_area  ').hide();
+            $('.list_area').show();
         });
     });
 </script>
