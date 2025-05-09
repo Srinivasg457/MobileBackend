@@ -290,73 +290,7 @@ class EmployeeRoles extends Home_Controller {
     }
     
 
-    
 
-
-//    public function get_user_role_feature_permissions() {
-//     // Retrieve user_id from the request
-//     $user_id = $this->input->get('user_id');
-
-//     // Validate if user_id is provided
-//     if (!$user_id) {
-//         return $this->json_response(400, 'Missing user_id');
-//     }
-
-//     // Check if the user exists
-//     $user_exists = $this->db->where('id', $user_id)->get('users')->row();
-//     if (!$user_exists) {
-//         return $this->json_response(404, 'User not found');
-//     }
-
-//     // Get all roles associated with this user
-//     $roles = $this->db->select('id, role_name')
-//                       ->from('employee_roles')
-//                       ->where('user_id', $user_id)
-//                       ->get()
-//                       ->result();
-
-//     // If no roles found for the user
-//     if (empty($roles)) {
-//         return $this->json_response(404, 'No roles found for the given user');
-//     }
-
-//     $result = [];
-
-//     foreach ($roles as $role) {
-//         // Fetch feature access entries for each role
-//         $access_entries = $this->db
-//             ->select('rfa.feature_id, af.feature_name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
-//             ->from('role_feature_access as rfa')
-//             ->join('app_features as af', 'af.id = rfa.feature_id')
-//             ->where('rfa.role_id', $role->id)
-//             ->where('rfa.user_id', $user_id)
-//             ->get()
-//             ->result();
-
-//         // Prepare features data for each role
-//         $features = [];
-//         foreach ($access_entries as $entry) {
-//             $features[] = [
-//                 'feature_id' => $entry->feature_id,
-//                 'feature_name' => $entry->feature_name,
-//                 'is_read' => $entry->is_read,
-//                 'is_write' => $entry->is_write,
-//                 'is_action' => $entry->is_action,
-//                 'is_delete' => $entry->is_delete
-//             ];
-//         }
-
-//         // Add role and its features to the result array
-//         $result[] = [
-//             'role_id' => $role->id,
-//             'role_name' => $role->role_name,
-//             'features' => $features
-//         ];
-//     }
-
-//     // Return the structured response
-//     return $this->json_response(200, 'Data fetched successfully', $result);
-// }
 public function get_user_role_feature_permissions() {
     // Retrieve user_id from the request
     $user_id = $this->input->get('user_id');
