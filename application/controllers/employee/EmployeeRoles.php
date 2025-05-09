@@ -175,6 +175,34 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response($e->getCode(), $e->getMessage());
         }
     }
+    public function get_roles_by_user()
+    {
+        $user_id = $this->session->userdata('id');
+
+        if (empty($user_id) || !is_numeric($user_id)) {
+            return $this->json_response(400, 'Invalid or missing user ID');
+        }
+
+        $this->db->select('id, role_name, department_id'); // fixed comma issue
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('role_name', 'asc');
+        $query = $this->db->get('employee_roles');
+
+        if ($query === FALSE) {
+            log_message('error', 'Database error: ' . $this->db->error()['message']);
+            return $this->json_response(500, 'Database query failed');
+        }
+
+        $roles = $query->result_array();
+
+        if (empty($roles)) {
+            return $this->json_response(404, 'No roles found for this user');
+        }
+
+        return $this->json_response(200, 'Roles fetched successfully', ['roles' => $roles]);
+    }
+
+
 
     public function store_role_feature_access() {
         try {
@@ -290,73 +318,7 @@ class EmployeeRoles extends Home_Controller {
     }
     
 
-    
 
-
-//    public function get_user_role_feature_permissions() {
-//     // Retrieve user_id from the request
-//     $user_id = $this->input->get('user_id');
-
-//     // Validate if user_id is provided
-//     if (!$user_id) {
-//         return $this->json_response(400, 'Missing user_id');
-//     }
-
-//     // Check if the user exists
-//     $user_exists = $this->db->where('id', $user_id)->get('users')->row();
-//     if (!$user_exists) {
-//         return $this->json_response(404, 'User not found');
-//     }
-
-//     // Get all roles associated with this user
-//     $roles = $this->db->select('id, role_name')
-//                       ->from('employee_roles')
-//                       ->where('user_id', $user_id)
-//                       ->get()
-//                       ->result();
-
-//     // If no roles found for the user
-//     if (empty($roles)) {
-//         return $this->json_response(404, 'No roles found for the given user');
-//     }
-
-//     $result = [];
-
-//     foreach ($roles as $role) {
-//         // Fetch feature access entries for each role
-//         $access_entries = $this->db
-//             ->select('rfa.feature_id, af.feature_name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
-//             ->from('role_feature_access as rfa')
-//             ->join('app_features as af', 'af.id = rfa.feature_id')
-//             ->where('rfa.role_id', $role->id)
-//             ->where('rfa.user_id', $user_id)
-//             ->get()
-//             ->result();
-
-//         // Prepare features data for each role
-//         $features = [];
-//         foreach ($access_entries as $entry) {
-//             $features[] = [
-//                 'feature_id' => $entry->feature_id,
-//                 'feature_name' => $entry->feature_name,
-//                 'is_read' => $entry->is_read,
-//                 'is_write' => $entry->is_write,
-//                 'is_action' => $entry->is_action,
-//                 'is_delete' => $entry->is_delete
-//             ];
-//         }
-
-//         // Add role and its features to the result array
-//         $result[] = [
-//             'role_id' => $role->id,
-//             'role_name' => $role->role_name,
-//             'features' => $features
-//         ];
-//     }
-
-//     // Return the structured response
-//     return $this->json_response(200, 'Data fetched successfully', $result);
-// }
 public function get_user_role_feature_permissions() {
     // Retrieve user_id from the request
     $user_id = $this->input->get('user_id');
@@ -428,35 +390,24 @@ public function delete_role()
 {
     header('Content-Type: application/json');
 
-    // Get user_id from session
-    $user_id = $this->session->userdata('user_id') ?? $this->input->get('user_id');
+    // Get parameters from POST
+    $employee_user_id = $this->input->post('user_id');
+    $department_id = $this->input->post('department_id');
+    $role_name = $this->input->post('role_name');
 
-    if (!$user_id) {
-        http_response_code(401);
-        echo json_encode([
-            'status' => false,
-            'message' => 'Unauthorized access.'
-        ]);
-        return;
-    }
-
-    // Get role_id and department_id from query parameters
-    $role_id = $this->input->get('role_id');
-    $department_id = $this->input->get('department_id');
-
-    if (!$role_id || !$department_id) {
+    if (!$employee_user_id || !$department_id || !$role_name) {
         http_response_code(400);
         echo json_encode([
             'status' => false,
-            'message' => 'Missing required parameters: role_id or department_id.'
+            'message' => 'Missing required parameters.'
         ]);
         return;
     }
 
-    // Verify role belongs to user and department
-    $role = $this->db->where('id', $role_id)
-                     ->where('user_id', $user_id)
+    // Get the role to delete
+    $role = $this->db->where('user_id', $employee_user_id)
                      ->where('department_id', $department_id)
+                     ->where('role_name', $role_name)
                      ->get('employee_roles')
                      ->row();
 
@@ -469,8 +420,8 @@ public function delete_role()
         return;
     }
 
-    // Check if role is assigned to any employee
-    $assigned = $this->db->where('role_id', $role_id)->limit(1)->get('employees')->row();
+    // Check if role is assigned to any employee (if needed)
+    $assigned = $this->db->where('role_id', $role->id)->limit(1)->get('employees')->row();
     if ($assigned) {
         http_response_code(409);
         echo json_encode([
@@ -481,7 +432,7 @@ public function delete_role()
     }
 
     // Proceed to delete
-    if ($this->db->delete('employee_roles', ['id' => $role_id])) {
+    if ($this->db->delete('employee_roles', ['id' => $role->id])) {
         echo json_encode([
             'status' => true,
             'message' => 'Role deleted successfully.'
@@ -496,7 +447,6 @@ public function delete_role()
         ]);
     }
 }
-
 
     
 
