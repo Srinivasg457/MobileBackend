@@ -448,40 +448,41 @@
         });
     }
 
-    $(document).off('click', '.delete-role-btn').on('click', '.delete-role-btn', function(e) {
-        e.preventDefault();
+  $(document).off('click', '.delete-role-btn').on('click', '.delete-role-btn', function(e) {
+    e.preventDefault();
 
-        const userId = $(this).data('id');
-        const departmentId = $(this).data('department-id');
-        const role = $(this).data('role');
-        console.log("depId: " + departmentId);
-        console.log("userId: " + userId);
-
-
-        if (confirm(`Are you sure you want to delete the role "${role}" for this employee?`)) {
-            $.ajax({
-                url: "<?= base_url('/employee/EmployeeRoles/delete_role'); ?>",
-                method: "POST",
-                dataType: "json",
-                data: {
-                    user_id: userId,
-                    department_id: departmentId,
-                },
-                success: function(response) {
-                    if (response.status === 200 || response.status === 'success') {
-                        alert('Role deleted successfully.');
-                        loadUserRolePermissions(userId); // Refresh table
-                    } else {
-                        alert(response.message || 'Failed to delete role.');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                    alert('Error deleting role.');
+    const userId = $(this).data('id');
+    const departmentId = $(this).data('department-id');
+    const role = $(this).data('role');
+    
+    // Properly escape the role name for the confirmation message
+    const confirmMessage = `Are you sure you want to delete the role "${role.replace(/"/g, '&quot;')}" for this employee?`;
+    
+    if (confirm(confirmMessage)) {
+        $.ajax({
+            url: "<?= base_url('/employee/EmployeeRoles/delete_role'); ?>",
+            method: "POST",
+            dataType: "json",
+            data: {
+                user_id: userId,
+                department_id: departmentId,
+                role_name: role  // Send role name to identify which role to delete
+            },
+            success: function(response) {
+                if (response.status === 200 || response.status === 'success' || response.status === true) {
+                    alert('Role deleted successfully.');
+                    loadUserRolePermissions(userId); // Refresh table
+                } else {
+                    alert(response.message || 'Failed to delete role.');
                 }
-            });
-        }
-    });
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+                alert('Error deleting role.');
+            }
+        });
+    }
+});
     $(document).off('click', '.edit_row_button').on('click', '.edit_row_button', function(e) {
         console.log("hii");
         e.preventDefault();
