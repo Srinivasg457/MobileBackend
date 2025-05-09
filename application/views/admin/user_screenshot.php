@@ -474,7 +474,8 @@
                                 container.find('.delete-screenshot').on('click', function() {
                                     const screenshotId = $(this).data('id');
 
-                                    if (confirm("Are you sure you want to delete this screenshot?")) {
+                                     const message = `Are you sure you want to delete the Screenshot?`;
+                                showConfirmationAlert(message, "warning", function() {
                                         $.ajax({
                                             url: "/admin/ScreenshotController/soft_delete_screenshot",
                                             type: "POST",
@@ -483,17 +484,21 @@
                                                 employee_id: employeeId
                                             },
                                             success: function() {
-                                                showToast(`Screenshot deleted successfully.`, 'success');
+                                                   if (response.status == 1) {
+                                                       swal("Failed!", response.message || "Could not delete Screenshot.", "error");
+                                                        loadUserRolePermissions(userId);      
+                                                    } else {
+                                                        swal("Deleted!", "Screenshot deleted successfully.", "success");
+                                                    }
                                                 // alert("Screenshot deleted successfully.");
                                                 fetchUserScreenshots(employeeId, $('#datePicker').val());
                                             },
                                             error: function(xhr) {
                                                 // alert("Error deleting screenshot: " + xhr.responseText);
-                                                showToast(`Error while deleting screenshot.`, 'error');
-
+                                                swal("Error!", "Something went wrong.", "error");
                                             }
                                         });
-                                    }
+                                      });
                                 });
 
                             } else {
@@ -693,8 +698,8 @@
                                     // Delete screenshot
                                     $(".delete-screenshot").on('click', function() {
                                         const screenshotId = $(this).data("id");
-
-                                        if (confirm("Are you sure you want to delete this screenshot?")) {
+                                     const message = `Are you sure you want to delete the Screenshot?`;
+                                showConfirmationAlert(message, "warning", function() {
                                             $.ajax({
                                                 url: "/admin/ScreenshotController/soft_delete_screenshot",
                                                 type: "POST",
@@ -703,15 +708,19 @@
                                                     employee_id: id
                                                 },
                                                 success: function() {
-                                                    showToast(`Screenshot deleted successfully.`, 'success');
-                                                    loadScreenshots();
+ if (response.status == 1) {
+                                                       swal("Failed!", response.message || "Could not delete Screenshot.", "error");
+                                                        loadUserRolePermissions(userId);      
+                                                    } else {
+                                                        swal("Deleted!", "Screenshot deleted successfully.", "success");
+                                                    }                                                    loadScreenshots();
                                                     fetchUserScreenshots(id, date);
                                                 },
                                                 error: function(xhr) {
-                                                    showToast(`Error while deleting screenshot.`, 'error');
+                                                swal("Error!", "Something went wrong.", "error");
                                                 }
                                             });
-                                        }
+                                        }); 
                                     });
 
                                     // Auto-refresh after 5 minutes from the latest timestamp

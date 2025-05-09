@@ -234,6 +234,7 @@ class Auth extends Home_Controller
                     $user_id = ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') ? $user->parent_id : $user->id;
                     $session_data = array(
                         'id' => $user_id,
+                        'user_type'=>'org_user',
                         'name' => $user->name,
                         'slug' => $user->slug,
                         'thumb' => $user->thumb,
@@ -258,6 +259,7 @@ class Auth extends Home_Controller
             if (!empty($employee) && $employee->is_registered == 1 && password_verify($password, $employee->password)) {
                 $session_data_employee = array(
                     'employee_id' => $employee->id,
+                    'user_type'=>'employee_user',
                     'employee_name' => $employee->name,
                     'employee_email' => $employee->email,
                     'business_id' => $employee->business_id,

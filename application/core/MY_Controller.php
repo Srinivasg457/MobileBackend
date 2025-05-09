@@ -114,80 +114,91 @@ class Home_Controller extends MY_Controller
     }
 
     
-    public function check_permission($employee_id, $permission_type) {
-        // Validate the permission type
+    public function has_access($employee_id, $feature_slug, $permission_type) {
+        // Allowed permission types
         $valid_permission_types = ['read', 'write', 'action', 'delete'];
         if (!in_array($permission_type, $valid_permission_types)) {
-            return $this->json_response(400, 'Invalid permission type provided.');
+            return false;
         }
     
-        // Fetch the employee record from the employees table
+        // Get employee record
         $employee = $this->ci->db->where('id', $employee_id)->get('employees')->row();
-    
-        // Check if the employee exists
-        if (!$employee) {
-            return $this->json_response(404, 'Employee not found.');
+        if (!$employee || !$employee->role_id) {
+            return false;
         }
     
-        // Check if the employee has an associated role
-        if (!$employee->role_id) {
-            return $this->json_response(404, 'Employee does not have an assigned role.');
+        // Get feature ID by slug
+        $feature = $this->ci->db->where('feature_name', $feature_slug)->get('app_feature')->row();
+        if (!$feature) {
+            return false;
         }
     
-        // Fetch the features linked to the employee's role
-        $features = $this->ci->db->where('role_id', $employee->role_id)
-                                 ->get('app_features')
-                                 ->result();
-    
-        // If no features are found for the role
-        if (empty($features)) {
-            return $this->json_response(404, 'No features associated with this role.');
+        // Get permission access row
+        $access = $this->ci->db->where('role_id', $employee->role_id)
+                               ->where('feature_id', $feature->id)
+                               ->where('user_id', $employee->user_id)
+                               ->get('role_feature_access')
+                               ->row();
+        if (!$access) {
+            return false;
         }
     
-        // Iterate through the features to check for permissions
-        foreach ($features as $feature) {
-            // Fetch the role-feature access for the given feature and employee's user_id
-            $access = $this->ci->db->where('role_id', $employee->role_id)
-                                   ->where('feature_id', $feature->id)
-                                   ->where('user_id', $employee->user_id) // Assuming user_id is linked to employees
-                                   ->get('role_feature_access')
-                                   ->row();
-    
-            // Check if access entry exists for this feature
-            if (!$access) {
-                // No access entry for this feature, continue to next feature
-                continue;
-            }
-    
-            // Check permission based on the provided permission_type
-            switch ($permission_type) {
-                case 'read':
-                    if ($access->is_read) {
-                        return $this->json_response(200, 'Permission Granted');
-                    }
-                    break;
-                case 'write':
-                    if ($access->is_write) {
-                        return $this->json_response(200, 'Permission Granted');
-                    }
-                    break;
-                case 'action':
-                    if ($access->is_action) {
-                        return $this->json_response(200, 'Permission Granted');
-                    }
-                    break;
-                case 'delete':
-                    if ($access->is_delete) {
-                        return $this->json_response(200, 'Permission Granted');
-                    }
-                    break;
-                default:
-                    return $this->json_response(400, 'Invalid permission type');
-            }
+        // Return permission result
+        switch ($permission_type) {
+            case 'read': return (bool)$access->is_read;
+            case 'write': return (bool)$access->is_write;
+            case 'action': return (bool)$access->is_action;
+            case 'delete': return (bool)$access->is_delete;
+            default: return false;
+        }
+    }
+    public function get_access_permissions($employee_id, $feature_slug) {
+        // Get employee record
+        $employee = $this->ci->db->where('id', $employee_id)->get('employees')->row();
+        if (!$employee || !$employee->role_id) {
+            return [
+                'read'   => false,
+                'write'  => false,
+                'action' => false,
+                'delete' => false
+            ];
         }
     
-        // If no matching permission was found
-        return $this->json_response(403, 'Access Denied: You do not have the required permission for this action.');
+        // Get feature ID by slug (case-insensitive match if needed)
+        $feature = $this->ci->db->where('feature_name', $feature_slug)->get('app_feature')->row();
+        if (!$feature) {
+            return [
+                'read'   => false,
+                'write'  => false,
+                'action' => false,
+                'delete' => false
+            ];
+        }
+    
+        // Get permission access row
+        $access = $this->ci->db->where('role_id', $employee->role_id)
+                               ->where('feature_id', $feature->id)
+                               ->where('user_id', $employee->user_id)
+                               ->get('role_feature_access')
+                               ->row();
+    
+        // If no access row found, return all false
+        if (!$access) {
+            return [
+                'read'   => false,
+                'write'  => false,
+                'action' => false,
+                'delete' => false
+            ];
+        }
+    
+        // Return all access flags
+        return [
+            'read'   => (bool)$access->is_read,
+            'write'  => (bool)$access->is_write,
+            'action' => (bool)$access->is_action,
+            'delete' => (bool)$access->is_delete
+        ];
     }
     
     
