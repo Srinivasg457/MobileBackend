@@ -278,6 +278,15 @@
         setTimeout(() => toast.fadeOut(500, () => toast.remove()), 2000);
     }
 
+
+
+
+    let storedRoleId = null;
+    let allFeatures = [];
+
+    $(document).ready(function() {
+        const userId = <?= json_encode($this->session->userdata('id')); ?>;
+
     function loadUserRolePermissions(userId) {
         $.ajax({
             url: "<?= base_url('/employee/EmployeeRoles/get_user_role_feature_permissions'); ?>",
@@ -289,9 +298,9 @@
             success: function(response) {
                 console.log(response);
 
-                if (response.status === 200 || response.status === 'success') {
-                    var tbody = $('#user-role-table tbody');
-                    tbody.empty(); // Clear old rows
+                    if (response.status === 200 || response.status === 'success') {
+                        var tbody = $('#user-role-table tbody');
+                        tbody.empty(); // Clear old rows
 
                     // Create modal div if it doesn't exist
                     if ($('#permissionsModal').length === 0) {
@@ -442,59 +451,17 @@
                 }
             },
             error: function(err) {
-                console.error('Error:', err);
-                alert('Something went wrong while fetching data.');
+                    var tbody = $('#user-role-table tbody');
+                    tbody.empty(); // Clear old rows
+                    // alert(response.message || 'No data found.');
+                    // console.error('Error:', err);
+                    // alert('Something went wrong while fetching data.');
+                    console.log(err);
+
             }
         });
     }
-
-  $(document).off('click', '.delete-role-btn').on('click', '.delete-role-btn', function(e) {
-    e.preventDefault();
-
-    const userId = $(this).data('id');
-    const departmentId = $(this).data('department-id');
-    const role = $(this).data('role');
-    
-    // Properly escape the role name for the confirmation message
-    const confirmMessage = `Are you sure you want to delete the role "${role.replace(/"/g, '&quot;')}" for this employee?`;
-    
-    if (confirm(confirmMessage)) {
-        $.ajax({
-            url: "<?= base_url('/employee/EmployeeRoles/delete_role'); ?>",
-            method: "POST",
-            dataType: "json",
-            data: {
-                user_id: userId,
-                department_id: departmentId,
-                role_name: role  // Send role name to identify which role to delete
-            },
-            success: function(response) {
-                if (response.status === 200 || response.status === 'success' || response.status === true) {
-                    alert('Role deleted successfully.');
-                    loadUserRolePermissions(userId); // Refresh table
-                } else {
-                    alert(response.message || 'Failed to delete role.');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error(error);
-                alert('Error deleting role.');
-            }
-        });
-    }
-});
-    $(document).off('click', '.edit_row_button').on('click', '.edit_row_button', function(e) {
-        console.log("hii");
-        e.preventDefault();
-        $('#edit_role_permssion_area').show();
-        $('.list_area').hide();
-    });
-    let storedRoleId = null;
-    let allFeatures = [];
-
-    $(document).ready(function() {
         loadFeatures();
-        const userId = <?= json_encode($this->session->userdata('id')); ?>;
         loadUserRolePermissions(userId);
         // Initialize the feature table
         function initializeFeatureTable(features) {
@@ -620,6 +587,48 @@
                 }
             });
         }
+        $(document).on('click', '.delete-role-btn', function(e) {
+            e.preventDefault();
+
+            const userId = $(this).data('id');
+            const departmentId = $(this).data('department-id');
+            const role = $(this).data('role');
+
+            const message = `Are you sure you want to delete the role "${role}" for this user?`;
+
+            showConfirmationAlert(message, "warning", function() {
+                // Perform the delete action here
+                $.ajax({
+                    url: "<?= base_url('/employee/EmployeeRoles/delete_role'); ?>",
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        user_id: userId,
+                        department_id: departmentId,
+                        role_name: role,
+                        csrf_test_name: "<?= $this->security->get_csrf_hash(); ?>"
+                    },
+                    success: function(response) {
+                        if (response.status == 1) {
+                            swal("Deleted!", "Role deleted successfully.", "success");
+                            loadUserRolePermissions(userId);
+                        } else {
+                            swal("Failed!", response.message || "Could not delete role.", "error");
+                        }
+                    },
+                    error: function() {
+                        swal("Error!", "Something went wrong.", "error");
+                    }
+                });
+            });
+        });
+
+        $(document).off('click', '.edit_row_button').on('click', '.edit_row_button', function(e) {
+            console.log("hii");
+            e.preventDefault();
+            $('#edit_role_permssion_area').show();
+            $('.list_area').hide();
+        });
 
         $('#createPermissionForm').on('submit', function(e) {
             e.preventDefault();
@@ -644,18 +653,17 @@
                 },
                 success: function(response) {
                     if (response.status === 'success' || response.status === 201) {
-                        showToast(response.message, 'success');
+                        // showToast(response.message, 'success');
                         storedRoleId = response.role_id || (response.data?.role_id ?? null);
                         console.log("Created Role ID:", storedRoleId);
                         submitPermissions(storedRoleId);
                     } else {
-                        showToast(response.message || 'Role creation failed.', 'error');
+                        showToast('Role already Exists.', 'error');
                     }
                 },
                 error: function() {
-                    showToast('Server error while creating role.', 'error');
-                    console.log("Created Role ID:", storedRoleId);
-
+                    // showToast('Server error while creating role.', 'error');
+                    showToast('Role already Exists.', 'error');
                 }
             });
         });
@@ -711,12 +719,13 @@
                 }),
                 success: function(response) {
                     if (response.status === 'success' || response.status === 201) {
-                        showToast(response.message, 'success');
+                        showToast("Role and Permission Created Successfully", 'success');
                         $('#createPermissionForm')[0].reset();
                         storedRoleId = null;
                         initializeFeatureTable(allFeatures); // Reload table if needed
+                        loadUserRolePermissions(userId);
                     } else {
-                        showToast(response.message || 'Permission assignment failed.', 'error');
+                        showToast("Failed to Create Role and Permission", 'error');
                     }
                 },
                 error: function(re) {
