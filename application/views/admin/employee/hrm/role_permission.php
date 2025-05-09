@@ -1,4 +1,27 @@
 <style>
+    .actions {
+        display: flex;
+        gap: 10px;
+
+        >a {
+            color: black;
+
+            >i {
+                transition: color 0.3s;
+                font-size: 20px;
+                margin-top: 5px;
+            }
+        }
+
+        >a:hover>i {
+            color: green;
+        }
+
+        >a:nth-child(2):hover>i {
+            color: red;
+        }
+    }
+
     [type=checkbox]:checked,
     [type=checkbox]:not(:checked) {
         position: static;
@@ -370,8 +393,8 @@
                         if ($('#permissionsModal').length === 0) {
                             $('body').append(`
                         <div class="modal fade" id="permissionsModal" tabindex="-1" role="dialog" aria-labelledby="permissionsModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content" style="margin-top: 10% !important">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="permissionsModalLabel">Role Permissions</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -421,11 +444,11 @@
                                 </a>
                             </td>
                              <td class="actions" width="15%">
-                                 <a href="#" class="on-default edit-row  edit_row_button" data-placement="top" title="Edit">
-                                    <i class="fa fa-pencil"></i>
+                                 <a href="#" class="edit-row  edit_row_button" data-placement="top" title="Edit">
+                                    <i class="fa fa-pencil-square-o"></i>
                                 </a>
                                <a href="#" 
-                                    class="on-default remove-row  delete-role-btn" 
+                                    class="remove-row  delete-role-btn" 
                                     data-val="employee" 
                                     data-id="${userId}" 
                                     data-department-id="${role.department_id}" 
@@ -445,12 +468,12 @@
                             <td><i class="bi bi-pencil-square text-muted" title="No features to update" style="cursor: not-allowed;">No feature to update</i></td>
                             <td>
                                 <a href="#" class="view-permissions  text-muted" title="No Permissions">
-                                    <i class="bi bi-eye-slash" style="font-size: 1.5rem;"></i>
+                                    <i class="bi bi-eye-slash"></i>
                                 </a>
                             </td>
                            <td class="actions" width="15%">
                                 <a href="#" class="on-default edit_row_button" data-placement="top" title="Edit">
-                                    <i class="fa fa-pencil"></i>
+                                    <i class="fa fa-pencil-square-o"></i>
                                 </a>
                                 <a href="#" 
                                     class="on-default remove-row delete-role-btn" 
@@ -852,6 +875,9 @@
                     swal("Success!", res.message, "success");
                     loadUserRolePermissions(userId);
                     $('#createPermissionForm')[0].reset();
+                    $('#create_role_permssion_area  ').hide();
+                    $('#edit_role_permssion_area  ').hide();
+                    $('.list_area').show();
 
                 },
                 error: function(xhr) {
@@ -928,6 +954,8 @@
                     $('#createRole')[0].reset(); // Clear the form
                     loadUserRolePermissions(userId)
                     loadRolesForCurrentUser();
+                    $('#create_role').hide();
+                    $('#create_role_permssion_area  ').show();
                 },
                 error: function(res) {
                     console.log(res); // Optional for debugging
