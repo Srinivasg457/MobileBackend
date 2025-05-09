@@ -428,35 +428,24 @@ public function delete_role()
 {
     header('Content-Type: application/json');
 
-    // Get user_id from session
-    $user_id = $this->session->userdata('user_id') ?? $this->input->get('user_id');
+    // Get parameters from POST
+    $employee_user_id = $this->input->post('user_id');
+    $department_id = $this->input->post('department_id');
+    $role_name = $this->input->post('role_name');
 
-    if (!$user_id) {
-        http_response_code(401);
-        echo json_encode([
-            'status' => false,
-            'message' => 'Unauthorized access.'
-        ]);
-        return;
-    }
-
-    // Get role_id and department_id from query parameters
-    $role_id = $this->input->get('role_id');
-    $department_id = $this->input->get('department_id');
-
-    if (!$role_id || !$department_id) {
+    if (!$employee_user_id || !$department_id || !$role_name) {
         http_response_code(400);
         echo json_encode([
             'status' => false,
-            'message' => 'Missing required parameters: role_id or department_id.'
+            'message' => 'Missing required parameters.'
         ]);
         return;
     }
 
-    // Verify role belongs to user and department
-    $role = $this->db->where('id', $role_id)
-                     ->where('user_id', $user_id)
+    // Get the role to delete
+    $role = $this->db->where('user_id', $employee_user_id)
                      ->where('department_id', $department_id)
+                     ->where('role_name', $role_name)
                      ->get('employee_roles')
                      ->row();
 
@@ -469,8 +458,8 @@ public function delete_role()
         return;
     }
 
-    // Check if role is assigned to any employee
-    $assigned = $this->db->where('role_id', $role_id)->limit(1)->get('employees')->row();
+    // Check if role is assigned to any employee (if needed)
+    $assigned = $this->db->where('role_id', $role->id)->limit(1)->get('employees')->row();
     if ($assigned) {
         http_response_code(409);
         echo json_encode([
@@ -481,7 +470,7 @@ public function delete_role()
     }
 
     // Proceed to delete
-    if ($this->db->delete('employee_roles', ['id' => $role_id])) {
+    if ($this->db->delete('employee_roles', ['id' => $role->id])) {
         echo json_encode([
             'status' => true,
             'message' => 'Role deleted successfully.'
@@ -496,7 +485,6 @@ public function delete_role()
         ]);
     }
 }
-
 
     
 
