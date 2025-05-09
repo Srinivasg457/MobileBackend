@@ -175,6 +175,34 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response($e->getCode(), $e->getMessage());
         }
     }
+    public function get_roles_by_user()
+    {
+        $user_id = $this->session->userdata('id');
+
+        if (empty($user_id) || !is_numeric($user_id)) {
+            return $this->json_response(400, 'Invalid or missing user ID');
+        }
+
+        $this->db->select('id, role_name, department_id'); // fixed comma issue
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('role_name', 'asc');
+        $query = $this->db->get('employee_roles');
+
+        if ($query === FALSE) {
+            log_message('error', 'Database error: ' . $this->db->error()['message']);
+            return $this->json_response(500, 'Database query failed');
+        }
+
+        $roles = $query->result_array();
+
+        if (empty($roles)) {
+            return $this->json_response(404, 'No roles found for this user');
+        }
+
+        return $this->json_response(200, 'Roles fetched successfully', ['roles' => $roles]);
+    }
+
+
 
     public function store_role_feature_access() {
         try {
