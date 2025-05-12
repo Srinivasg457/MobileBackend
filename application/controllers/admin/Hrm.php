@@ -150,6 +150,7 @@ class Hrm extends Home_Controller {
             'business_id' => $this->business->uid,
             'name' => $this->input->post('name', true),
             'department_id' => $this->input->post('department', true),
+            'role_id' => $this->input->post('role', true), // ✅ Add this line
             'email' => $email,
             'phone' => $this->input->post('phone', true),
             'address' => $this->input->post('address', true),
@@ -158,6 +159,7 @@ class Hrm extends Home_Controller {
             'status' => $this->input->post('status', true),
             'created_at' => my_date_now()
         );
+        
 
         $data = $this->security->xss_clean($data);
 
