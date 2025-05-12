@@ -1,445 +1,441 @@
+<style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2980b9;
+      --success-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --light-color: #ecf0f1;
+      --dark-color: #2c3e50;
+      --text-color: #333;
+      --text-light: #7f8c8d;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --transition: all 0.3s ease;
+    }
+ 
+    h2 {
+      margin-bottom: 25px;
+      color: var(--dark-color);
+      font-weight: 600;
+      font-size: 28px;
+    }
+ 
+    .toolbar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+ 
+    .toolbar input[type="text"],
+    .toolbar select {
+      padding: 10px 15px;
+      border-radius: var(--border-radius);
+      border: 1px solid #ddd;
+      font-size: 14px;
+      background-color: white;
+      transition: var(--transition);
+    width:30%}
+ 
+    .toolbar input[type="text"]:focus,
+    .toolbar select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+ 
+    .card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  gap: 25px;
+}
+ 
+ 
+    .card {
+      background-color: #fff;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+ 
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+ 
+    .card .image-container {
+      position: relative;
+      cursor: pointer;
+    }
+ 
+    .card img.thumbnail {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+ 
+    .card .video-call-icon {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 36px;
+      height: 36px;
+      background-color: white;
+      padding: 7px;
+      border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      transition: var(--transition);
+    }
+ 
+    .card .video-call-icon:hover {
+      transform: scale(1.1);
+    }
+ 
+    .card-content {
+      padding: 5px;
+    }
+ 
+    .card-content h3 {
+      margin: 0 0 5px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--dark-color);
+    }
+ 
+    .card-content p {
+      margin: 0 0 10px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+ 
+    .status {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0 5px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+ 
+    .status span {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+ 
+    .status-icon {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+ 
+    .active {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+ 
+    .inactive {
+      color: var(--danger-color);
+      font-weight: 500;
+    }
+ 
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+      backdrop-filter: blur(5px);
+    }
+ 
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      width: 80%;
+      max-width: 900px;
+      border-radius: var(--border-radius);
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+ 
+    @keyframes modalFadeIn {
+      from {opacity: 0; transform: translateY(-60%);}
+      to {opacity: 1; transform: translateY(-50%);}
+    }
+ 
+    .modal-content video {
+      width: 100%;
+      height: auto;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+ 
+    .modal-info {
+      padding: 15px;
+      background-color: white;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+ 
+    .modal-info h3 {
+      margin: 0 0 5px;
+      color: var(--dark-color);
+    }
+ 
+    .modal-info p {
+      margin: 0;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+ 
+    .close {
+      color: white;
+      position: absolute;
+      top: -40px;
+      right: 0;
+      font-size: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 10000;
+      opacity: 0.8;
+      transition: var(--transition);
+    }
+ 
+    .close:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+ 
+    @media(max-width: 768px) {
+      .modal-content {
+        width: 95%;
+      }
+ 
+      .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+    }
+ 
+    @media(max-width: 480px) {
+      .toolbar {
+        flex-direction: column;
+        gap: 10px;
+      }
+ 
+      .toolbar input[type="text"],
+      .toolbar select {
+        width: 100%;
+      }
+    }
+    video { width: 100%; max-width: 100%; border: 1px solid #ccc; }
+    button { margin: 10px 0; padding: 10px 20px; }
+</style>
+
+
 <div class="content-wrapper">
   <section class="content">
-    <h2>Live Monitoring Dashboard</h2>
  
-    <div class="toolbar">
-      <input type="text" id="searchInput" placeholder="Search employees by name or ID...">
-      <select id="sortSelect">
-        <option value="">Sort by</option>
-        <option value="name">Name (A-Z)</option>
-        <option value="active">Active Hours (High-Low)</option>
-        <option value="inactive">Inactive Hours (High-Low)</option>
-      </select>
+  <h2>Live Monitoring Dashboard</h2>
+ 
+  <div class="toolbar">
+    <input type="text" placeholder="Search employees by name or ID...">
+    <select>
+      <option value="">Sort by</option>
+      <option value="name">Name (A-Z)</option>
+      <option value="active">Active Hours (High-Low)</option>
+      <option value="inactive">Inactive Hours (High-Low)</option>
+    </select>
+  </div>
+ 
+<div class="card-grid">
+  <!-- Card 1 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Veena Ramamoorthy', 'ID: 57001')">
+      <img src="https://www.bleepstatic.com/content/hl-images/2022/01/26/Windows_11_HDR.jpg" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
     </div>
- 
-    <div class="card-container" id="employeeCards">
-      <div class="loading">Loading employees...</div>
-    </div>
- 
-    <!-- Modal -->
-    <div id="videoModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeVideoModal()">&times;</span>
-        <img id="remoteVideo" autoplay playsinline>
-        <div class="modal-info">
-          <h3 id="modalName"></h3>
-          <p id="modalId"></p>
-        </div>
+    <div class="card-content">
+      <h3>Veena Ramamoorthy</h3>
+      <p>ID: 57001</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
       </div>
     </div>
+  </div>
+ 
+  <!-- Card 2 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Ravi Kumar', 'ID: 57002')">
+      <img src="https://code.visualstudio.com/assets/docs/editor/accessibility/zoomed-in.png" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Ravi Kumar</h3>
+      <p>ID: 57002</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:45 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:15 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Card 3 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Nisha Patel', 'ID: 57003')">
+      <img src="https://media.licdn.com/dms/image/v2/D4E12AQGwGxCOQEtydA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1686749902757?e=2147483647&v=beta&t=F0_A4kcAK7B2ItAgPjLOj7bRlmcgVJmwhk8vKmU3Qw8" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Nisha Patel</h3>
+      <p>ID: 57003</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 07:00 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 00:30 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Card 4 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Amit Sharma', 'ID: 57004')">
+      <img src="https://kinsta.com/wp-content/uploads/2021/09/linux-commands-1024x512.jpg" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Amit Sharma</h3>
+      <p>ID: 57004</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 04:50 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 02:10 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Card 5 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Divya Menon', 'ID: 57005')">
+      <img src="https://code.visualstudio.com/assets/docs/editor/accessibility/high-contrast.png" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Divya Menon</h3>
+      <p>ID: 57005</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:00 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Card 6 -->
+  <div class="card">
+    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Suresh Raina', 'ID: 57006')">
+      <img src="https://cdn.mos.cms.futurecdn.net/f5kTB9Cb3HSGjfPiiTcobK.jpg" class="thumbnail" alt="Video Feed">
+      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+    </div>
+    <div class="card-content">
+      <h3>Suresh Raina</h3>
+      <p>ID: 57006</p>
+      <div class="status">
+        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:30 hrs active</span>
+        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:30 hrs inactive</span>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+ 
+  <!-- Modal -->
+  <div id="videoModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeVideoModal()">&times;</span>
+      <img id="remoteVideo" autoplay playsinline>
+      <div class="modal-info">
+        <h3 id="modalName"></h3>
+        <p id="modalId"></p>
+      </div>
+    </div>
+  </div>
+ 
   </section>
 </div>
 
-<style>
-:root {
-  --primary-color: #3498db;
-  --secondary-color: #2980b9;
-  --success-color: #2ecc71;
-  --danger-color: #e74c3c;
-  --light-color: #ecf0f1;
-  --dark-color: #2c3e50;
-  --text-color: #333;
-  --text-light: #7f8c8d;
-  --border-radius: 8px;
-  --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  --transition: all 0.3s ease;
-}
-
-/* Updated CSS for the card layout */
-.card-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  margin-top: 20px;
-}
-
-.card {
-  background: #fff;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  overflow: hidden;
-  transition: var(--transition);
-  border: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
-}
-
-.image-container {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.image-container img.thumbnail {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: var(--transition);
-}
-
-.card:hover .image-container img.thumbnail {
-  transform: scale(1.05);
-}
-
-.video-call-icon {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 36px;
-  height: 36px;
-  background-color: white;
-  padding: 7px;
-  border-radius: 50%;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-  transition: var(--transition);
-}
-
-.card:hover .video-call-icon {
-  background: var(--primary-color);
-  transform: scale(1.1);
-}
-
-.card-content {
-  padding: 16px;
-}
-
-.card-content h3 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  color: var(--dark-color);
-  font-weight: 600;
-}
-
-.card-content p {
-  margin: 0 0 12px 0;
-  color: var(--text-light);
-  font-size: 14px;
-}
-
-.status {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid #eee;
-}
-
-.status span {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  gap: 5px;
-}
-
-.status-icon {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.active {
-  color: var(--success-color);
-  font-weight: 500;
-}
-
-.inactive {
-  color: var(--danger-color);
-  font-weight: 500;
-}
-
-.loading {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 40px;
-  color: #666;
-}
-
-/* Modal styles */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.8);
-  backdrop-filter: blur(5px);
-}
-
-.modal-content {
-  position: relative;
-  margin: auto;
-  width: 80%;
-  max-width: 900px;
-  background: #fff;
-  border-radius: var(--border-radius);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  top: 50%;
-  transform: translateY(-50%);
-  animation: modalFadeIn 0.3s ease-out;
-}
-
-@keyframes modalFadeIn {
-  from {opacity: 0; transform: translateY(-60%);}
-  to {opacity: 1; transform: translateY(-50%);}
-}
-
-.modal-content img#remoteVideo {
-  width: 100%;
-  height: auto;
-  max-height: 500px;
-  object-fit: contain;
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
-}
-
-.modal-info {
-  padding: 15px;
-  text-align: center;
-}
-
-.close {
-  position: absolute;
-  top: -40px;
-  right: 0;
-  color: white;
-  font-size: 30px;
-  font-weight: bold;
-  cursor: pointer;
-  opacity: 0.8;
-  transition: var(--transition);
-}
-
-.close:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-.screen-label {
-  background-color: #ccc;
-  height: 200px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  cursor: pointer;
-  position: relative;
-}
-
-.screen-text {
-  text-align: center;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .card-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .card-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .modal-content {
-    width: 95%;
-  }
-}
-
-@media (max-width: 480px) {
-  .toolbar {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .toolbar input[type="text"],
-  .toolbar select {
-    width: 100%;
-  }
-}
-</style>
 
 <script>
-$(document).ready(function() {
-  // Fetch employees via AJAX
-  function fetchEmployees() {
-    $.ajax({
-      url: "<?= base_url('admin/Monitoring_room/list_employees_by_user'); ?>",
-      type: 'GET',
-      dataType: 'json',
-      beforeSend: function() {
-        $('#employeeCards').html('<div class="loading">Loading employees...</div>');
-      },
-      success: function(response) {
-        if(response.status === 'success') {
-          renderEmployeeCards(response.employees);
-        } else {
-          $('#employeeCards').html('<div class="loading">Error: ' + response.message + '</div>');
-        }
-      },
-      error: function(xhr, status, error) {
-        $('#employeeCards').html('<div class="loading">Error loading employees. Please try again.</div>');
-        console.error('AJAX Error:', error);
+    function openVideoModal(videoUrl, name, id) {
+      document.getElementById("modalName").innerText = name;
+      document.getElementById("modalId").innerText = id;
+      document.getElementById("videoModal").style.display = "block";
+      playVideo(id) 
+    }
+ 
+    function closeVideoModal() {
+      const modal = document.getElementById("videoModal");
+      modal.style.display = "none";
+    }
+ 
+    window.onclick = function(event) {
+      const modal = document.getElementById("videoModal");
+      if (event.target === modal) {
+        closeVideoModal();
       }
-    });
-  }
+    }
+  </script>
 
-  // Render employee cards with improved design
-  function renderEmployeeCards(employees) {
-    if (employees.length === 0) {
-      $('#employeeCards').html('<div class="loading">No employees found</div>');
-      return;
+
+<body>
+
+ <h2>Live Screen Viewer</h2>
+
+  <script>
+
+    const socket = new WebSocket('wss://work-room.io:8090');
+    socket.binaryType = 'blob'; 
+
+    const img = document.getElementById('remoteVideo');
+
+    socket.onopen = function () {
+      console.log('WebSocket connection established');
+      // Optional: send a message to the server
+    };
+    socket.onclose = function () {
+      console.log('WebSocket connection closed');
+    };
+    socket.onerror = function (error) {
+      console.error('WebSocket error:', error);
+    };
+
+    function playVideo(id) {
+      // Send a message to the server to start streaming video
+      socket.send(JSON.stringify({ action: 'start_stream', employee_id: 8 }));
     }
 
-    let cardsHTML = '';
+    socket.binaryType = 'blob'
 
-    employees.forEach((employee, index) => {
-      const activeHours = (Math.random() * 3 + 4).toFixed(1);
-      const inactiveHours = (Math.random() * 2).toFixed(1);
+    socket.onmessage = function (event) {
+      const blob = event.data;
 
-      cardsHTML += `
-        <div class="card" data-name="${employee.name.toLowerCase()}" data-id="${employee.id}">
-          <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', 'ID: ${employee.id}')">
-            <div class="screen-label">
-              <div class="screen-text">Screen-${index + 1}</div>
-            </div>
-            <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-          </div>
-          <div class="card-content">
-            <h3>${employee.name}</h3>
-            <p>ID: ${employee.id}</p>
-            <div class="status">
-              <span class="active"><span class="status-icon"></span> ${activeHours} hrs active</span>
-              <span class="inactive"><span class="status-icon"></span> ${inactiveHours} hrs idle</span>
-            </div>
-          </div>
-        </div>
-      `;
-    });
+      const fixedBlob = new Blob([blob], { type: 'image/jpeg' });
 
-    $('#employeeCards').html(cardsHTML);
-  }
+      const url = URL.createObjectURL(fixedBlob);
+      img.src = url;
 
-  // Search functionality
-  $('#searchInput').on('input', function() {
-    const searchTerm = $(this).val().toLowerCase();
-    $('.card').each(function() {
-      const name = $(this).data('name');
-      const id = $(this).data('id').toString();
-      if(name.includes(searchTerm) || id.includes(searchTerm)) {
-        $(this).show();
-      } else {
-        $(this).hide();
-      }
-    });
-  });
+      img.onload = () => URL.revokeObjectURL(url);
+    };
 
-  // Sort functionality
-  $('#sortSelect').change(function() {
-    const sortBy = $(this).val();
-    if(!sortBy) return;
-    
-    const $cards = $('.card').get();
-    
-    $cards.sort((a, b) => {
-      if(sortBy === 'name') {
-        return $(a).data('name').localeCompare($(b).data('name'));
-      } else if(sortBy === 'active') {
-        const hoursA = parseFloat($(a).find('.active').text().split(' ')[0]);
-        const hoursB = parseFloat($(b).find('.active').text().split(' ')[0]);
-        return hoursB - hoursA;
-      } else if(sortBy === 'inactive') {
-        const hoursA = parseFloat($(a).find('.inactive').text().split(' ')[0]);
-        const hoursB = parseFloat($(b).find('.inactive').text().split(' ')[0]);
-        return hoursB - hoursA;
-      }
-      return 0;
-    });
-    
-    $('#employeeCards').empty().append($cards);
-  });
+  </script>
 
-  // Initialize
-  fetchEmployees();
-});
 
-// WebSocket for live video
-const socket = new WebSocket('wss://work-room.io:8090');
-socket.binaryType = 'blob'; 
-const img = document.getElementById('remoteVideo');
 
-socket.onopen = function() {
-  console.log('WebSocket connection established');
-};
 
-socket.onclose = function() {
-  console.log('WebSocket connection closed');
-};
-
-socket.onerror = function(error) {
-  console.error('WebSocket error:', error);
-};
-
-function playVideo(id) {
-  socket.send(JSON.stringify({ action: 'start_stream', employee_id: id }));
-}
-
-socket.onmessage = function(event) {
-  const blob = event.data;
-  const fixedBlob = new Blob([blob], { type: 'image/jpeg' });
-  const url = URL.createObjectURL(fixedBlob);
-  img.src = url;
-  img.onload = () => URL.revokeObjectURL(url);
-};
-
-// Video modal functions
-function openVideoModal(videoUrl, name, id) {
-  const modal = document.getElementById('videoModal');
-  const remoteVideo = document.getElementById('remoteVideo');
-  const modalName = document.getElementById('modalName');
-  const modalId = document.getElementById('modalId');
-
-  // Set video source
-  remoteVideo.src = videoUrl;
-
-  // Set employee info
-  modalName.textContent = name;
-  modalId.textContent = id;
-
-  // Display modal
-  modal.style.display = 'block';
-  
-  // Start WebSocket stream
-  playVideo(id.split(': ')[1]);
-}
-
-function closeVideoModal() {
-  const modal = document.getElementById('videoModal');
-  const remoteVideo = document.getElementById('remoteVideo');
-
-  // Stop video playback
-  remoteVideo.src = '';
-
-  // Hide modal
-  modal.style.display = 'none';
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-  const modal = document.getElementById('videoModal');
-  if (event.target === modal) {
-    closeVideoModal();
-  }
-};
-</script>
