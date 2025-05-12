@@ -360,7 +360,7 @@
   <div id="videoModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeVideoModal()">&times;</span>
-      <video id="remoteVideo" autoplay playsinline></video>
+      <img id="remoteVideo" autoplay playsinline>
       <div class="modal-info">
         <h3 id="modalName"></h3>
         <p id="modalId"></p>
@@ -396,84 +396,46 @@
 
 <body>
 
-    <button id="startShare">Start Screen Share</button>
+ <h2>Live Screen Viewer</h2>
 
-    <script>
-const ws = new WebSocket('wss://work-room.io:8090')
-        let peerConnection;
+  <script>
 
-        const config = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-        };
+    const socket = new WebSocket('ws://localhost:8090');
+    socket.binaryType = 'blob'; 
 
-        ws.onopen = () => {
-            console.log('WebSocket connected to server');
-        };
+    const img = document.getElementById('remoteVideo');
 
-        ws.onmessage = async (event) => {
-            const msg = JSON.parse(event.data);
-            console.log('Received message:', msg);
+    socket.onopen = function () {
+      console.log('WebSocket connection established');
+      // Optional: send a message to the server
+    };
+    socket.onclose = function () {
+      console.log('WebSocket connection closed');
+    };
+    socket.onerror = function (error) {
+      console.error('WebSocket error:', error);
+    };
 
-            if (msg.type === 'error') {
-                console.error('Server error:', msg.message);
-                alert('Error: ' + msg.message);
-            } else if (msg.type === 'offer') {
-                peerConnection = new RTCPeerConnection(config);
+    function playVideo(id) {
+      // Send a message to the server to start streaming video
+      socket.send(JSON.stringify({ action: 'start_stream', employee_id: 8 }));
+    }
 
-                peerConnection.ontrack = (event) => {
-                    console.log('Received remote stream with tracks:', event.streams[0].getTracks());
-                    document.getElementById('remoteVideo').srcObject = event.streams[0];
-                };
+    socket.binaryType = 'blob'
 
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        console.log('Sending ICE candidate:', event.candidate);
-                        ws.send(JSON.stringify({ type: 'candidate', data: event.candidate }));
-                    }
-                };
+    socket.onmessage = function (event) {
+      const blob = event.data;
 
-                peerConnection.oniceconnectionstatechange = () => {
-                    console.log('ICE connection state:', peerConnection.iceConnectionState);
-                };
+      const fixedBlob = new Blob([blob], { type: 'image/jpeg' });
 
-                peerConnection.onconnectionstatechange = () => {
-                    console.log('Connection state:', peerConnection.connectionState);
-                };
+      const url = URL.createObjectURL(fixedBlob);
+      img.src = url;
 
-                try {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(msg.data));
-                    const answer = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(answer);
-                    console.log('Sending answer:', answer);
-                    ws.send(JSON.stringify({ type: 'answer', data: answer }));
-                } catch (err) {
-                    console.error('Error handling offer:', err);
-                }
-            } else if (msg.type === 'candidate' && peerConnection) {
-                try {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(msg.data));
-                } catch (err) {
-                    console.error('Error adding ICE candidate:', err);
-                }
-            }
-        };
+      img.onload = () => URL.revokeObjectURL(url);
+    };
 
-        ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
+  </script>
 
-        ws.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
 
-        function playVideo(id){
-          const data = {
-            employee_id: 8,
-            type: 'request-share'
-          };
-          ws.send(JSON.stringify(data));
-       }
-    </script>
+
+

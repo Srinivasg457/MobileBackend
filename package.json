@@ -1,17 +1,9 @@
 {
-  "name": "workroom",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^5.1.0",
-    "ws": "^8.18.2"
-  }
+    "name": "mediasoup-server",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "server.js",
+    "dependencies": {
+        "ws": "^8.13.0"
+    }
 }
