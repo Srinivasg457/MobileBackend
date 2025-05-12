@@ -1,4 +1,3 @@
-<!-- Add this right after the opening <body> tag -->
 <div class="content-wrapper">
   <section class="content">
     <h2>Live Monitoring Dashboard</h2>
@@ -32,21 +31,37 @@
 </div>
 
 <style>
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2980b9;
+  --success-color: #2ecc71;
+  --danger-color: #e74c3c;
+  --light-color: #ecf0f1;
+  --dark-color: #2c3e50;
+  --text-color: #333;
+  --text-light: #7f8c8d;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  --transition: all 0.3s ease;
+}
+
 /* Updated CSS for the card layout */
 .card-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 25px;
   margin-top: 20px;
 }
 
 .card {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: var(--transition);
   border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
@@ -56,7 +71,7 @@
 
 .image-container {
   position: relative;
-  height: 180px;
+  height: 200px;
   overflow: hidden;
   cursor: pointer;
 }
@@ -65,7 +80,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: var(--transition);
 }
 
 .card:hover .image-container img.thumbnail {
@@ -74,18 +89,19 @@
 
 .video-call-icon {
   position: absolute;
-  bottom: 15px;
+  top: 15px;
   right: 15px;
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.6);
+  width: 36px;
+  height: 36px;
+  background-color: white;
+  padding: 7px;
   border-radius: 50%;
-  padding: 8px;
-  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  transition: var(--transition);
 }
 
 .card:hover .video-call-icon {
-  background: rgba(0, 120, 255, 0.8);
+  background: var(--primary-color);
   transform: scale(1.1);
 }
 
@@ -96,44 +112,46 @@
 .card-content h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
-  color: #333;
+  color: var(--dark-color);
   font-weight: 600;
 }
 
 .card-content p {
   margin: 0 0 12px 0;
-  color: #666;
+  color: var(--text-light);
   font-size: 14px;
 }
 
 .status {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  justify-content: space-between;
   margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
 }
 
 .status span {
   display: flex;
   align-items: center;
-  font-size: 13px;
-  color: #555;
+  font-size: 14px;
+  gap: 5px;
 }
 
 .status-icon {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  margin-right: 8px;
 }
 
-.active .status-icon {
-  background: #4CAF50;
+.active {
+  color: var(--success-color);
+  font-weight: 500;
 }
 
-.inactive .status-icon {
-  background: #F44336;
+.inactive {
+  color: var(--danger-color);
+  font-weight: 500;
 }
 
 .loading {
@@ -143,67 +161,71 @@
   color: #666;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .card-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .card-container {
-    grid-template-columns: 1fr;
-  }
-}
+/* Modal styles */
 .modal {
   display: none;
   position: fixed;
-  z-index: 999;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
   overflow: auto;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0,0,0,0.8);
+  backdrop-filter: blur(5px);
 }
 
 .modal-content {
   position: relative;
-  margin: 5% auto;
-  padding: 20px;
-  background: #fff;
+  margin: auto;
   width: 80%;
-  max-width: 800px;
-  border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  max-width: 900px;
+  background: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  top: 50%;
+  transform: translateY(-50%);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {opacity: 0; transform: translateY(-60%);}
+  to {opacity: 1; transform: translateY(-50%);}
 }
 
 .modal-content img#remoteVideo {
   width: 100%;
   height: auto;
-  max-height: 400px;
+  max-height: 500px;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
 .modal-info {
-  margin-top: 15px;
+  padding: 15px;
   text-align: center;
 }
 
 .close {
   position: absolute;
-  top: 10px; right: 15px;
-  font-size: 28px;
+  top: -40px;
+  right: 0;
+  color: white;
+  font-size: 30px;
   font-weight: bold;
-  color: #aaa;
   cursor: pointer;
+  opacity: 0.8;
+  transition: var(--transition);
 }
 
 .close:hover {
-  color: #000;
+  opacity: 1;
+  transform: scale(1.1);
 }
+
 .screen-label {
   background-color: #ccc;
-  height: 150px;
+  height: 200px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -218,7 +240,34 @@
   text-align: center;
 }
 
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .card-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
+@media (max-width: 768px) {
+  .card-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    width: 95%;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .toolbar input[type="text"],
+  .toolbar select {
+    width: 100%;
+  }
+}
 </style>
 
 <script>
@@ -246,46 +295,40 @@ $(document).ready(function() {
     });
   }
 
-  // Render employee cards with different design
+  // Render employee cards with improved design
   function renderEmployeeCards(employees) {
-  if (employees.length === 0) {
-    $('#employeeCards').html('<div class="loading">No employees found</div>');
-    return;
-  }
+    if (employees.length === 0) {
+      $('#employeeCards').html('<div class="loading">No employees found</div>');
+      return;
+    }
 
-  let cardsHTML = '';
+    let cardsHTML = '';
 
-  employees.forEach((employee, index) => {
-    const activeHours = (Math.random() * 3 + 4).toFixed(1);
-    const inactiveHours = (Math.random() * 2).toFixed(1);
-    const productivityScore = Math.floor(Math.random() * 30) + 70;
+    employees.forEach((employee, index) => {
+      const activeHours = (Math.random() * 3 + 4).toFixed(1);
+      const inactiveHours = (Math.random() * 2).toFixed(1);
 
-    cardsHTML += `
-      <div class="card" data-name="${employee.name.toLowerCase()}" data-id="${employee.id}">
-        <div class="image-container screen-label" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', 'ID: ${employee.id}')">
-          <div class="screen-text">Screen-${index + 1}</div>
-        </div>
-        <div class="card-content">
-          <h3>${employee.name}</h3>
-          <p>ID: ${employee.id}</p>
-          <div class="status">
-            <span class="active"><span class="status-icon"></span> Active: ${activeHours} hrs</span>
-            <span class="inactive"><span class="status-icon"></span> Idle: ${inactiveHours} hrs</span>
-           
+      cardsHTML += `
+        <div class="card" data-name="${employee.name.toLowerCase()}" data-id="${employee.id}">
+          <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', 'ID: ${employee.id}')">
+            <div class="screen-label">
+              <div class="screen-text">Screen-${index + 1}</div>
+            </div>
+            <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+          </div>
+          <div class="card-content">
+            <h3>${employee.name}</h3>
+            <p>ID: ${employee.id}</p>
+            <div class="status">
+              <span class="active"><span class="status-icon"></span> ${activeHours} hrs active</span>
+              <span class="inactive"><span class="status-icon"></span> ${inactiveHours} hrs idle</span>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  });
+      `;
+    });
 
-  $('#employeeCards').html(cardsHTML);
-}
-
-  function getProgressColor(score) {
-    if (score >= 85) return '#4CAF50';
-    if (score >= 70) return '#8BC34A';
-    if (score >= 50) return '#FFC107';
-    return '#F44336';
+    $('#employeeCards').html(cardsHTML);
   }
 
   // Search functionality
@@ -313,12 +356,12 @@ $(document).ready(function() {
       if(sortBy === 'name') {
         return $(a).data('name').localeCompare($(b).data('name'));
       } else if(sortBy === 'active') {
-        const hoursA = parseFloat($(a).find('.active').text().split(' ')[1]);
-        const hoursB = parseFloat($(b).find('.active').text().split(' ')[1]);
+        const hoursA = parseFloat($(a).find('.active').text().split(' ')[0]);
+        const hoursB = parseFloat($(b).find('.active').text().split(' ')[0]);
         return hoursB - hoursA;
       } else if(sortBy === 'inactive') {
-        const hoursA = parseFloat($(a).find('.inactive').text().split(' ')[1]);
-        const hoursB = parseFloat($(b).find('.inactive').text().split(' ')[1]);
+        const hoursA = parseFloat($(a).find('.inactive').text().split(' ')[0]);
+        const hoursB = parseFloat($(b).find('.inactive').text().split(' ')[0]);
         return hoursB - hoursA;
       }
       return 0;
@@ -329,24 +372,6 @@ $(document).ready(function() {
 
   // Initialize
   fetchEmployees();
-});
-
-// Video modal functions
-function openVideoModal(videoUrl, name, id) {
-  $('#modalName').text(name);
-  $('#modalId').text(id);
-  $('#videoModal').show();
-  playVideo(id);
-}
-
-function closeVideoModal() {
-  $('#videoModal').hide();
-}
-
-$(window).click(function(event) {
-  if(event.target === $('#videoModal')[0]) {
-    closeVideoModal();
-  }
 });
 
 // WebSocket for live video
@@ -377,6 +402,8 @@ socket.onmessage = function(event) {
   img.src = url;
   img.onload = () => URL.revokeObjectURL(url);
 };
+
+// Video modal functions
 function openVideoModal(videoUrl, name, id) {
   const modal = document.getElementById('videoModal');
   const remoteVideo = document.getElementById('remoteVideo');
@@ -392,6 +419,9 @@ function openVideoModal(videoUrl, name, id) {
 
   // Display modal
   modal.style.display = 'block';
+  
+  // Start WebSocket stream
+  playVideo(id.split(': ')[1]);
 }
 
 function closeVideoModal() {
@@ -405,4 +435,11 @@ function closeVideoModal() {
   modal.style.display = 'none';
 }
 
+// Close modal when clicking outside
+window.onclick = function(event) {
+  const modal = document.getElementById('videoModal');
+  if (event.target === modal) {
+    closeVideoModal();
+  }
+};
 </script>
