@@ -1,23 +1,34 @@
-import { WebSocketServer, WebSocket } from 'ws';
+import fs from "fs";
+import https from "https";
+import { WebSocketServer, WebSocket } from "ws";
 
-const wss = new WebSocketServer({ port: 8090 });
+const serverOptions = {
+  cert: fs.readFileSync("/etc/letsencrypt/live/work-room.io/fullchain.pem"),
+  key: fs.readFileSync("/etc/letsencrypt/live/work-room.io/privkey.pem"),
+};
 
-console.log('WebSocket server running on ws://localhost:8090');
+const httpsServer = https.createServer(serverOptions);
 
-wss.on('connection', (ws) => {
-  console.log('New client connected.');
+const wss = new WebSocketServer({ server: httpsServer });
 
-  ws.on('message', (data, isBinary) => {
+httpsServer.listen(8090, () => {
+  console.log("Secure WebSocket server running on wss://localhost:8090");
+});
+
+wss.on("connection", (ws) => {
+  console.log("New client connected.");
+
+  ws.on("message", (data, isBinary) => {
     if (!isBinary) {
-      const textData = data.toString('utf-8');
+      const textData = data.toString("utf-8");
       wss.clients.forEach((client) => {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
           client.send(textData);
-          console.log('Sent to client:', textData);
+          console.log("Sent to client:", textData);
         }
       });
     } else {
-      console.log('Received non-buffer data:', data);
+      console.log("Received binary data");
       wss.clients.forEach((client) => {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
           client.send(data);
@@ -26,11 +37,11 @@ wss.on('connection', (ws) => {
     }
   });
 
-  ws.on('close', () => {
-    console.log('Client disconnected.');
+  ws.on("close", () => {
+    console.log("Client disconnected.");
   });
 
-  ws.on('error', (err) => {
-    console.error('WebSocket error:', err.message);
+  ws.on("error", (err) => {
+    console.error("WebSocket error:", err.message);
   });
 });

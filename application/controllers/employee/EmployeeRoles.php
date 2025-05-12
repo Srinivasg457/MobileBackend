@@ -417,10 +417,11 @@ public function get_user_role_feature_permissions() {
     // Return the structured response
     return $this->json_response(200, 'Data fetched successfully', $result);
 }
+
 public function get_feature_access_by_user_and_role()
     {
-        $user_id = 3;
-        $role_id = 45;
+        $user_id = $this->input->get('user_id');
+        $role_id = $this->input->get('role_id');
  
         // Validate input
         if (!$user_id || !$role_id) {
