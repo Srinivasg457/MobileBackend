@@ -1,77 +1,36 @@
-const fs = require("fs");
-const https = require("https");
-const WebSocket = require("ws");
+import { WebSocketServer, WebSocket } from 'ws';
 
-const server = https.createServer({
-  cert: fs.readFileSync("/etc/letsencrypt/live/work-room.io/fullchain.pem"),
-  key: fs.readFileSync("/etc/letsencrypt/live/work-room.io/privkey.pem"),
-});
+const wss = new WebSocketServer({ port: 8090 });
 
-const wss = new WebSocket.Server({ server });
+console.log('WebSocket server running on ws://localhost:8090');
 
-const clients = [];
-let electronClient = null;
+wss.on('connection', (ws) => {
+  console.log('New client connected.');
 
-wss.on("connection", (ws) => {
-  console.log("New client connected");
-  clients.push(ws);
-
-  ws.on("message", (message) => {
-    try {
-      const msg = JSON.parse(message);
-      console.log("Received message:", msg);
-
-      if (msg.type === "client-type" && msg.data === "electron") {
-        console.log("Electron client identified");
-        electronClient = ws;
-      } else if (msg.type === "request-share") {
-        console.log("Received screen share request");
-        if (electronClient && electronClient.readyState === WebSocket.OPEN) {
-          console.log("Sending start-share to Electron client");
-          electronClient.send(
-            JSON.stringify({
-              type: "start-share",
-              employee_id: msg.employee_id,
-            })
-          );
-        } else {
-          console.error("No Electron client connected");
-          ws.send(
-            JSON.stringify({
-              type: "error",
-              message: "No Electron client available",
-            })
-          );
+  ws.on('message', (data, isBinary) => {
+    if (!isBinary) {
+      const textData = data.toString('utf-8');
+      wss.clients.forEach((client) => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(textData);
+          console.log('Sent to client:', textData);
         }
-      } else {
-        clients.forEach((client) => {
-          if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(msg));
-          }
-        });
-      }
-    } catch (err) {
-      console.error("Error processing message:", err);
+      });
+    } else {
+      console.log('Received non-buffer data:', data);
+      wss.clients.forEach((client) => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(data);
+        }
+      });
     }
   });
 
-  ws.on("close", () => {
-    console.log("Client disconnected");
-    if (ws === electronClient) {
-      electronClient = null;
-      console.log("Electron client disconnected");
-    }
-    const index = clients.indexOf(ws);
-    if (index !== -1) {
-      clients.splice(index, 1);
-    }
+  ws.on('close', () => {
+    console.log('Client disconnected.');
   });
 
-  ws.on("error", (err) => {
-    console.error("WebSocket error:", err);
+  ws.on('error', (err) => {
+    console.error('WebSocket error:', err.message);
   });
-});
-
-server.listen(8090, () => {
-  console.log("WebSocket server is running at wss://work-room.io:8090");
 });
