@@ -168,35 +168,6 @@
                 }
             }
 
-            .toast {
-                padding: 10px;
-                margin: 5px;
-                border-radius: 4px;
-                color: #fff;
-                min-width: 200px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            }
-
-            .toast-success {
-                background-color: #28a745;
-            }
-
-            .toast-error {
-                background-color: #e74c3c;
-            }
-
-            .is-invalid {
-                border: 2px solid #e74c3c;
-                background-color: #fcebea;
-            }
-
-            #toast-container {
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                z-index: 9999;
-            }
-
             /* ---------- Mobile Responsive Styling ---------- */
             @media (max-width: 768px) {
                 .header {
@@ -250,6 +221,7 @@
                 }
 
             }
+
             .screenshot-card {
   width: calc(100% / 6 - 10px);
   box-sizing: border-box;
@@ -266,8 +238,7 @@
 
 
         <!-- Popup Div -->
-        <div id="toast-container" style="position: fixed;top: 0;"></div>
-        <div class="popup" id="popupCard">
+       <div class="popup" id="popupCard">
             <div class="d-flex justify-content-between align-items-baseline mb-5">
                 <h5><strong>Name:</strong> <span id="popupName"></span></h5>
                 <h5><strong>User ID:</strong> <span id="popupID"></span></h5>
@@ -335,11 +306,6 @@
             const today = new Date().toISOString().split('T')[0];
             $('#datePicker').val(today);
 
-            function showToast(message, type) {
-                const toast = $(`<div class="toast toast-${type}">${message}</div>`);
-                $('#toast-container').append(toast);
-                setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
-            }
 
             function closePopup() {
                 $('#popupCard').hide();
@@ -459,8 +425,9 @@
                                 } else {
                                     $(`#user-${employeeId} .see-more-button`).hide();
                                 }
-
-                                setTimeout(() => fetchUserScreenshots(employeeId, date), 60000);
+                                if (date === new Date().toISOString().split('T')[0]) {
+                                    setTimeout(() => fetchUserScreenshots(employeeId, date), 1000);
+                                }
 
                                 container.find('.zoomable-screenshot').on('click', function() {
                                     $('#modal-image').attr('src', $(this).attr('src'));
@@ -668,7 +635,9 @@
                                     });
 
                                     $(".screenshot-container").html(output);
-                                    setTimeout(() => loadScreenshots(), 60000);
+                                    if (date === new Date().toISOString().split('T')[0]) {
+                                        setTimeout(() => loadScreenshots(), 60000);
+                                    }
 
                                     // Zoom modal
                                     $(".see-zoomable-screenshot").on('click', function() {
@@ -708,12 +677,13 @@
                                                     employee_id: id
                                                 },
                                                 success: function() {
- if (response.status == 1) {
-                                                       swal("Failed!", response.message || "Could not delete Screenshot.", "error");
-                                                        loadUserRolePermissions(userId);      
+                                                    if (response.status == 1) {
+                                                        swal("Failed!", response.message || "Could not delete Screenshot.", "error");
+                                                        loadUserRolePermissions(userId);
                                                     } else {
                                                         swal("Deleted!", "Screenshot deleted successfully.", "success");
-                                                    }                                                    loadScreenshots();
+                                                    }
+                                                    loadScreenshots();
                                                     fetchUserScreenshots(id, date);
                                                 },
                                                 error: function(xhr) {

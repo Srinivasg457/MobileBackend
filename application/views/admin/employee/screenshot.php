@@ -421,10 +421,13 @@
                                     }
 
                                     // Auto-refresh after 5.5 minutes
-                                    setTimeout(() => {
-                                        let selectedDate = $('#datePicker').val();
-                                        fetchUserScreenshots(selectedDate);
-                                    }, 60000);
+                                    if ($('#datePicker').val() === new Date().toISOString().split('T')[0]) {
+
+                                        setTimeout(() => {
+                                            let selectedDate = $('#datePicker').val();
+                                            fetchUserScreenshots(selectedDate);
+                                        }, 60000);
+                                    }
                                 }
 
 
