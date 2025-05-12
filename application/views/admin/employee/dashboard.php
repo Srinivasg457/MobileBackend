@@ -2,8 +2,7 @@
 
     <section class="content">
 
-
-       <h1>employe dashboard</h1>
-       <h1><?php echo $details ?></h1>
+<h3>Dashboard</h3>
+       
     </section>
 </div>

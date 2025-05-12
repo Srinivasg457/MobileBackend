@@ -1,4 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class Hrm extends Home_Controller {
 
@@ -130,23 +133,24 @@ class Hrm extends Home_Controller {
     //             redirect(base_url('admin/hrm/employee'));
 
             
-    //     }      
-        
-    // }
-
+    //     }     
+    
+    
     public function employee_add()
 {   
     if ($_POST) {   
         check_status();
+        $this->load->database();
 
         $id = $this->input->post('id', true);
+        $email = $this->input->post('email', true);
 
         $data = array(
             'user_id' => user()->id,
             'business_id' => $this->business->uid,
             'name' => $this->input->post('name', true),
             'department_id' => $this->input->post('department', true),
-            'email' => $this->input->post('email', true),
+            'email' => $email,
             'phone' => $this->input->post('phone', true),
             'address' => $this->input->post('address', true),
             'city' => $this->input->post('city', true),
@@ -158,48 +162,105 @@ class Hrm extends Home_Controller {
         $data = $this->security->xss_clean($data);
 
         if ($id != '') {
-            $this->admin_model->edit_option($data, $id, 'employees');
-            $this->session->set_flashdata('msg', trans('msg-updated')); 
+            $this->db->where('id', $id)->update('employees', $data);
+            $this->session->set_flashdata('msg', trans('msg-updated'));
         } else {
-            $id = $this->admin_model->insert($data, 'employees');
-            $this->session->set_flashdata('msg', trans('msg-inserted')); 
+            // Check if email exists
+            $this->db->where('LOWER(email)', strtolower($email));
+            $exists = $this->db->get('employees')->row();
 
-            // ✅ Generate invitation token
+            if ($exists) {
+                $this->session->set_flashdata('error', 'Email address already exists.');
+                redirect(base_url('admin/hrm/employee'));
+                exit; // Important
+            }
+
+            // Insert new employee
+            $this->db->insert('employees', $data);
+            $id = $this->db->insert_id();
+
+            // Generate and save invitation token
             $token = uniqid();
-            $this->admin_model->edit_option(['invitation_token' => $token], $id, 'employees');
+            $this->db->where('id', $id)->update('employees', ['invitation_token' => $token]);
 
-            // ✅ Email config for Mailtrap
+            // Send invitation email
             $config = array(
                 'protocol'    => 'smtp',
                 'smtp_host'   => 'smtp.gmail.com',
                 'smtp_port'   => 587,
-                'smtp_user'   => 'sabeer2002ahmed@gmail.com', // your Gmail
-                'smtp_pass'   => 'vivxkwqkkygmelzp',   // NOT your Gmail password!
+                'smtp_user'   => 'sabeer2002ahmed@gmail.com',
+                'smtp_pass'   => 'vivxkwqkkygmelzp',
                 'smtp_crypto' => 'tls',
                 'mailtype'    => 'html',
                 'charset'     => 'utf-8',
                 'newline'     => "\r\n",
                 'crlf'        => "\r\n"
             );
-            
 
             $this->load->library('email');
             $this->email->initialize($config);
 
-            // ✅ Prepare invitation email
-            $to = $this->input->post('email', true);
-            $subject = 'You are invited to join Time Tracker';
-            $message = '<p>Hello ' . $this->input->post('name', true) . ',</p>';
-            $message .= '<p>You have been invited to register for Time Tracker. Please click the link below to register:</p>';
-            $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
-            $message .= '<p>If you did not expect this, you can ignore this email.</p>';
-            $message .= '<p>Regards,<br>Time Tracker Team</p>';
+            // $subject = 'You are invited to join Time Tracker';
+            // $message = '<p>Hello ' . $data['name'] . ',</p>';
+            // $message .= '<p>You have been invited to register for Time Tracker. Click below to register:</p>';
+            // $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
+            // $message .= '<p>If you did not expect this, you can ignore this email.</p>';
+            // $message .= '<p>Regards,<br>Time Tracker Team</p>';
+            $subject = 'You are invited to join Workroom';
 
-            $this->email->to($to);
+$message = '
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Invitation</title>
+</head>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+          <tr>
+            <td align="center" style="background-color: #4CAF50; padding: 20px;">
+              <img width="100" src="' . base_url('uploads/thumbnail/2_thumb-100x100.png') . '" alt="Workroom" style="display:block; margin:0 auto;">
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px; font-family: Arial, sans-serif;">
+              <p style="font-size: 16px; color: #333; font-family: Arial, sans-serif;">Hello ' . $data['name'] . ',</p>
+              <p style="font-size: 16px; color: #333; font-family: Arial, sans-serif;">
+                You have been invited to register for <strong>Workroom</strong>. Click the button below to complete your registration:
+              </p>
+              <p style="text-align: center; margin: 30px 0;">
+                <a href="' . base_url('accept-invitation?token=' . $token) . '" style="background-color: #4CAF50; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 16px; font-family: Arial, sans-serif;">
+                  Accept Invitation
+                </a>
+              </p>
+              <p style="font-size: 14px; color: #555; font-family: Arial, sans-serif;">
+                If you did not expect this email, you can safely ignore it.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f1f1f1; text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+              <p style="margin: 0; font-size: 14px; color: #777; font-family: Arial, sans-serif;">Regards,<br>Workroom Team</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>';
+
+            
+
+            $this->email->to($email);
             $this->email->from('sabeer2002ahmed@gmail.com', 'Time Tracker');
             $this->email->subject($subject);
             $this->email->message($message);
 
+            
             if ($this->email->send()) {
                 $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
                 $this->session->set_flashdata('msg', 'Employee added and invitation email sent.');
@@ -208,8 +269,8 @@ class Hrm extends Home_Controller {
                 $this->session->set_flashdata('error', 'Employee added but failed to send email.');
             }
         }
-
-        // ✅ Upload photo if available
+ 
+        //  Upload photo if available
         if ($_FILES['photo']['name'] != '') {
             $up_load = $this->admin_model->upload_image('1200');
             $data_img = array(
@@ -220,8 +281,9 @@ class Hrm extends Home_Controller {
         }
 
         redirect(base_url('admin/hrm/employee'));
+        exit; // Important to stop further execution
     }      
-}
+}   
 
     public function employee_edit($id)
     {  
@@ -240,7 +302,6 @@ class Hrm extends Home_Controller {
         $this->admin_model->delete($id,'employees'); 
         echo json_encode(array('st' => 1));
     }
-
 
     public function attendance(){
         //echo "string"; exit();
@@ -288,6 +349,212 @@ class Hrm extends Home_Controller {
         }
         
     }
+    public function employee_import()
+    {
+        check_status();
+        $this->load->database();
+    
+        if (!empty($_FILES['import_file']['name'])) {
+            $config['upload_path'] = './uploads/';
+            $config['allowed_types'] = 'csv|xls|xlsx';
+            $config['max_size'] = 10000;
+    
+            $this->load->library('upload', $config);
+    
+            if (!$this->upload->do_upload('import_file')) {
+                $this->session->set_flashdata('error', $this->upload->display_errors());
+                redirect(base_url('admin/hrm/employee'));
+                exit;
+            }
+    
+            $fileData = $this->upload->data();
+            $filePath = './uploads/' . $fileData['file_name'];
+    
+            try {
+                $spreadsheet = IOFactory::load($filePath);
+                $sheet = $spreadsheet->getActiveSheet();
+                $rows = $sheet->toArray();
+    
+                $header = array_map('strtolower', array_map('trim', $rows[0]));
+                unset($rows[0]); // Remove header row
+    
+                $duplicateEmails = [];
+    
+                foreach ($rows as $row) {
+                    $employeeData = array_combine($header, $row);
+    
+                    $name = isset($employeeData['name']) ? trim($employeeData['name']) : '';
+                    $email = isset($employeeData['email']) ? strtolower(trim($employeeData['email'])) : '';
+    
+                    if (empty($name) || empty($email)) {
+                        continue; // Skip rows missing essential fields
+                    }
+    
+                    // Check if email already exists
+                    $this->db->where('LOWER(email)', $email);
+                    $exists = $this->db->get('employees')->row();
+    
+                    if ($exists) {
+                        $duplicateEmails[] = $email;
+                        continue;
+                    }
+    
+                    $data = [
+                        'user_id' => user()->id,
+                        'business_id' => $this->business->uid,
+                        'name' => $name,
+                        'department_id' => $employeeData['department_id'] ?? null,
+                        'email' => $email,
+                        'phone' => $employeeData['phone'] ?? null,
+                        'address' => $employeeData['address'] ?? null,
+                        'city' => $employeeData['city'] ?? null,
+                        'country' => $employeeData['country'] ?? null,
+                        'status' => 1,
+                        'created_at' => my_date_now()
+                    ];
+    
+                    $data = $this->security->xss_clean($data);
+    
+                    $this->db->insert('employees', $data);
+                    $id = $this->db->insert_id();
+    
+                    $token = uniqid();
+                    $this->db->where('id', $id)->update('employees', ['invitation_token' => $token]);
+    
+                    // Send invitation email (same logic as employee_add)
+                    $this->load->library('email');
+                    $email_config = array(
+                        'protocol'    => 'smtp',
+                        'smtp_host'   => 'smtp.gmail.com',
+                        'smtp_port'   => 587,
+                        'smtp_user'   => 'sabeer2002ahmed@gmail.com',
+                        'smtp_pass'   => 'vivxkwqkkygmelzp',
+                        'smtp_crypto' => 'tls',
+                        'mailtype'    => 'html',
+                        'charset'     => 'utf-8',
+                        'newline'     => "\r\n",
+                        'crlf'        => "\r\n"
+                    );
+                    $this->email->initialize($email_config);
+    
+                    $subject = 'You are invited to join Time Tracker';
+                    $message = '<p>Hello ' . $name . ',</p>';
+                    $message .= '<p>You have been invited to register for Time Tracker. Click below to register:</p>';
+                    $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
+                    $message .= '<p>If you did not expect this, you can ignore this email.</p>';
+                    $message .= '<p>Regards,<br>Time Tracker Team</p>';
+    
+                    $this->email->to($email);
+                    $this->email->from('sabeer2002ahmed@gmail.com', 'Time Tracker');
+                    $this->email->subject($subject);
+                    $this->email->message($message);
+    
+                    if ($this->email->send()) {
+                        $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
+                    } else {
+                        log_message('error', 'Email error (import): ' . $this->email->print_debugger());
+                    }
+                }
+    
+                unlink($filePath);
+    
+                if (!empty($duplicateEmails)) {
+                    $this->session->set_flashdata('error', 'These emails already exist and were skipped: ' . implode(', ', $duplicateEmails));
+                } else {
+                    $this->session->set_flashdata('msg', 'Employees imported and invitations sent successfully.');
+                }
+    
+                redirect(base_url('admin/hrm/employee'));
+                exit;
+            } catch (Exception $e) {
+                unlink($filePath);
+                log_message('error', 'Import error: ' . $e->getMessage());
+                $this->session->set_flashdata('error', 'Failed to import employees. Please check the file format.');
+                redirect(base_url('admin/hrm/employee'));
+                exit;
+            }
+        }
+    }
+    
+    
+
+
+public function download_sample_excel()
+{
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // Set headings
+    $sheet->setCellValue('A1', 'name');
+    $sheet->setCellValue('B1', 'department_id');
+    $sheet->setCellValue('C1', 'email');
+    $sheet->setCellValue('D1', 'phone');
+    $sheet->setCellValue('E1', 'address');
+    $sheet->setCellValue('F1', 'city');
+    $sheet->setCellValue('G1', 'country');
+
+    // Make first row bold
+    $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+
+    // Add sample row
+    $sheet->setCellValue('A2', 'John Doe');
+    $sheet->setCellValue('B2', '1');
+    $sheet->setCellValue('C2', 'john@example.com');
+    $sheet->setCellValue('D2', '1234567890');
+    $sheet->setCellValue('E2', '123 Main St');
+    $sheet->setCellValue('F2', 'New York');
+    $sheet->setCellValue('G2', 'USA');
+
+    // Send file to browser
+    $filename = 'employee_sample.xlsx';
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    header('Cache-Control: max-age=0');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('php://output');
+    exit;
+}
+
+
+// Reuse email logic as a helper method
+private function _send_invitation_email($name, $email, $token)
+{
+    $config = array(
+        'protocol'    => 'smtp',
+        'smtp_host'   => 'smtp.gmail.com',
+        'smtp_port'   => 587,
+        'smtp_user'   => 'sabeer2002ahmed@gmail.com',
+        'smtp_pass'   => 'vivxkwqkkygmelzp',
+        'smtp_crypto' => 'tls',
+        'mailtype'    => 'html',
+        'charset'     => 'utf-8',
+        'newline'     => "\r\n",
+        'crlf'        => "\r\n"
+    );
+
+    $this->load->library('email');
+    $this->email->initialize($config);
+
+    $subject = 'You are invited to join Time Tracker';
+    $message = '<p>Hello ' . $name . ',</p>';
+    $message .= '<p>You have been invited to register for Time Tracker. Click below to register:</p>';
+    $message .= '<p><a href="' . base_url('accept-invitation?token=' . $token) . '">Accept Invitation</a></p>';
+    $message .= '<p>If you did not expect this, you can ignore this email.</p>';
+    $message .= '<p>Regards,<br>Time Tracker Team</p>';
+
+    $this->email->to($email);
+    $this->email->from('sabeer2002ahmed@gmail.com', 'Time Tracker');
+    $this->email->subject($subject);
+    $this->email->message($message);
+
+    if ($this->email->send()) {
+        $this->db->where('email', $email)->update('employees', ['invitation_sent_at' => my_date_now()]);
+    } else {
+        log_message('error', 'Email failed: ' . $this->email->print_debugger());
+    }
+}
+
 
     public function attendance_edit($id)
     {  

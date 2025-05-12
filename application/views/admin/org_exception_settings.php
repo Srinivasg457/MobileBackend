@@ -90,6 +90,10 @@
         right: 10px;
         z-index: 9999;
     }
+            .content-wrapper{
+    height: unset !important;
+    min-height: unset !important;
+}
 </style>
 
 <div class="content-wrapper">
@@ -176,14 +180,23 @@
                     </div>
                     <div class="col-md-6">
                         <label>Timecards Interval (mins):</label>
-                        <select name="timecards_time_interval" class="form-control interval-field">
+                        <!-- <select name="timecards_time_interval" class="form-control interval-field">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="5">5</option>
                             <option value="10">10</option>
-                        </select>
+                        </select> -->
+                        <input type="text" name="timecards_time_interval" class="form-control interval-field" value="1" readonly>
                     </div>
-                </div>
+
+                  <div class="col-md-6">
+        <label>Self Login:</label><br>
+        <label class="switch">
+            <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
+            <span class="slider"></span>
+        </label>
+    </div>
+                </div>  
 
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">Save Settings</button>
@@ -211,12 +224,12 @@
         if (target) {
             if (enabled) {
                 target.prop('disabled', false);
-                if (target.is('select')) {
-                    const firstValue = target.find('option:first').next().val();
-                    target.val(firstValue);
-                }
+                // if (target.is('select')) {
+                //     const firstValue = target.find('option:first').next().val();
+                //     target.val(firstValue);
+                // }
             } else {
-                target.prop('disabled', true).val('');
+                target.prop('disabled', true);
             }
         }
     }
@@ -233,15 +246,17 @@
             const value = parseInt(field.val(), 10);
             field.removeClass('is-invalid');
 
-            if (!field.prop('disabled') && (isNaN(value) || value > max || value < 0)) {
+            if (!field.prop('disabled') && (isNaN(value) || value < 1 || value > max)) {
                 field.addClass('is-invalid');
-                showToast(`Limit exceeded: ${fieldName.replace('_', ' ')} max is ${max}`, 'error');
+                const readableName = fieldName.replace(/_/g, ' ');
+                showToast(`${readableName} must be between 1 and ${max}`, 'error');
                 isValid = false;
             }
         }
 
         return isValid;
     }
+
 
 
     function showToast(message, type) {
@@ -289,8 +304,8 @@
 
                 $('#orgExceptionForm input[type="checkbox"]').prop('checked', true).trigger('change');
                 $('#orgExceptionForm select.interval-field').val('1').prop('disabled', false);
-                $('[name="mouse_move_threshold"]').val(40).prop('disabled', false);
-                $('[name="key_stroke_threshold"]').val(20).prop('disabled', false);
+                $('[name="mouse_move_threshold"]').val(20).prop('disabled', false);
+                $('[name="key_stroke_threshold"]').val(40).prop('disabled', false);
 
                 return;
             }
@@ -332,7 +347,7 @@
                                     if (isChecked) {
                                         relatedField.prop('disabled', false).val(settings[relatedField.attr('name')] || '');
                                     } else {
-                                        relatedField.prop('disabled', true).val('');
+                                        relatedField.prop('disabled', true);
                                     }
                                 }
 
@@ -373,11 +388,11 @@
             });
 
             // Always fetch the values (even if the related flag is off)
-            dataObj['screenshot_time_interval'] = $('[name="screenshot_time_interval"]').val() || '5';
-            dataObj['webcam_time_interval'] = $('[name="webcam_time_interval"]').val() || '5';
-            dataObj['mouse_move_threshold'] = $('[name="mouse_move_threshold"]').val() || '20';
-            dataObj['key_stroke_threshold'] = $('[name="key_stroke_threshold"]').val() || '40';
-            dataObj['timecards_time_interval'] = $('[name="timecards_time_interval"]').val() || '5';
+            dataObj['screenshot_time_interval'] = $('[name="screenshot_time_interval"]').val();
+            dataObj['webcam_time_interval'] = $('[name="webcam_time_interval"]').val();
+            dataObj['mouse_move_threshold'] = $('[name="mouse_move_threshold"]').val();
+            dataObj['key_stroke_threshold'] = $('[name="key_stroke_threshold"]').val();
+            dataObj['timecards_time_interval'] = $('[name="timecards_time_interval"]').val();
 
             console.log(currentEmployeeId);
             console.log(dataObj);

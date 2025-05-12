@@ -1,9 +1,11 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class ScreenshotController extends Home_Controller {
+class ScreenshotController extends Home_Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->load->database();
         $this->load->helper(['url', 'form']);
@@ -98,320 +100,370 @@ class ScreenshotController extends Home_Controller {
     //             "message" => "Screenshot stored successfully"
     //         ]));
     // }
-    public function store_screenshot() {
-    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+    public function store_screenshot()
+    {
+        if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(405)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Invalid request method"
+                ]));
+        }
+
+        $user_id = $this->input->get_request_header('user_id', TRUE);
+        $employee_id = $this->input->get_request_header('employee_id', TRUE);
+        $provided_timestamp = $this->input->get_request_header('timestamp', TRUE);
+
+        if (empty($user_id) || empty($employee_id) || empty($provided_timestamp)) {
+            $missing_fields = [];
+            if (empty($user_id)) $missing_fields[] = 'user_id';
+            if (empty($employee_id)) $missing_fields[] = 'employee_id';
+            if (empty($provided_timestamp)) $missing_fields[] = 'timestamp';
+
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Missing required fields in headers: " . implode(', ', $missing_fields)
+                ]));
+        }
+
+        if (empty($_FILES['screenshot']['tmp_name'])) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "No file uploaded"
+                ]));
+        }
+
+        // Capture overall_activity_percent and is_active from POST data
+        $overall_activity_percent = $this->input->get_request_header('overall_activity_percent', TRUE);
+        if($overall_activity_percent>60){
+            $is_active =2;
+        }else if($overall_activity_percent>40 && $overall_activity_percent<=60){
+            $is_active =1;
+        }else{
+            $is_active =0;
+        }
+
+
+        // Validate overall_activity_percent
+        if (!is_numeric($overall_activity_percent) || $overall_activity_percent < 0 || $overall_activity_percent > 100) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Invalid value for overall_activity_percent. It should be a number between 0 and 100."
+                ]));
+        }
+
+        // Validate is_active
+        if (!in_array($is_active, [0, 1, 2], true)) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Invalid value for is_active. It should be either 0, 1, or 2."
+                ]));
+        }
+
+        // Validate the provided timestamp format
+        try {
+            $timestamp_object = new DateTime($provided_timestamp);
+            $formatted_timestamp = $timestamp_object->format('Ymd_His'); // Change format here
+        } catch (Exception $e) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Invalid timestamp format. Please use a format that DateTime can parse."
+                ]));
+        }
+
+        // Define upload path using user_id
+        $upload_path = FCPATH . "uploads/screenshots/{$user_id}/";
+
+        // Create the directory if it doesn't exist
+        if (!is_dir($upload_path)) {
+            mkdir($upload_path, 0755, true);
+        }
+
+        // Get file extension and construct file name
+        $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
+        $file_name = "screenshot_{$employee_id}_{$formatted_timestamp}." . $file_extension; // Use formatted timestamp
+
+        $full_path = $upload_path . $file_name;
+        $relative_path = "uploads/screenshots/{$user_id}/{$file_name}";
+
+        if (!move_uploaded_file($_FILES['screenshot']['tmp_name'], $full_path)) {
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Failed to move uploaded file"
+                ]));
+        }
+
+        // Insert record into DB
+        $data = [
+            'user_id' => $user_id,
+            'employee_id' => $employee_id,
+            'file_path' => $relative_path,
+            'file_type' => $file_extension,
+            'created_at' => date('Y-m-d H:i:s', strtotime($provided_timestamp)), // Use original timestamp value
+            'overall_activity_percent' => $overall_activity_percent,
+            'is_active' => $is_active
+        ];
+
+        if (!$this->db->insert('screenshots', $data)) {
+            $error = $this->db->error();
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "DB Insertion Failed",
+                    "error" => $error
+                ]));
+        }
+
         return $this->output->set_content_type('application/json')
-            ->set_status_header(405)
+            ->set_status_header(201)
             ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Invalid request method"
+                "status" => "success",
+                "message" => "Screenshot stored successfully",
+                "file_path" => $relative_path
             ]));
     }
-
-    $user_id = $this->input->get_request_header('user_id', TRUE);
-    $employee_id = $this->input->get_request_header('employee_id', TRUE);
-
-    if (empty($user_id) || empty($employee_id)) {
-        return $this->output->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Missing user_id or employee_id in headers"
-            ]));
-    }
-
-    if (empty($_FILES['screenshot']['tmp_name'])) {
-        return $this->output->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "No file uploaded"
-            ]));
-    }
-
-    // Define upload path using user_id
-    $upload_path = FCPATH . "uploads/screenshots/{$user_id}/";
-
-    // Create the directory if it doesn't exist
-    if (!is_dir($upload_path)) {
-        mkdir($upload_path, 0755, true);
-    }
-
-    // Get file extension and construct file name with timestamp
-    $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
-    $timestamp = date('Ymd_His');
-    $file_name = "screenshot_{$employee_id}_{$timestamp}." . $file_extension;
-
-    $full_path = $upload_path . $file_name;
-    $relative_path = "uploads/screenshots/{$user_id}/{$file_name}";
-
-    if (!move_uploaded_file($_FILES['screenshot']['tmp_name'], $full_path)) {
-        return $this->output->set_content_type('application/json')
-            ->set_status_header(500)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Failed to move uploaded file"
-            ]));
-    }
-
-    // Insert record into DB
-    $data = [
-        'user_id' => $user_id,
-        'employee_id' => $employee_id,
-        'file_path' => $relative_path,
-        'file_type' => $file_extension,
-        'created_at' => date('Y-m-d H:i:s')
-    ];
-
-    if (!$this->db->insert('screenshots', $data)) {
-        $error = $this->db->error();
-        return $this->output->set_content_type('application/json')
-            ->set_status_header(500)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "DB Insertion Failed",
-                "error" => $error
-            ]));
-    }
-
-    return $this->output->set_content_type('application/json')
-        ->set_status_header(201)
-        ->set_output(json_encode([
-            "status" => "success",
-            "message" => "Screenshot stored successfully",
-            "file_path" => $relative_path
-        ]));
-}
-
 
     
-    // public function get_screenshots() {
-    //     $employee_id = $this->input->get('employee_id');
-    //     $user_id = $this->session->userdata('id');
-    //     $date = $this->input->get('date'); // Optional date in 'YYYY-MM-DD'
+    //     public function get_screenshots() {
+    //          $employee_id = $this->input->get('employee_id');
+    //         // $user_id = $this->input->get('user_id');
+    //         $user_id = $this->session->userdata('id');
+    //         $date = $this->input->get('date');
 
-    //     if (empty($user_id) && empty($employee_id)) {
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 "status" => "error",
-    //                 "message" => "Missing user_id or employee_id"
-    //             ]));
-    //     }
-
-    //     // Default to today’s date if none is provided
-    //     if (empty($date)) {
-    //         $date = date('Y-m-d');
-    //     }
-
-    //     $this->db->select('screenshot_id, file_data, file_type, created_at');
-    //     $this->db->from('screenshots');
-
-    //     if (!empty($user_id)) {
-    //         $this->db->where('user_id', $user_id);
-    //     }
-
-    //     if (!empty($employee_id)) {
-    //         $this->db->where('employee_id', $employee_id);
-    //     }
-
-    //     $this->db->where('status', 1);
-    //     $this->db->where('DATE(created_at)', $date); // 📅 Filter by date
-    //     $this->db->order_by('created_at', 'DESC');
-    //     $query = $this->db->get();
-
-    //     if ($query->num_rows() == 0) {
-    //         $message = "No screenshots found";
-    //         if (!empty($date)) {
-    //             $message .= " for date " . $date;
+    //         if (empty($user_id) && empty($employee_id)) {
+    //             return $this->output->set_content_type('application/json')
+    //                 ->set_status_header(400)
+    //                 ->set_output(json_encode([
+    //                     "status" => "error",
+    //                     "message" => "Missing user_id or employee_id"
+    //                 ]));
     //         }
-    //         if (!empty($user_id)) {
-    //             $message .= " for user ID " . $user_id;
+
+    //         if (empty($date)) {
+    //             $date = date('Y-m-d');
     //         }
-    //         if (!empty($employee_id)) {
-    //             $message .= " for employee ID " . $employee_id;
+
+    //         // Use user_id as folder name directly
+    //         $user_folder = $user_id;
+    //         $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
+
+    //         if (!is_dir($upload_path)) {
+    //             return $this->output->set_content_type('application/json')
+    //                 ->set_status_header(404)
+    //                 ->set_output(json_encode([
+    //                     "status" => "error",
+    //                     "message" => "No folder found for user ID {$user_id}"
+    //                 ]));
     //         }
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(404)
-    //             ->set_output(json_encode([
-    //                 "status" => "error",
-    //                 "message" => $message
-    //             ]));
-    //     }
-    //     if ($query->num_rows() === 0) {
+
+    //         $screenshots = [];
+    //         $files = scandir($upload_path);
+
+    //         foreach ($files as $file) {
+    //             if (strpos($file, "screenshot_{$employee_id}") === 0 && strpos($file, str_replace('-', '', $date)) !== false) {
+    //                 preg_match('/screenshot_(\d+)_(\d{8})_(\d{6})\.(\w{3,4})/', $file, $matches);
+
+    //                 if (isset($matches[2]) && isset($matches[3])) {
+    //                     $file_date = $matches[2];
+    //                     $file_time = $matches[3];
+    //                     $file_extension = $matches[4];
+
+    //                     if ($file_date == str_replace('-', '', $date)) {
+    //                         $formatted_time = date('H:i:s', strtotime($file_time));
+    //                         $file_path = base_url("uploads/screenshots/{$user_folder}/{$file}");
+
+    //                         $screenshots[] = [
+    //                             'file_name' => $file,
+    //                             'image_url' => $file_path,
+    //                             'created_at' => $formatted_time,
+    //                             'display_text' => $formatted_time
+    //                         ];
+    //                     }
+    //                 }
+    //             }
+    //         }
+
     //         return $this->output->set_content_type('application/json')
     //             ->set_status_header(200)
     //             ->set_output(json_encode([
     //                 "status" => "success",
-    //                 "screenshots" => [],
-    //                 "message" => "No screenshots found for employee ID {$employee_id} on {$date}",
+    //                 "screenshots" => $screenshots,
     //                 "date" => $date,
-    //                 "employee_id" => $employee_id
+    //                 "user_id" => $user_id,
+    //                 "employee_id" => $employee_id,
+    //                 "message" => empty($screenshots) ? "No screenshots found for user ID {$user_id} on {$date}" : null
     //             ]));
     //     }
+public function get_screenshots()
+{
+    $employee_id = $this->input->get('employee_id');
+    $user_id = $this->session->userdata('id');
+    $date = $this->input->get('date');
 
-    //     $screenshots = [];
-    //     foreach ($query->result() as $row) {
-    //         $formatted_date = date('H:i:s', strtotime($row->created_at));
-    //         $base64_image = base64_encode($row->file_data);
-    //         $image_data_url = 'data:image/' . $row->file_type . ';base64,' . $base64_image;
-
-    //         $screenshots[] = [
-    //             'id' => $row->screenshot_id,
-    //             'image_data' => $image_data_url,
-    //             'created_at' => $formatted_date,
-    //             'display_text' => $formatted_date
-    //         ];
-    //     }
-
-    //     return $this->output->set_content_type('application/json')
-    //         ->set_status_header(200)
-    //         ->set_output(json_encode([
-    //             "status" => "success",
-    //             "screenshots" => $screenshots,
-    //             "date" => $date,
-    //             "user_id" => $user_id,
-    //             "employee_id" => $employee_id
-    //         ]));
-    // }
-    public function get_screenshots() {
-         $employee_id = $this->input->get('employee_id');
-        $user_id = $this->session->userdata('id');
-        $date = $this->input->get('date');
-    
-        if (empty($user_id) && empty($employee_id)) {
-            return $this->output->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    "status" => "error",
-                    "message" => "Missing user_id or employee_id"
-                ]));
-        }
-    
-        if (empty($date)) {
-            $date = date('Y-m-d');
-        }
-    
-        // Use user_id as folder name directly
-        $user_folder = $user_id;
-        $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
-    
-        if (!is_dir($upload_path)) {
-            return $this->output->set_content_type('application/json')
-                ->set_status_header(404)
-                ->set_output(json_encode([
-                    "status" => "error",
-                    "message" => "No folder found for user ID {$user_id}"
-                ]));
-        }
-    
-        $screenshots = [];
-        $files = scandir($upload_path);
-    
-        foreach ($files as $file) {
-            if (strpos($file, "screenshot_{$employee_id}") === 0 && strpos($file, str_replace('-', '', $date)) !== false) {
-                preg_match('/screenshot_(\d+)_(\d{8})_(\d{6})\.(\w{3,4})/', $file, $matches);
-    
-                if (isset($matches[2]) && isset($matches[3])) {
-                    $file_date = $matches[2];
-                    $file_time = $matches[3];
-                    $file_extension = $matches[4];
-    
-                    if ($file_date == str_replace('-', '', $date)) {
-                        $formatted_time = date('H:i:s', strtotime($file_time));
-                        $file_path = base_url("uploads/screenshots/{$user_folder}/{$file}");
-    
-                        $screenshots[] = [
-                            'file_name' => $file,
-                            'image_url' => $file_path,
-                            'created_at' => $formatted_time,
-                            'display_text' => $formatted_time
-                        ];
-                    }
-                }
-            }
-        }
-    
+    if (empty($user_id) && empty($employee_id)) {
         return $this->output->set_content_type('application/json')
-            ->set_status_header(200)
+            ->set_status_header(400)
             ->set_output(json_encode([
-                "status" => "success",
-                "screenshots" => $screenshots,
-                "date" => $date,
-                "user_id" => $user_id,
-                "employee_id" => $employee_id,
-                "message" => empty($screenshots) ? "No screenshots found for user ID {$user_id} on {$date}" : null
+                "status" => "error",
+                "message" => "Missing user_id or employee_id"
             ]));
     }
-    
-    
-    
 
-    public function get_user_screenshots()
-    {
-        $employee_id = $this->session->userdata('employee_id');
-        $date = $this->input->get('date'); // Optional date in 'YYYY-MM-DD'
+    if (empty($date)) {
+        $date = date('Y-m-d');
+    }
 
-        if (empty($employee_id)) {
-            return $this->output->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    "status" => "error",
-                    "message" => "Missing employee_id"
-                ]));
-        }
+    $user_folder = $user_id;
+    $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
 
-        // Default to today’s date if not provided
-        if (empty($date)) {
-            $date = date('Y-m-d');
-        }
+    if (!is_dir($upload_path)) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(404)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "No folder found for user ID {$user_id}"
+            ]));
+    }
 
-        $this->db->select('screenshot_id, file_data, file_type, created_at');
-        $this->db->from('screenshots');
-        $this->db->where('employee_id', $employee_id);
-        $this->db->where('status', 1);
-        $this->db->where('DATE(created_at)', $date); // Filter by date
-        $this->db->order_by('created_at', 'DESC');
-        $query = $this->db->get();
+    // Fetch screenshot records from DB where status is 1
+    $this->db->select('screenshot_id, file_path, created_at');
+    $this->db->where('employee_id', $employee_id);
+    $this->db->where('user_id', $user_id);
+    $this->db->where('status', 1); // Only active screenshots
+    $this->db->like('created_at', $date);
+    $this->db->order_by('created_at', 'DESC');
+    $query = $this->db->get('screenshots');
+    $db_screenshots = $query->result_array();
 
-        if ($query->num_rows() === 0) {
-            return $this->output->set_content_type('application/json')
-                ->set_status_header(200)
-                ->set_output(json_encode([
-                    "status" => "success",
-                    "screenshots" => [],
-                    "message" => "No screenshots found for employee ID {$employee_id} on {$date}",
-                    "date" => $date,
-                    "employee_id" => $employee_id
-                ]));
-        }
+    $screenshots = [];
 
-        $screenshots = [];
-        foreach ($query->result() as $row) {
-            $formatted_date = date('H:i:s', strtotime($row->created_at));
-            $base64_image = base64_encode($row->file_data);
-            $image_data_url = 'data:image/' . $row->file_type . ';base64,' . $base64_image;
+    foreach ($db_screenshots as $row) {
+        $filename = basename($row['file_path']);
+        $full_path = $upload_path . $filename;
+
+        if (file_exists($full_path)) {
+            // Use created_at directly without timezone conversion
+            $formatted_time = date('H:i:s', strtotime($row['created_at']));
 
             $screenshots[] = [
-                'id' => $row->screenshot_id,
-                'image_data' => $image_data_url,
-                'created_at' => $formatted_date,
-                'display_text' => $formatted_date
+                'id' => $row['screenshot_id'],
+                'file_name' => $filename,
+                'image_url' => base_url("uploads/screenshots/{$user_folder}/{$filename}"),
+                'created_at' => $formatted_time,
+                'display_text' => $formatted_time
             ];
         }
+    }
 
+    return $this->output->set_content_type('application/json')
+        ->set_status_header(200)
+        ->set_output(json_encode([
+            "status" => "success",
+            "screenshots" => $screenshots,
+            "date" => $date,
+            "user_id" => $user_id,
+            "employee_id" => $employee_id,
+            "message" => empty($screenshots) ? "No screenshots found for user ID {$user_id} on {$date}" : null
+        ]));
+}
+
+
+
+
+
+
+   public function get_user_screenshots()
+{
+    $employee_id = $this->session->userdata('employee_id');
+    $employee_org_id = $this->session->userdata('employee_org_id');
+    $date = $this->input->get('date'); // Optional
+
+    if (empty($employee_id)) {
         return $this->output->set_content_type('application/json')
-            ->set_status_header(200)
+            ->set_status_header(400)
             ->set_output(json_encode([
-                "status" => "success",
-                "screenshots" => $screenshots,
-                "date" => $date,
-                "employee_id" => $employee_id
+                "status" => "error",
+                "message" => "Missing employee_id"
             ]));
     }
 
+    if (empty($date)) {
+        $date = date('Y-m-d');
+    }
+
+    $user_folder = $employee_org_id;
+    $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
+
+    if (!is_dir($upload_path)) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(404)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "No screenshot folder found for employee ID {$employee_id}"
+            ]));
+    }
+
+    // Fetch screenshot records from DB where status = 1
+    $this->db->select('screenshot_id, file_path, created_at');
+    $this->db->where('employee_id', $employee_id);
+    $this->db->where('user_id', $employee_org_id); // Assuming user_id = org_id
+    $this->db->where('status', 1);
+    $this->db->like('created_at', $date);
+    $this->db->order_by('created_at', 'DESC');
+    $query = $this->db->get('screenshots');
+    $db_screenshots = $query->result_array();
+
+    $screenshots = [];
+
+    foreach ($db_screenshots as $row) {
+        $filename = basename($row['file_path']);
+        $full_path = $upload_path . $filename;
+
+        if (file_exists($full_path)) {
+            // Use created_at time directly
+            $formatted_time = date('H:i:s', strtotime($row['created_at']));
+
+            $screenshots[] = [
+                'id' => $row['screenshot_id'],
+                'file_name' => $filename,
+                'image_url' => base_url("uploads/screenshots/{$user_folder}/{$filename}"),
+                'created_at' => $formatted_time,
+                'display_text' => $formatted_time
+            ];
+        }
+    }
+
+    return $this->output->set_content_type('application/json')
+        ->set_status_header(200)
+        ->set_output(json_encode([
+            "status" => "success",
+            "screenshots" => $screenshots,
+            "date" => $date,
+            "employee_id" => $employee_id,
+            "message" => empty($screenshots) ? "No screenshots found for employee ID {$employee_id} on {$date}" : null
+        ]));
+}
+
+
+
+
     //hard delete
-    public function hard_delete_screenshot($screenshot_id) {
+    public function hard_delete_screenshot($screenshot_id)
+    {
         $user_id = $this->input->get_request_header('user_id', TRUE);
         $employee_id = $this->input->get_request_header('employee_id', TRUE);
 
@@ -486,7 +538,8 @@ class ScreenshotController extends Home_Controller {
     }
 
     //list of employees based on user ID
-    public function list_employees_by_user() {
+    public function list_employees_by_user()
+    {
 
         $user_id = $this->session->userdata('id');
 
@@ -528,10 +581,11 @@ class ScreenshotController extends Home_Controller {
                 ]));
         }
     }
-   
+
 
     //search employees by name based on user ID
-    public function search_employees_by_name_by_user() {
+    public function search_employees_by_name_by_user()
+    {
         $user_id = $this->session->userdata('id');
         // 1. Validate user ID
         if (empty($user_id) || !is_numeric($user_id)) {
@@ -571,6 +625,4 @@ class ScreenshotController extends Home_Controller {
                 'employees' => $employees
             ]));
     }
-    
-    
 }

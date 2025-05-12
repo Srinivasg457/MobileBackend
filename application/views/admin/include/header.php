@@ -69,6 +69,30 @@
 
 
   <style type="text/css">
+    .toast {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 4px;
+      color: #fff;
+      min-width: 200px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast-success {
+      background-color: #28a745;
+    }
+
+    .toast-error {
+      background-color: #e74c3c;
+    }
+
+    #toast-container {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 9999;
+    }
+
     .radio input[type="radio"],
     .radio-inline input[type="radio"],
     .checkbox input[type="checkbox"],
@@ -92,7 +116,18 @@
       display: none;
     }
 
-    <?php endif ?>
+    <?php endif ?>@media (max-width: 480px) {
+      #toast-container {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+      }
+
+      .toast {
+        min-width: auto;
+        width: calc(100% - 20px);
+      }
+    }
   </style>
 
   <!-- Color picker plugins css -->
@@ -123,7 +158,14 @@
 
     <?php if (isset($page_title) && $page_title != 'Online Payment'): ?>
       <header class="main-header">
-        <?php if (is_admin()): ?>
+        <?php if (is_employee()): ?>
+          <a target="_blank" href="<?php echo base_url() ?>" class="switch_businesss logo text-centers">
+            <span class="logo-lg">
+              <img width="50px" class="mr-5" src="<?php echo base_url($settings->favicon) ?>" alt="<?php echo $this->session->userdata("employee_name"); ?>"> <span data-toggle="tooltip" data-placement="top" title="<?php echo $this->session->userdata("employee_name"); ?>" class="ml-20"><?php echo $this->session->userdata("employee_name"); ?></span>
+            </span>
+          </a>
+        <?php else :  ?>
+          <?php if (is_admin()): ?>
           <a target="_blank" href="<?php echo base_url() ?>" class="switch_businesss logo text-centers">
             <span class="logo-lg">
               <img width="50px" class="mr-5" src="<?php echo base_url($settings->favicon) ?>" alt="<?php echo html_escape($settings->site_name); ?>"> <span class="ml-20"><?php echo html_escape($settings->site_name); ?></span>
@@ -184,7 +226,7 @@
             </div>
           </div>
         <?php endif; ?>
-
+        <?php endif; ?>
         <nav class="navbar navbar-static-top hidden-md">
           <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
             <span class="sr-only">Toggle navigation</span>
@@ -193,3 +235,28 @@
 
       </header>
     <?php endif; ?>
+    <div id="toast-container"></div>
+    <script>
+      function showToast(message, type) {
+        const toast = $(`<div class="toast toast-${type}">${message}</div>`);
+        $('#toast-container').append(toast);
+        setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
+      }
+
+      function showConfirmationAlert(message, status = "warning", confirmCallback) {
+        swal({
+          title: "Confirm Action",
+          text: message,
+          type: status,
+          showCancelButton: true,
+          cancelButtonText: "Cancel",
+          confirmButtonColor: "#DD6B55",
+          confirmButtonText: "Yes, Proceed",
+          closeOnConfirm: false
+        }, function(isConfirm) {
+          if (isConfirm && typeof confirmCallback === "function") {
+            confirmCallback();
+          }
+        });
+      }
+    </script>

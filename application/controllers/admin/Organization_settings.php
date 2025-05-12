@@ -10,7 +10,7 @@ class Organization_settings extends Home_Controller {
         $this->load->database();
     }
 
-    public function index()
+    public function index(): void
     {
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -21,7 +21,7 @@ class Organization_settings extends Home_Controller {
         $this->load->view('admin/index', $data);
     }
 
-    public function org_exception_settings()
+    public function org_exception_settings(): void
     {
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -49,7 +49,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
             'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
-            'timecards_time_interval' => $this->input->post('timecards_time_interval', TRUE)
+            'timecards_time_interval' => 5
         ];
 
         // Check if settings exist for this user
@@ -72,64 +72,108 @@ class Organization_settings extends Home_Controller {
         }
     }
 
-    // Method to insert or update organization exception settings for a specific employee
-    public function save_org_exception_settings($employee_id)
-    {
-
-        $user_id = $this->session->userdata('id');
-        // Get data from POST request (replace with actual form data)
-        $data = [
-            'user_id'               => $user_id,
-            'employee_id'           => $employee_id,
-            'screenshot_flag'       => $this->input->post('screenshot_flag', TRUE),
-            'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
-            'webcam_flag'           => $this->input->post('webcam_flag', TRUE),
-            'webcam_time_interval'  => $this->input->post('webcam_time_interval', TRUE),
-            'mouse_move_flag'       => $this->input->post('mouse_move_flag', TRUE),
-            'mouse_move_threshold'  => $this->input->post('mouse_move_threshold', TRUE),
-            'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
-            'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
-            'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
-            'timecards_time_interval' => $this->input->post('timecards_time_interval', TRUE)
-        ];
-
-        // Check if exception settings exist for this user and employee
-        $query = $this->db->get_where('organization_exception_setting', [
-            'user_id' => $user_id,
-            'employee_id' => $employee_id
-        ]);
-
-        if ($query->num_rows() > 0) {
-            // Update existing exception settings
-            $this->db->where('user_id', $user_id);
-            $this->db->where('employee_id', $employee_id);
-            $this->db->update('organization_exception_setting', $data);
-        } else {
-            // Insert new exception settings
-            $this->db->insert('organization_exception_setting', $data);
-        }
-
-        // Check for errors
-        if ($this->db->affected_rows() > 0) {
-            echo "Employee settings saved successfully!";
-        } else {
-            echo "No changes in the saved employee settings.";
-        }
-    }
-
-    // // Method to fetch org settings for a user
-    // public function get_org_settings()
+    // // Method to insert or update organization exception settings for a specific employee
+    // public function save_org_exception_settings($employee_id)
     // {
-    //     $user_id = $this->session->userdata('id');
 
-    //     $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
+    //     $user_id = $this->session->userdata('id');
+    //     // Get data from POST request (replace with actual form data)
+    //     $data = [
+    //         'user_id'               => $user_id,
+    //         'employee_id'           => $employee_id,
+    //         'screenshot_flag'       => $this->input->post('screenshot_flag', TRUE),
+    //         'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
+    //         'webcam_flag'           => $this->input->post('webcam_flag', TRUE),
+    //         'webcam_time_interval'  => $this->input->post('webcam_time_interval', TRUE),
+    //         'mouse_move_flag'       => $this->input->post('mouse_move_flag', TRUE),
+    //         'mouse_move_threshold'  => $this->input->post('mouse_move_threshold', TRUE),
+    //         'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
+    //         'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
+    //         'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
+    //         'timecards_time_interval' => 1
+    //     ];
+
+    //     // Check if exception settings exist for this user and employee
+    //     $query = $this->db->get_where('organization_exception_setting', [
+    //         'user_id' => $user_id,
+    //         'employee_id' => $employee_id
+    //     ]);
 
     //     if ($query->num_rows() > 0) {
-    //         echo json_encode($query->row_array());
+    //         //   ✅ Update settings_status in employees table to 2, based on user_id and employee_id
+    //         $this->db->where('id', $employee_id);
+    //         $this->db->where('user_id', $user_id);
+    //         $this->db->update('employees', ['settings_status' => 2]);
+    //         // Update existing exception settings
+    //         $this->db->where('user_id', $user_id);
+    //         $this->db->where('employee_id', $employee_id);
+    //         $this->db->update('organization_exception_setting', $data);
     //     } else {
-    //         echo json_encode(['error' => 'No settings found for this user.']);
+    //         // Insert new exception settings
+    //         $this->db->insert('organization_exception_setting', $data);
+    //     }
+              
+    //     // Check for errors
+    //     if ($this->db->affected_rows() > 0) {
+    //         echo "Employee settings saved successfully!";
+    //     } else {
+    //         echo "No changes in the saved employee settings.";
     //     }
     // }
+
+    public function save_org_exception_settings($employee_id)
+{
+    $user_id = $this->session->userdata('id');
+    $self_login = $this->input->post('self_login') ? 1 : 0;
+
+    $data = [
+        'user_id'                  => $user_id,
+        'employee_id'              => $employee_id,
+        'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
+        'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
+        'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
+        'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
+        'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
+        'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
+        'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
+        'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
+        'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
+        'timecards_time_interval'  => 5
+    ];
+
+    $employee_data = [
+        'settings_status' => 2,
+        'self_login' => $self_login
+    ];
+
+    // Check if exception settings exist
+    $query = $this->db->get_where('organization_exception_setting', [
+        'user_id' => $user_id,
+        'employee_id' => $employee_id
+    ]);
+
+    if ($query->num_rows() > 0) {
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->update('organization_exception_setting', $data);
+    } else {
+        $this->db->insert('organization_exception_setting', $data);
+    }
+
+    // Update self_login and settings_status
+    $this->db->where('id', $employee_id);
+    $this->db->where('user_id', $user_id);
+    $this->db->update('employees', $employee_data);
+
+    if ($this->db->affected_rows() > 0) {
+        echo "Employee settings saved successfully!";
+    } else {
+        echo "No changes in the saved employee settings.";
+    }
+}
+
+
+   
     public function get_org_settings()
 {
     $user_id = $this->input->get('user_id');
@@ -148,23 +192,6 @@ class Organization_settings extends Home_Controller {
     }
 }
 
-
-    // // Method to fetch organization exception settings for a specific user and employee
-    // public function get_org_exception_settings($employee_id)
-    // {
-    //     $user_id = $this->session->userdata('id');
-
-    //     $query = $this->db->get_where('organization_exception_setting', [
-    //         'user_id' => $user_id,
-    //         'employee_id' => $employee_id
-    //     ]);
-
-    //     if ($query->num_rows() > 0) {
-    //         echo json_encode($query->row_array());
-    //     } else {
-    //         echo json_encode(['error' => 'No exception settings found for this user and employee.']);
-    //     }
-    // }
     public function get_org_exception_settings($employee_id)
 {
         $user_id = $this->session->userdata('id');
