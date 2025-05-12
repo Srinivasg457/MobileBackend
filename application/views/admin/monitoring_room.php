@@ -400,7 +400,7 @@
 
   <script>
 
-    const socket = new WebSocket('ws://work-room.io:8090');
+    const socket = new WebSocket('wss://work-room.io:8090');
     socket.binaryType = 'blob'; 
 
     const img = document.getElementById('remoteVideo');
