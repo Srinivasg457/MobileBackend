@@ -257,102 +257,51 @@
     </select>
   </div>
  
-<div class="card-grid">
-  <!-- Card 1 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Veena Ramamoorthy', 'ID: 57001')">
-      <img src="https://www.bleepstatic.com/content/hl-images/2022/01/26/Windows_11_HDR.jpg" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Veena Ramamoorthy</h3>
-      <p>ID: 57001</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 2 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Ravi Kumar', 'ID: 57002')">
-      <img src="https://code.visualstudio.com/assets/docs/editor/accessibility/zoomed-in.png" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Ravi Kumar</h3>
-      <p>ID: 57002</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:45 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:15 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 3 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Nisha Patel', 'ID: 57003')">
-      <img src="https://media.licdn.com/dms/image/v2/D4E12AQGwGxCOQEtydA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1686749902757?e=2147483647&v=beta&t=F0_A4kcAK7B2ItAgPjLOj7bRlmcgVJmwhk8vKmU3Qw8" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Nisha Patel</h3>
-      <p>ID: 57003</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 07:00 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 00:30 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 4 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Amit Sharma', 'ID: 57004')">
-      <img src="https://kinsta.com/wp-content/uploads/2021/09/linux-commands-1024x512.jpg" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Amit Sharma</h3>
-      <p>ID: 57004</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 04:50 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 02:10 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 5 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Divya Menon', 'ID: 57005')">
-      <img src="https://code.visualstudio.com/assets/docs/editor/accessibility/high-contrast.png" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Divya Menon</h3>
-      <p>ID: 57005</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:00 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 6 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Suresh Raina', 'ID: 57006')">
-      <img src="https://cdn.mos.cms.futurecdn.net/f5kTB9Cb3HSGjfPiiTcobK.jpg" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Suresh Raina</h3>
-      <p>ID: 57006</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:30 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:30 hrs inactive</span>
-      </div>
-    </div>
-  </div>
+  <div class="card-grid" id="employeeCardGrid">
+  <script>
+$(document).ready(function () {
+    fetchEmployees(); // Fetch on page load
+});
+
+function fetchEmployees() {
+    $.ajax({
+      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
+      method: 'GET',
+        dataType: 'json',
+        success: function (response) {
+            if (response.status === 'success' && response.employees.length > 0) {
+                $('#employeeCardGrid').empty(); // Clear old content
+
+                $.each(response.employees, function (index, emp) {
+                    let card = `
+                    <div class="card">
+                        <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${emp.name}', 'ID: ${emp.id}')">
+                            <img src="https://cdn.mos.cms.futurecdn.net/f5kTB9Cb3HSGjfPiiTcobK.jpg" class="thumbnail" alt="Video Feed">
+                            <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+                        </div>
+                        <div class="card-content">
+                            <h3>${emp.name}</h3>
+                            <p>ID: ${emp.id}</p>
+                            <div class="status">
+                                <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:00 hrs active</span>
+                                <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+                            </div>
+                        </div>
+                    </div>`;
+                    $('#employeeCardGrid').append(card);
+                });
+            } else {
+                $('#employeeCardGrid').html('<p>No employees found.</p>');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', error);
+            $('#employeeCardGrid').html('<p>Error loading employees.</p>');
+        }
+    });
+}
+</script>
+
 </div>
  
  
@@ -418,7 +367,7 @@
 
     function playVideo(id) {
       // Send a message to the server to start streaming video
-      socket.send(JSON.stringify({ action: 'start_stream', employee_id: 8 }));
+      socket.send(JSON.stringify({ action: 'start_stream', employee_id: id }));
     }
 
     socket.binaryType = 'blob'
