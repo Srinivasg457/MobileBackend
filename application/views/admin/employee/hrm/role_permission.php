@@ -1,4 +1,13 @@
 <style>
+    .content-wrapper,
+    body,
+    .wrapper {
+        height: unset !important;
+        min-height: unset !important;
+        overflow-x: unset !important;
+        overflow-y: unset !important;
+    }
+
     .actions {
         display: flex;
         gap: 10px;
@@ -160,7 +169,7 @@
                                     <i class="bi bi-x-circle"></i> Cancel
                                 </button>
                                 <button type="submit" class="btn btn-success mx-2">
-                                    <i class="bi bi-shield-plus"></i> Create
+                                    <i class="fa fa-plus"></i> Create
                                 </button>
                             </div>
                         </div>
@@ -177,52 +186,35 @@
                 <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_bulk"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
             </h3>
         </div>
-        <form id="createPermissionForm">
-            <div class="row rolesandpermission">
-                <!-- Role Form -->
-                <div class="col-lg-6">
-                    <div class="card shadow-lg role">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-person-plus"></i> Select Role</h5>
-                            <div class="mb-4">
-                                <label for="role_name" class="form-label">Role Name</label>
-                                <select class="form-control" id="role_name" name="role_name" required>
-                                    <option value="">-- Select Role --</option>
-                                    <option value="TeamLead">Team Lead (TL)</option>
-                                    <option value="ProjectManager">Project Manager</option>
-                                    <option value="HR">HR Manager</option>
-                                    <option value="Employee">Employee</option>
-                                    <option value="ter">Intern</option>
+        <form id="editPermissionForm">
 
-                                </select>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label">Department</label>
-                                <select class="form-control" name="department" required>
-                                    <option value="">-- Select Department --</option>
-                                    <?php foreach ($departments as $department): ?>
-                                        <option value="<?= html_escape($department->id); ?>"
-                                            <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
-                                            <?= html_escape($department->name); ?>
-                                        </option>
-                                    <?php endforeach ?>
-                                </select>
-                            </div>
-                            <div class="mb-4">
-                                <label for="role_description" class="form-label">Role Description</label>
-                                <textarea class="form-control" id="role_description" name="role_description" maxlength="500" rows="3"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="row">
                 <!-- Permissions Form -->
-                <div class="col-lg-6">
+                <div class="col-12">
                     <div class="card shadow-lg role">
                         <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-shield-plus"></i> Assign Permission to Role</h5>
-                            <div class="mb-4">
-                                <div id="feature-access-list" class="mt-4">
+                            <div class="row">
+                                <div class="my-4 col-lg-6">
+                                    <label for="role_name" class="form-label">Role Name</label>
+                                    <input id="roleName" type="text" class="form-control" value="" readonly>
+                                    <input type="hidden" id="editroleId">
+                                </div>
+                                <!-- <div class="my-4 col-lg-6">
+                                    <label class="form-label">Department</label>
+                                    <select class="form-control" name="department" required>
+                                        <option value="">-- Select Department --</option>
+                                        <?php foreach ($departments as $department): ?>
+                                            <option value="<?= html_escape($department->id); ?>"
+                                                <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
+                                                <?= html_escape($department->name); ?>
+                                            </option>
+                                        <?php endforeach ?>
+                                    </select>
+                                </div> -->
+                            </div>
+                            <div class="my-4">
+                                <label class="form-label">Features</label>
+                                <div id="edit-feature-access-list">
                                     <!-- Features table will be loaded here via JavaScript -->
                                     <div class="text-center py-5">
                                         <div class="spinner-border text-primary" role="status">
@@ -232,16 +224,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mb-4 hide">
+                            <div class="my-4">
                                 <label for="permission_description" class="form-label">Permission Description</label>
                                 <textarea class="form-control" id="permission_description" name="permission_description" maxlength="500" rows="3"></textarea>
                             </div>
                             <div class="my-4 d-flex justify-content-end">
-                                <button type="button" class="btn btn-secondary mx-2" id="cancelBtn">
-                                    <i class="bi bi-x-circle"></i> Cancel
-                                </button>
                                 <button type="submit" class="btn btn-success mx-2">
-                                    <i class="fa fa-check"></i> Save Changes
+                                    <i class="bi bi-arrow-clockwise"></i> Update
                                 </button>
                             </div>
                         </div>
@@ -296,11 +285,11 @@
                                 <textarea class="form-control" id="role_description" name="role_description" maxlength="500" rows="3"></textarea>
                             </div>
                             <div class="my-4 d-flex justify-content-end">
-                                <button type="button" class="btn btn-secondary mx-2" id="cancelBtn">
+                                <button type="button" class="btn btn-secondary mx-2" id="rolecancelBtn">
                                     <i class="bi bi-x-circle"></i> Cancel
                                 </button>
                                 <button type="submit" class="btn btn-success mx-2">
-                                    <i class="bi bi-shield-plus"></i> Create
+                                    <i class="fa fa-plus"></i> Create
                                 </button>
                             </div>
                         </div>
@@ -323,10 +312,7 @@
                         <th>Role Name</th>
                         <th>Feature Name</th>
                         <th>View</th>
-                        <!-- <th>Write</th> -->
                         <th>Action</th>
-                        <!-- <th>Delete</th>
-                        <th>Edit & Delete</th> -->
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -338,21 +324,12 @@
 
 
 <script>
-    function showToast(message, type) {
-        const toast = $(`<div class="toast toast-${type}">${message}</div>`);
-        $('#toast-container').append(toast);
-        setTimeout(() => toast.fadeOut(500, () => toast.remove()), 2000);
-    }
-
-
-
-
     let storedRoleId = null;
     // let allFeatures = [];
 
     $(document).ready(function() {
         const userId = <?= json_encode($this->session->userdata('id')); ?>;
-
+        //  for loading the roles
         function loadRolesForCurrentUser() {
             $.ajax({
                 url: "<?= base_url('employee/EmployeeRoles/get_roles_by_user'); ?>",
@@ -373,7 +350,7 @@
             });
         }
 
-
+        // for role list 
         function loadUserRolePermissions(userId) {
             $.ajax({
                 url: "<?= base_url('/employee/EmployeeRoles/get_user_role_feature_permissions'); ?>",
@@ -444,7 +421,7 @@
                                 </a>
                             </td>
                              <td class="actions" width="15%">
-                                 <a href="#" class="edit-row  edit_row_button" data-placement="top" title="Edit">
+                                 <a href="#" data-role-name ="${role.role_name}" data-role-id="${role.role_id}"  class="edit-row  edit_row_button" data-placement="top" title="Edit">
                                     <i class="fa fa-pencil-square-o"></i>
                                 </a>
                                <a href="#" 
@@ -468,15 +445,15 @@
                             <td><i class="bi bi-pencil-square text-muted" title="No features to update" style="cursor: not-allowed;">No feature to update</i></td>
                             <td>
                                 <a href="#" class="view-permissions  text-muted" title="No Permissions">
-                                    <i class="bi bi-eye-slash"></i>
+                                    <i class="bi bi-eye-slash" style="font-size: 1.5rem;"></i>
                                 </a>
                             </td>
                            <td class="actions" width="15%">
-                                <a href="#" class="on-default edit_row_button" data-placement="top" title="Edit">
+                                <a href="#" data-role-name ="${role.role_name}" data-role-id="${role.role_id}"  class="edit_row_button" data-placement="top" title="Edit">
                                     <i class="fa fa-pencil-square-o"></i>
                                 </a>
                                 <a href="#" 
-                                    class="on-default remove-row delete-role-btn" 
+                                    class="remove-row delete-role-btn" 
                                     data-val="employee" 
                                     data-id="${userId}" 
                                     data-department-id="${role.department_id}" 
@@ -549,8 +526,8 @@
             });
         }
         // Initialize the feature table
-        function initializeFeatureTable(features) {
-            const container = $('#feature-access-list');
+        function initializeFeatureTable(features, tableName, roleId) {
+            const container = $(tableName);
             container.empty();
 
             if (features.length === 0) {
@@ -615,7 +592,7 @@
             container.append(table);
 
             // Select all features checkbox
-            $('#selectAllFeatures').change(function() {
+            $(document).on('change', '#selectAllFeatures', function() {
                 const isChecked = $(this).prop('checked');
                 $('.feature-selector').prop('checked', isChecked).trigger('change');
             });
@@ -631,28 +608,88 @@
             });
 
             // Select all checkboxes for each permission type
-            $('#selectAllRead').change(function() {
+            $(document).on('change', '#selectAllFeatures', function() {
+                const isChecked = $(this).prop('checked');
+                $('.feature-selector').prop('checked', isChecked).trigger('change');
+            });
+
+            $(document).on('change', '#selectAllRead', function() {
                 const isChecked = $(this).prop('checked');
                 $('.read-checkbox:not(:disabled)').prop('checked', isChecked);
             });
 
-            $('#selectAllWrite').change(function() {
+            $(document).on('change', '#selectAllWrite', function() {
                 const isChecked = $(this).prop('checked');
                 $('.write-checkbox:not(:disabled)').prop('checked', isChecked);
             });
 
-            $('#selectAllAction').change(function() {
+            $(document).on('change', '#selectAllAction', function() {
                 const isChecked = $(this).prop('checked');
                 $('.action-checkbox:not(:disabled)').prop('checked', isChecked);
             });
 
-            $('#selectAllDelete').change(function() {
+            $(document).on('change', '#selectAllDelete', function() {
                 const isChecked = $(this).prop('checked');
                 $('.delete-checkbox:not(:disabled)').prop('checked', isChecked);
             });
+
+            if (tableName == '#edit-feature-access-list') {
+                console.log(roleId);
+
+                $.ajax({
+                    url: "<?= base_url('employee/EmployeeRoles/get_feature_access_by_user_and_role') ?>",
+                    method: "GET",
+                    dataType: "json",
+                    data: {
+                        role_id: roleId,
+                        user_id: userId
+                    },
+                    success: function(response) {
+                        console.log(response);
+
+                        const features = response.data.features;
+
+                        features.forEach((feature) => {
+                            const featureId = feature.feature_id;
+
+                            // Read checkbox
+                            $(`input[name="access[${featureId}][is_read]"]`)
+                                .prop('checked', feature.is_read === '1')
+                                .prop('disabled', false);
+
+                            // Write checkbox
+                            $(`input[name="access[${featureId}][is_write]"]`)
+                                .prop('checked', feature.is_write === '1')
+                                .prop('disabled', false);
+
+                            // Action checkbox
+                            $(`input[name="access[${featureId}][is_action]"]`)
+                                .prop('checked', feature.is_action === '1')
+                                .prop('disabled', false);
+
+                            // Delete checkbox (only if present in your response)
+                            if (feature.hasOwnProperty('is_delete')) {
+                                $(`input[name="access[${featureId}][is_delete]"]`)
+                                    .prop('checked', feature.is_delete === '1')
+                                    .prop('disabled', false);
+                            }
+
+                            // Also check the feature-selector checkbox
+                            $(`.feature-selector[data-feature-id="${featureId}"]`).prop('checked', true);
+                        });
+
+                    },
+                    error: function() {
+                        console.log("Failed to fetch features.", "error");
+                        // $(tableName).html('<div class="alert alert-danger">Failed to load features</div>');
+                    }
+                });
+                const editTable = $('#edit_role_permssion_area');
+                // console.log(editTable.html());
+            }
         }
 
-        function loadFeatures() {
+        function loadFeatures(tableName, roleId) {
             $.ajax({
                 url: "<?= base_url('employee/EmployeeRoles/get_app_features') ?>",
                 method: "GET",
@@ -660,15 +697,15 @@
                 success: function(response) {
                     if (response.status === "success") {
                         allFeatures = response.data.features;
-                        initializeFeatureTable(allFeatures);
+                        initializeFeatureTable(allFeatures, tableName, roleId);
                     } else {
                         showToast("No features found.", "error");
-                        $('#feature-access-list').html('<div class="alert alert-info">No features available</div>');
+                        $(tableName).html('<div class="alert alert-info">No features available</div>');
                     }
                 },
                 error: function() {
                     showToast("Failed to fetch features.", "error");
-                    $('#feature-access-list').html('<div class="alert alert-danger">Failed to load features</div>');
+                    $(tableName).html('<div class="alert alert-danger">Failed to load features</div>');
                 }
             });
         }
@@ -709,136 +746,35 @@
         });
 
         $(document).off('click', '.edit_row_button').on('click', '.edit_row_button', function(e) {
-            console.log("hii");
+
             e.preventDefault();
             $('#edit_role_permssion_area').show();
             $('.list_area').hide();
+            const roleName = $(this).data('role-name');
+            const roleid = $(this).data('role-id');
+            $('#roleName').val(roleName); // Show role name
+            $('#editroleId').val(roleid);
+            console.log(roleName, roleid);
+            loadFeatures("#edit-feature-access-list", roleid);
         });
-
-        // $('#createPermissionForm').on('submit', function(e) {
-        //     e.preventDefault();
-
-        //     // const role_name = $('#role_name').val();
-        //     // const department_id = $('select[name="department"]').val();
-        //     // const role_description = $('#role_description').val();
-
-        //     if (!role_name || !department_id) {
-        //         showToast('Please fill out all required fields in Role form.', 'error');
-        //         return;
-        //     }
-
-        //     $.ajax({
-        //         url: "<?= base_url('/employee/EmployeeRoles/create_role'); ?>",
-        //         method: "POST",
-        //         data: {
-        //             user_id: userId,
-        //             department_id: department_id,
-        //             role_name: role_name,
-        //             description: role_description
-        //         },
-        //         success: function(response) {
-        //             if (response.status === 'success' || response.status === 201) {
-        //                 // showToast(response.message, 'success');
-        //                 storedRoleId = response.role_id || (response.data?.role_id ?? null);
-        //                 console.log("Created Role ID:", storedRoleId);
-        //                 submitPermissions(storedRoleId);
-        //             } else {
-        //                 showToast('Role already Exists.', 'error');
-        //             }
-        //         },
-        //         error: function() {
-        //             // showToast('Server error while creating role.', 'error');
-        //             showToast('Role already Exists.', 'error');
-        //         }
-        //     });
-        // });
-
-        // function submitPermissions(roleId) {
-        //     const selectedFeatures = $('.feature-selector:checked');
-        //     const features = [];
-
-        //     if (selectedFeatures.length === 0) {
-        //         showToast('Please select at least one feature.', 'error');
-        //         return;
-        //     }
-
-        //     selectedFeatures.each(function() {
-        //         const feature_id = $(this).data('feature-id');
-        //         const permissions = {
-        //             feature_id: parseInt(feature_id),
-        //             is_read: 0,
-        //             is_write: 0,
-        //             is_action: 0,
-        //             is_delete: 0
-        //         };
-
-        //         // Collect all permissions for this feature
-        //         $(`input[name^="access[${feature_id}]"]:checked`).each(function() {
-        //             const name = $(this).attr('name'); // access[1][is_read]
-        //             const match = name.match(/\[(\w+)\]$/); // get is_read
-        //             if (match && match[1]) {
-        //                 permissions[match[1]] = 1;
-        //             }
-        //         });
-
-        //         features.push(permissions);
-        //     });
-        //     console.log("Role ID:", roleId);
-        //     console.log("User ID:", userId);
-        //     console.log("Submitting permissions:", features);
-
-
-        //     if (!roleId) {
-        //         showToast('Role not created properly.', 'error');
-        //         return;
-        //     }
-
-        //     $.ajax({
-        //         url: "<?= base_url('employee/EmployeeRoles/store_role_feature_access'); ?>",
-        //         method: "POST",
-        //         contentType: "application/json",
-        //         data: JSON.stringify({
-        //             role_id: roleId,
-        //             user_id: userId,
-        //             features: features
-        //         }),
-        //         success: function(response) {
-        //             if (response.status === 'success' || response.status === 201) {
-        //                 showToast("Role and Permission Created Successfully", 'success');
-        //                 $('#createPermissionForm')[0].reset();
-        //                 storedRoleId = null;
-        //                 initializeFeatureTable(allFeatures); // Reload table if needed
-        //                 loadUserRolePermissions(userId);
-        //             } else {
-        //                 showToast("Failed to Create Role and Permission", 'error');
-        //             }
-        //         },
-        //         error: function(re) {
-        //             console.log(re);
-
-        //             showToast('Server error while assigning permission.', 'error');
-        //         }
-        //     });
-        // }
 
         //creating permission
         $('#createPermissionForm').on('submit', function(e) {
             e.preventDefault();
 
-            const roleId = $('#roleDropdown').val(); // #name is the role select
-            const userId = <?= $this->session->userdata('id') ?>; // or however you're getting logged-in user ID
-            const permissionDescription = $('#permission_description').val();
+            const form = $('#createPermissionForm'); // form context
 
-            const selectedFeatures = $('.feature-selector:checked');
+            const roleId = form.find('#roleDropdown').val(); // scoped to the form
+            const userId = <?= $this->session->userdata('id') ?>;
+            const permissionDescription = form.find('#permission_description').val();
+
             const features = [];
 
-            if (selectedFeatures.length === 0) {
-                showToast('Please select at least one feature.', 'error');
-                return;
-            }
-
-            selectedFeatures.each(function() {
+            // Get all feature checkboxes inside this form
+            form.find('.feature-selector').each(function() {
                 const feature_id = $(this).data('feature-id');
+                const isChecked = $(this).is(':checked');
+
                 const permissions = {
                     feature_id: parseInt(feature_id),
                     is_read: 0,
@@ -847,17 +783,20 @@
                     is_delete: 0
                 };
 
-                // Collect all permissions for this feature
-                $(`input[name^="access[${feature_id}]"]:checked`).each(function() {
-                    const name = $(this).attr('name'); // access[1][is_read]
-                    const match = name.match(/\[(\w+)\]$/); // get is_read
-                    if (match && match[1]) {
-                        permissions[match[1]] = 1;
-                    }
-                });
+                // Only if checked, collect permission inputs
+                if (isChecked) {
+                    form.find(`input[name^="access[${feature_id}]"]:checked`).each(function() {
+                        const name = $(this).attr('name');
+                        const match = name.match(/\[(\w+)\]$/);
+                        if (match && match[1]) {
+                            permissions[match[1]] = 1;
+                        }
+                    });
+                }
 
                 features.push(permissions);
             });
+
             const payload = {
                 role_id: parseInt(roleId),
                 user_id: parseInt(userId),
@@ -874,11 +813,85 @@
                     console.log(res);
                     swal("Success!", res.message, "success");
                     loadUserRolePermissions(userId);
-                    $('#createPermissionForm')[0].reset();
-                    $('#create_role_permssion_area  ').hide();
-                    $('#edit_role_permssion_area  ').hide();
+                    form[0].reset();
+                    $('#create_role_permssion_area').hide();
+                    $('#edit_role_permssion_area').hide();
                     $('.list_area').show();
+                },
+                error: function(xhr) {
+                    console.error(xhr);
+                    const errorMsg = xhr.responseJSON?.message || "Something went wrong.";
+                    swal("Error!", errorMsg, "error");
+                }
+            });
+        });
 
+
+        // Update permission from edit form
+        $('#editPermissionForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const form1 = $('#editPermissionForm'); // Always reference within the form
+            const roleId1 = form1.find('#editroleId').val();
+            const userId1 = <?= $this->session->userdata('id') ?>;
+            const permissionDescription1 = form1.find('#permission_description').val();
+
+            const selectedFeatures1 = form1.find('.feature-selector:checked');
+            const features1 = [];
+
+            if (selectedFeatures1.length === 0) {
+                showToast('Please select at least one feature.', 'error');
+                return;
+            }
+
+            console.log(selectedFeatures1);
+
+            selectedFeatures1.each(function() {
+                const featureId1 = $(this).data('feature-id');
+                const permissions1 = {
+                    feature_id: parseInt(featureId1),
+                    is_read: 0,
+                    is_write: 0,
+                    is_action: 0,
+                    is_delete: 0
+                };
+
+                // Only get permissions within the form context
+                form1.find(`input[name^="access[${featureId1}]"]:checked`).each(function() {
+                    const name1 = $(this).attr('name'); // access[1][is_read]
+                    const match1 = name1.match(/\[(\w+)\]$/); // get is_read, etc.
+                    if (match1 && match1[1]) {
+                        permissions1[match1[1]] = 1;
+                    }
+                });
+
+                features1.push(permissions1);
+            });
+
+            const payload1 = {
+                role_id: parseInt(roleId1),
+                user_id: parseInt(userId1),
+                features: features1,
+                permission_description: permissionDescription1
+            };
+
+            console.log(payload1);
+
+            $.ajax({
+                url: "<?= base_url('employee/EmployeeRoles/store_role_feature_access'); ?>",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(payload1),
+                success: function(res) {
+                    console.log(res);
+                    swal("Success!", "Updated Successfully", "success");
+                    loadUserRolePermissions(userId1);
+                    $('#createPermissionForm')[0].reset();
+                    $('#editPermissionForm')[0].reset();
+                    $('#create_role_permssion_area').hide();
+                    $('#edit_role_permssion_area').hide();
+                    $('.list_area').show();
+                    // Optional reset/hide logic here
                 },
                 error: function(xhr) {
                     console.error(xhr);
@@ -891,11 +904,13 @@
 
         $('#cancelBtn').on('click', function() {
             $('#createPermissionForm')[0].reset();
+            $('#editscreatePermissionForm')[0].reset();
             storedRoleId = null;
             initializeFeatureTable(allFeatures);
         });
         $('.create_role_permssion').on('click', function(e) {
             e.preventDefault();
+            loadFeatures('#feature-access-list');
             $('#create_role_permssion_area').show();
             $('.list_area').hide();
         });
@@ -908,6 +923,8 @@
 
         $('.cancel_bulk').on('click', function(e) {
             e.preventDefault();
+            $('#createPermissionForm')[0].reset();
+            $('#editPermissionForm')[0].reset();
             $('#create_role_permssion_area  ').hide();
             $('#edit_role_permssion_area  ').hide();
             $('.list_area').show();
@@ -918,6 +935,9 @@
             $('#create_role').hide();
             $('#create_role_permssion_area  ').show();
             // $('.list_area').show();
+        });
+        $('#rolecancelBtn').on('click', function() {
+            $('#createRole')[0].reset();
         });
 
 
@@ -965,7 +985,6 @@
                 }
             });
         });
-        loadFeatures();
         loadUserRolePermissions(userId);
         loadRolesForCurrentUser();
     });
