@@ -27,20 +27,38 @@
           <input type="file" id="imgInp" name="photo">
         </div>
 
-        <div class="form-group">
-          <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
-          <select class="form-control" name="department">
-            <option value=""><?php echo trans('select') ?></option>
-            <?php foreach ($departments as $department): ?>
-              <option value="<?php echo html_escape($department->id); ?>"
-                <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
-                <?php echo html_escape($department->name); ?>
-              </option>
-            <?php endforeach ?>
-          </select>
-        </div>
 
         <div class="form-group">
+          <div class="form-group d-flex" style="gap: 20px;">
+  
+  <!-- Department Field -->
+                  <div style="flex: 1;">
+                    <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
+                    <select class="form-control" name="department">
+                      <option value=""><?php echo trans('select') ?></option>
+                      <?php foreach ($departments as $department): ?>
+                        <option value="<?php echo html_escape($department->id); ?>"
+                          <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
+                          <?php echo html_escape($department->name); ?>
+                        </option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+
+                  <!-- Role Field -->
+                  <div style="flex: 1;">
+                  <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
+                  <select class="form-control" name="role">
+                  <option value=""><?php echo trans('select'); ?></option>
+                  <?php foreach ($roles as $role): ?>
+                    <option value="<?php echo html_escape($role->id); ?>"
+                      <?php if (!empty($employee) && $employee[0]['role_id'] == $role->id) echo 'selected'; ?>>
+                      <?php echo html_escape($role->name); ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+                  </div>
+                </div>
           <label><?php echo trans('employee-name') ?> <span class="text-danger">*</span></label>
           <input type="text" class="form-control" required name="name" value="<?php echo html_escape($employee[0]['name']); ?>">
         </div>
@@ -239,4 +257,36 @@
       $('.list_area').show();
     });
   });
+</script>
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Make AJAX request to get user roles
+    $.ajax({
+        url: "<?= base_url('/employee/EmployeeRoles/get_user_roles'); ?>",
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 200) {
+                // If roles are fetched successfully, populate the dropdown
+                var roles = response.data;
+                var $roleSelect = $('select[name="role"]');
+                $roleSelect.empty(); // Clear any existing options
+                $roleSelect.append('<option value=""><?php echo trans('select'); ?></option>'); // Default select option
+
+                // Loop through roles and append them to the dropdown
+                $.each(roles, function(index, role) {
+                    $roleSelect.append('<option value="' + role.id + '">' + role.role_name + '</option>');
+                });
+            } else {
+                console.log('Error: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error: ' + error);
+        }
+    });
+});
+
 </script>
