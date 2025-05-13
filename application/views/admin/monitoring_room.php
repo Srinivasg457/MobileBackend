@@ -256,55 +256,54 @@
       <option value="inactive">Inactive Hours (High-Low)</option>
     </select>
   </div>
- 
-  <div class="card-grid" id="employee-container">
-  <!-- Employee cards will be inserted here -->
-</div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-$(document).ready(function () {
-  fetchEmployees();
+$(document).ready(function() {
+    // Make AJAX GET request to fetch employee data
+    $.ajax({
+      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'success') {
+                var employees = response.employees;
+                var cardGrid = $('.card-grid');
+                cardGrid.empty(); // Clear existing content
+
+                // Loop through each employee and render the card
+                $.each(employees, function(index, employee) {
+                    var card = `
+                        <div class="card">
+                            <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${1}')">
+                                <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+                            </div>
+                            <div class="card-content">
+                                <h3>${employee.name}</h3>
+                                <p>ID: ${employee.id}</p>
+                                <div class="status">
+                                    <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
+                                    <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    cardGrid.append(card); // Append the card to the card grid
+                });
+            } else {
+                alert('Error: ' + response.message); // Handle error response
+            }
+        },
+        error: function() {
+            alert('There was an error fetching employee data');
+        }
+    });
 });
-
-function fetchEmployees() {
-  $.ajax({
-    url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",    type: 'GET',
-    dataType: 'json',
-    success: function (response) {
-      if (response.status === 'success') {
-        const container = $('#employee-container');
-        container.empty(); // Clear previous content
-
-        $.each(response.employees, function (index, employee) {
-          const card = `
-            <div class="card">
-              <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', 'ID: ${employee.id}')">
-                <img src="https://cdn.mos.cms.futurecdn.net/f5kTB9Cb3HSGjfPiiTcobK.jpg" class="thumbnail" alt="Video Feed">
-                <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-              </div>
-              <div class="card-content">
-                <h3>${employee.name}</h3>
-                <p>ID: ${employee.id}</p>
-                <div class="status">
-                  <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:00 hrs active</span>
-                  <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
-                </div>
-              </div>
-            </div>
-          `;
-          container.append(card);
-        });
-      } else {
-        alert('Failed to load employees: ' + response.message);
-      }
-    },
-    error: function (xhr, status, error) {
-      console.error('AJAX Error:', error);
-    }
-  });
-}
 </script>
 
- 
+<div class="card-grid">
+    <!-- Cards will be dynamically inserted here -->
+</div>
+
  
   <!-- Modal -->
   <div id="videoModal" class="modal">
@@ -327,7 +326,7 @@ function fetchEmployees() {
       document.getElementById("modalName").innerText = name;
       document.getElementById("modalId").innerText = id;
       document.getElementById("videoModal").style.display = "block";
-      playVideo(employeeId) 
+      playVideo(id) 
     }
  
     function closeVideoModal() {
@@ -356,14 +355,23 @@ const ws = new WebSocket('wss://work-room.io:8090');
 
 // const ws = new WebSocket('ws://localhost:8090'); 
 
+const video = document.getElementById('screen');
 
+let mediaSource = new MediaSource();
+video.src = URL.createObjectURL(mediaSource);
+
+let sourceBuffer;
+
+mediaSource.addEventListener('sourceopen', () => {
+  sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+});
 
 ws.binaryType = 'arraybuffer';
-function playVideo(employeeId) {
 
+function playVideo(employeeId) {
   ws.send(JSON.stringify({
     type: 'viewer-join',
-    employee_id: employeeId, 
+    employee_id: employeeId 
   }));
 }
 
