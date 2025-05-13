@@ -274,7 +274,7 @@ $(document).ready(function() {
                 $.each(employees, function(index, employee) {
                     var card = `
                         <div class="card">
-                            <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${1}')">
+                            <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
                                 <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
                             </div>
                             <div class="card-content">
