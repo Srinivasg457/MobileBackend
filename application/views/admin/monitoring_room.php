@@ -327,7 +327,7 @@ function fetchEmployees() {
       document.getElementById("modalName").innerText = name;
       document.getElementById("modalId").innerText = id;
       document.getElementById("videoModal").style.display = "block";
-      playVideo(8) 
+      playVideo(employeeId) 
     }
  
     function closeVideoModal() {
@@ -356,16 +356,7 @@ const ws = new WebSocket('wss://work-room.io:8090');
 
 // const ws = new WebSocket('ws://localhost:8090'); 
 
-const video = document.getElementById('screen');
 
-let mediaSource = new MediaSource();
-video.src = URL.createObjectURL(mediaSource);
-
-let sourceBuffer;
-
-mediaSource.addEventListener('sourceopen', () => {
-  sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
-});
 
 ws.binaryType = 'arraybuffer';
 function playVideo(employeeId) {
