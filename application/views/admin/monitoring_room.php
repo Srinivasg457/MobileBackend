@@ -360,7 +360,6 @@ const ws = new WebSocket('wss://work-room.io:8090');
 
 ws.binaryType = 'arraybuffer';
 function playVideo(employeeId) {
-  console.log(employeeId);
 
   ws.send(JSON.stringify({
     type: 'viewer-join',
