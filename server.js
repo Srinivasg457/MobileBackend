@@ -1,47 +1,92 @@
-import fs from "fs";
-import https from "https";
-import { WebSocketServer, WebSocket } from "ws";
+import fs from 'fs';
+import https from 'https';
+import { WebSocketServer } from 'ws';
 
+// For production with SSL:
 const serverOptions = {
-  cert: fs.readFileSync("/etc/letsencrypt/live/work-room.io/fullchain.pem"),
-  key: fs.readFileSync("/etc/letsencrypt/live/work-room.io/privkey.pem"),
+  cert: fs.readFileSync('/etc/letsencrypt/live/work-room.io/fullchain.pem'),
+  key: fs.readFileSync('/etc/letsencrypt/live/work-room.io/privkey.pem')
 };
-
 const httpsServer = https.createServer(serverOptions);
-
 const wss = new WebSocketServer({ server: httpsServer });
-
 httpsServer.listen(8090, () => {
-  console.log("Secure WebSocket server running on wss://localhost:8090");
+  console.log('Secure WebSocket server running on wss://localhost:8090');
 });
 
-wss.on("connection", (ws) => {
-  console.log("New client connected.");
+// For local dev without SSL:
+//const wss = new WebSocketServer({ port: 8090 });
 
-  ws.on("message", (data, isBinary) => {
+const streamers = new Map(); 
+const viewers = new Map();   
+
+wss.on('connection', (ws) => {
+  console.log('New client connected.');
+
+  ws.employeeId = null;
+
+  ws.on('message', (data, isBinary) => {
     if (!isBinary) {
-      const textData = data.toString("utf-8");
-      wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(textData);
-          console.log("Sent to client:", textData);
+      try {
+        const msg = JSON.parse(data.toString());
+
+        switch (msg.type) {
+          case 'connect-streamer':
+            ws.employeeId = msg.employee_id;
+            streamers.set(ws.employeeId, ws);
+            console.log(`Streamer connected: ${ws.employeeId}`);
+            break;
+
+          case 'viewer-join':
+            viewers.set(ws, msg.employee_id);
+            console.log(`Viewer joined for: ${msg.employee_id}`);
+            const streamerSocket = streamers.get(msg.employee_id);
+            if (streamerSocket && streamerSocket.readyState === ws.OPEN) {
+              streamerSocket.send(JSON.stringify({
+                action: 'start',
+                employee_id: msg.employee_id
+              }));
+              console.log(`Sent start command to streamer: ${msg.employee_id}`);
+            } else {
+              console.warn(`Streamer not available for employee_id: ${msg.employee_id}`);
+            }
+            break;
+
+          case 'screen-frame':
+            break;
+
+          default:
+            console.warn(`Unknown message type: ${msg.type}`);
         }
-      });
+      } catch (err) {
+        console.error('Failed to parse message:', err.message);
+      }
     } else {
-      console.log("Received binary data");
-      wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(data);
+      if (!ws.employeeId) return;
+      const senderId = ws.employeeId;
+
+      for (const [viewerWs, targetEmployeeId] of viewers.entries()) {
+        if (targetEmployeeId === senderId && viewerWs.readyState === ws.OPEN) {
+          viewerWs.send(data);
         }
-      });
+      }
     }
   });
 
-  ws.on("close", () => {
-    console.log("Client disconnected.");
+  ws.on('close', () => {
+    console.log('Client disconnected.');
+
+    if (ws.employeeId && streamers.get(ws.employeeId) === ws) {
+      streamers.delete(ws.employeeId);
+    }
+
+    if (viewers.has(ws)) {
+      viewers.delete(ws);
+    }
   });
 
-  ws.on("error", (err) => {
-    console.error("WebSocket error:", err.message);
+  ws.on('error', (err) => {
+    console.error('WebSocket error:', err.message);
   });
 });
+
+console.log('WebSocket server running on ws://localhost:8090');
