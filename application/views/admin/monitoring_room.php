@@ -261,66 +261,67 @@
       <option value="inactive">Inactive Hours (High-Low)</option>
     </select>
   </div>
- 
-  <div class="card-grid" id="employeeCardGrid">
-  <script>
-$(document).ready(function () {
-    fetchEmployees(); // Fetch on page load
-});
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-function fetchEmployees() {
+<script>
+$(document).ready(function() {
+    // Make AJAX GET request to fetch employee data
     $.ajax({
-      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
-      method: 'GET',
+      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",        method: 'GET',
         dataType: 'json',
-        success: function (response) {
-            if (response.status === 'success' && response.employees.length > 0) {
-                $('#employeeCardGrid').empty(); // Clear old content
+        success: function(response) {
+            if (response.status === 'success') {
+                var employees = response.employees;
+                var cardGrid = $('.card-grid');
+                cardGrid.empty(); // Clear existing content
 
-                $.each(response.employees, function (index, emp) {
-                    let card = `
-                    <div class="card">
-                        <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${emp.name}', 'ID: ${emp.id}')">
-                            <img src="https://cdn.mos.cms.futurecdn.net/f5kTB9Cb3HSGjfPiiTcobK.jpg" class="thumbnail" alt="Video Feed">
-                            <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-                        </div>
-                        <div class="card-content">
+                // Loop through each employee and render the card
+                $.each(employees, function(index, employee) {
+                    var card = `
+                        <div class="card">
+                            <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
+                                <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+                            </div>
+                            <div class="card-content">
+
                             <div class="row">
                               <div class="col-md-8">
-                                <h3>${emp.name}</h3>
+                                <h3>${employee.name}</h3>
                               </div>
                               <div class="col-md-4">
-                                <p class="text-right">ID: ${emp.id}</p>
+                                <p class="text-right">ID: ${employee.id}</p>
                               </div>
                             </div>
-                            <div class="status">
-                                <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:00 hrs active</span>
-                                <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+                                <div class="status">
+                                    <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
+                                    <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+                                </div>
                             </div>
                         </div>
-                    </div>`;
-                    $('#employeeCardGrid').append(card);
+                    `;
+                    cardGrid.append(card); // Append the card to the card grid
                 });
             } else {
-                $('#employeeCardGrid').html('<p>No employees found.</p>');
+                alert('Error: ' + response.message); // Handle error response
             }
         },
-        error: function (xhr, status, error) {
-            console.error('AJAX Error:', error);
-            $('#employeeCardGrid').html('<p>Error loading employees.</p>');
+        error: function() {
+            alert('There was an error fetching employee data');
         }
     });
-}
+});
 </script>
 
+<div class="card-grid">
+    <!-- Cards will be dynamically inserted here -->
 </div>
- 
+
  
   <!-- Modal -->
   <div id="videoModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeVideoModal()">&times;</span>
-      <img id="remoteVideo" autoplay playsinline>
+      <img id="screen" autoplay playsinline>
       <div class="modal-info">
         <h3 id="modalName"></h3>
         <p id="modalId"></p>
@@ -358,43 +359,49 @@ function fetchEmployees() {
 
  <h2>Live Screen Viewer</h2>
 
-  <script>
 
-    const socket = new WebSocket('wss://work-room.io:8090');
-    socket.binaryType = 'blob'; 
 
-    const img = document.getElementById('remoteVideo');
+<script>
+  
+const ws = new WebSocket('wss://work-room.io:8090');
 
-    socket.onopen = function () {
-      console.log('WebSocket connection established');
-      // Optional: send a message to the server
+// const ws = new WebSocket('ws://localhost:8090'); 
+
+const video = document.getElementById('screen');
+
+let mediaSource = new MediaSource();
+video.src = URL.createObjectURL(mediaSource);
+
+let sourceBuffer;
+
+mediaSource.addEventListener('sourceopen', () => {
+  sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+});
+
+ws.binaryType = 'arraybuffer';
+
+function playVideo(employeeId) {
+  ws.send(JSON.stringify({
+    type: 'viewer-join',
+    employee_id: employeeId 
+  }));
+}
+
+ws.addEventListener('message', (event) => {
+  if (typeof event.data !== 'string') {
+    const blob = new Blob([event.data], { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+
+    const img = document.getElementById('screen');
+    img.src = url;
+    img.onload = () => {
+      URL.revokeObjectURL(url);
     };
-    socket.onclose = function () {
-      console.log('WebSocket connection closed');
-    };
-    socket.onerror = function (error) {
-      console.error('WebSocket error:', error);
-    };
+  }
+});
 
-    function playVideo(id) {
-      // Send a message to the server to start streaming video
-      socket.send(JSON.stringify({ action: 'start_stream', employee_id: id }));
-    }
+</script>
 
-    socket.binaryType = 'blob'
-
-    socket.onmessage = function (event) {
-      const blob = event.data;
-
-      const fixedBlob = new Blob([blob], { type: 'image/jpeg' });
-
-      const url = URL.createObjectURL(fixedBlob);
-      img.src = url;
-
-      img.onload = () => URL.revokeObjectURL(url);
-    };
-
-  </script>
 
 
 
