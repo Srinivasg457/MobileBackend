@@ -217,6 +217,7 @@ public function get_user_roles()
     $query = $this->db->get('employee_roles');
 
     // Handle any database errors
+    
     if ($query === FALSE) {
         echo json_encode(['status' => 500, 'message' => 'Database query failed']);
         return;
@@ -309,8 +310,15 @@ public function get_user_roles()
                     'is_read' => $feature['is_read'],
                     'is_write' => $feature['is_write'],
                     'is_action' => $feature['is_action'],
-                    'is_delete' => $feature['is_delete']
+                    'is_delete' => $feature['is_delete'],
+                    'status' => (
+                        $feature['is_read'] || 
+                        $feature['is_write'] || 
+                        $feature['is_action'] || 
+                        $feature['is_delete']
+                    ) ? 1 : 0
                 ];
+                
     
                 $existing = $this->db->get_where('role_feature_access', [
                     'role_id' => $role_id,
