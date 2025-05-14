@@ -362,14 +362,46 @@
                                             groupScreenshots.slice(screenshotsPerGroup).forEach((screenshot) => {
                                                 const matchingActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
                                                 const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
+                                                let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
 
 
                                                 output_screen += `
                             <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
-                                    <span>Activity: ${overallActivity}%</span> 
-                                    <span>${screenshot.display_text}</span>
+                                       <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                     <svg viewBox="0 0 36 36" width="40" height="40">
+                    <!-- Background circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
+                    fill="none"
+                    stroke="#e6e6e6"
+                    stroke-width="4"
+                    />
+                    
+                    <!-- Progress circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
+                    fill="none"
+                    stroke="green"
+                    stroke-width="4"
+                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
+                    stroke-dashoffset="25"  <!-- makes it start from top -->
+                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
+                />
+            </svg>
+            <div style="position: absolute; top: 50%; left: 50%; 
+                        transform: translate(-50%, -50%);
+                        font-size: 10px; font-weight: bold;cursor: pointer;"
+                        data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
+                ${overallActivity}%
+                                </div>
+                            </div>
+                                    <span>${timeWithoutSeconds}</span>
                                 </div>
                             </div>
                         `;

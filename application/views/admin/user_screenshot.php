@@ -605,7 +605,38 @@
                             <div class="screenshot-card" box-sizing: border-box;">
                                 <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                   <span>${overallActivity}%</span> <p>${timeWithoutSeconds}</p>
+                                      <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                     <svg viewBox="0 0 36 36" width="40" height="40">
+                    <!-- Background circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
+                    fill="none"
+                    stroke="#e6e6e6"
+                    stroke-width="4"
+                    />
+                    
+                    <!-- Progress circle -->
+                    <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9155"
+                    fill="none"
+                    stroke="green"
+                    stroke-width="4"
+                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
+                    stroke-dashoffset="25"  <!-- makes it start from top -->
+                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
+                />
+            </svg>
+            <div style="position: absolute; top: 50%; left: 50%; 
+                        transform: translate(-50%, -50%);
+                        font-size: 10px; font-weight: bold;cursor: pointer;"
+                        data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
+                ${overallActivity}%
+                                </div>
+                            </div> <p>${timeWithoutSeconds}</p>
                                     <img 
                                         src="https://img.icons8.com/?size=50&id=4887&format=png" 
                                         class="delete-screenshot" 

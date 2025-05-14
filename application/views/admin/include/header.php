@@ -69,6 +69,13 @@
 
 
   <style type="text/css">
+    .content-wrapper,
+    body,
+    .wrapper {
+      overflow-x: hidden !important;
+      overflow-y: unset !important;
+    }
+
     .toast {
       padding: 10px;
       margin: 5px;
