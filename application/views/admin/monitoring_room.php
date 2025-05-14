@@ -118,7 +118,7 @@
     }
  
     .status {
-      display: flex;
+/*       display: flex; */
       justify-content: space-between;
       margin: 15px 0 0;
       padding-top: 10px;
@@ -131,7 +131,7 @@
 
     >img {
       width: inherit;
-      height: initial;ss
+      height: initial;
     }
   }
 
