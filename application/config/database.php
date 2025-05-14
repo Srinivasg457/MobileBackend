@@ -35,9 +35,9 @@
 */
 
 // The following values will probably need to be changed.
-$db['default']['username'] = "sabeer";
-$db['default']['password'] = "root@123";
-$db['default']['database'] = "worksmart";
+$db['default']['username'] = "workroom_db_user_remote";
+$db['default']['password'] = "6YbJ9Q£G739";
+$db['default']['database'] = "workroom_db";
 
 // The following values can probably stay the same.
 $db['default']['hostname'] = "localhost";
