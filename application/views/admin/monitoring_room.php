@@ -256,111 +256,60 @@
       <option value="inactive">Inactive Hours (High-Low)</option>
     </select>
   </div>
- 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Make AJAX GET request to fetch employee data
+    $.ajax({
+      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'success') {
+                var employees = response.employees;
+                var cardGrid = $('.card-grid');
+                cardGrid.empty(); // Clear existing content
+
+                // Loop through each employee and render the card
+                $.each(employees, function(index, employee) {
+                    var card = `
+                        <div class="card">
+                            <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
+                                <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
+                            </div>
+                            <div class="card-content">
+                                <h3>${employee.name}</h3>
+                                <p>ID: ${employee.id}</p>
+                                <div class="status">
+                                    <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
+                                    <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    cardGrid.append(card); // Append the card to the card grid
+                });
+            } else {
+                alert('Error: ' + response.message); // Handle error response
+            }
+        },
+        error: function() {
+            alert('There was an error fetching employee data');
+        }
+    });
+});
+</script>
+
 <div class="card-grid">
-  <!-- Card 1 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Veena Ramamoorthy', 'ID: 57001')">
-      <img src="https://www.bleepstatic.com/content/hl-images/2022/01/26/Windows_11_HDR.jpg" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Veena Ramamoorthy</h3>
-      <p>ID: 57001</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 2 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Ravi Kumar', 'ID: 57002')">
-      <img src="https://code.visualstudio.com/assets/docs/editor/accessibility/zoomed-in.png" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Ravi Kumar</h3>
-      <p>ID: 57002</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:45 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:15 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 3 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Nisha Patel', 'ID: 57003')">
-      <img src="https://media.licdn.com/dms/image/v2/D4E12AQGwGxCOQEtydA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1686749902757?e=2147483647&v=beta&t=F0_A4kcAK7B2ItAgPjLOj7bRlmcgVJmwhk8vKmU3Qw8" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Nisha Patel</h3>
-      <p>ID: 57003</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 07:00 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 00:30 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 4 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Amit Sharma', 'ID: 57004')">
-      <img src="https://kinsta.com/wp-content/uploads/2021/09/linux-commands-1024x512.jpg" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Amit Sharma</h3>
-      <p>ID: 57004</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 04:50 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 02:10 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 5 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Divya Menon', 'ID: 57005')">
-      <img src="https://code.visualstudio.com/assets/docs/editor/accessibility/high-contrast.png" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Divya Menon</h3>
-      <p>ID: 57005</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:00 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
-      </div>
-    </div>
-  </div>
- 
-  <!-- Card 6 -->
-  <div class="card">
-    <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', 'Suresh Raina', 'ID: 57006')">
-      <img src="https://cdn.mos.cms.futurecdn.net/f5kTB9Cb3HSGjfPiiTcobK.jpg" class="thumbnail" alt="Video Feed">
-      <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-    </div>
-    <div class="card-content">
-      <h3>Suresh Raina</h3>
-      <p>ID: 57006</p>
-      <div class="status">
-        <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 05:30 hrs active</span>
-        <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:30 hrs inactive</span>
-      </div>
-    </div>
-  </div>
+    <!-- Cards will be dynamically inserted here -->
 </div>
- 
+
  
   <!-- Modal -->
   <div id="videoModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeVideoModal()">&times;</span>
-      <img id="remoteVideo" autoplay playsinline>
+      <img id="screen" autoplay playsinline>
       <div class="modal-info">
         <h3 id="modalName"></h3>
         <p id="modalId"></p>
@@ -398,43 +347,49 @@
 
  <h2>Live Screen Viewer</h2>
 
-  <script>
 
-    const socket = new WebSocket('wss://work-room.io:8090');
-    socket.binaryType = 'blob'; 
 
-    const img = document.getElementById('remoteVideo');
+<script>
+  
+const ws = new WebSocket('wss://work-room.io:8090');
 
-    socket.onopen = function () {
-      console.log('WebSocket connection established');
-      // Optional: send a message to the server
+// const ws = new WebSocket('ws://localhost:8090'); 
+
+const video = document.getElementById('screen');
+
+let mediaSource = new MediaSource();
+video.src = URL.createObjectURL(mediaSource);
+
+let sourceBuffer;
+
+mediaSource.addEventListener('sourceopen', () => {
+  sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+});
+
+ws.binaryType = 'arraybuffer';
+
+function playVideo(employeeId) {
+  ws.send(JSON.stringify({
+    type: 'viewer-join',
+    employee_id: employeeId 
+  }));
+}
+
+ws.addEventListener('message', (event) => {
+  if (typeof event.data !== 'string') {
+    const blob = new Blob([event.data], { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+
+    const img = document.getElementById('screen');
+    img.src = url;
+    img.onload = () => {
+      URL.revokeObjectURL(url);
     };
-    socket.onclose = function () {
-      console.log('WebSocket connection closed');
-    };
-    socket.onerror = function (error) {
-      console.error('WebSocket error:', error);
-    };
+  }
+});
 
-    function playVideo(id) {
-      // Send a message to the server to start streaming video
-      socket.send(JSON.stringify({ action: 'start_stream', employee_id: 8 }));
-    }
+</script>
 
-    socket.binaryType = 'blob'
-
-    socket.onmessage = function (event) {
-      const blob = event.data;
-
-      const fixedBlob = new Blob([blob], { type: 'image/jpeg' });
-
-      const url = URL.createObjectURL(fixedBlob);
-      img.src = url;
-
-      img.onload = () => URL.revokeObjectURL(url);
-    };
-
-  </script>
 
 
 
