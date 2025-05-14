@@ -60,6 +60,7 @@
       display: flex;
       flex-direction: column;
       transition: var(--transition);
+      margin-bottom: 0;
     }
  
     .card:hover {
@@ -76,14 +77,15 @@
       width: 100%;
       height: 200px;
       object-fit: cover;
+      padding: 15px;
     }
  
     .card .video-call-icon {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      width: 36px;
-      height: 36px;
+      top: 25px;
+      right: 25px;
+      width: 35px;
+      height: 35px;
       background-color: white;
       padding: 7px;
       border-radius: 50%;
@@ -96,18 +98,21 @@
     }
  
     .card-content {
-      padding: 5px;
+      /* padding: 5px; */
+        padding: 0px 15px 15px 15px;
     }
  
     .card-content h3 {
-      margin: 0 0 5px;
+      /* margin: 0 0 5px; */
+      margin: 0 0 0;
       font-size: 18px;
       font-weight: 600;
       color: var(--dark-color);
     }
  
     .card-content p {
-      margin: 0 0 10px;
+      line-height: 30px;
+      margin: 0 0 0;
       color: var(--text-light);
       font-size: 14px;
     }
@@ -115,7 +120,7 @@
     .status {
       display: flex;
       justify-content: space-between;
-      margin: 15px 0 5px;
+      margin: 15px 0 0;
       padding-top: 10px;
       border-top: 1px solid #eee;
     }
@@ -278,8 +283,15 @@ $(document).ready(function() {
                                 <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
                             </div>
                             <div class="card-content">
+
+                            <div class="row">
+                              <div class="col-md-8">
                                 <h3>${employee.name}</h3>
-                                <p>ID: ${employee.id}</p>
+                              </div>
+                              <div class="col-md-4">
+                                <p class="text-right">ID: ${employee.id}</p>
+                              </div>
+                            </div>
                                 <div class="status">
                                     <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
                                     <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
@@ -371,8 +383,9 @@ ws.binaryType = 'arraybuffer';
 function playVideo(employeeId) {
   ws.send(JSON.stringify({
     type: 'viewer-join',
-    employee_id: employeeId 
-  }));
+    employee_id: parseInt(employeeId)
+  }));  
+ 
 }
 
 ws.addEventListener('message', (event) => {
