@@ -35,12 +35,12 @@
 */
 
 // The following values will probably need to be changed.
-$db['default']['username'] = "root";
-$db['default']['password'] = "";
-$db['default']['database'] = "worksmart";
+$db['default']['username'] = "workroom_db_user_remote";
+$db['default']['password'] = "6YbJ9Q£G739b";
+$db['default']['database'] = "workroom_db";;
 
 // The following values can probably stay the same.
-$db['default']['hostname'] = "localhost";
+$db['default']['hostname'] = "54.196.19.105";
 $db['default']['dbdriver'] = "mysqli"; //Updated to latest driver.
 $db['default']['dbprefix'] = "";
 $db['default']['pconnect'] = FALSE;
