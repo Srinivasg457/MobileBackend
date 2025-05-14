@@ -25,7 +25,7 @@ class EmployeeRoles extends Home_Controller {
      */
     public function create_role() {
         $input = $this->get_input_data();
-    
+
         // 🔧 Set input data for validation
         $this->form_validation->set_data($input);
     
@@ -282,7 +282,11 @@ public function get_user_roles()
             }
     
             $this->db->trans_start();
-    
+            // Step: Set all existing features for this user-role combination to status 0 first
+            $this->db->where('role_id', $role_id)
+                ->where('user_id', $user_id)
+                ->update('role_feature_access', ['status' => 0]);
+
             foreach ($features as $key => $feature) {
                 $this->form_validation->set_data($feature);
                 $this->form_validation->set_rules('feature_id', 'Feature ID', 'required|integer');
