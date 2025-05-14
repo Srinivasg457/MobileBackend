@@ -93,7 +93,7 @@
 
 <!-- Roles & Permissions Form -->
 <div class="content-wrapper">
-    <h2>Roles & Permissions</h2>
+    <h2 class="mb-5">Roles & Permissions</h2>
     <!-- Feature Details Modal -->
     <div class="modal fade" id="featureDetailsModal" tabindex="-1" aria-labelledby="featureDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -169,7 +169,7 @@
                                     <i class="bi bi-x-circle"></i> Cancel
                                 </button>
                                 <button type="submit" class="btn btn-success mx-2">
-                                    <i class="fa fa-plus"></i> Create
+                                    <i class="bi bi-shield-plus"></i> Assign Permissions
                                 </button>
                             </div>
                         </div>
@@ -309,8 +309,8 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Role Name</th>
-                        <th>Feature Name</th>
+                        <th>Role</th>
+                        <th>Features</th>
                         <th>View</th>
                         <th>Action</th>
                     </tr>
@@ -602,9 +602,16 @@
                 const featureId = $(this).data('feature-id');
                 const isChecked = $(this).is(':checked');
 
-                $(`input[name^="access[${featureId}]"]`)
-                    .prop('disabled', !isChecked)
-                    .prop('checked', isChecked ? $(`input[name^="access[${featureId}]"]`).prop('checked') : false);
+                // Enable/disable the permission checkboxes
+                $(`input[name^="access[${featureId}]"]`).prop('disabled', !isChecked);
+
+                if (isChecked) {
+                    // Automatically check is_read when feature is selected
+                    $(`input[name="access[${featureId}][is_read]"]`).prop('checked', true);
+                } else {
+                    // Uncheck all permission checkboxes when deselected
+                    $(`input[name^="access[${featureId}]"]`).prop('checked', false);
+                }
             });
 
             // Select all checkboxes for each permission type
