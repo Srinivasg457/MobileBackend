@@ -383,8 +383,9 @@ ws.binaryType = 'arraybuffer';
 function playVideo(employeeId) {
   ws.send(JSON.stringify({
     type: 'viewer-join',
-    employee_id: employeeId 
-  }));
+    employee_id: parseInt(employeeId)
+  }));  
+ 
 }
 
 ws.addEventListener('message', (event) => {
