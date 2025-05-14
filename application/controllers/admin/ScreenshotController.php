@@ -381,6 +381,84 @@ public function get_screenshots()
         ]));
 }
 
+public function get_last_screenshot()
+{
+    $employee_id = $this->input->get('employee_id');
+    $user_id = $this->session->userdata('id');
+    $date = $this->input->get('date');
+
+    if (empty($user_id) || empty($employee_id)) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Missing user_id or employee_id"
+            ]));
+    }
+
+    if (empty($date)) {
+        $date = date('Y-m-d');
+    }
+
+    $user_folder = $user_id;
+    $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
+
+    if (!is_dir($upload_path)) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(404)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "No folder found for user ID {$user_id}"
+            ]));
+    }
+
+    // Fetch only the latest screenshot
+    $this->db->select('screenshot_id, file_path, created_at');
+    $this->db->where('employee_id', $employee_id);
+    $this->db->where('user_id', $user_id);
+    $this->db->where('status', 1); // Only active screenshots
+    $this->db->like('created_at', $date);
+    $this->db->order_by('created_at', 'DESC');
+    $this->db->limit(1);
+    $query = $this->db->get('screenshots');
+    $row = $query->row_array();
+
+    if ($row) {
+        $filename = basename($row['file_path']);
+        $full_path = $upload_path . $filename;
+
+        if (file_exists($full_path)) {
+            $formatted_time = date('H:i:s', strtotime($row['created_at']));
+
+            $screenshot = [
+                'id' => $row['screenshot_id'],
+                'file_name' => $filename,
+                'image_url' => base_url("uploads/screenshots/{$user_folder}/{$filename}"),
+                'created_at' => $formatted_time,
+                'display_text' => $formatted_time
+            ];
+
+            return $this->output->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode([
+                    "status" => "success",
+                    "screenshot" => $screenshot,
+                    "date" => $date,
+                    "user_id" => $user_id,
+                    "employee_id" => $employee_id
+                ]));
+        }
+    }
+
+    return $this->output->set_content_type('application/json')
+        ->set_status_header(404)
+        ->set_output(json_encode([
+            "status" => "error",
+            "message" => "No recent screenshot found for user ID {$user_id} on {$date}"
+        ]));
+}
+
+
 
 
 
