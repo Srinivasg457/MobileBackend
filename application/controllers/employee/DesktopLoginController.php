@@ -10,7 +10,15 @@ use \Firebase\JWT\Key;
 class DesktopLoginController extends CI_Controller {
 
     // Your secret key (keep this secure, ideally in an .env file or config)
-    private $jwt_key = "your_secret_key_here";
+    private $jwt_key;
+
+    public function __construct() {
+        parent::__construct();
+        // Load necessary libraries and models
+        $this->load->library('session');
+        $this->load->database();
+        $this->jwt_key = "your_secret_key_here"; //  Move to config
+    }
 
     public function login()
     {
