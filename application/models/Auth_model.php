@@ -274,7 +274,6 @@ class Auth_model extends CI_Model {
         if ($this->session->userdata('employee_id') && $this->session->userdata('is_employee')) {
             return TRUE;
         } else {
-            redirect('login');
             return FALSE;
         }
     }
