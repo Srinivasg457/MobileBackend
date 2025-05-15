@@ -11,9 +11,9 @@ class Employee extends Home_Controller
         $this->load->library('form_validation');
     }
      public function index(){
-        if (!$this->session->userdata('employee_logged_in')) {
-            redirect('login');
-        }
+        // if (!$this->session->userdata('logged_in')) {
+        //     redirect('login');
+        // }
         $data = array();
         $data['page_title'] = 'Employee Dashboard';
         $data['details'] = $this->session->userdata('employee_id');

@@ -12,9 +12,9 @@ class Report extends Home_Controller
     }
     public function index()
     {
-        if (!$this->session->userdata('employee_logged_in')) {
-            redirect('login');
-        }
+        // if (!$this->session->userdata('employee_logged_in')) {
+        //     redirect('login');
+        // }
         $data = array();
         $data['page_title'] = 'Report';
         $data['main_content'] = $this->load->view('admin/employee/report', $data, TRUE);

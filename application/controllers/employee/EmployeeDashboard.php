@@ -6,7 +6,7 @@ class EmployeeDashboard extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        // Session check for logged-in employee
+        Session check for logged-in employee
         if (!$this->session->userdata('employee_logged_in')) {
             redirect('login'); // Redirect to the login page if not logged in as an employee
         }
