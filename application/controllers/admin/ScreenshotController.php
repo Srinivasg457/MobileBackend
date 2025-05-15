@@ -12,9 +12,9 @@ class ScreenshotController extends Home_Controller
     }
     public function index()
     {
-        if (!$this->session->userdata('logged_in')) {
-            redirect('login');
-        }
+        // if (!$this->session->userdata('logged_in')) {
+        //     redirect('login');
+        // }
         $data = array();
         $data['page_title'] = 'User Screenshots';
         $data['main_content'] = $this->load->view('admin/user_screenshot', $data, TRUE);
@@ -385,7 +385,7 @@ public function get_last_screenshot()
 {
     $employee_id = $this->input->get('employee_id');
     $user_id = $this->session->userdata('id');
-    $date = $this->input->get('date');
+    $date = "2025-05-06";
 
     if (empty($user_id) || empty($employee_id)) {
         return $this->output->set_content_type('application/json')

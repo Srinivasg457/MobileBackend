@@ -58,11 +58,15 @@ class AutoLoginController extends CI_Controller {
 
         // Set session
         $this->session->set_userdata([
+            'user_type' => 'employee_user',
             'employee_id' => $employee->id,
             'employee_name' => $employee->name,
             'employee_email' => $employee->email,
-            'is_employee' => true,
-            'logged_in' => true
+            'business_id' => $employee->business_id,
+            'department_id' => $employee->department_id,
+            'employee_org_id' => $employee->user_id,
+            'employee_logged_in' => true,
+            'is_employee' => true
         ]);
 
         echo "Login successful.  Redirecting to dashboard.<br>"; //Keep for Debugging
