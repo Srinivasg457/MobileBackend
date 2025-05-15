@@ -7,7 +7,14 @@ use \Firebase\JWT\Key;
 
 class AutoLoginController extends CI_Controller {
 
-    private $jwt_key = "your_secret_key_here"; // Same as in DesktopLoginController
+    private $jwt_key; //  moved to class property
+
+      public function __construct() {
+        parent::__construct();
+        $this->load->library('session');
+        $this->load->database();
+        $this->jwt_key = "your_secret_key_here";  // Initialize in constructor.  IMPORTANT
+    }
 
     public function auto_login()
     {
@@ -15,6 +22,7 @@ class AutoLoginController extends CI_Controller {
 
         if (!$token) {
             // Token missing
+             echo "Token is missing.  Redirecting to login.<br>"; //Keep for Debugging
             redirect('login');
             return;
         }
@@ -23,6 +31,7 @@ class AutoLoginController extends CI_Controller {
             $decoded = JWT::decode($token, new Key($this->jwt_key, 'HS256'));
         } catch (\Exception $e) {
             // Token invalid or expired
+            echo "Token is invalid: " . $e->getMessage() . ". Redirecting to login.<br>"; // Keep for Debugging
             redirect('login');
             return;
         }
@@ -30,6 +39,7 @@ class AutoLoginController extends CI_Controller {
         // Validate employee ID
         $employee_id = $decoded->sub ?? null;
         if (!$employee_id) {
+            echo "Employee ID is missing from token. Redirecting to login.<br>"; // Keep for Debugging.
             redirect('login');
             return;
         }
@@ -41,6 +51,7 @@ class AutoLoginController extends CI_Controller {
         ])->row();
 
         if (!$employee) {
+            echo "Employee not found in database. Redirecting to login.<br>";  // Keep for Debugging.
             redirect('login');
             return;
         }
@@ -54,7 +65,8 @@ class AutoLoginController extends CI_Controller {
             'logged_in' => true
         ]);
 
+        echo "Login successful.  Redirecting to dashboard.<br>"; //Keep for Debugging
         // Redirect to employee dashboard (or reports)
-        redirect('employeedashboard'); // Customize this route
+        redirect('employeedashboard'); // Customize this route.  Make SURE this route is correct.
     }
 }
