@@ -118,14 +118,25 @@
     }
  
     .status {
-      display: flex;
+/*       display: flex; */
       justify-content: space-between;
       margin: 15px 0 0;
       padding-top: 10px;
       border-top: 1px solid #eee;
     }
- 
-    .status span {
+
+  .thumbnail-image-container {
+    height: 200px;
+    overflow: hidden;
+
+    >img {
+      width: inherit;
+      height: initial;
+    }
+  }
+
+
+  .status>.row>div>span {
       font-size: 14px;
       display: flex;
       align-items: center;
@@ -261,56 +272,6 @@
       <option value="inactive">Inactive Hours (High-Low)</option>
     </select>
   </div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-$(document).ready(function() {
-    // Make AJAX GET request to fetch employee data
-    $.ajax({
-      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",        method: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.status === 'success') {
-                var employees = response.employees;
-                var cardGrid = $('.card-grid');
-                cardGrid.empty(); // Clear existing content
-
-                // Loop through each employee and render the card
-                $.each(employees, function(index, employee) {
-                    var card = `
-                        <div class="card">
-                            <div class="image-container" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
-                                <img src="https://img.icons8.com/ios-filled/50/000000/video-call.png" alt="Video Call" class="video-call-icon">
-                            </div>
-                            <div class="card-content">
-
-                            <div class="row">
-                              <div class="col-md-8">
-                                <h3>${employee.name}</h3>
-                              </div>
-                              <div class="col-md-4">
-                                <p class="text-right">ID: ${employee.id}</p>
-                              </div>
-                            </div>
-                                <div class="status">
-                                    <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
-                                    <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    cardGrid.append(card); // Append the card to the card grid
-                });
-            } else {
-                alert('Error: ' + response.message); // Handle error response
-            }
-        },
-        error: function() {
-            alert('There was an error fetching employee data');
-        }
-    });
-});
-</script>
 
 <div class="card-grid">
     <!-- Cards will be dynamically inserted here -->
@@ -332,6 +293,84 @@ $(document).ready(function() {
   </section>
 </div>
 
+<script>
+  $(document).ready(function() {
+    // Make AJAX GET request to fetch employee data
+    $.ajax({
+      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
+      method: 'GET',
+      dataType: 'json',
+      success: function(response) {
+        if (response.status === 'success') {
+          var employees = response.employees;
+          var cardGrid = $('.card-grid');
+          cardGrid.empty(); // Clear existing content
+
+          // Loop through each employee and render the card
+          $.each(employees, function(index, employee) {
+            var card = `
+        <div class="card" id="employee-card-${employee.id}">
+            <div class="thumbnail-image-container" id="thumb-container-${employee.id}"onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
+                <img id="screenshot-${employee.id}" src="https://cdn.pixabay.com/photo/2015/12/03/01/27/play-1073616_640.png" alt="Live Screen">
+            </div>
+            <div class="card-content">
+                <div class="status">
+                    <div class="row mt-5">
+                        <div class="col-md-6"><h3>${employee.name}</h3></div>
+                        <div class="col-md-6 text-right"><p>ID: ${employee.id}</p></div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <span class="active"><span class="status-icon" style="background: var(--success-color);"></span> 06:30 hrs active</span>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-end">
+                            <span class="inactive"><span class="status-icon" style="background: var(--danger-color);"></span> 01:00 hrs inactive</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+            cardGrid.append(card);
+            console.log("card completedddd");
+
+            // ✅ After appending the card, call AJAX to fetch screenshot
+            $.ajax({
+              url: "<?= base_url('/admin/ScreenshotController/get_last_screenshot') ?>",
+              method: "GET",
+              dataType: "json",
+              data: {
+                employee_id: employee.id,
+              },
+              success: function(response) {
+                // console.log(response);
+
+                if (response.status === 'success') {
+                  const imgSrc = response.screenshot.image_url;
+                  $(`#screenshot-${employee .id}`).attr('src', imgSrc);
+                } else {
+                  $(`#screenshot-${employee.id}`).attr('src', 'https://via.placeholder.com/300x200?text=No+Screenshot');
+                }
+              },
+              error: function(re) {
+                console.log(re);
+
+                $(`#screenshot-${employee.id}`).attr('src', 'https://img.icons8.com/?size=50&id=8672&format=png');
+              }
+            });
+          });
+
+        } else {
+          alert('Error: ' + response.message); // Handle error response
+        }
+      },
+      error: function() {
+        alert('There was an error fetching employee data');
+      }
+    });
+  });
+</script>
 
 <script>
     function openVideoModal(videoUrl, name, id) {
@@ -355,9 +394,7 @@ $(document).ready(function() {
   </script>
 
 
-<body>
 
- <h2>Live Screen Viewer</h2>
 
 
 
