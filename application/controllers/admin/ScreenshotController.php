@@ -385,7 +385,7 @@ public function get_last_screenshot()
 {
     $employee_id = $this->input->get('employee_id');
     $user_id = $this->session->userdata('id');
-    $date = "2025-05-06";
+    $date = date('Y-m-d'); // Always use today's date
 
     if (empty($user_id) || empty($employee_id)) {
         return $this->output->set_content_type('application/json')
@@ -394,10 +394,6 @@ public function get_last_screenshot()
                 "status" => "error",
                 "message" => "Missing user_id or employee_id"
             ]));
-    }
-
-    if (empty($date)) {
-        $date = date('Y-m-d');
     }
 
     $user_folder = $user_id;
@@ -412,13 +408,13 @@ public function get_last_screenshot()
             ]));
     }
 
-    // Fetch only the latest screenshot
+    // Get the most recent screenshot of today
     $this->db->select('screenshot_id, file_path, created_at');
     $this->db->where('employee_id', $employee_id);
     $this->db->where('user_id', $user_id);
     $this->db->where('status', 1); // Only active screenshots
-    $this->db->like('created_at', $date);
-    $this->db->order_by('created_at', 'DESC');
+    $this->db->like('created_at', $date); // Filter by today's date
+    $this->db->order_by('created_at', 'DESC'); // Latest first
     $this->db->limit(1);
     $query = $this->db->get('screenshots');
     $row = $query->row_array();
@@ -457,6 +453,7 @@ public function get_last_screenshot()
             "message" => "No recent screenshot found for user ID {$user_id} on {$date}"
         ]));
 }
+
 
 
 
