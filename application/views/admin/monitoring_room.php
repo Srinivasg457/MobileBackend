@@ -259,6 +259,12 @@
   }
 
   @media(max-width: 1204px) {
+    .mobileAligment {
+      text-align: left !important;
+      justify-content: left !important;
+      margin-top: 5px;
+    }
+
     .modal-content {
       width: 95%;
     }
@@ -345,71 +351,138 @@
 </div>
 
 <script>
-  $(document).ready(function() {
-    // Make AJAX GET request to fetch employee data
+  function loadAllEmployees() {
     $.ajax({
       url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
       method: 'GET',
       dataType: 'json',
       success: function(response) {
         if (response.status === 'success') {
-          var employees = response.employees;
-          var cardGrid = $('.card-grid');
-          cardGrid.empty(); // Clear existing content
+          const employees = response.employees;
+          const cardGrid = $('.card-grid');
+          cardGrid.empty();
 
-          // Loop through each employee and render the card
           $.each(employees, function(index, employee) {
-            var card = `
-  <div class="card" id="employee-card-${employee.id}">
-    <div class="thumbnail-image-container" id="thumb-container-${employee.id}" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
-      <img id="screenshot-${employee.id}" src="https://t4.ftcdn.net/jpg/10/78/87/79/240_F_1078877919_BuOhReO2s7w5Yu6ReT39b4bsoTTomARa.jpg" alt="Live Screen">
-    </div>
-    <div class="card-content">
-      <div class="status">
-        <div class="row mt-4">
-          <div class="col-md-12"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
-          <div class="col-md-12 mobileAligment"><p>ID: ${employee.id}</p></div>
-        </div>
-        <div class="row mt-4">
-          <div class="col-md-6">
-          <span class="active">
-            <span class="status-icon"style="background: var(--success-color);"></span> 
-            <span id="active-time-${employee.id}">
-              00:00 hrs Active
-            </span>
-            </span>
-          </div>
-          <div class="col-md-6 d-flex justify-content-end mobileAligment">
-           <span class="inactive">
-            <span class="status-icon" style="background: var(--danger-color);"></span> 
-            <span id="inactive-time-${employee.id}">
-              00:00 hrs Inactive
-            </span>
-            </span>
+            const card = `
+            <div class="card" id="employee-card-${employee.id}">
+              <div class="thumbnail-image-container" id="thumb-container-${employee.id}" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
+                <img id="screenshot-${employee.id}" src="https://t4.ftcdn.net/jpg/10/78/87/79/240_F_1078877919_BuOhReO2s7w5Yu6ReT39b4bsoTTomARa.jpg" alt="Live Screen">
+              </div>
+              <div class="card-content">
+                <div class="status">
+                  <div class="row mt-4">
+                    <div class="col-md-12"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
+                    <div class="col-md-12 mobileAligment"><p>ID: ${employee.id}</p></div>
+                  </div>
+                  <div class="row mt-4">
+                    <div class="col-lg-6">
+                      <span class="active">
+                        <span class="status-icon" style="background: var(--success-color);"></span> 
+                        <span id="active-time-${employee.id}">00:00 hrs Active</span>
+                      </span>
+                    </div>
+                    <div class="col-lg-6 d-flex justify-content-end mobileAligment">
+                      <span class="inactive">
+                        <span class="status-icon" style="background: var(--danger-color);"></span> 
+                        <span id="inactive-time-${employee.id}">00:00 hrs Inactive</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    `;
-
+          `;
 
             cardGrid.append(card);
             getActivity(employee.id);
             getLatestScreenshot(employee.id);
           });
         } else {
-          alert('Error: ' + response.message); // Handle error response
+          $('.card-grid').html('<p>No employees found</p>');
         }
       },
       error: function() {
         alert('There was an error fetching employee data');
       }
     });
+  }
+  $(document).ready(function() {
+    // Make AJAX GET request to fetch employee data
+    loadAllEmployees();
   });
 </script>
 
 <script>
+  $('input[placeholder="Search employees by name or ID..."]').on('keyup', function() {
+    const searchQuery = $(this).val().trim();
+
+    // If input is empty, load the full employee list
+    if (searchQuery === "") {
+      loadAllEmployees(); // <-- Call original employee loader
+      return;
+    }
+
+    $.ajax({
+      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_name') ?>",
+      method: 'GET',
+      data: {
+        name: searchQuery
+      },
+      dataType: 'json',
+      success: function(response) {
+        if (response.status === 'success' && response.employees.length > 0) {
+          const employees = response.employees;
+          const cardGrid = $('.card-grid');
+          cardGrid.empty();
+
+          $.each(employees, function(index, employee) {
+            const card = `
+            <div class="card" id="employee-card-${employee.id}">
+              <div class="thumbnail-image-container" id="thumb-container-${employee.id}" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
+                <img id="screenshot-${employee.id}" src="https://t4.ftcdn.net/jpg/10/78/87/79/240_F_1078877919_BuOhReO2s7w5Yu6ReT39b4bsoTTomARa.jpg" alt="Live Screen">
+              </div>
+              <div class="card-content">
+                <div class="status">
+                  <div class="row mt-4">
+                    <div class="col-md-12"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
+                    <div class="col-md-12 mobileAligment"><p>ID: ${employee.id}</p></div>
+                  </div>
+                  <div class="row mt-4">
+                    <div class="col-md-6">
+                      <span class="active">
+                        <span class="status-icon" style="background: var(--success-color);"></span> 
+                        <span id="active-time-${employee.id}">00:00 hrs Active</span>
+                      </span>
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-end mobileAligment">
+                      <span class="inactive">
+                        <span class="status-icon" style="background: var(--danger-color);"></span> 
+                        <span id="inactive-time-${employee.id}">00:00 hrs Inactive</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+
+            cardGrid.append(card);
+            getActivity(employee.id);
+            getLatestScreenshot(employee.id);
+          });
+        } else {
+          const cardGrid = $('.card-grid');
+          cardGrid.empty();
+          $('.card-grid').html('<p>No employees found</p>');
+        }
+      },
+      error: function() {
+        alert('Failed to fetch employee list');
+      }
+    });
+  });
+
+
   function openVideoModal(videoUrl, name, id) {
     const img = document.getElementById('screen');
     img.src = "";
