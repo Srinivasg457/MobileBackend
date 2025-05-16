@@ -1,4 +1,11 @@
 <style>
+  .content-wrapper,
+  body,
+  .wrapper {
+    overflow-x: clip !important;
+    overflow-y: unset !important;
+  }
+
   :root {
     --primary-color: #3498db;
     --secondary-color: #2980b9;

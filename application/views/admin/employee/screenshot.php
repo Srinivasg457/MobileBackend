@@ -212,7 +212,7 @@
 
             <!-- Filter only by date -->
             <div class="search-row">
-              Date:  <input type="date" id="datePicker" value="">
+                Date: <input type="date" id="datePicker" value="">
             </div>
 
             <!-- Main Screenshot Row for Logged-in User -->
@@ -285,7 +285,7 @@
                                         response.screenshots.forEach((screenshot) => {
                                             const time = screenshot.display_text;
                                             const hour = time.split(":")[0];
-                                            const groupLabel = `${hour}:00:00-${String(Number(hour) + 1).padStart(2, '0')}:00:00`;
+                                            const groupLabel = `${hour.padStart(2, '0')}:00 - ${String(Number(hour) + 1).padStart(2, '0')}:00`;
 
                                             if (!groupedScreenshots[groupLabel]) {
                                                 groupedScreenshots[groupLabel] = [];
@@ -341,7 +341,7 @@
             <div style="position: absolute; top: 50%; left: 50%; 
                         transform: translate(-50%, -50%);
                         font-size: 10px; font-weight: bold;">
-                ${overallActivity}%
+                ${Math.round(overallActivity)}%
 
 
             </div>
@@ -397,8 +397,8 @@
             <div style="position: absolute; top: 50%; left: 50%; 
                         transform: translate(-50%, -50%);
                         font-size: 10px; font-weight: bold;cursor: pointer;"
-                        data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
-                ${overallActivity}%
+                        data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}%">
+                ${Math.round(overallActivity)}%
                                 </div>
                             </div>
                                     <span>${timeWithoutSeconds}</span>
