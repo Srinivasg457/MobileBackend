@@ -223,22 +223,21 @@
             }
 
             .screenshot-card {
-  width: calc(100% / 6 - 10px);
-  box-sizing: border-box;
-}
+                width: calc(100% / 6 - 10px);
+                box-sizing: border-box;
+            }
 
-/* For mobile responsiveness (adjust max-width as needed) */
-@media (max-width: 768px) {
-  .screenshot-card {
-    width: 200px;
-  }
-}
-
+            /* For mobile responsiveness (adjust max-width as needed) */
+            @media (max-width: 768px) {
+                .screenshot-card {
+                    width: 200px;
+                }
+            }
         </style>
 
 
         <!-- Popup Div -->
-       <div class="popup" id="popupCard">
+        <div class="popup" id="popupCard">
             <div class="d-flex justify-content-between align-items-baseline mb-5">
                 <h5><strong>Name:</strong> <span id="popupName"></span></h5>
                 <h5><strong>User ID:</strong> <span id="popupID"></span></h5>
@@ -397,8 +396,8 @@
                 <div style="position: absolute; top: 50%; left: 50%; 
                             transform: translate(-50%, -50%);
                             font-size: 10px; font-weight: bold;cursor: pointer;" 
-                            data-toggle="tooltip" data-placement="top" title="${overallActivityRaw}%">
-                    ${overallActivityRaw}%
+                            data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}%">
+                    ${Math.round(overallActivity)}%
                 </div>
             </div>
             <span>${timeWithoutSeconds}</span>
@@ -441,8 +440,8 @@
                                 container.find('.delete-screenshot').on('click', function() {
                                     const screenshotId = $(this).data('id');
 
-                                     const message = `Are you sure you want to delete the Screenshot?`;
-                                showConfirmationAlert(message, "warning", function() {
+                                    const message = `Are you sure you want to delete the Screenshot?`;
+                                    showConfirmationAlert(message, "warning", function() {
                                         $.ajax({
                                             url: "/admin/ScreenshotController/soft_delete_screenshot",
                                             type: "POST",
@@ -451,12 +450,12 @@
                                                 employee_id: employeeId
                                             },
                                             success: function() {
-                                                   if (response.status == 1) {
-                                                       swal("Failed!", response.message || "Could not delete Screenshot.", "error");
-                                                        loadUserRolePermissions(userId);      
-                                                    } else {
-                                                        swal("Deleted!", "Screenshot deleted successfully.", "success");
-                                                    }
+                                                if (response.status == 1) {
+                                                    swal("Failed!", response.message || "Could not delete Screenshot.", "error");
+                                                    loadUserRolePermissions(userId);
+                                                } else {
+                                                    swal("Deleted!", "Screenshot deleted successfully.", "success");
+                                                }
                                                 // alert("Screenshot deleted successfully.");
                                                 fetchUserScreenshots(employeeId, $('#datePicker').val());
                                             },
@@ -465,7 +464,7 @@
                                                 swal("Error!", "Something went wrong.", "error");
                                             }
                                         });
-                                      });
+                                    });
                                 });
 
                             } else {
@@ -519,7 +518,7 @@
                                     response.screenshots.forEach((screenshot) => {
                                         const time = screenshot.display_text;
                                         const hour = time.split(":")[0];
-                                        const groupLabel = `${hour}:00:00-${String(Number(hour) + 1).padStart(2, '0')}:00:00`;
+                                        const groupLabel = `${hour.padStart(2, '0')}:00 - ${String(Number(hour) + 1).padStart(2, '0')}:00`;
 
                                         if (!groupedScreenshots[groupLabel]) {
                                             groupedScreenshots[groupLabel] = [];
@@ -573,8 +572,8 @@
             <div style="position: absolute; top: 50%; left: 50%; 
                         transform: translate(-50%, -50%);
                         font-size: 10px; font-weight: bold;cursor: pointer;"
-                        data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
-                ${overallActivity}%
+                        data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}%">
+                ${Math.round(overallActivity)}%
                                 </div>
                             </div> <p>${timeWithoutSeconds}</p>
                                     <img 
@@ -633,8 +632,9 @@
             <div style="position: absolute; top: 50%; left: 50%; 
                         transform: translate(-50%, -50%);
                         font-size: 10px; font-weight: bold;cursor: pointer;"
-                        data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
-                ${overallActivity}%
+                        data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}
+%">
+                ${Math.round(overallActivity)}%
                                 </div>
                             </div> <p>${timeWithoutSeconds}</p>
                                     <img 
@@ -698,8 +698,8 @@
                                     // Delete screenshot
                                     $(".delete-screenshot").on('click', function() {
                                         const screenshotId = $(this).data("id");
-                                     const message = `Are you sure you want to delete the Screenshot?`;
-                                showConfirmationAlert(message, "warning", function() {
+                                        const message = `Are you sure you want to delete the Screenshot?`;
+                                        showConfirmationAlert(message, "warning", function() {
                                             $.ajax({
                                                 url: "/admin/ScreenshotController/soft_delete_screenshot",
                                                 type: "POST",
@@ -718,10 +718,10 @@
                                                     fetchUserScreenshots(id, date);
                                                 },
                                                 error: function(xhr) {
-                                                swal("Error!", "Something went wrong.", "error");
+                                                    swal("Error!", "Something went wrong.", "error");
                                                 }
                                             });
-                                        }); 
+                                        });
                                     });
 
                                     // Auto-refresh after 5 minutes from the latest timestamp
