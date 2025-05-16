@@ -50,7 +50,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     /* 3 columns */
-    gap: 25px;
+    gap: 50px;
   }
 
 
@@ -342,8 +342,8 @@
     <div class="card-content">
       <div class="status">
         <div class="row mt-4">
-          <div class="col-md-6"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
-          <div class="col-md-6 text-right mobileAligment"><p>ID: ${employee.id}</p></div>
+          <div class="col-md-8"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
+          <div class="col-md-4 text-right mobileAligment"><p>ID: ${employee.id}</p></div>
         </div>
         <div class="row mt-4">
           <div class="col-md-6">
