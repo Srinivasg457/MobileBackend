@@ -123,12 +123,12 @@
     /*       display: flex; */
     justify-content: space-between;
     margin: 15px 0 0;
-    padding-top: 10px;
+    /* padding-top: 10px; */
     border-top: 1px solid #eee;
   }
 
   .thumbnail-image-container {
-    height: 200px;
+    height: 170px;
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -341,7 +341,7 @@
     </div>
     <div class="card-content">
       <div class="status">
-        <div class="row mt-5">
+        <div class="row mt-4">
           <div class="col-md-6"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
           <div class="col-md-6 text-right mobileAligment"><p>ID: ${employee.id}</p></div>
         </div>
@@ -386,6 +386,8 @@
 
 <script>
   function openVideoModal(videoUrl, name, id) {
+    const img = document.getElementById('screen');
+    img.src = "";
     document.getElementById("modalName").innerText = name;
     document.getElementById("modalId").innerText = id;
     document.getElementById("videoModal").style.display = "block";
@@ -395,6 +397,9 @@
   function closeVideoModal() {
     const modal = document.getElementById("videoModal");
     modal.style.display = "none";
+    const img = document.getElementById('screen');
+    img.src = "";
+
   }
 
   window.onclick = function(event) {
