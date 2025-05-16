@@ -50,14 +50,15 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     /* 3 columns */
-    gap: 50px;
+    gap: 95px;
   }
 
 
   .card {
     background-color: #fff;
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    /* box-shadow: var(--box-shadow); */
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -128,6 +129,7 @@
   }
 
   .thumbnail-image-container {
+    padding: 15px;
     height: 170px;
     overflow: hidden;
     display: flex;
@@ -136,15 +138,28 @@
     >img {
       width: -webkit-fill-available;
       height: initial;
+      border-radius: 5px;
     }
   }
 
 
   .status>.row>div>span {
-    font-size: 14px;
+    padding: 5px 15px;
+    border-radius: 15px;
+    width: fit-content;
+    font-size: 12px;
+    font-weight: bolder;
     display: flex;
     align-items: center;
     gap: 5px;
+  }
+
+  .status>.row>div>.active {
+    background: #DEFAEC;
+  }
+
+  .status>.row>div>.inactive {
+    background: #FEF1F1;
   }
 
   .status-icon {
@@ -249,7 +264,12 @@
     }
 
     .card-grid {
-      grid-template-columns: repeat(1, 1fr);
+      grid-template-columns: repeat(2, 1fr);
+      gap: 50px;
+    }
+
+    .status-icon {
+      height: 10px;
     }
   }
 
@@ -268,6 +288,11 @@
     .toolbar input[type="text"],
     .toolbar select {
       width: 100%;
+    }
+
+    .card-grid {
+      grid-template-columns: repeat(1, 1fr);
+      /* gap: 50px; */
     }
   }
 
@@ -342,15 +367,15 @@
     <div class="card-content">
       <div class="status">
         <div class="row mt-4">
-          <div class="col-md-8"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
-          <div class="col-md-4 text-right mobileAligment"><p>ID: ${employee.id}</p></div>
+          <div class="col-md-12"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
+          <div class="col-md-12 mobileAligment"><p>ID: ${employee.id}</p></div>
         </div>
         <div class="row mt-4">
           <div class="col-md-6">
           <span class="active">
             <span class="status-icon"style="background: var(--success-color);"></span> 
             <span id="active-time-${employee.id}">
-              00 hrs 00 min Active
+              00:00 hrs Active
             </span>
             </span>
           </div>
@@ -358,7 +383,7 @@
            <span class="inactive">
             <span class="status-icon" style="background: var(--danger-color);"></span> 
             <span id="inactive-time-${employee.id}">
-              00 hrs 00 min Inactive
+              00:00 hrs Inactive
             </span>
             </span>
               </div>
@@ -424,24 +449,22 @@
         if (response.status && response.data.length > 0) {
           const data = response.data[0];
 
-          // Active time
+          // Format Active time
           const activeParts = data.total_active_time.split(':');
-          const activeHours = parseInt(activeParts[0]);
-          const activeMinutes = parseInt(activeParts[1]);
-          const activeFormatted = `${activeHours.toString().padStart(2, '0')} hrs ${activeMinutes.toString().padStart(2, '0')} min`;
+          const activeHours = activeParts[0].padStart(2, '0');
+          const activeMinutes = activeParts[1].padStart(2, '0');
+          const activeFormatted = `${activeHours}:${activeMinutes} hrs`;
           $(`#active-time-${currentEmployeeId}`).text(activeFormatted + " Active");
 
-          // Inactive time
+          // Format Inactive time
           const idleParts = data.total_idle_time.split(':');
-          const idleHours = parseInt(idleParts[0]);
-          const idleMinutes = parseInt(idleParts[1]);
-          const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
-
-          // Update the second .status-box strong tag (Inactive)
+          const idleHours = idleParts[0].padStart(2, '0');
+          const idleMinutes = idleParts[1].padStart(2, '0');
+          const idleFormatted = `${idleHours}:${idleMinutes} hrs`;
           $(`#inactive-time-${currentEmployeeId}`).text(idleFormatted + " Inactive");
         } else {
-          $(`#active-time-${currentEmployeeId}`).text("00 hrs 00 min Active");
-          $(`#inactive-time-${currentEmployeeId}`).text("00 hrs 00 min Inactive");
+          $(`#active-time-${currentEmployeeId}`).text("00:00 hrs Active");
+          $(`#inactive-time-${currentEmployeeId}`).text("00:00 hrs Inactive");
         }
       },
       error: function() {
@@ -499,11 +522,16 @@
   ws.binaryType = 'arraybuffer';
 
   function playVideo(employeeId) {
-    ws.send(JSON.stringify({
-      type: 'viewer-join',
-      employee_id: parseInt(employeeId)
-    }));
 
+    try {
+      ws.send(JSON.stringify({
+        type: 'viewer-join',
+        employee_id: parseInt(employeeId) // Or use: parseInt(employeeId)
+      }));
+    } catch (error) {
+      alert("Unable to connect. Please start the server.");
+      console.error("WebSocket Error:", error);
+    }
   }
 
   ws.addEventListener('message', (event) => {
