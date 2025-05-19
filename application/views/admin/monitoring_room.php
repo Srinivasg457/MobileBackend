@@ -3,8 +3,8 @@
     --primary: #4361ee;
     --primary-light: #e6e9ff;
     --secondary: #3f37c9;
-    --success: #4cc9f0;
-    --danger: #f72585;
+    --success: #5cb85c;
+    --danger: #ff0505;
     --warning: #f8961e;
     --info: #4895ef;
     --light: #f8f9fa;
@@ -54,24 +54,25 @@
   }
 
   .search-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    /* outline: none; */
+    /* border-color: var(--primary); */
+    /* box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25); */
   }
 
   .sort-select {
-    padding: 0.625rem 1rem;
+    padding: 0.625rem 1rem !important;
     border-radius: var(--border-radius);
     border: 1px solid #ced4da;
     font-size: 0.875rem;
     background-color: white;
     transition: var(--transition);
+    width: 100px;
   }
 
   .sort-select:focus {
-    outline: none;
+    /* outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25); */
   }
 
   .employee-grid {
@@ -158,9 +159,17 @@
   }
 
   @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.3; }
-    100% { opacity: 1; }
+    0% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.3;
+    }
+
+    100% {
+      opacity: 1;
+    }
   }
 
   .card-body {
@@ -192,6 +201,11 @@
     padding-top: 1rem;
     margin-top: auto;
     border-top: 1px solid var(--light-gray);
+
+    >div {
+      border-radius: 5px;
+      padding: 3px 10px;
+    }
   }
 
   .stat-item {
@@ -208,18 +222,22 @@
   }
 
   .stat-label {
-    font-size: 0.75rem;
-    color: var(--gray);
-    text-transform: uppercase;
+    font-size: 0.875rem;
+    /* color: var(--gray); */
+    /* text-transform: uppercase; */
     letter-spacing: 0.5px;
   }
 
-  .active-stat .stat-value {
+  .active-stat {
     color: var(--success);
+    display: inline;
+    background-color: #DEF9EC;
   }
 
-  .inactive-stat .stat-value {
+  .inactive-stat {
     color: var(--danger);
+    display: inline;
+    background-color: #FFF2F1;
   }
 
   /* Modal Styles */
@@ -250,7 +268,7 @@
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: var(--box-shadow);
-    animation: modalFadeIn 0.3s ease-out;
+    /* animation: modalFadeIn 0.1s ease-out; */
   }
 
   @keyframes modalFadeIn {
@@ -258,6 +276,7 @@
       opacity: 0;
       transform: translate(-50%, -55%);
     }
+
     to {
       opacity: 1;
       transform: translate(-50%, -50%);
@@ -344,20 +363,20 @@
     .monitoring-container {
       padding: 1.5rem;
     }
-    
+
     .monitoring-header {
       flex-direction: column;
       align-items: flex-start;
     }
-    
+
     .monitoring-toolbar {
       width: 100%;
     }
-    
+
     .search-input {
       width: 100%;
     }
-    
+
     .modal-dialog {
       width: 95%;
     }
@@ -367,12 +386,12 @@
     .employee-grid {
       grid-template-columns: 1fr;
     }
-    
+
     .activity-stats {
       flex-direction: column;
       gap: 0.75rem;
     }
-    
+
     .stat-item {
       align-items: flex-start;
     }
@@ -381,50 +400,50 @@
 
 <div class="content-wrapper">
   <section class="content">
-<div class="monitoring-container">
-  <div class="monitoring-header">
-    <h1 class="monitoring-title">Employee Monitoring Dashboard</h1>
-    <div class="monitoring-toolbar">
-      <input type="text" class="search-input" placeholder="Search employees...">
-      <select class="sort-select">
-        <option value="">Sort by</option>
-        <option value="name">Name (A-Z)</option>
-        <option value="active">Active Hours</option>
-        <option value="inactive">Inactive Hours</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="employee-grid" id="employeeGrid">
-    <!-- Employee cards will be dynamically inserted here -->
-  </div>
-
-  <!-- Monitoring Modal -->
-  <div id="monitoringModal" class="monitoring-modal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div>
-            <h3 class="modal-title" id="modalEmployeeName"></h3>
-            <p class="modal-subtitle" id="modalEmployeeId"></p>
-          </div>
-          <button class="modal-close" onclick="closeVideoModal()">&times;</button>
+    <div class="monitoring-container">
+      <div class="monitoring-header">
+        <h1 class="monitoring-title">Employee Monitoring Dashboard</h1>
+        <div class="monitoring-toolbar">
+          <input type="text" class="search-input form-control" placeholder="Search employees...">
+          <select class="sort-select form-control">
+            <option value="">Sort by</option>
+            <option value="name">Name (A-Z)</option>
+            <option value="active">Active Hours</option>
+            <option value="inactive">Inactive Hours</option>
+          </select>
         </div>
-        <div class="modal-body">
-          <img id="modalScreen" class="modal-screen" autoplay playsinline>
-        </div>
-        <div class="modal-footer">
+      </div>
+
+      <div class="employee-grid" id="employeeGrid">
+        <!-- Employee cards will be dynamically inserted here -->
+      </div>
+
+      <!-- Monitoring Modal -->
+      <div id="monitoringModal" class="monitoring-modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div>
+                <h3 class="modal-title" id="modalEmployeeName"></h3>
+                <p class="modal-subtitle" id="modalEmployeeId"></p>
+              </div>
+              <button class="modal-close" onclick="closeVideoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+              <img id="modalScreen" class="modal-screen" autoplay playsinline>
+            </div>
+            <!-- <div class="modal-footer">
           <div class="connection-status">
             <span class="status-indicator"></span>
             <span>Connected</span>
           </div>
           <div class="timestamp" id="modalTimestamp"></div>
+        </div> -->
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-</section>
+  </section>
 </div>
 
 <script>
@@ -441,17 +460,17 @@
 
         if (response.status === 'success' && response.employees.length > 0) {
           const employees = response.employees;
-          
+
           // Process employees in chunks of 3 for each row
           for (let i = 0; i < employees.length; i += 3) {
             const rowEmployees = employees.slice(i, i + 3);
-            
+
             // Create a row container (not needed since we're using CSS grid)
             $.each(rowEmployees, function(index, employee) {
               const card = `
                 <div class="employee-card" id="employee-card-${employee.id}">
                   <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
-                    <img id="screenshot-${employee.id}" src="" alt="Employee Screen" onerror="this.onerror=null;this.src='';this.parentNode.classList.add('blank-screen');this.parentNode.innerHTML='<span>No Screen Available</span>'">
+                    <img id="screenshot-${employee.id}" src="" alt="Employee Screen">
                     <div class="live-badge">LIVE</div>
                   </div>
                   <div class="card-body">
@@ -461,12 +480,12 @@
                     <p class="employee-id">ID: ${employee.id}</p>
                     <div class="activity-stats">
                       <div class="stat-item active-stat">
+                        <strong class="stat-label">Active: </strong>
                         <span class="stat-value" id="active-time-${employee.id}">00:00</span>
-                        <span class="stat-label">Active</span>
                       </div>
                       <div class="stat-item inactive-stat">
+                       <strong class="stat-label">Inactive :</strong>
                         <span class="stat-value" id="inactive-time-${employee.id}">00:00</span>
-                        <span class="stat-label">Inactive</span>
                       </div>
                     </div>
                   </div>
@@ -490,11 +509,11 @@
 
   $(document).ready(function() {
     loadAllEmployees();
-    
+
     // Search functionality
     $('.search-input').on('keyup', function() {
       const searchQuery = $(this).val().trim();
-      
+
       if (searchQuery === "") {
         loadAllEmployees();
         return;
@@ -503,7 +522,9 @@
       $.ajax({
         url: "<?= base_url('/admin/Monitoring_room/list_employees_by_name') ?>",
         method: 'GET',
-        data: { name: searchQuery },
+        data: {
+          name: searchQuery
+        },
         dataType: 'json',
         success: function(response) {
           const employeeGrid = $('#employeeGrid');
@@ -511,12 +532,12 @@
 
           if (response.status === 'success' && response.employees.length > 0) {
             const employees = response.employees;
-            
+
             $.each(employees, function(index, employee) {
               const card = `
                 <div class="employee-card" id="employee-card-${employee.id}">
                   <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
-                    <img id="screenshot-${employee.id}" src="" alt="Employee Screen" onerror="this.onerror=null;this.src='';this.parentNode.classList.add('blank-screen');this.parentNode.innerHTML='<span>No Screen Available</span>'">
+                    <img id="screenshot-${employee.id}" src="" alt="Employee Screen">
                     <div class="live-badge">LIVE</div>
                   </div>
                   <div class="card-body">
@@ -526,12 +547,12 @@
                     <p class="employee-id">ID: ${employee.id}</p>
                     <div class="activity-stats">
                       <div class="stat-item active-stat">
+                        <strong class="stat-label">Active: </strong>
                         <span class="stat-value" id="active-time-${employee.id}">00:00</span>
-                        <span class="stat-label">Active</span>
                       </div>
                       <div class="stat-item inactive-stat">
+                       <strong class="stat-label">Inactive :</strong>
                         <span class="stat-value" id="inactive-time-${employee.id}">00:00</span>
-                        <span class="stat-label">Inactive</span>
                       </div>
                     </div>
                   </div>
@@ -561,7 +582,7 @@
     document.getElementById("monitoringModal").style.display = "block";
     document.body.style.overflow = "hidden";
     playVideo(employeeId);
-    
+
     // Update timestamp
     const now = new Date();
     document.getElementById("modalTimestamp").innerText = `Last updated: ${now.toLocaleTimeString()}`;
@@ -587,11 +608,13 @@
       url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
       type: 'GET',
       dataType: 'json',
-      data: { employee_id: currentEmployeeId },
+      data: {
+        employee_id: currentEmployeeId
+      },
       success: function(response) {
         if (response.status && response.data.length > 0) {
           const data = response.data[0];
-          
+
           // Format Active time
           const activeParts = data.total_active_time.split(':');
           const activeHours = activeParts[0].padStart(2, '0');
@@ -621,11 +644,13 @@
       url: "<?= base_url('/admin/ScreenshotController/get_last_screenshot') ?>",
       method: "GET",
       dataType: "json",
-      data: { employee_id: currentEmployeeId },
+      data: {
+        employee_id: currentEmployeeId
+      },
       success: function(response) {
         const thumbnail = $(`#screenshot-${currentEmployeeId}`);
         const container = thumbnail.parent();
-        
+
         if (response.status === 'success' && response.screenshot.image_url) {
           thumbnail.attr('src', response.screenshot.image_url)
             .on('error', function() {
@@ -664,7 +689,9 @@
 
   ws.addEventListener('message', (event) => {
     if (typeof event.data !== 'string') {
-      const blob = new Blob([event.data], { type: 'image/jpeg' });
+      const blob = new Blob([event.data], {
+        type: 'image/jpeg'
+      });
       const url = URL.createObjectURL(blob);
 
       const img = document.getElementById('modalScreen');
@@ -672,7 +699,7 @@
       img.onload = () => {
         URL.revokeObjectURL(url);
       };
-      
+
       // Update timestamp when new image arrives
       const now = new Date();
       document.getElementById("modalTimestamp").innerText = `Last updated: ${now.toLocaleTimeString()}`;

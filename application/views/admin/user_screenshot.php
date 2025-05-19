@@ -240,7 +240,7 @@
         <div class="popup" id="popupCard">
             <div class="d-flex justify-content-between align-items-baseline mb-5">
                 <h5><strong>Name:</strong> <span id="popupName"></span></h5>
-                <h5><strong>User ID:</strong> <span id="popupID"></span></h5>
+                <!-- <h5><strong>User ID:</strong> <span id="popupID"></span></h5> -->
                 <button class="cancel-btn" onclick="closePopup()">
                     <i class="fa fa-times-circle"></i>
                 </button>
