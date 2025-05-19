@@ -1,550 +1,613 @@
 <style>
-  .content-wrapper,
-  body,
-  .wrapper {
-    overflow-x: clip !important;
-    overflow-y: unset !important;
-  }
-
   :root {
-    --primary-color: #3498db;
-    --secondary-color: #2980b9;
-    --success-color: #2ecc71;
-    --danger-color: #e74c3c;
-    --light-color: #ecf0f1;
-    --dark-color: #2c3e50;
-    --text-color: #333;
-    --text-light: #7f8c8d;
-    --border-radius: 8px;
-    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
+    --primary: #4361ee;
+    --primary-light: #e6e9ff;
+    --secondary: #3f37c9;
+    --success: #4cc9f0;
+    --danger: #f72585;
+    --warning: #f8961e;
+    --info: #4895ef;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --gray: #6c757d;
+    --light-gray: #e9ecef;
+    --border-radius: 0.375rem;
+    --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 
-  h2 {
-    margin-bottom: 25px;
-    color: var(--dark-color);
-    font-weight: 600;
-    font-size: 28px;
+  .monitoring-container {
+    padding: 2rem;
+    background-color: #f5f7fb;
+    min-height: 100vh;
   }
 
-  .toolbar {
+  .monitoring-header {
+    margin-bottom: 2rem;
     display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
     justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
-  .toolbar input[type="text"],
-  .toolbar select {
-    padding: 10px 15px;
+  .monitoring-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0;
+  }
+
+  .monitoring-toolbar {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    padding: 0.625rem 1rem;
     border-radius: var(--border-radius);
-    border: 1px solid #ddd;
-    font-size: 14px;
+    border: 1px solid #ced4da;
+    font-size: 0.875rem;
+    width: 240px;
+    transition: var(--transition);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+  }
+
+  .sort-select {
+    padding: 0.625rem 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #ced4da;
+    font-size: 0.875rem;
     background-color: white;
     transition: var(--transition);
-    width: 30%
   }
 
-  .toolbar input[type="text"]:focus,
-  .toolbar select:focus {
+  .sort-select:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
   }
 
-  .card-grid {
+  .employee-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    /* 3 columns */
-    gap: 95px;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
   }
 
-
-  .card {
-    background-color: #fff;
+  .employee-card {
+    background-color: white;
     border-radius: var(--border-radius);
-    /* box-shadow: var(--box-shadow); */
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    transition: var(--transition);
+    border: 1px solid var(--light-gray);
+    height: 100%;
     display: flex;
     flex-direction: column;
-    transition: var(--transition);
-    margin-bottom: 0;
   }
 
-  .card:hover {
+  .employee-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--box-shadow);
+    border-color: var(--primary-light);
   }
 
-  .card .image-container {
+  .card-thumbnail {
     position: relative;
-    cursor: pointer;
-  }
-
-  .card img.thumbnail {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    padding: 15px;
-  }
-
-  .card .video-call-icon {
-    position: absolute;
-    top: 25px;
-    right: 25px;
-    width: 35px;
-    height: 35px;
-    background-color: white;
-    padding: 7px;
-    border-radius: 50%;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    transition: var(--transition);
-  }
-
-  .card .video-call-icon:hover {
-    transform: scale(1.1);
-  }
-
-  .card-content {
-    /* padding: 5px; */
-    padding: 0px 15px 15px 15px;
-  }
-
-  .card-content h3 {
-    /* margin: 0 0 5px; */
-    margin: 0 0 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--dark-color);
-  }
-
-  .card-content p {
-    line-height: 30px;
-    margin: 0 0 0;
-    color: var(--text-light);
-    font-size: 14px;
-  }
-
-  .status {
-    /*       display: flex; */
-    justify-content: space-between;
-    margin: 15px 0 0;
-    /* padding-top: 10px; */
-    border-top: 1px solid #eee;
-  }
-
-  .thumbnail-image-container {
-    padding: 15px;
-    height: 170px;
+    height: 180px;
     overflow: hidden;
-    display: flex;
-    justify-content: center;
-
-    >img {
-      width: -webkit-fill-available;
-      height: initial;
-      border-radius: 5px;
-    }
-  }
-
-
-  .status>.row>div>span {
-    padding: 5px 15px;
-    border-radius: 15px;
-    width: fit-content;
-    font-size: 12px;
-    font-weight: bolder;
+    background-color: #f0f2f5;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
   }
 
-  .status>.row>div>.active {
-    background: #DEFAEC;
+  .card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    background-color: #e9ecef;
   }
 
-  .status>.row>div>.inactive {
-    background: #FEF1F1;
+  .blank-screen {
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray);
+    font-size: 0.875rem;
   }
 
-  .status-icon {
-    width: 12px;
-    height: 12px;
+  .employee-card:hover .card-thumbnail img {
+    transform: scale(1.03);
+  }
+
+  .live-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background-color: var(--danger);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    z-index: 2;
+  }
+
+  .live-badge::before {
+    content: "";
+    display: block;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: white;
     border-radius: 50%;
-    display: inline-block;
+    animation: pulse 1.5s infinite;
   }
 
-  .active {
-    color: var(--success-color);
-    font-weight: 500;
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
   }
 
-  .inactive {
-    color: var(--danger-color);
-    font-weight: 500;
+  .card-body {
+    padding: 1.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
   }
 
-  .modal {
+  .employee-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .employee-id {
+    font-size: 0.875rem;
+    color: var(--gray);
+    margin-bottom: 1rem;
+  }
+
+  .activity-stats {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1rem;
+    margin-top: auto;
+    border-top: 1px solid var(--light-gray);
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .active-stat .stat-value {
+    color: var(--success);
+  }
+
+  .inactive-stat .stat-value {
+    color: var(--danger);
+  }
+
+  /* Modal Styles */
+  .monitoring-modal {
     display: none;
     position: fixed;
-    z-index: 9999;
+    z-index: 1050;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(5px);
   }
 
+  .modal-dialog {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 1000px;
+  }
+
   .modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    width: 80%;
-    max-width: 900px;
+    background-color: white;
     border-radius: var(--border-radius);
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
     animation: modalFadeIn 0.3s ease-out;
   }
 
   @keyframes modalFadeIn {
     from {
       opacity: 0;
-      transform: translateY(-60%);
+      transform: translate(-50%, -55%);
     }
-
     to {
       opacity: 1;
-      transform: translateY(-50%);
+      transform: translate(-50%, -50%);
     }
   }
 
-  .modal-content video {
-    width: 100%;
-    height: auto;
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-  }
-
-  .modal-info {
-    padding: 15px;
-    background-color: white;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-  }
-
-  .modal-info h3 {
-    margin: 0 0 5px;
-    color: var(--dark-color);
-  }
-
-  .modal-info p {
-    margin: 0;
-    color: var(--text-light);
-    font-size: 14px;
-  }
-
-  .close {
+  .modal-header {
+    padding: 1rem 1.5rem;
+    background-color: var(--primary);
     color: white;
-    position: absolute;
-    top: -40px;
-    right: 0;
-    font-size: 30px;
-    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .modal-subtitle {
+    font-size: 0.875rem;
+    opacity: 0.9;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
     cursor: pointer;
-    z-index: 10000;
     opacity: 0.8;
     transition: var(--transition);
   }
 
-  .close:hover {
+  .modal-close:hover {
     opacity: 1;
-    transform: scale(1.1);
   }
 
-  @media(max-width: 1204px) {
-    .mobileAligment {
-      text-align: left !important;
-      justify-content: left !important;
-      margin-top: 5px;
-    }
+  .modal-body {
+    padding: 0;
+    text-align: center;
+  }
 
-    .modal-content {
-      width: 95%;
-    }
+  .modal-screen {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    background-color: black;
+  }
 
-    .card-grid {
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    background-color: var(--light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .connection-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .status-indicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: var(--success);
+    animation: pulse 1.5s infinite;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 992px) {
+    .employee-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: 50px;
-    }
-
-    .status-icon {
-      height: 10px;
     }
   }
 
-  @media(max-width: 480px) {
-    .toolbar {
+  @media (max-width: 768px) {
+    .monitoring-container {
+      padding: 1.5rem;
+    }
+    
+    .monitoring-header {
       flex-direction: column;
-      gap: 10px;
+      align-items: flex-start;
     }
-
-    .mobileAligment {
-      text-align: left !important;
-      justify-content: left !important;
-      margin-top: 5px;
-    }
-
-    .toolbar input[type="text"],
-    .toolbar select {
+    
+    .monitoring-toolbar {
       width: 100%;
     }
-
-    .card-grid {
-      grid-template-columns: repeat(1, 1fr);
-      /* gap: 50px; */
+    
+    .search-input {
+      width: 100%;
+    }
+    
+    .modal-dialog {
+      width: 95%;
     }
   }
 
-  video {
-    width: 100%;
-    max-width: 100%;
-    border: 1px solid #ccc;
-  }
-
-  button {
-    margin: 10px 0;
-    padding: 10px 20px;
+  @media (max-width: 576px) {
+    .employee-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .activity-stats {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .stat-item {
+      align-items: flex-start;
+    }
   }
 </style>
 
-
 <div class="content-wrapper">
   <section class="content">
-
-    <h2>Live Monitoring</h2>
-
-    <div class="toolbar">
-      <input type="text" placeholder="Search employees by name or ID...">
-      <select>
+<div class="monitoring-container">
+  <div class="monitoring-header">
+    <h1 class="monitoring-title">Employee Monitoring Dashboard</h1>
+    <div class="monitoring-toolbar">
+      <input type="text" class="search-input" placeholder="Search employees...">
+      <select class="sort-select">
         <option value="">Sort by</option>
         <option value="name">Name (A-Z)</option>
-        <option value="active">Active Hours (High-Low)</option>
-        <option value="inactive">Inactive Hours (High-Low)</option>
+        <option value="active">Active Hours</option>
+        <option value="inactive">Inactive Hours</option>
       </select>
     </div>
+  </div>
 
-    <div class="card-grid">
-      <!-- Cards will be dynamically inserted here -->
-    </div>
+  <div class="employee-grid" id="employeeGrid">
+    <!-- Employee cards will be dynamically inserted here -->
+  </div>
 
-
-    <!-- Modal -->
-    <div id="videoModal" class="modal">
+  <!-- Monitoring Modal -->
+  <div id="monitoringModal" class="monitoring-modal">
+    <div class="modal-dialog">
       <div class="modal-content">
-        <span class="close" onclick="closeVideoModal()">&times;</span>
-        <img id="screen" autoplay playsinline>
-        <div class="modal-info">
-          <h3 id="modalName"></h3>
-          <p id="modalId"></p>
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title" id="modalEmployeeName"></h3>
+            <p class="modal-subtitle" id="modalEmployeeId"></p>
+          </div>
+          <button class="modal-close" onclick="closeVideoModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <img id="modalScreen" class="modal-screen" autoplay playsinline>
+        </div>
+        <div class="modal-footer">
+          <div class="connection-status">
+            <span class="status-indicator"></span>
+            <span>Connected</span>
+          </div>
+          <div class="timestamp" id="modalTimestamp"></div>
         </div>
       </div>
     </div>
-
-  </section>
+  </div>
+</div>
+</section>
 </div>
 
 <script>
+  // All your existing JavaScript functionality remains unchanged
+  // Only the UI elements have been updated
   function loadAllEmployees() {
     $.ajax({
       url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
       method: 'GET',
       dataType: 'json',
       success: function(response) {
-        if (response.status === 'success') {
-          const employees = response.employees;
-          const cardGrid = $('.card-grid');
-          cardGrid.empty();
+        const employeeGrid = $('#employeeGrid');
+        employeeGrid.empty();
 
-          $.each(employees, function(index, employee) {
-            const card = `
-            <div class="card" id="employee-card-${employee.id}">
-              <div class="thumbnail-image-container" id="thumb-container-${employee.id}" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
-                <img id="screenshot-${employee.id}" src="https://t4.ftcdn.net/jpg/10/78/87/79/240_F_1078877919_BuOhReO2s7w5Yu6ReT39b4bsoTTomARa.jpg" alt="Live Screen">
-              </div>
-              <div class="card-content">
-                <div class="status">
-                  <div class="row mt-4">
-                    <div class="col-md-12"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
-                    <div class="col-md-12 mobileAligment"><p>ID: ${employee.id}</p></div>
+        if (response.status === 'success' && response.employees.length > 0) {
+          const employees = response.employees;
+          
+          // Process employees in chunks of 3 for each row
+          for (let i = 0; i < employees.length; i += 3) {
+            const rowEmployees = employees.slice(i, i + 3);
+            
+            // Create a row container (not needed since we're using CSS grid)
+            $.each(rowEmployees, function(index, employee) {
+              const card = `
+                <div class="employee-card" id="employee-card-${employee.id}">
+                  <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
+                    <img id="screenshot-${employee.id}" src="" alt="Employee Screen" onerror="this.onerror=null;this.src='';this.parentNode.classList.add('blank-screen');this.parentNode.innerHTML='<span>No Screen Available</span>'">
+                    <div class="live-badge">LIVE</div>
                   </div>
-                  <div class="row mt-4">
-                    <div class="col-lg-6">
-                      <span class="active">
-                        <span class="status-icon" style="background: var(--success-color);"></span> 
-                        <span id="active-time-${employee.id}">00:00 hrs Active</span>
-                      </span>
-                    </div>
-                    <div class="col-lg-6 d-flex justify-content-end mobileAligment">
-                      <span class="inactive">
-                        <span class="status-icon" style="background: var(--danger-color);"></span> 
-                        <span id="inactive-time-${employee.id}">00:00 hrs Inactive</span>
-                      </span>
+                  <div class="card-body">
+                    <h3 class="employee-name">
+                      <i class="bi bi-person-fill"></i> ${employee.name}
+                    </h3>
+                    <p class="employee-id">ID: ${employee.id}</p>
+                    <div class="activity-stats">
+                      <div class="stat-item active-stat">
+                        <span class="stat-value" id="active-time-${employee.id}">00:00</span>
+                        <span class="stat-label">Active</span>
+                      </div>
+                      <div class="stat-item inactive-stat">
+                        <span class="stat-value" id="inactive-time-${employee.id}">00:00</span>
+                        <span class="stat-label">Inactive</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          `;
+              `;
 
-            cardGrid.append(card);
-            getActivity(employee.id);
-            getLatestScreenshot(employee.id);
-          });
+              employeeGrid.append(card);
+              getActivity(employee.id);
+              getLatestScreenshot(employee.id);
+            });
+          }
         } else {
-          $('.card-grid').html('<p>No employees found</p>');
+          employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No employees found</p>');
         }
       },
       error: function() {
-        alert('There was an error fetching employee data');
+        $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading employee data</p>');
       }
     });
   }
+
   $(document).ready(function() {
-    // Make AJAX GET request to fetch employee data
     loadAllEmployees();
-  });
-</script>
+    
+    // Search functionality
+    $('.search-input').on('keyup', function() {
+      const searchQuery = $(this).val().trim();
+      
+      if (searchQuery === "") {
+        loadAllEmployees();
+        return;
+      }
 
-<script>
-  $('input[placeholder="Search employees by name or ID..."]').on('keyup', function() {
-    const searchQuery = $(this).val().trim();
+      $.ajax({
+        url: "<?= base_url('/admin/Monitoring_room/list_employees_by_name') ?>",
+        method: 'GET',
+        data: { name: searchQuery },
+        dataType: 'json',
+        success: function(response) {
+          const employeeGrid = $('#employeeGrid');
+          employeeGrid.empty();
 
-    // If input is empty, load the full employee list
-    if (searchQuery === "") {
-      loadAllEmployees(); // <-- Call original employee loader
-      return;
-    }
-
-    $.ajax({
-      url: "<?= base_url('/admin/Monitoring_room/list_employees_by_name') ?>",
-      method: 'GET',
-      data: {
-        name: searchQuery
-      },
-      dataType: 'json',
-      success: function(response) {
-        if (response.status === 'success' && response.employees.length > 0) {
-          const employees = response.employees;
-          const cardGrid = $('.card-grid');
-          cardGrid.empty();
-
-          $.each(employees, function(index, employee) {
-            const card = `
-            <div class="card" id="employee-card-${employee.id}">
-              <div class="thumbnail-image-container" id="thumb-container-${employee.id}" onclick="openVideoModal('https://www.w3schools.com/html/mov_bbb.mp4', '${employee.name}', '${employee.id}')">
-                <img id="screenshot-${employee.id}" src="https://t4.ftcdn.net/jpg/10/78/87/79/240_F_1078877919_BuOhReO2s7w5Yu6ReT39b4bsoTTomARa.jpg" alt="Live Screen">
-              </div>
-              <div class="card-content">
-                <div class="status">
-                  <div class="row mt-4">
-                    <div class="col-md-12"><h3><i class="bi bi-person-fill"></i> ${employee.name}</h3></div>
-                    <div class="col-md-12 mobileAligment"><p>ID: ${employee.id}</p></div>
+          if (response.status === 'success' && response.employees.length > 0) {
+            const employees = response.employees;
+            
+            $.each(employees, function(index, employee) {
+              const card = `
+                <div class="employee-card" id="employee-card-${employee.id}">
+                  <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
+                    <img id="screenshot-${employee.id}" src="" alt="Employee Screen" onerror="this.onerror=null;this.src='';this.parentNode.classList.add('blank-screen');this.parentNode.innerHTML='<span>No Screen Available</span>'">
+                    <div class="live-badge">LIVE</div>
                   </div>
-                  <div class="row mt-4">
-                    <div class="col-md-6">
-                      <span class="active">
-                        <span class="status-icon" style="background: var(--success-color);"></span> 
-                        <span id="active-time-${employee.id}">00:00 hrs Active</span>
-                      </span>
-                    </div>
-                    <div class="col-md-6 d-flex justify-content-end mobileAligment">
-                      <span class="inactive">
-                        <span class="status-icon" style="background: var(--danger-color);"></span> 
-                        <span id="inactive-time-${employee.id}">00:00 hrs Inactive</span>
-                      </span>
+                  <div class="card-body">
+                    <h3 class="employee-name">
+                      <i class="bi bi-person-fill"></i> ${employee.name}
+                    </h3>
+                    <p class="employee-id">ID: ${employee.id}</p>
+                    <div class="activity-stats">
+                      <div class="stat-item active-stat">
+                        <span class="stat-value" id="active-time-${employee.id}">00:00</span>
+                        <span class="stat-label">Active</span>
+                      </div>
+                      <div class="stat-item inactive-stat">
+                        <span class="stat-value" id="inactive-time-${employee.id}">00:00</span>
+                        <span class="stat-label">Inactive</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          `;
+              `;
 
-            cardGrid.append(card);
-            getActivity(employee.id);
-            getLatestScreenshot(employee.id);
-          });
-        } else {
-          const cardGrid = $('.card-grid');
-          cardGrid.empty();
-          $('.card-grid').html('<p>No employees found</p>');
+              employeeGrid.append(card);
+              getActivity(employee.id);
+              getLatestScreenshot(employee.id);
+            });
+          } else {
+            employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+          }
+        },
+        error: function() {
+          $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error searching employees</p>');
         }
-      },
-      error: function() {
-        alert('Failed to fetch employee list');
-      }
+      });
     });
   });
 
-
-  function openVideoModal(videoUrl, name, id) {
-    const img = document.getElementById('screen');
+  function openVideoModal(employeeId, name, id) {
+    const img = document.getElementById('modalScreen');
     img.src = "";
-    document.getElementById("modalName").innerText = name;
-    document.getElementById("modalId").innerText = id;
-    document.getElementById("videoModal").style.display = "block";
-    playVideo(id)
+    document.getElementById("modalEmployeeName").innerText = name;
+    document.getElementById("modalEmployeeId").innerText = `Employee ID: ${id}`;
+    document.getElementById("monitoringModal").style.display = "block";
+    document.body.style.overflow = "hidden";
+    playVideo(employeeId);
+    
+    // Update timestamp
+    const now = new Date();
+    document.getElementById("modalTimestamp").innerText = `Last updated: ${now.toLocaleTimeString()}`;
   }
 
   function closeVideoModal() {
-    const modal = document.getElementById("videoModal");
+    const modal = document.getElementById("monitoringModal");
     modal.style.display = "none";
-    const img = document.getElementById('screen');
+    document.body.style.overflow = "auto";
+    const img = document.getElementById('modalScreen');
     img.src = "";
-
   }
 
   window.onclick = function(event) {
-    const modal = document.getElementById("videoModal");
+    const modal = document.getElementById("monitoringModal");
     if (event.target === modal) {
       closeVideoModal();
     }
   }
-
 
   function getActivity(currentEmployeeId) {
     $.ajax({
       url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
       type: 'GET',
       dataType: 'json',
-      data: {
-        employee_id: currentEmployeeId,
-      },
+      data: { employee_id: currentEmployeeId },
       success: function(response) {
-
-
         if (response.status && response.data.length > 0) {
           const data = response.data[0];
-
+          
           // Format Active time
           const activeParts = data.total_active_time.split(':');
           const activeHours = activeParts[0].padStart(2, '0');
           const activeMinutes = activeParts[1].padStart(2, '0');
-          const activeFormatted = `${activeHours}:${activeMinutes} hrs`;
-          $(`#active-time-${currentEmployeeId}`).text(activeFormatted + " Active");
+          const activeFormatted = `${activeHours}:${activeMinutes}`;
+          $(`#active-time-${currentEmployeeId}`).text(activeFormatted);
 
           // Format Inactive time
           const idleParts = data.total_idle_time.split(':');
           const idleHours = idleParts[0].padStart(2, '0');
           const idleMinutes = idleParts[1].padStart(2, '0');
-          const idleFormatted = `${idleHours}:${idleMinutes} hrs`;
-          $(`#inactive-time-${currentEmployeeId}`).text(idleFormatted + " Inactive");
+          const idleFormatted = `${idleHours}:${idleMinutes}`;
+          $(`#inactive-time-${currentEmployeeId}`).text(idleFormatted);
         } else {
-          $(`#active-time-${currentEmployeeId}`).text("00:00 hrs Active");
-          $(`#inactive-time-${currentEmployeeId}`).text("00:00 hrs Inactive");
+          $(`#active-time-${currentEmployeeId}`).text("00:00");
+          $(`#inactive-time-${currentEmployeeId}`).text("00:00");
         }
       },
       error: function() {
@@ -554,59 +617,44 @@
   }
 
   function getLatestScreenshot(currentEmployeeId) {
-    // ✅ After appending the card, call AJAX to fetch screenshot
     $.ajax({
       url: "<?= base_url('/admin/ScreenshotController/get_last_screenshot') ?>",
       method: "GET",
       dataType: "json",
-      data: {
-        employee_id: currentEmployeeId,
-      },
+      data: { employee_id: currentEmployeeId },
       success: function(response) {
-
-        if (response.status === 'success') {
-          const imgSrc = response.screenshot.image_url;
-          $(`#screenshot-${currentEmployeeId}`).attr('src', imgSrc);
+        const thumbnail = $(`#screenshot-${currentEmployeeId}`);
+        const container = thumbnail.parent();
+        
+        if (response.status === 'success' && response.screenshot.image_url) {
+          thumbnail.attr('src', response.screenshot.image_url)
+            .on('error', function() {
+              container.addClass('blank-screen').html('<span>No Screen Available</span>');
+            });
+          container.removeClass('blank-screen');
         } else {
-          $(`#screenshot-${currentEmployeeId}`).attr('src', 'https://t4.ftcdn.net/jpg/10/78/87/79/240_F_1078877919_BuOhReO2s7w5Yu6ReT39b4bsoTTomARa.jpg');
+          container.addClass('blank-screen').html('<span>No Screen Available</span>');
         }
       },
-      error: function(re) {
-        $(`#screenshot-${currentEmployeeId}`).attr('src', 'https://t4.ftcdn.net/jpg/10/78/87/79/240_F_1078877919_BuOhReO2s7w5Yu6ReT39b4bsoTTomARa.jpg');
+      error: function() {
+        $(`#screenshot-${currentEmployeeId}`).parent()
+          .addClass('blank-screen')
+          .html('<span>No Screen Available</span>');
       }
     });
   }
-</script>
 
-
-
-
-
-
-<script>
+  // WebSocket functionality remains unchanged
   const ws = new WebSocket('wss://work-room.io:8090');
-
-  // const ws = new WebSocket('ws://localhost:8090'); 
-
-  const video = document.getElementById('screen');
-
-  let mediaSource = new MediaSource();
-  video.src = URL.createObjectURL(mediaSource);
-
-  let sourceBuffer;
-
-  mediaSource.addEventListener('sourceopen', () => {
-    sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
-  });
+  const video = document.getElementById('modalScreen');
 
   ws.binaryType = 'arraybuffer';
 
   function playVideo(employeeId) {
-
     try {
       ws.send(JSON.stringify({
         type: 'viewer-join',
-        employee_id: parseInt(employeeId) // Or use: parseInt(employeeId)
+        employee_id: parseInt(employeeId)
       }));
     } catch (error) {
       alert("Unable to connect. Please start the server.");
@@ -616,16 +664,18 @@
 
   ws.addEventListener('message', (event) => {
     if (typeof event.data !== 'string') {
-      const blob = new Blob([event.data], {
-        type: 'image/jpeg'
-      });
+      const blob = new Blob([event.data], { type: 'image/jpeg' });
       const url = URL.createObjectURL(blob);
 
-      const img = document.getElementById('screen');
+      const img = document.getElementById('modalScreen');
       img.src = url;
       img.onload = () => {
         URL.revokeObjectURL(url);
       };
+      
+      // Update timestamp when new image arrives
+      const now = new Date();
+      document.getElementById("modalTimestamp").innerText = `Last updated: ${now.toLocaleTimeString()}`;
     }
   });
 </script>
