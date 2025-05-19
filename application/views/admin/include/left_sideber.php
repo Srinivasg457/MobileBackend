@@ -277,9 +277,9 @@
                 <?php endif; ?>
 
 
-                <li class="treeview <?php if (isset($main_page) && $main_page == "Sales") {
-                                      echo "active";
-                                    } ?>">
+                <!-- <li class="treeview <?php if (isset($main_page) && $main_page == "Sales") {
+                                            echo "active";
+                                          } ?>">
 
                   <a href="#"><i class="bi bi-credit-card"></i>
                     <span><?php echo trans('sales') ?></span>
@@ -337,11 +337,11 @@
                     <?php endif; ?>
 
                   </ul>
-                </li>
+                </li> -->
 
-                <li class="treeview <?php if (isset($main_page) && $main_page == "Purchases") {
-                                      echo "active";
-                                    } ?>">
+                <!-- <li class="treeview <?php if (isset($main_page) && $main_page == "Purchases") {
+                                            echo "active";
+                                          } ?>">
 
                   <a href="#"><i class="bi bi-cart"></i>
                     <span><?php echo trans('purchases') ?></span>
@@ -388,24 +388,24 @@
                     <?php endif; ?>
 
                   </ul>
-                </li>
+                </li> -->
 
                 <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
-                  <li class="<?php if (isset($page_title) && $page_title == "Category") {
-                                echo "active";
-                              } ?>">
+                  <!-- <li class="<?php if (isset($page_title) && $page_title == "Category") {
+                                    echo "active";
+                                  } ?>">
                     <a href="<?php echo base_url('admin/category') ?>">
                       <i class="bi bi-folder2-open"></i> <span><?php echo trans('categories') ?></span>
                     </a>
-                  </li>
+                  </li> -->
 
-                  <li class="<?php if (isset($page_title) && $page_title == "Tax") {
-                                echo "active";
-                              } ?>">
+                  <!-- <li class="<?php if (isset($page_title) && $page_title == "Tax") {
+                                    echo "active";
+                                  } ?>">
                     <a href="<?php echo base_url('admin/tax') ?>">
                       <i class="bi bi-receipt"></i> <span><?php echo trans('tax') ?></span>
                     </a>
-                  </li>
+                  </li> -->
                   <li class="<?php if (isset($page_title) && $page_title == "User Screenshots") {
                                 echo "active";
                               } ?>">
@@ -456,10 +456,31 @@
                       <i class="bi bi-tools"></i> <span><?php echo "Employee settings" ?></span>
                     </a>
                   </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Department") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/hrm/department') ?>">
+                      <i class="bi bi-list-check"></i> <span><?php echo trans('department') ?></span>
+                    </a>
+                  </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Employee") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/hrm/employee') ?>">
+                      <i class="bi bi-people"></i> <span><?php echo trans('employees') ?></span>
+                    </a>
+                  </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
+                      <i class="bi bi-shield-lock"></i> <span><?php echo "Roles & Permissions" ?></span>
+                    </a>
+                  </li>
 
                 <?php endif; ?>
 
-                <?php if (check_permissions(auth('role'), 'reports') == TRUE): ?>
+                <!-- <?php if (check_permissions(auth('role'), 'reports') == TRUE): ?>
                   <li class="treeview <?php if (isset($main_page) && $main_page == "Report") {
                                         echo "active";
                                       } ?>">
@@ -512,7 +533,7 @@
 
                     </ul>
                   </li>
-                <?php endif ?>
+                <?php endif ?> -->
 
 
                 <?php if (check_package_limit('hrm') == -1): ?>
@@ -534,21 +555,21 @@
                         </a>
                       </li>
 
-                      <li class="<?php if (isset($page_title) && $page_title == "Department") {
-                                    echo "active";
-                                  } ?>">
+                      <!-- <li class="<?php if (isset($page_title) && $page_title == "Department") {
+                                        echo "active";
+                                      } ?>">
                         <a href="<?php echo base_url('admin/hrm/department') ?>">
                           <i class="bi bi-list-check"></i> <span><?php echo trans('department') ?></span>
                         </a>
-                      </li>
+                      </li> -->
 
-                      <li class="<?php if (isset($page_title) && $page_title == "Employee") {
-                                    echo "active";
-                                  } ?>">
+                      <!-- <li class="<?php if (isset($page_title) && $page_title == "Employee") {
+                                        echo "active";
+                                      } ?>">
                         <a href="<?php echo base_url('admin/hrm/employee') ?>">
                           <i class="bi bi-people"></i> <span><?php echo trans('employees') ?></span>
                         </a>
-                      </li>
+                      </li> -->
 
 
                       <li class="<?php if (isset($page_title) && $page_title == "Attendance") {
@@ -568,20 +589,20 @@
                         </a>
                       </li>
 
-                      <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
-                                    echo "active";
-                                  } ?>">
+                      <!-- <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
+                                        echo "active";
+                                      } ?>">
                         <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
-                          <i class="bi bi-person-plus"></i> <span><?php echo "Roles & Permissions" ?></span>
+                          <i class="bi bi-shield-lock"></i> <span><?php echo "Roles & Permissions" ?></span>
                         </a>
-                      </li>
+                      </li> -->
 
                     </ul>
                   </li>
                 <?php endif; ?>
 
 
-                <?php if (affiliate_settings()->is_enable == 1): ?>
+                <!-- <?php if (affiliate_settings()->is_enable == 1): ?>
                   <li class="treeview <?php if (isset($page_title) && $page_title == "Affiliate " || isset($page) && $page == "Affiliate") {
                                         echo "active";
                                       } ?> <?= $uval; ?>">
@@ -613,13 +634,13 @@
                       </li>
                     </ul>
                   </li>
-                <?php endif ?>
+                <?php endif ?> -->
 
 
 
               <?php endif ?>
 
-              <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
+              <!-- <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
                 <li class="<?php if (isset($page_title) && $page_title == "Subscription") {
                               echo "active";
                             } ?>">
@@ -627,19 +648,19 @@
                     <i class="bi bi-clock"></i> <span><?php echo trans('subscription') ?></span>
                   </a>
                 </li>
-              <?php endif; ?>
+              <?php endif; ?> -->
 
             <?php endif; ?>
           <?php endif ?>
 
 
-          <li class="<?php if (isset($page_title) && $page_title == "Country") {
-                        echo "active";
-                      } ?>">
+          <!-- <li class="<?php if (isset($page_title) && $page_title == "Country") {
+                            echo "active";
+                          } ?>">
             <a href="<?php echo base_url('admin/country') ?>">
               <i class="bi bi-flag"></i> <span><?php echo trans('country') ?></span>
             </a>
-          </li>
+          </li> -->
 
 
           <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
