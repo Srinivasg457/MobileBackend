@@ -145,4 +145,68 @@ class Monitoring_room extends Home_Controller {
         ]));
 }
 
+
+public function get_active_hours_by_latest_date() {
+    // 1. Get user_id and order from session or GET parameters
+    $user_id = $this->session->userdata('employee_org_id') 
+        ?? $this->session->userdata('id') 
+        ?? $this->input->get('user_id');
+    $order = strtolower($this->input->get('order'));
+
+    // 2. Validate user_id
+    if (empty($user_id) || !is_numeric($user_id)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                'status' => false,
+                'message' => 'Valid user_id is required'
+            ]));
+    }
+
+    // 3. Default order
+    if ($order !== 'asc' && $order !== 'desc') {
+        $order = 'desc';
+    }
+
+    // 4. Get latest log_date for the user
+    $this->db->select_max('DATE(log_date)', 'latest_date');
+    $this->db->where('user_id', $user_id);
+    $latest_date_result = $this->db->get('time_logs')->row_array();
+    $latest_date = $latest_date_result['latest_date'] ?? null;
+
+    if (!$latest_date) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(404)
+            ->set_output(json_encode([
+                'status' => false,
+                'message' => 'No time logs found for the user.'
+            ]));
+    }
+
+    // 5. Fetch all employees under the user/org and LEFT JOIN their logs for the latest date
+    $this->db->select('e.id AS employee_id, e.name, e.email, COALESCE(t.total_active_time, "00:00:00") AS total_active_time');
+    $this->db->from('employees e');
+    $this->db->where('e.user_id', $user_id);
+    $this->db->join('time_logs t', 't.employee_id = e.id AND DATE(t.log_date) = "'.$latest_date.'"', 'left');
+    $this->db->order_by('total_active_time', $order);
+
+    $active_hours = $this->db->get()->result_array();
+
+    // 6. Return response
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_status_header(200)
+        ->set_output(json_encode([
+            'status' => true,
+            'user_id' => (int)$user_id,
+            'latest_date' => $latest_date,
+            'order' => $order,
+            'active_hours' => $active_hours
+        ]));
+}
+
+
+
 }
