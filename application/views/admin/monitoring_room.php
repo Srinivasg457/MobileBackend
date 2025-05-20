@@ -66,7 +66,7 @@
     font-size: 0.875rem;
     background-color: white;
     transition: var(--transition);
-    width: 100px;
+    width: 200px;
   }
 
   .sort-select:focus {
@@ -173,7 +173,7 @@
   }
 
   .card-body {
-    padding: 1.25rem;
+    padding: 0.55rem;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -190,9 +190,9 @@
   }
 
   .employee-id {
-    font-size: 0.875rem;
+    font-size: 1.0rem;
     color: var(--gray);
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .activity-stats {
@@ -405,18 +405,19 @@
         <h1 class="monitoring-title">Employee Monitoring Dashboard</h1>
         <div class="monitoring-toolbar">
           <input type="text" class="search-input form-control" placeholder="Search employees...">
-          <select class="sort-select form-control">
-            <option value="">Sort by</option>
-            <option value="name">Name (A-Z)</option>
-            <option value="active">Active Hours</option>
-            <option value="inactive">Inactive Hours</option>
-          </select>
+          <select class="sort-select form-control" id="sortSelect">
+    <option value="">Sort by</option>
+    <option value="asc">Employee Name (Asc)</option>
+    <option value="desc">Employee Name (Desc)</option> <!-- Added desc option -->
+    <option value="active">Active Hours</option> <!-- These can be handled later -->
+    <option value="inactive">Inactive Hours</option>
+</select>
         </div>
       </div>
 
       <div class="employee-grid" id="employeeGrid">
-        <!-- Employee cards will be dynamically inserted here -->
-      </div>
+    <!-- Employee list will appear here -->
+</div>
 
       <!-- Monitoring Modal -->
       <div id="monitoringModal" class="monitoring-modal">
@@ -474,10 +475,11 @@
                     <div class="live-badge">LIVE</div>
                   </div>
                   <div class="card-body">
+                                      <p class="employee-id">ID: ${employee.id}</p>
+
                     <h3 class="employee-name">
                       <i class="bi bi-person-fill"></i> ${employee.name}
                     </h3>
-                    <p class="employee-id">ID: ${employee.id}</p>
                     <div class="activity-stats">
                       <div class="stat-item active-stat">
                         <strong class="stat-label">Active: </strong>
@@ -541,10 +543,11 @@
                     <div class="live-badge">LIVE</div>
                   </div>
                   <div class="card-body">
+                                      <p class="employee-id">ID: ${employee.id}</p>
+
                     <h3 class="employee-name">
                       <i class="bi bi-person-fill"></i> ${employee.name}
                     </h3>
-                    <p class="employee-id">ID: ${employee.id}</p>
                     <div class="activity-stats">
                       <div class="stat-item active-stat">
                         <strong class="stat-label">Active: </strong>
@@ -705,4 +708,72 @@
       document.getElementById("modalTimestamp").innerText = `Last updated: ${now.toLocaleTimeString()}`;
     }
   });
+</script>
+
+<script>
+$(document).ready(function () {
+    $('#sortSelect').on('change', function () {
+        const order = $(this).val();
+
+        if (order === 'asc' || order === 'desc') {
+            $.ajax({
+              url: "<?= base_url('/admin/Monitoring_room/list_employees_ordered') ?>",
+
+                method: 'GET',
+                data: {
+                    order: order,
+                    // add user_id if necessary
+                },
+                dataType: 'json',
+                success: function(response) {
+                    const employeeGrid = $('#employeeGrid');
+                    employeeGrid.empty();
+
+                    if (response.status === 'success' && response.employees.length > 0) {
+                        const employees = response.employees;
+
+                        $.each(employees, function(index, employee) {
+                            const card = `
+                                <div class="employee-card" id="employee-card-${employee.id}">
+                                    <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
+                                        <img id="screenshot-${employee.id}" src="" alt="Employee Screen">
+                                        <div class="live-badge">LIVE</div>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="employee-id">ID: ${employee.id}</p>
+                                        <h3 class="employee-name">
+                                            <i class="bi bi-person-fill"></i> ${employee.name}
+                                        </h3>
+                                        <div class="activity-stats">
+                                            <div class="stat-item active-stat">
+                                                <strong class="stat-label">Active: </strong>
+                                                <span class="stat-value" id="active-time-${employee.id}">00:00</span>
+                                            </div>
+                                            <div class="stat-item inactive-stat">
+                                                <strong class="stat-label">Inactive :</strong>
+                                                <span class="stat-value" id="inactive-time-${employee.id}">00:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            employeeGrid.append(card);
+                            getActivity(employee.id);
+                            getLatestScreenshot(employee.id);
+                        });
+                    } else {
+                        employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+                    }
+                },
+                error: function() {
+                    $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error searching employees</p>');
+                }
+            });
+        } else {
+            $('#employeeGrid').empty();
+        }
+    });
+});
+
 </script>
