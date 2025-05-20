@@ -13,7 +13,7 @@ class AutoLoginController extends CI_Controller {
         parent::__construct();
         $this->load->library('session');
         $this->load->database();
-        $this->jwt_key = "your_secret_key_here";
+        $this->jwt_key = "limitscale_workroom";
     }
 
     public function auto_login()
