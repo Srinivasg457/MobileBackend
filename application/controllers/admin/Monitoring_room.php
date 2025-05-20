@@ -100,4 +100,49 @@ class Monitoring_room extends Home_Controller {
                 'employees' => $employees
             ]));
     }
+    public function list_employees_ordered()
+{
+    $user_id = $this->session->userdata('id') ?? $this->input->get('user_id');
+    // 1. Validate user ID
+    if (empty($user_id) || !is_numeric($user_id)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'Valid user ID required'
+            ]));
+    }
+
+    // 2. Get optional filters from query
+    $name = $this->input->get('name');
+    $order = strtolower($this->input->get('order'));
+    if ($order !== 'asc' && $order !== 'desc') {
+        $order = 'asc'; // default ordering
+    }
+
+    // 3. Build query
+    $this->db->select('id, name, email')
+        ->from('employees')
+        ->where('user_id', $user_id);
+
+    if (!empty($name)) {
+        $this->db->like('LOWER(name)', strtolower($name));
+    }
+
+    $this->db->order_by('name', $order);
+    $employees = $this->db->get()->result_array();
+
+    // 4. Return response
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_status_header(200)
+        ->set_output(json_encode([
+            'status' => 'success',
+            'user_id' => (int)$user_id,
+            'order' => $order,
+            'employees' => $employees
+        ]));
+}
+
 }
