@@ -10,7 +10,7 @@ use \Firebase\JWT\Key;
 class DesktopLoginController extends CI_Controller {
 
     // Keep the JWT key here (still advisable to eventually move to an env/config)
-    private $jwt_key = 'your_secure_random_secret_here';
+    private $jwt_key = 'limitscale_workroom';
 
     public function __construct() {
         parent::__construct();
