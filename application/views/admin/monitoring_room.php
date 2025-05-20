@@ -396,7 +396,15 @@
       align-items: flex-start;
     }
   }
+
+    #sortIcon {
+      vertical-align: middle;
+      font-size: 18px;
+  }
+
 </style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
 
 <div class="content-wrapper">
   <section class="content">
@@ -406,114 +414,20 @@
         <div class="monitoring-toolbar">
           <input type="text" class="search-input form-control" placeholder="Search employees...">
           <select class="sort-select form-control" id="sortSelect">
-    <option value="">Sort by</option>
-    <option value="employeeName">Employee Name</option>
-    <option value="active">Active Hours</option>
-    <option value="inactive">Inactive Hours</option>
-</select>
-
-<!-- Sorting icon -->
-<span id="sortIcon" style="cursor: pointer; display: inline-block; margin-left: 10px;">
-    <i class="bi bi-arrow-down-up"></i>
-</span>
-<script>
-  let sortOrder = 'desc'; // default sort order
-
-// Listen for change in dropdown
-$('#sortSelect').on('change', function () {
-    const selectedValue = $(this).val();
-
-    if (selectedValue === 'active') {
-        fetchSortedEmployees('active', sortOrder);
-    } else if (selectedValue === 'employeeName') {
-        fetchSortedEmployees('employeeName', sortOrder);
-    } else if (selectedValue === 'inactive') {
-        fetchSortedEmployees('inactive', sortOrder);
-    }
-});
-
-// Optional: toggle sorting order when clicking icon
-$('#sortIcon').on('click', function () {
-    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-    const selectedValue = $('#sortSelect').val();
-
-    if (selectedValue) {
-        fetchSortedEmployees(selectedValue, sortOrder);
-    }
-});
-
-// Function to fetch and reload employees
-function fetchSortedEmployees(type, order) {
-    let orderParam = 'desc'; // fallback
-
-    if (type === 'active') {
-        orderParam = order;
-    }
-
-    $.ajax({
-      url: "<?= base_url('/admin/Monitoring_room/get_active_hours_by_latest_date') ?>",
-
-        type: 'GET',
-        dataType: 'json',
-        data: {
-            order: orderParam
-        },
-        success: function(response) {
-            const employeeGrid = $('#employeeGrid');
-            employeeGrid.empty();
-
-            if (response.status === true && response.active_hours.length > 0) {
-                const employees = response.active_hours;
-
-                $.each(employees, function(index, employee) {
-                    const card = `
-                        <div class="employee-card" id="employee-card-${employee.employee_id}">
-                            <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
-                                <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
-                                <div class="live-badge">LIVE</div>
-                            </div>
-                            <div class="card-body">
-                                <p class="employee-id">ID: ${employee.employee_id}</p>
-                                <h3 class="employee-name">
-                                    <i class="bi bi-person-fill"></i> ${employee.name}
-                                </h3>
-                                <div class="activity-stats">
-                                    <div class="stat-item active-stat">
-                                        <strong class="stat-label">Active: </strong>
-                                        <span class="stat-value" id="active-time-${employee.employee_id}">${employee.total_active_time}</span>
-                                    </div>
-                                    <div class="stat-item inactive-stat">
-                                        <strong class="stat-label">Inactive :</strong>
-                                        <span class="stat-value" id="inactive-time-${employee.employee_id}">00:00</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    employeeGrid.append(card);
-                    getActivity(employee.employee_id);
-                    getLatestScreenshot(employee.employee_id);
-                });
-            } else {
-                employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
-            }
-        },
-        error: function() {
-            $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading employees</p>');
-        }
-    });
-}
-
-</script>
-
+              <option value="">Sort by</option>
+              <option value="employeeName">Employee Name</option>
+              <option value="active">Active Hours</option>
+              <option value="inactive">Inactive Hours</option>
+          </select>
+          <!-- Sorting icon -->
+          <span id="sortIcon" style="cursor: pointer; display: inline-block; margin-left: 10px;">
+              <i class="bi bi-arrow-down-up"></i>
+          </span>
         </div>
       </div>
-
-      <div class="employee-grid" id="employeeGrid">
+ <div class="employee-grid" id="employeeGrid">
     <!-- Employee list will appear here -->
 </div>
-
       <!-- Monitoring Modal -->
       <div id="monitoringModal" class="monitoring-modal">
         <div class="modal-dialog">
@@ -803,9 +717,7 @@ function fetchSortedEmployees(type, order) {
       document.getElementById("modalTimestamp").innerText = `Last updated: ${now.toLocaleTimeString()}`;
     }
   });
-</script>
 
-<script>
 $(document).ready(function () {
     let currentOrder = 'asc'; // Default sorting order
     let currentSort = '';     // Track current selected sort
@@ -895,13 +807,182 @@ $(document).ready(function () {
         }
     });
 });
-</script>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-<style>
-  #sortIcon {
-    vertical-align: middle;
-    font-size: 18px;
+  let sortOrder = 'desc'; // default sort order
+
+// Listen for change in dropdown
+$('#sortSelect').on('change', function () {
+    const selectedValue = $(this).val();
+
+    if (selectedValue === 'active') {
+        fetchSortedEmployees('active', sortOrder);
+    } else if (selectedValue === 'employeeName') {
+        fetchSortedEmployees('employeeName', sortOrder);
+    } else if (selectedValue === 'inactive') {
+        fetchSortedEmployees('inactive', sortOrder);
+    }
+});
+
+// Optional: toggle sorting order when clicking icon
+$('#sortIcon').on('click', function () {
+    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    const selectedValue = $('#sortSelect').val();
+
+    if (selectedValue) {
+        fetchSortedEmployees(selectedValue, sortOrder);
+    }
+});
+
+// Function to fetch and reload employees
+function fetchSortedEmployees(type, order) {
+    let orderParam = 'desc'; // fallback
+
+    if (type === 'active') {
+        orderParam = order;
+    }
+
+    $.ajax({
+      url: "<?= base_url('/admin/Monitoring_room/get_active_hours_by_latest_date') ?>",
+
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            order: orderParam
+        },
+        success: function(response) {
+            const employeeGrid = $('#employeeGrid');
+            employeeGrid.empty();
+
+            if (response.status === true && response.active_hours.length > 0) {
+                const employees = response.active_hours;
+
+                $.each(employees, function(index, employee) {
+                    const card = `
+                        <div class="employee-card" id="employee-card-${employee.employee_id}">
+                            <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
+                                <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
+                                <div class="live-badge">LIVE</div>
+                            </div>
+                            <div class="card-body">
+                                <p class="employee-id">ID: ${employee.employee_id}</p>
+                                <h3 class="employee-name">
+                                    <i class="bi bi-person-fill"></i> ${employee.name}
+                                </h3>
+                                <div class="activity-stats">
+                                    <div class="stat-item active-stat">
+                                        <strong class="stat-label">Active: </strong>
+                                        <span class="stat-value" id="active-time-${employee.employee_id}">${employee.total_active_time}</span>
+                                    </div>
+                                    <div class="stat-item inactive-stat">
+                                        <strong class="stat-label">Inactive :</strong>
+                                        <span class="stat-value" id="inactive-time-${employee.employee_id}">00:00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    employeeGrid.append(card);
+                    getActivity(employee.employee_id);
+                    getLatestScreenshot(employee.employee_id);
+                });
+            } else {
+                employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+            }
+        },
+        error: function() {
+            $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading employees</p>');
+        }
+    });
 }
 
-</style>
+  // Add this to your sort select change handler
+$('#sortSelect').on('change', function() {
+    const selectedValue = $(this).val();
+    
+    if (selectedValue === 'inactive') {
+        fetchInactiveEmployees();
+    }
+    // ... other sort options
+});
+
+function fetchInactiveEmployees(order = 'desc') {
+    $.ajax({
+        url: "<?= base_url('/admin/Monitoring_room/get_inactive_hours_by_latest_date') ?>",
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            order: order
+        },
+        success: function(response) {
+            const employeeGrid = $('#employeeGrid');
+            employeeGrid.empty();
+
+            if (response.status === true && response.inactive_hours.length > 0) {
+                const employees = response.inactive_hours;
+
+                $.each(employees, function(index, employee) {
+                    // Format the inactive time (remove seconds if present)
+                    let inactiveTime = employee.total_idle_time;
+                    if (inactiveTime && inactiveTime.includes(':')) {
+                        const parts = inactiveTime.split(':');
+                        if (parts.length === 3) {
+                            inactiveTime = `${parts[0]}:${parts[1]}`; // HH:MM
+                        }
+                    }
+
+                    const card = `
+                        <div class="employee-card" id="employee-card-${employee.employee_id}">
+                            <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
+                                <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
+                                <div class="live-badge">LIVE</div>
+                            </div>
+                            <div class="card-body">
+                                <p class="employee-id">ID: ${employee.employee_id}</p>
+                                <h3 class="employee-name">
+                                    <i class="bi bi-person-fill"></i> ${employee.name}
+                                </h3>
+                                <div class="activity-stats">
+                                    <div class="stat-item active-stat">
+                                        <strong class="stat-label">Active: </strong>
+                                        <span class="stat-value" id="active-time-${employee.employee_id}">00:00</span>
+                                    </div>
+                                    <div class="stat-item inactive-stat">
+                                        <strong class="stat-label">Inactive: </strong>
+                                        <span class="stat-value" id="inactive-time-${employee.employee_id}">${inactiveTime}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    employeeGrid.append(card);
+                    getActivity(employee.employee_id);
+                    getLatestScreenshot(employee.employee_id);
+                });
+            } else {
+                employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No employees with inactive hours found</p>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching inactive hours:', error);
+            $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading inactive hours data</p>');
+        }
+    });
+}
+
+// Optional: Add toggle functionality for sort order
+$('#sortIcon').on('click', function() {
+    if ($('#sortSelect').val() === 'inactive') {
+        const currentOrder = $(this).data('order') || 'desc';
+        const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
+        $(this).data('order', newOrder);
+        
+        // Update icon to show sort direction
+        $(this).find('i').removeClass('bi-arrow-down bi-arrow-up')
+               .addClass(newOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up');
+        
+        fetchInactiveEmployees(newOrder);
+    }
+});
+</script>
