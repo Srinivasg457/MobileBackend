@@ -94,4 +94,63 @@ class Employee extends Home_Controller
         $this->db->where('id', $id);
         return $this->db->update('employees', $data);
     }
+
+    public function change_password()
+{
+    header('Content-Type: application/json');
+
+    // Ensure employee is logged in
+    if (!$this->session->userdata('employee_logged_in')) {
+        http_response_code(401);
+        echo json_encode(['status' => 0, 'message' => 'Unauthorized']);
+        return;
+    }
+
+    $employee_id = $this->session->userdata('employee_id');
+    $user_id = $this->session->userdata('user_id'); // Make sure you store this in session during login
+
+    $current_password = $this->input->post('current_password', true);
+    $new_password = $this->input->post('new_password', true);
+    $confirm_password = $this->input->post('confirm_password', true);
+
+    // Basic validation
+    if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
+        http_response_code(400);
+        echo json_encode(['status' => 0, 'message' => 'All password fields are required']);
+        return;
+    }
+
+    if ($new_password !== $confirm_password) {
+        http_response_code(400);
+        echo json_encode(['status' => 0, 'message' => 'New password and confirmation do not match']);
+        return;
+    }
+
+    // Fetch employee with user_id scope
+    $employee = $this->db->get_where('employees', [
+        'id' => $employee_id,
+        'user_id' => $user_id
+    ])->row();
+
+    if (!$employee || !password_verify($current_password, $employee->password)) {
+        http_response_code(400);
+        echo json_encode(['status' => 0, 'message' => 'Current password is incorrect']);
+        return;
+    }
+
+    // Hash and update new password
+    $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+    $updated = $this->db->update('employees', ['password' => $hashed_password], [
+        'id' => $employee_id,
+        'user_id' => $user_id
+    ]);
+
+    if ($updated) {
+        echo json_encode(['status' => 1, 'message' => 'Password changed successfully']);
+    } else {
+        http_response_code(500);
+        echo json_encode(['status' => 0, 'message' => 'Failed to update password']);
+    }
+}
+
 }
