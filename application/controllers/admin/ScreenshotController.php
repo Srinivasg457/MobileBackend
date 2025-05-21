@@ -236,6 +236,192 @@ class ScreenshotController extends Home_Controller
                 "file_path" => $relative_path
             ]));
     }
+    public function store_webcam()
+{
+    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(405)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Invalid request method"
+            ]));
+    }
+
+    $user_id = $this->input->get_request_header('user_id', TRUE);
+    $employee_id = $this->input->get_request_header('employee_id', TRUE);
+    $provided_timestamp = $this->input->get_request_header('timestamp', TRUE);
+
+    if (empty($user_id) || empty($employee_id) || empty($provided_timestamp)) {
+        $missing_fields = [];
+        if (empty($user_id)) $missing_fields[] = 'user_id';
+        if (empty($employee_id)) $missing_fields[] = 'employee_id';
+        if (empty($provided_timestamp)) $missing_fields[] = 'timestamp';
+
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Missing required fields in headers: " . implode(', ', $missing_fields)
+            ]));
+    }
+
+    if (empty($_FILES['webcam_image']['tmp_name'])) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "No file uploaded"
+            ]));
+    }
+
+   
+
+    // Validate is_active
+    
+
+    // Define upload path using user_id
+    $upload_path = FCPATH . "uploads/webcam/{$user_id}/";
+
+    // Create the directory if it doesn't exist
+    if (!is_dir($upload_path)) {
+        mkdir($upload_path, 0755, true);
+    }
+
+    // Get file extension and construct file name
+    $file_extension = strtolower(pathinfo($_FILES['webcam_image']['name'], PATHINFO_EXTENSION));
+    $file_name = "webcam_{$employee_id}_{$formatted_timestamp}." . $file_extension;
+
+    $full_path = $upload_path . $file_name;
+    $relative_path = "uploads/webcam/{$user_id}/{$file_name}";
+
+    if (!move_uploaded_file($_FILES['webcam_image']['tmp_name'], $full_path)) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Failed to move uploaded file"
+            ]));
+    }
+
+    // Insert record into DB
+    $data = [
+        'user_id' => $user_id,
+        'employee_id' => $employee_id,
+        'file_path' => $relative_path,
+        'file_type' => $file_extension,
+        'status' => 1, // Assuming 1 means active/successful
+        'created_at' => date('Y-m-d H:i:s', strtotime($provided_timestamp)),
+        'is_active' => $is_active
+    ];
+
+    if (!$this->db->insert('webcam', $data)) {
+        $error = $this->db->error();
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "DB Insertion Failed",
+                "error" => $error
+            ]));
+    }
+
+    // Get the inserted webcam_id
+    $webcam_id = $this->db->insert_id();
+
+    return $this->output->set_content_type('application/json')
+        ->set_status_header(201)
+        ->set_output(json_encode([
+            "status" => "success",
+            "message" => "Webcam image stored successfully",
+            "file_path" => $relative_path,
+            "webcam_id" => $webcam_id
+        ]));
+}
+    // public function store_webcam_screenshot()
+    // {
+    //     if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+    //         return $this->output->set_content_type('application/json')
+    //             ->set_status_header(405)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "Invalid request method"
+    //             ]));
+    //     }
+    
+    //     $user_id = $this->input->get_request_header('user_id', TRUE);
+    //     $employee_id = $this->input->get_request_header('employee_id', TRUE);
+    //     $provided_timestamp = $this->input->get_request_header('timestamp', TRUE);
+    
+    //     // Check required headers
+    //     $missing_fields = [];
+    //     if (empty($user_id)) $missing_fields[] = 'user_id';
+    //     if (empty($employee_id)) $missing_fields[] = 'employee_id';
+    //     if (empty($provided_timestamp)) $missing_fields[] = 'timestamp';
+    
+    //     if (!empty($missing_fields)) {
+    //         return $this->output->set_content_type('application/json')
+    //             ->set_status_header(400)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "Missing required headers: " . implode(', ', $missing_fields)
+    //             ]));
+    //     }
+    
+    //     // Check file upload
+    //     if (empty($_FILES['webcam_image']['tmp_name'])) {
+    //         return $this->output->set_content_type('application/json')
+    //             ->set_status_header(400)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "No webcam image uploaded"
+    //             ]));
+    //     }
+    
+    //     // Validate and parse timestamp
+    //     try {
+    //         $timestamp_object = new DateTime($provided_timestamp);
+    //     } catch (Exception $e) {
+    //         return $this->output->set_content_type('application/json')
+    //             ->set_status_header(400)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "Invalid timestamp format"
+    //             ]));
+    //     }
+    
+    //     // Read binary file content
+    //     $file_data = file_get_contents($_FILES['webcam_image']['tmp_name']);
+    //     $file_type = $_FILES['webcam_image']['type'];
+    
+    //     // Prepare data for DB insert
+    //     $insert_data = [
+    //         'user_id' => $user_id,
+    //         'employee_id' => $employee_id,
+    //         'file_data' => $file_data,
+    //         'file_type' => $file_type,
+    //         'created_at' => $timestamp_object->format('Y-m-d H:i:s')
+    //     ];
+    
+    //     // Insert into DB
+    //     if (!$this->db->insert('webcam', $insert_data)) {
+    //         $error = $this->db->error();
+    //         return $this->output->set_content_type('application/json')
+    //             ->set_status_header(500)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "Database insertion failed",
+    //                 "error" => $error
+    //             ]));
+    //     }
+    
+    //     return $this->output->set_content_type('application/json')
+    //         ->set_status_header(201)
+    //         ->set_output(json_encode([
+    //             "status" => "success",
+    //             "message" => "Webcam screenshot saved successfully"
+    //         ]));
+    // }
+    
 
     
     //     public function get_screenshots() {
@@ -463,8 +649,8 @@ public function get_last_screenshot()
 
    public function get_user_screenshots()
 {
-    $employee_id = $this->session->userdata('employee_id');
-    $employee_org_id = $this->session->userdata('employee_org_id');
+    $employee_id =2;
+    $employee_org_id = 3;
     $date = $this->input->get('date'); // Optional
 
     if (empty($employee_id)) {
