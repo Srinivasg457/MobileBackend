@@ -585,6 +585,67 @@ public function get_screenshots()
         ]));
 }
 
+public function get_webcam_screenshots()
+{
+    $employee_id = $this->input->get('employee_id');
+    $user_id = $this->input->get('user_id');
+    $date = $this->input->get('date');
+
+    if (empty($user_id) && empty($employee_id)) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Missing user_id or employee_id"
+            ]));
+    }
+
+    if (empty($date)) {
+        $date = date('Y-m-d');
+    }
+
+    // Fetch webcam screenshot records from DB where status is 1
+    $this->db->select('webcam_id, file_path, created_at, status, user_id, employee_id');
+    $this->db->where('employee_id', $employee_id);
+    $this->db->where('user_id', $user_id);
+    $this->db->where('status', 1); // Only active screenshots
+    $this->db->like('created_at', $date);
+    $this->db->order_by('created_at', 'DESC');
+    $query = $this->db->get('webcam');
+    $db_screenshots = $query->result_array();
+
+    $screenshots = [];
+
+    foreach ($db_screenshots as $row) {
+        $filename = basename($row['file_path']);
+        $created_at = new DateTime($row['created_at']);
+        
+        $screenshots[] = [
+            'webcam_id' => (string)$row['webcam_id'],
+            'url' => $row['file_path'],
+            'file_type' => pathinfo($filename, PATHINFO_EXTENSION), // Changed from 'Message' to 'file_type'
+            'status' => (int)$row['status'],
+            'is_active' => 1,
+            'captured_at' => $created_at->format('Y-m-d H:i:s'), // Changed from 'Time' to 'captured_at'
+            'user_id' => (string)$row['user_id'],
+            'employee_id' => (string)$row['employee_id']
+        ];
+    }
+
+    return $this->output->set_content_type('application/json')
+        ->set_status_header(200)
+        ->set_output(json_encode([
+            "status" => "success",
+            "data" => $screenshots,
+            "metadata" => [
+                "date" => $date,
+                "total_records" => count($screenshots),
+                "server_time" => date('Y-m-d H:i:s')
+            ],
+            "message" => empty($screenshots) ? "No webcam screenshots found for user ID {$user_id} on {$date}" : null
+        ]));
+}
+
 public function get_last_screenshot()
 {
     $employee_id = $this->input->get('employee_id');
