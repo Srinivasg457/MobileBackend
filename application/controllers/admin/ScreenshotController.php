@@ -283,13 +283,22 @@ class ScreenshotController extends Home_Controller
             ]));
     }
 
-   
+    // Validate timestamp format
+    $timestamp = strtotime($provided_timestamp);
+    if ($timestamp === false) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Invalid timestamp format"
+            ]));
+    }
 
-    // Validate is_active
+    // Format timestamp for filename (yy-mm-dd hh-mm-ss)
+    $formatted_timestamp = date('y-m-d H-i-s', $timestamp);
     
-
-    // Define upload path using user_id
-    $upload_path = FCPATH . "uploads/webcam/{$user_id}/";
+    // Define upload path using user_id and employee_id
+    $upload_path = FCPATH . "uploads/webcam/{$user_id}/{$employee_id}/";
 
     // Create the directory if it doesn't exist
     if (!is_dir($upload_path)) {
@@ -298,10 +307,10 @@ class ScreenshotController extends Home_Controller
 
     // Get file extension and construct file name
     $file_extension = strtolower(pathinfo($_FILES['webcam_image']['name'], PATHINFO_EXTENSION));
-    $file_name = "webcam_{$employee_id}_{$formatted_timestamp}." . $file_extension;
+    $file_name = "webcam_{$formatted_timestamp}.{$file_extension}";
 
     $full_path = $upload_path . $file_name;
-    $relative_path = "uploads/webcam/{$user_id}/{$file_name}";
+    $relative_path = "uploads/webcam/{$user_id}/{$employee_id}/{$file_name}";
 
     if (!move_uploaded_file($_FILES['webcam_image']['tmp_name'], $full_path)) {
         return $this->output->set_content_type('application/json')
@@ -319,8 +328,8 @@ class ScreenshotController extends Home_Controller
         'file_path' => $relative_path,
         'file_type' => $file_extension,
         'status' => 1, // Assuming 1 means active/successful
-        'created_at' => date('Y-m-d H:i:s', strtotime($provided_timestamp)),
-        'is_active' => $is_active
+        'created_at' => date('Y-m-d H:i:s', $timestamp),
+        'is_active' => 1 // Assuming you want this to be active by default
     ];
 
     if (!$this->db->insert('webcam', $data)) {
