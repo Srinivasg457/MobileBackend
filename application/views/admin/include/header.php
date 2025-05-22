@@ -143,7 +143,9 @@
       color: #fafafa;
     }
 
-
+    .select2{
+     width: 100% !important;
+    }
   </style>
 
   <!-- Color picker plugins css -->

@@ -3,7 +3,7 @@
 
     .btn-group {
         display: flex;
-        gap: 30px;
+        gap: 25px;
         justify-content: end;
     }
 
@@ -78,12 +78,13 @@
                 <option value="">Select Employee</option>
             </select>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-6 align-content-center justify-content-center mt-3">
             <div class="btn-group">
                 <span class="m-10">Filters:</span>
                 <button id="approved-btn" class="btn btn-success btn-sm m-5">Approved</button>
                 <button id="unapproved-btn" class="btn btn-warning btn-sm m-5">Unapproved</button>
-                <button id="cancel-btn" class="btn btn-secondary btn-sm m-5">Cancel Filter</button>
+                <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>" class="btn btn-default btn-sm m-5 "><i class="flaticon-reload"></i> <?php echo trans('reset-filter') ?></a>
+                <!-- <button id="cancel-btn" class="btn btn-secondary btn-sm m-5">Cancel Filter</button> -->
             </div>
         </div>
     </div>
@@ -253,8 +254,8 @@
             loadTimecards($('#employee-select').val(), globalUserId, 'unapproved');
         });
 
-        $('#cancel-btn').on('click', function() {
-            loadTimecards('', globalUserId);
-        });
+        // $('#cancel-btn').on('click', function() {
+        //     loadTimecards('', globalUserId);
+        // });
     });
 </script>

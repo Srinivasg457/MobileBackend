@@ -34,7 +34,7 @@
   <!-- Department Field -->
                   <div style="flex: 1;">
                     <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
-                    <select class="form-control" name="department">
+                    <select class="form-control single_select" name="department">
                       <option value=""><?php echo trans('select') ?></option>
                       <?php foreach ($departments as $department): ?>
                         <option value="<?php echo html_escape($department->id); ?>"
@@ -48,7 +48,7 @@
                   <!-- Role Field -->
                   <div style="flex: 1;">
                   <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
-                  <select class="form-control" name="role">
+                  <select class="form-control single_select" name="role">
                   <option value=""><?php echo trans('select'); ?></option>
                   <?php foreach ($roles as $role): ?>
                     <option value="<?php echo html_escape($role->id); ?>"
@@ -93,7 +93,7 @@
           <div class="col-md-6">
             <div class="form-group">
               <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('country') ?> </label>
-              <select class="form-control" name="country">
+              <select class="form-control single_select" name="country">
                 <option value=""><?php echo trans('select') ?></option>
                 <?php foreach ($countries as $country): ?>
                   <option value="<?php echo html_escape($country->id); ?>"
