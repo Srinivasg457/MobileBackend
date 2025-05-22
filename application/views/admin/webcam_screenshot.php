@@ -266,13 +266,13 @@
                 height: 100%;
                 background: rgba(0, 0, 0, 0.9);
 
-                > div {
+                >div {
                     max-width: 1200px;
                     margin: auto;
                     padding: 20px;
                     height: 100%;
 
-                    > #close-modal {
+                    >#close-modal {
                         display: block;
                         font-size: 40px;
                         color: white;
@@ -288,7 +288,7 @@
                         position: relative;
                         height: 70%;
 
-                        > #modal-image {
+                        >#modal-image {
                             max-width: 100%;
                             max-height: 100%;
                             display: block;
@@ -296,7 +296,7 @@
                             border-radius: 8px;
                         }
 
-                        > #image-info {
+                        >#image-info {
                             color: white;
                             text-align: center;
                             margin-top: 15px;
@@ -312,7 +312,7 @@
                         margin: 0 auto;
                         text-align: center;
 
-                        > #modal-additional-screenshots {
+                        >#modal-additional-screenshots {
                             display: flex;
                             flex-wrap: wrap;
                             justify-content: center;
@@ -483,7 +483,7 @@
 
             async function fetchUserScreenshots(employeeId, date = '') {
                 try {
-                    const activityDataArray1 = await fetchOverallActivityPercentage(employeeId, date);
+                    // const activityDataArray1 = await fetchOverallActivityPercentage(employeeId, date);
                     // console.log('Activity data:', activityDataArray1);
                     // proceed with rendering
 
@@ -504,9 +504,9 @@
                                 let output_screen = "";
 
                                 $.each(response.screenshots.slice(0, 6), function(index, screenshot) {
-                                    const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
-                                    const overallActivityRaw = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
-                                    const overallActivity = isNaN(parseFloat(overallActivityRaw)) ? 0 : Math.min(100, parseFloat(overallActivityRaw));
+                                    // const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
+                                    // const overallActivityRaw = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
+                                    // const overallActivity = isNaN(parseFloat(overallActivityRaw)) ? 0 : Math.min(100, parseFloat(overallActivityRaw));
                                     let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
 
                                     output_screen += `
@@ -514,38 +514,7 @@
     <div class="screenshot-card" style="width: 200px; margin: 5px;">
         <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" width="100%" style="cursor: pointer;">
         <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
-            <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                  <svg viewBox="0 0 36 36" width="40" height="40">
-                    <!-- Background circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="#e6e6e6"
-                    stroke-width="4"
-                    />
-                    
-                    <!-- Progress circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="green"
-                    stroke-width="4"
-                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
-                    stroke-dashoffset="25"  <!-- makes it start from top -->
-                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
-                    />
-                </svg>
-                <div style="position: absolute; top: 50%; left: 50%; 
-                            transform: translate(-50%, -50%);
-                            font-size: 10px; font-weight: bold;cursor: pointer;" 
-                            data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}%">
-                    ${Math.round(overallActivity)}%
-                </div>
-            </div>
+          
             <span>${timeWithoutSeconds}</span>
             <img 
                 src="https://img.icons8.com/?size=50&id=4887&format=png" 
@@ -589,10 +558,10 @@
                                     const message = `Are you sure you want to delete the Screenshot?`;
                                     showConfirmationAlert(message, "warning", function() {
                                         $.ajax({
-                                            url: "/admin/ScreenshotController/soft_delete_screenshot",
+                                            url: "/admin/ScreenshotController/delete_webcam_screenshot",
                                             type: "POST",
                                             data: {
-                                                screenshot_id: screenshotId,
+                                                webcam_id: screenshotId,
                                                 employee_id: employeeId
                                             },
                                             success: function() {
@@ -719,20 +688,7 @@
                                             data-interval="${intervalKey}"
                                             data-hour-range="${hourRange}">
                                         <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                            <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                                                <svg viewBox="0 0 36 36" width="40" height="40">
-                                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
-                                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
-                                                        stroke-dasharray="${overallActivity} ${100 - overallActivity}"
-                                                        stroke-dashoffset="25"
-                                                        transform="rotate(-90 18 18)"
-                                                    />
-                                                </svg>
-                                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
-                                                    data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}%">
-                                                    ${Math.round(overallActivity)}%
-                                                </div>
-                                            </div>
+                                          
                                             <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
                                             <img src="https://img.icons8.com/?size=50&id=4887&format=png" 
                                                 class="delete-screenshot" 
@@ -832,10 +788,10 @@
                                                 "warning",
                                                 function() {
                                                     $.ajax({
-                                                        url: "/admin/ScreenshotController/soft_delete_screenshot",
+                                                        url: "/admin/ScreenshotController/delete_webcam_screenshot",
                                                         type: "POST",
                                                         data: {
-                                                            screenshot_id: screenshotId,
+                                                            webcam_id: screenshotId,
                                                             employee_id: id
                                                         },
                                                         success: function(response) {
@@ -930,10 +886,10 @@
                                         const message = "Are you sure you want to delete this screenshot?";
                                         showConfirmationAlert(message, "warning", function() {
                                             $.ajax({
-                                                url: "/admin/ScreenshotController/soft_delete_screenshot",
+                                                url: "/admin/ScreenshotController/delete_webcam_screenshot",
                                                 type: "POST",
                                                 data: {
-                                                    screenshot_id: screenshotId,
+                                                    webcam_id: screenshotId,
                                                     employee_id: id
                                                 },
                                                 success: function(response) {
