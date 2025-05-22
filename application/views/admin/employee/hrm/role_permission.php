@@ -1,12 +1,12 @@
 <style>
-    .content-wrapper,
+    /* .content-wrapper,
     body,
     .wrapper {
         height: unset !important;
         min-height: unset !important;
         overflow-x: unset !important;
         overflow-y: unset !important;
-    }
+    } */
 
     .actions {
         display: flex;

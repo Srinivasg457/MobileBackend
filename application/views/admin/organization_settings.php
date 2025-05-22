@@ -195,7 +195,7 @@
                     <!-- Screenshot Interval -->
                     <div class="col-md-6 form-group">
                         <label class="form-label">Screenshot Interval (mins):</label>
-                        <select name="screenshot_time_interval" class="form-control target-input" id="screenshot_time_interval">
+                        <select name="screenshot_time_interval" class="form-control target-input single_select" id="screenshot_time_interval">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option selected value="5">5</option>
@@ -215,7 +215,7 @@
                     <!-- Webcam Interval -->
                     <div class="col-md-6 form-group">
                         <label class="form-label">Webcam Interval (mins):</label>
-                        <select name="webcam_time_interval" class="form-control target-input" id="webcam_time_interval">
+                        <select name="webcam_time_interval" class="form-control single_select" id="webcam_time_interval">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option selected value="5">5</option>
@@ -233,9 +233,9 @@
                     </div>
 
                     <!-- Mouse Movement Threshold -->
-                    <div class="col-md-6 form-group">
+                    <div class="col-md-6">
                         <label class="form-label">Mouse Movement Threshold:</label>
-                        <input type="number" name="mouse_move_threshold" class="form-control target-input" id="mouse_move_threshold" value="20" placeholder="" />
+                        <input type="number" name="mouse_move_threshold" class="form-control" id="mouse_move_threshold" value="20" placeholder="" />
                     </div>
 
                     <!-- Keystroke Flag -->
@@ -248,9 +248,9 @@
                     </div>
 
                     <!-- Keystroke Threshold -->
-                    <div class="col-md-6 form-group">
+                    <div class="col-md-6">
                         <label class="form-label">Keystroke Threshold:</label>
-                        <input type="number" name="key_stroke_threshold" class="form-control target-input" id="key_stroke_threshold" value="40" placeholder="" />
+                        <input type="number" name="key_stroke_threshold" class="form-control" id="key_stroke_threshold" value="40" placeholder="" />
                     </div>
 
                     <!-- Idle Time Flag -->
@@ -271,7 +271,7 @@
                             <option value="5">5</option>
                             <option value="10">10</option>
                         </select> -->
-                        <input type="text" name="timecards_time_interval" class="form-control interval-field" value="1" readonly>
+                        <input type="text" name="timecards_time_interval" class="form-control" value="1" readonly>
                     </div>
                 </div>
 
