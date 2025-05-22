@@ -233,6 +233,25 @@
                     width: 200px;
                 }
             }
+            /* Add these styles to your CSS */
+            .delete-thumbnail {
+    opacity: 1; /* Changed from 0 to 1 to make it always visible */
+    transform: scale(1); /* Changed from 0.8 to 1 */
+    transition: all 0.2s ease;
+}
+
+
+
+.delete-thumbnail:hover {
+    transform: scale(1.1);
+}
+
+
+.thumbnail-item.deleting {
+    transform: scale(0.8) translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
         </style>
 
 
@@ -277,11 +296,80 @@
         </div>
 
         <!-- Modal for Screenshot Preview -->
-        <div id="screenshot-modal" style="display: none; position: fixed; z-index: 1111; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); text-align: center; justify-content: center; align-items: center; flex-direction: column;">
-            <span id="close-modal" style="position: absolute; top: 20px; right: 40px; font-size: 40px; color: white; cursor: pointer;">&times;</span>
-            <img id="modal-image" style="position: relative; top: 75px;max-width: 95%; max-height: 90%; border: 5px solid white; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);">
+        <div id="screenshot-modal" style="display: none; position: fixed; z-index: 1111; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); ">
+    <span id="close-modal" style="position: fixed; top: 30px; right: 40px; font-size: 40px; color: white; cursor: pointer; z-index: 2; text-shadow: 0 0 5px rgba(0,0,0,0.5);">&times;</span>
+    
+    <div style="max-width: 1200px; margin: 80px auto; padding: 20px;">
+        <!-- Main Image Container -->
+        <div class="main-image-container" style="border-radius: 12px; padding: 15px;margin-bottom: 30px; position: relative;">
+            <img id="modal-image" style="max-width: 100%; max-height: 70vh; display: block; margin: 0 auto; border-radius: 8px;">
+            <div id="image-info" style="color: white; text-align: center; margin-top: 15px; font-size: 16px; opacity: 0.9;"></div>
         </div>
+        
+        <!-- Thumbnail Gallery -->
+        <div class="thumbnail-gallery" style="
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+">
+    <div id="modal-additional-screenshots" style="
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    ">
+     
+        <!-- Repeat for additional images -->
+    </div>
+</div>
 
+    </div>
+</div>
+<style>
+    /* Add these styles to your CSS */
+#screenshot-modal {
+    transition: opacity 0.3s ease;
+}
+
+.thumbnail-item {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.thumbnail-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.active-thumbnail {
+    box-shadow: 0 0 0 3px #4CAF50;
+}
+
+#modal-image {
+    transition: opacity 0.3s ease;
+}
+
+/* Custom scrollbar for thumbnails */
+#modal-additional-screenshots::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+#modal-additional-screenshots::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+#modal-additional-screenshots::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 10px;
+}
+
+#modal-additional-screenshots::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
+}
+</style>
         <!-- Delete Confirmation Modal -->
         <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -485,284 +573,344 @@
 
             // Popup Screenshot Loader
             $(document).on("click", ".see-more-button", function() {
-                $(".container").hide();
+    $(".container").hide();
 
-                const name = $(this).data("name");
-                const id = $(this).data("id");
-                const date = $('#datePicker').val();
+    const name = $(this).data("name");
+    const id = $(this).data("id");
+    const date = $('#datePicker').val();
 
-                $("#popupName").text(name);
-                $("#popupID").text(id);
-                $("#popupCard").fadeIn();
+    $("#popupName").text(name);
+    $("#popupID").text(id);
+    $("#popupCard").fadeIn();
 
-                async function loadScreenshots() {
-                    try {
-                        let activityDataArray1 = await fetchOverallActivityPercentage(id, date);
-                        $.ajax({
-                            url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
-                            type: "GET",
-                            dataType: "json",
-                            data: {
-                                employee_id: id,
-                                date: date
-                            },
-                            success: function(response) {
-                                console.log(response);
+    async function loadScreenshots() {
+        try {
+            let activityDataArray1 = await fetchOverallActivityPercentage(id, date);
+            $.ajax({
+                url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
+                type: "GET",
+                dataType: "json",
+                data: {
+                    employee_id: id,
+                    date: date
+                },
+                success: function(response) {
+                    console.log(response);
 
-                                if (response.status === "success" && response.screenshots.length > 0) {
-                                    const screenshotsPerGroup = 12;
-                                    let output = "";
-                                    const groupedScreenshots = {};
+                    if (response.status === "success" && response.screenshots.length > 0) {
+                        let output = '';
+                        const groupedByHour = {};
 
-                                    // Group screenshots by hour range
-                                    response.screenshots.forEach((screenshot) => {
-                                        const time = screenshot.display_text;
-                                        const hour = time.split(":")[0];
-                                        const groupLabel = `${hour.padStart(2, '0')}:00 - ${String(Number(hour) + 1).padStart(2, '0')}:00`;
+                        // First group by hour
+                        response.screenshots.forEach((screenshot) => {
+                            const time = screenshot.display_text;
+                            const hour = time.split(":")[0].padStart(2, '0');
+                            const hourLabel = `${hour}:00 - ${String(Number(hour) + 1).padStart(2, '0')}:00`;
 
-                                        if (!groupedScreenshots[groupLabel]) {
-                                            groupedScreenshots[groupLabel] = [];
-                                        }
-
-                                        groupedScreenshots[groupLabel].push(screenshot);
-                                    });
-
-                                    $.each(groupedScreenshots, function(timeRange, groupScreenshots) {
-                                        const groupId = `group-${timeRange.replace(/[^a-zA-Z0-9]/g, "")}`;
-                                        output += `
-                        <div class="screenshot-group box" style="border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 30px;">
-                            <div class="box-header" style="font-weight: bold; margin-bottom: 10px;">Time: ${timeRange}</div>
-                            <div class="screenshot-visible" style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    `;
-
-                                        groupScreenshots.slice(0, screenshotsPerGroup).forEach((screenshot) => {
-                                            const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
-                                            const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
-                                            let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
-
-                                            output += `
-                            <div class="screenshot-card"  box-sizing: border-box;">
-                                <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
-                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                    <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                     <svg viewBox="0 0 36 36" width="40" height="40">
-                    <!-- Background circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="#e6e6e6"
-                    stroke-width="4"
-                    />
-                    
-                    <!-- Progress circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="green"
-                    stroke-width="4"
-                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
-                    stroke-dashoffset="25"  <!-- makes it start from top -->
-                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
-                />
-            </svg>
-            <div style="position: absolute; top: 50%; left: 50%; 
-                        transform: translate(-50%, -50%);
-                        font-size: 10px; font-weight: bold;cursor: pointer;"
-                        data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}%">
-                ${Math.round(overallActivity)}%
-                                </div>
-                            </div> <p>${timeWithoutSeconds}</p>
-                                    <img 
-                                        src="https://img.icons8.com/?size=50&id=4887&format=png" 
-                                        class="delete-screenshot" 
-                                        data-id="${screenshot.id}" 
-                                        alt="Delete" 
-                                        style="cursor: pointer; width: 20px; height: 20px;"
-                                        data-toggle="tooltip" data-placement="top" title="Delete"
-                                    />
-                                </div>
-                            </div>
-                        `;
-                                        });
-
-
-                                        output += `
-                            </div> <!-- end visible -->
-                            <div class="screenshot-hidden" id="${groupId}-extra" style="display: none; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                    `;
-
-                                        groupScreenshots.slice(screenshotsPerGroup).forEach((screenshot) => {
-                                            const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
-                                            const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? 'N/A') : 'N/A';
-                                            let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
-
-                                            output += `
-                            <div class="screenshot-card" box-sizing: border-box;">
-                                <img src="${screenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
-                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                      <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                     <svg viewBox="0 0 36 36" width="40" height="40">
-                    <!-- Background circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="#e6e6e6"
-                    stroke-width="4"
-                    />
-                    
-                    <!-- Progress circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="green"
-                    stroke-width="4"
-                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
-                    stroke-dashoffset="25"  <!-- makes it start from top -->
-                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
-                />
-            </svg>
-            <div style="position: absolute; top: 50%; left: 50%; 
-                        transform: translate(-50%, -50%);
-                        font-size: 10px; font-weight: bold;cursor: pointer;"
-                        data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}
-%">
-                ${Math.round(overallActivity)}%
-                                </div>
-                            </div> <p>${timeWithoutSeconds}</p>
-                                    <img 
-                                        src="https://img.icons8.com/?size=50&id=4887&format=png" 
-                                        class="delete-screenshot" 
-                                        data-id="${screenshot.id}" 
-                                        alt="Delete" 
-                                        style="cursor: pointer; width: 20px; height: 20px;"
-                                        data-toggle="tooltip" data-placement="top" title="Delete"
-                                    />
-                                </div>
-                            </div>
-                        `;
-                                        });
-
-                                        output += `
-                            </div> <!-- end hidden -->
-                    `;
-
-                                        if (groupScreenshots.length > screenshotsPerGroup) {
-                                            output += `
-                            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-                                <button class="toggle-button" data-target="${groupId}-extra" style="padding: 6px 12px; font-size: 13px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">See More</button>
-                            </div>
-                        `;
-                                        }
-
-                                        output += `</div> <!-- end screenshot group -->`;
-                                    });
-
-                                    $(".screenshot-container").html(output);
-                                    if (date === new Date().toISOString().split('T')[0]) {
-                                        setTimeout(() => loadScreenshots(), 60000);
-                                    }
-
-                                    // Zoom modal
-                                    $(".see-zoomable-screenshot").on('click', function() {
-                                        $('#modal-image').attr('src', $(this).attr('src'));
-                                        $('#screenshot-modal').fadeIn();
-                                    });
-
-                                    $('#close-modal').on('click', function() {
-                                        $('#screenshot-modal').fadeOut();
-                                    });
-
-                                    // Toggle See More / See Less
-                                    $('.toggle-button').on('click', function() {
-                                        const targetId = $(this).data('target');
-                                        const target = $(`#${targetId}`);
-                                        const isVisible = target.is(':visible');
-
-                                        if (isVisible) {
-                                            target.slideUp();
-                                            $(this).text('See More');
-                                        } else {
-                                            target.css('display', 'flex').hide().slideDown();
-                                            $(this).text('See Less');
-                                        }
-                                    });
-
-                                    // Delete screenshot
-                                    $(".delete-screenshot").on('click', function() {
-                                        const screenshotId = $(this).data("id");
-                                        const message = `Are you sure you want to delete the Screenshot?`;
-                                        showConfirmationAlert(message, "warning", function() {
-                                            $.ajax({
-                                                url: "/admin/ScreenshotController/soft_delete_screenshot",
-                                                type: "POST",
-                                                data: {
-                                                    screenshot_id: screenshotId,
-                                                    employee_id: id
-                                                },
-                                                success: function() {
-                                                    if (response.status == 1) {
-                                                        swal("Failed!", response.message || "Could not delete Screenshot.", "error");
-                                                        loadUserRolePermissions(userId);
-                                                    } else {
-                                                        swal("Deleted!", "Screenshot deleted successfully.", "success");
-                                                    }
-                                                    loadScreenshots();
-                                                    fetchUserScreenshots(id, date);
-                                                },
-                                                error: function(xhr) {
-                                                    swal("Error!", "Something went wrong.", "error");
-                                                }
-                                            });
-                                        });
-                                    });
-
-                                    // Auto-refresh after 5 minutes from the latest timestamp
-                                    // let latestTime = response.screenshots[response.screenshots.length - 1].timestamp;
-                                    // if (latestTime) {
-                                    //     if (nextFetchTimeout) clearTimeout(nextFetchTimeout);
-
-                                    //     const latestDate = new Date(latestTime);
-                                    //     const now = new Date();
-                                    //     const timeDiff = 100;
-                                    //      console.log("hii");
-
-                                    //     nextFetchTimeout = setTimeout(() => {
-                                    //         const currentDate = latestDate.toISOString().split("T")[0];
-                                    //         $('#datePicker').val(currentDate);
-                                    //         loadScreenshots(); // Auto-refresh
-                                    //     }, timeDiff);
-                                    // }
-
-                                } else {
-                                    $(".screenshot-container").html("<p>No screenshots available.</p>");
-                                }
-                            },
-                            error: function(status, error) {
-                                console.error("AJAX Error: " + error);
+                            if (!groupedByHour[hourLabel]) {
+                                groupedByHour[hourLabel] = [];
                             }
-
+                            groupedByHour[hourLabel].push(screenshot);
                         });
-                    } catch (error) {
-                        // console.error("Error fetching screenshots:", error);
 
-                        showToast(error, "error");
+                        // Process each hour
+                        $.each(groupedByHour, function(hourRange, screenshots) {
+                            const groupId = `group-${hourRange.replace(/[^a-zA-Z0-9]/g, "")}`;
+                            output += `<div class="screenshot-group box" style="border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 30px;">
+                                <div class="box-header" style="font-weight: bold; margin-bottom: 10px;">Time: ${hourRange}</div>
+                                <div class="screenshot-visible" style="display: flex; flex-wrap: wrap; gap: 10px;">`;
+
+                            // Group by 10-minute intervals and find closest to 5-minute mark
+                            const intervalScreenshots = {};
+                            screenshots.forEach(screenshot => {
+                                const time = screenshot.display_text;
+                                const [hours, minutes] = time.split(':').map(Number);
+                                const interval = Math.floor(minutes / 10) * 10;
+                                const intervalKey = `${hours}:${interval}`;
+
+                                if (!intervalScreenshots[intervalKey]) {
+                                    intervalScreenshots[intervalKey] = [];
+                                }
+                                intervalScreenshots[intervalKey].push(screenshot);
+                            });
+
+                            // Get one screenshot per interval (closest to 5-minute mark)
+                            Object.keys(intervalScreenshots).forEach(intervalKey => {
+                                const screenshotsInInterval = intervalScreenshots[intervalKey];
+                                let closestScreenshot = null;
+                                let smallestDiff = Infinity;
+                                const targetMinute = parseInt(intervalKey.split(':')[1]) + 5;
+
+                                screenshotsInInterval.forEach(screenshot => {
+                                    const minutes = parseInt(screenshot.display_text.split(':')[1]);
+                                    const diff = Math.abs(minutes - targetMinute);
+                                    if (diff < smallestDiff) {
+                                        smallestDiff = diff;
+                                        closestScreenshot = screenshot;
+                                    }
+                                });
+
+                                if (closestScreenshot) {
+                                    const matchingActivity = activityDataArray1.find(item => item.screenshot_id == closestScreenshot.id);
+                                    const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
+                                    let timeWithoutSeconds = closestScreenshot.display_text.split(':').slice(0, 2).join(':');
+
+                                    output += `<div class="screenshot-card" style="box-sizing: border-box; width: calc(16.666% - 10px);">
+                                        <img src="${closestScreenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" 
+                                            style="width: 100%; cursor: pointer;"
+                                            data-interval="${intervalKey}"
+                                            data-hour-range="${hourRange}">
+                                        <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                            <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                                <svg viewBox="0 0 36 36" width="40" height="40">
+                                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
+                                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
+                                                        stroke-dasharray="${overallActivity} ${100 - overallActivity}"
+                                                        stroke-dashoffset="25"
+                                                        transform="rotate(-90 18 18)"
+                                                    />
+                                                </svg>
+                                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                                    data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}%">
+                                                    ${Math.round(overallActivity)}%
+                                                </div>
+                                            </div>
+                                            <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
+                                            <img src="https://img.icons8.com/?size=50&id=4887&format=png" 
+                                                class="delete-screenshot" 
+                                                data-id="${closestScreenshot.id}" 
+                                                alt="Delete" 
+                                                style="cursor: pointer; width: 20px; height: 20px;"
+                                                data-toggle="tooltip" data-placement="top" title="Delete"
+                                            />
+                                        </div>
+                                        <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
+                                    </div>`;
+                                }
+                            });
+
+                            output += `</div></div>`;
+                        });
+
+                        $(".screenshot-container").html(output);
+
+                        // Initialize tooltips
+                        $('[data-toggle="tooltip"]').tooltip();
+
+                        // Zoom modal
+                        $(".see-zoomable-screenshot").on('click', function() {
+    const interval = $(this).data('interval');
+    const hourRange = $(this).data('hour-range');
+    const clickedTime = $(this).closest('.screenshot-card').find('p').text();
+    
+    // Find all screenshots in this interval
+    const allScreenshotsInInterval = groupedByHour[hourRange].filter(screenshot => {
+        const [hours, minutes] = screenshot.display_text.split(':').map(Number);
+        const screenshotInterval = Math.floor(minutes / 10) * 10;
+        return `${hours}:${screenshotInterval}` === interval;
+    }).sort((a, b) => a.display_text.localeCompare(b.display_text));
+    
+    // Set the clicked image as main image
+    const clickedImageUrl = $(this).attr('src');
+    $('#modal-image').attr('src', clickedImageUrl);
+    
+    // Set image info
+    const matchingActivity = activityDataArray1.find(item => item.screenshot_id == $(this).closest('.screenshot-card').data('id'));
+    const overallActivity = matchingActivity ? Math.round(matchingActivity.overall_activity_percent) || 0 : 0;
+    $('#image-info').html(`
+        <span style="display: inline-block; margin: 0 10px;">${clickedTime}</span>
+        <span style="display: inline-block; margin: 0 10px;">•</span>
+        <span style="display: inline-block; margin: 0 10px;">
+            Activity: <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
+        </span>
+    `);
+    
+    // Clear and rebuild thumbnails
+    $('#modal-additional-screenshots').empty();
+    
+    allScreenshotsInInterval.forEach(screenshot => {
+        const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
+        const overallActivity = matchingActivity ? Math.round(matchingActivity.overall_activity_percent) || 0 : 0;
+        const timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
+        const isActive = screenshot.image_url === clickedImageUrl;
+        
+        $('#modal-additional-screenshots').append(`
+    <div class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
+         style="cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
+         data-src="${screenshot.image_url}"
+         data-time="${timeWithoutSeconds}"
+         data-activity="${overallActivity}"
+         data-id="${screenshot.id}">
+         
+        <img src="${screenshot.image_url}" 
+             style="width: 100%; height: 100px; object-fit: cover; display: block; filter: ${isActive ? 'none' : 'brightness(0.7)'}; transition: filter 0.3s;">
+        
+        <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
+   
+            <span>${timeWithoutSeconds}</span>
+                <div class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                    <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
+                </div>
+            </div>
+        </div>
+
+        ${isActive ? '<div class="active-indicator" style="position: absolute; top: 5px; right: 5px; width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; border: 2px solid white;"></div>' : ''}
+    </div>
+`);
+
+
+    });
+// Handle delete button clicks
+$('.delete-thumbnail').on('click', function(e) {
+    e.stopPropagation();
+    const thumbnailItem = $(this).closest('.thumbnail-item');
+    const screenshotId = thumbnailItem.data('id');
+    const isActive = thumbnailItem.hasClass('active-thumbnail');
+    
+    showConfirmationAlert(
+        "Are you sure you want to delete this screenshot?", 
+        "warning", 
+        function() {
+            $.ajax({
+                url: "/admin/ScreenshotController/soft_delete_screenshot",
+                type: "POST",
+                data: {
+                    screenshot_id: screenshotId,
+                    employee_id: id
+                },
+                success: function(response) {
+                    if (response.status == 1) {
+                        swal("Failed!", response.message || "Could not delete screenshot.", "error");
+                    } else {
+                        // Visual feedback
+                        thumbnailItem.addClass('deleting');
+                        
+                        // If deleting the active thumbnail, select a new one
+                        if (isActive) {
+                            const nextThumbnail = $('.thumbnail-item').not(thumbnailItem).first();
+                            if (nextThumbnail.length) {
+                                nextThumbnail.click();
+                            } else {
+                                $('#screenshot-modal').fadeOut();
+                            }
+                        }
+                        
+                        // Remove after animation
+                        setTimeout(() => {
+                            thumbnailItem.remove();
+                            swal({
+                                title: "Deleted!",
+                                text: "Screenshot deleted successfully.",
+                                type: "success",
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            
+                            // If no more thumbnails, close modal
+                            if ($('.thumbnail-item').length === 0) {
+                                $('#screenshot-modal').fadeOut();
+                            }
+                        }, 300);
+                        
+                        // Refresh the main view
+                        setTimeout(loadScreenshots, 500);
                     }
-
+                },
+                error: function(xhr) {
+                    swal("Error!", "Something went wrong.", "error");
                 }
-
-
-
-
-                loadScreenshots();
             });
+        }
+    );
+});
+    // Show the modal
+    $('#screenshot-modal').fadeIn();
+    
+    // Handle thumbnail clicks
+    $('.thumbnail-item').on('click', function() {
+        const newSrc = $(this).data('src');
+        const newTime = $(this).data('time');
+        const newActivity = $(this).data('activity');
+        
+        // Update main image
+        $('#modal-image').attr('src', newSrc);
+        $('#image-info').html(`
+            <span style="display: inline-block; margin: 0 10px;">${newTime}</span>
+            <span style="display: inline-block; margin: 0 10px;">•</span>
+            <span style="display: inline-block; margin: 0 10px;">
+                Activity: <span style="color: ${getActivityColor(newActivity)}; font-weight: bold;">${newActivity}%</span>
+            </span>
+        `);
+        
+        // Update active state
+        $('.thumbnail-item').removeClass('active-thumbnail')
+            .find('img').css('filter', 'brightness(0.7)');
+        $(this).addClass('active-thumbnail')
+            .find('img').css('filter', 'none');
+        
+        // Move to center if possible
+        this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
+});
+
+// Helper function for activity colors
+function getActivityColor(percentage) {
+    if (percentage >= 70) return '#4CAF50'; // Green
+    if (percentage >= 40) return '#FFC107'; // Amber
+    return '#F44336'; // Red
+}
+                        // Delete screenshot
+                        $(".delete-screenshot").on('click', function(e) {
+                            e.stopPropagation();
+                            const screenshotId = $(this).data("id");
+                            const message = "Are you sure you want to delete this screenshot?";
+                            showConfirmationAlert(message, "warning", function() {
+                                $.ajax({
+                                    url: "/admin/ScreenshotController/soft_delete_screenshot",
+                                    type: "POST",
+                                    data: {
+                                        screenshot_id: screenshotId,
+                                        employee_id: id
+                                    },
+                                    success: function(response) {
+                                        if (response.status == 1) {
+                                            swal("Failed!", response.message || "Could not delete screenshot.", "error");
+                                        } else {
+                                            swal("Deleted!", "Screenshot deleted successfully.", "success");
+                                            loadScreenshots();
+                                        }
+                                    },
+                                    error: function(xhr) {
+                                        swal("Error!", "Something went wrong.", "error");
+                                    }
+                                });
+                            });
+                        }); 
+
+                        // Auto-refresh if current date
+                        if (date === new Date().toISOString().split('T')[0]) {
+                            setTimeout(loadScreenshots, 60000);
+                        }
+
+                    } else {
+                        $(".screenshot-container").html("<p>No screenshots available for this date.</p>");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", status, error);
+                    $(".screenshot-container").html("<p>Error loading screenshots. Please try again.</p>");
+                }
+            });
+        } catch (error) {
+            console.error("Error in loadScreenshots:", error);
+            showToast("Error loading screenshots: " + error.message, "error");
+        }
+    }
+
+    loadScreenshots();
+});
             // let activityDataArray = []; // store activity data globally
 
 
