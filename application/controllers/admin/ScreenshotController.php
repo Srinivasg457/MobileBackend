@@ -588,7 +588,7 @@ public function get_screenshots()
 public function get_webcam_screenshots()
 {
     $employee_id = $this->input->get('employee_id');
-    $user_id = $this->input->get('user_id');
+    $user_id = $this->session->userdata('id');
     $date = $this->input->get('date');
 
     if (empty($user_id) && empty($employee_id)) {
@@ -621,12 +621,12 @@ public function get_webcam_screenshots()
         $created_at = new DateTime($row['created_at']);
         
         $screenshots[] = [
-            'webcam_id' => (string)$row['webcam_id'],
-            'url' => $row['file_path'],
+            'id' => (string)$row['webcam_id'],
+            'image_url' => base_url( $row['file_path']),
             'file_type' => pathinfo($filename, PATHINFO_EXTENSION), // Changed from 'Message' to 'file_type'
             'status' => (int)$row['status'],
             'is_active' => 1,
-            'captured_at' => $created_at->format('Y-m-d H:i:s'), // Changed from 'Time' to 'captured_at'
+            'display_text' => $created_at->format('H:i:'), // Changed from 'Time' to 'captured_at'
             'user_id' => (string)$row['user_id'],
             'employee_id' => (string)$row['employee_id']
         ];
@@ -636,7 +636,7 @@ public function get_webcam_screenshots()
         ->set_status_header(200)
         ->set_output(json_encode([
             "status" => "success",
-            "data" => $screenshots,
+            "screenshots" => $screenshots,
             "metadata" => [
                 "date" => $date,
                 "total_records" => count($screenshots),
