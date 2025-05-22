@@ -17,6 +17,7 @@ class ScreenshotController extends Home_Controller
         // }
         $data = array();
         $data['page_title'] = 'User Screenshots';
+        $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/user_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
