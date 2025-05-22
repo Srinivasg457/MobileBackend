@@ -16878,7 +16878,8 @@ span.alterlogo {
   position: fixed;
   top: 0;
   right: 0;
-  width: 85%;
+  left:262px;
+  width: auto;
   height: 100%;
   z-index: 99999;
   display: flex;

@@ -264,7 +264,7 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-    .container {
+    /* .container {
         background-color: white;
         border-radius: 4px;
         padding: 40px;
@@ -272,7 +272,7 @@
         margin: 0 auto;
         width: auto;
         border: 1px solid #ddd;
-    }
+    } */
 
     .header {
         display: flex;
@@ -485,18 +485,12 @@
 
         <div class="entry-header">
             <label>Employee
-                <select id="employeeSelect"></select>
+                <select id="employeeSelect" class="form-control"></select>
             </label>
             <label>Date
-                <input type="date" id="datePicker" value="">
+                <input type="date" id="datePicker" class="form-control" value="">
             </label>
-            <label>Timezone
-                <select>
-                    <option>IST</option>
-                    <option>GMT</option>
-                    <option>PST</option>
-                </select>
-            </label>
+
         </div>
 
         <div class="status-boxes">

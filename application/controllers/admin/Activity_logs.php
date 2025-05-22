@@ -16,6 +16,7 @@ class Activity_logs extends Home_Controller
         // }
         $data = array();
         $data['page_title'] = 'Activity Log Admin';
+        $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/activityLog', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
@@ -343,6 +344,7 @@ public function get_index()
         // }
         $data = array();
         $data['page_title'] = 'employee_activity';
+        $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/time_cards', $data, TRUE);
         $this->load->view('admin/index', $data);
     }

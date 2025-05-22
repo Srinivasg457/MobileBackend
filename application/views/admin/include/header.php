@@ -135,6 +135,15 @@
         width: calc(100% - 20px);
       }
     }
+
+    ul.sidebar-menu.tree li a i {
+      font-size: 14px;
+      margin-right: 0px;
+      font-weight: 400;
+      color: #fafafa;
+    }
+
+
   </style>
 
   <!-- Color picker plugins css -->
