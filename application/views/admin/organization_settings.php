@@ -276,7 +276,7 @@
                 </div>
 
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                    <button type="submit" class="btn btn-info">Save Settings</button>
                 </div>
             </form>
         </div>

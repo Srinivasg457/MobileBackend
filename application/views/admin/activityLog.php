@@ -485,7 +485,7 @@
 
         <div class="entry-header">
             <label>Employee
-                <select id="employeeSelect" class="form-control"></select>
+                <select id="employeeSelect" class="form-control single_select"></select>
             </label>
             <label>Date
                 <input type="date" id="datePicker" class="form-control" value="">

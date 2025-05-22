@@ -131,7 +131,7 @@
                             <div class="row">
                                 <div class="my-4 col-lg-6">
                                     <label for="role_name" class="form-label">Role Name</label>
-                                    <select name="role_id" id="roleDropdown" class="form-control" required>
+                                    <select name="role_id" id="roleDropdown" class="form-control single_select" required>
                                         <option value="">-- Select Role --</option>
                                     </select>
                                 </div>
@@ -270,7 +270,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label">Department</label>
-                                <select class="form-control" name="department1" required>
+                                <select class="form-control single_select" name="department1" required>
                                     <option value="">-- Select Department --</option>
                                     <?php foreach ($departments as $department): ?>
                                         <option value="<?= html_escape($department->id); ?>"
