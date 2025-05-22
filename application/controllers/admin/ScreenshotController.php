@@ -876,6 +876,44 @@ public function get_last_screenshot()
                 ->set_output("Screenshot not found or already deleted.");
         }
     }
+    public function delete_webcam_screenshot()
+    {
+        $webcam_id = $this->input->post('webcam_id');
+        $employee_id = $this->input->post('employee_id');
+
+        if (empty($webcam_id) || empty($employee_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Missing webcam_id or employee_id"
+                ]));
+        }
+
+        // Update status to 0 (soft delete) with additional employee_id check
+        $this->db->where('webcam_id', $webcam_id);
+        $this->db->where('employee_id', $employee_id);
+        $updated = $this->db->update('webcam', ['status' => 0]);
+
+        if ($updated && $this->db->affected_rows() > 0) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode([
+                    "status" => "success",
+                    "message" => "Webcam screenshot marked as deleted."
+                ]));
+        } else {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(404)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Screenshot not found or already deleted."
+                ]));
+        }
+    }
 
     //list of employees based on user ID
     public function list_employees_by_user()
