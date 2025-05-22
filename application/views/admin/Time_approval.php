@@ -1,121 +1,12 @@
 <style>
-    .toast {
-        padding: 10px;
-        margin: 5px;
-        border-radius: 4px;
-        color: #fff;
-        min-width: 200px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .toast-success {
-        background-color: #28a745;
-    }
-
-    .toast-error {
-        background-color: #e74c3c;
-    }
-
-    #toast-container {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 9999;
-    }
-
-    .log-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-
-    .tableDiv {
-        background-color: white;
-        min-height: 100vh;
-        padding: 10px;
-    }
-
-    th,
-    td {
-        padding: 12px;
-        text-align: center;
-        border-bottom: 1px solid #e0e0e0;
-    }
-
-    th {
-        background: #fafafa;
-        font-weight: 600;
-    }
-
-    tr:nth-child(even) {
-        background-color: #fafafa;
-    }
+  
 
     .btn-group {
         display: flex;
         gap: 30px;
         justify-content: end;
     }
-</style>
-<style>
-    /* Existing styles remain the same */
-    .toast {
-        padding: 10px;
-        margin: 5px;
-        border-radius: 4px;
-        color: #fff;
-        min-width: 200px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
 
-    .toast-success {
-        background-color: #28a745;
-    }
-
-    .toast-error {
-        background-color: #e74c3c;
-    }
-
-    #toast-container {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 9999;
-    }
-
-    .log-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-
-    .tableDiv {
-        background-color: white;
-        min-height: 100vh;
-        padding: 10px;
-    }
-
-    th,
-    td {
-        padding: 12px;
-        text-align: center;
-        border-bottom: 1px solid #e0e0e0;
-    }
-
-    th {
-        background: #fafafa;
-        font-weight: 600;
-    }
-
-    tr:nth-child(even) {
-        background-color: #fafafa;
-    }
-
-    .btn-group {
-        display: flex;
-        gap: 30px;
-        justify-content: end;
-    }
 
     /* New mobile-responsive styles */
     @media (max-width: 768px) {
@@ -123,47 +14,32 @@
             flex-direction: column;
             margin: 15px auto !important;
         }
-        
+
         .col-lg-6 {
             width: 100%;
             margin-bottom: 15px;
         }
-        
+
         #employee-select {
             width: 100%;
         }
-        
+
         .btn-group {
             flex-wrap: wrap;
             gap: 10px;
             justify-content: flex-start;
         }
-        
+
         .btn-group button {
             flex: 1 0 100px;
             margin: 5px 0 !important;
         }
-        
-        .log-table {
-            display: block;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        
+
         .content-wrapper h3 {
             font-size: 1.5rem;
             text-align: center;
         }
-        
-        .tableDiv {
-            padding: 5px;
-        }
-        
-        th, td {
-            padding: 8px;
-            font-size: 0.9rem;
-        }
-        
+
         .btn-sm {
             padding: 0.25rem 0.5rem;
             font-size: 0.8rem;
@@ -198,7 +74,7 @@
     <h3>Time Approval</h3>
     <div class="row" style="margin: 25px auto;">
         <div class="col-lg-6">
-         Employee List:   <select id="employee-select" class="form-control">
+         Employee List:   <select id="employee-select" class="form-control single_select">
                 <option value="">Select Employee</option>
             </select>
         </div>
@@ -214,11 +90,11 @@
 
     <hr>
 
-    <div class="tableDiv box">
-        <table class="table table-bordered log-table">
+    <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
+        <table class="table table-hover cushover">
             <thead>
                 <tr>
-                    <th>S.no</th>
+                    <th>#</th>
                     <th>Employee Name</th>
                     <th>Start</th>
                     <th>End</th>
@@ -322,6 +198,9 @@
                     html = `<tr><td colspan="8">No requests found</td></tr>`;
                 } else {
                     timecards.forEach((row, i) => {
+                        const startTime = row.timestamp_start ? row.timestamp_start.slice(0, 5) : '';
+                        const endTime = row.timestamp_end ? row.timestamp_end.slice(0, 5) : '';
+
                         const duration = (row.timestamp_start && row.timestamp_end) ?
                             Math.floor((new Date(`1970-01-01T${row.timestamp_end}`) - new Date(`1970-01-01T${row.timestamp_start}`)) / 60000) + ' mins' :
                             'N/A';
@@ -338,8 +217,8 @@
                             <tr>
                                 <td>${i + 1}</td>
                                 <td>${employeeData[row.employee_id] || 'Unknown'}</td>
-                                <td>${row.timestamp_start}</td>
-                                <td>${row.timestamp_end}</td>
+                                <td>${startTime}</td>
+                                <td>${endTime}</td>
                                 <td>${duration}</td>
                                 <td>${row.reason || ''}</td>
                                 <td class="${row.approved == 1 ? 'text-success' : 'text-warning'}">

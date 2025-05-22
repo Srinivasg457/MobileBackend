@@ -103,7 +103,7 @@
 
             <div class="form-group">
                 <label for="employeeSelect">Select Employee:</label>
-                <select id="employeeSelect" class="form-control"></select>
+                <select id="employeeSelect" class="form-control single_select"></select>
             </div>
 
             <form id="orgExceptionForm">
@@ -118,7 +118,7 @@
                     </div>
                     <div class="col-md-6">
                         <label>Screenshot Interval (mins):</label>
-                        <select name="screenshot_time_interval" class="form-control interval-field">
+                        <select name="screenshot_time_interval" class="form-control interval-field single_select">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="5">5</option>
@@ -136,7 +136,7 @@
                     </div>
                     <div class="col-md-6">
                         <label>Webcam Interval (mins):</label>
-                        <select name="webcam_time_interval" class="form-control interval-field">
+                        <select name="webcam_time_interval" class="form-control interval-field single_select">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="5">5</option>
@@ -186,17 +186,17 @@
                             <option value="5">5</option>
                             <option value="10">10</option>
                         </select> -->
-                        <input type="text" name="timecards_time_interval" class="form-control interval-field" value="1" readonly>
+                        <input type="text" name="timecards_time_interval" class="form-control" value="1" readonly>
                     </div>
 
-                  <div class="col-md-6">
-        <label>Self Login:</label><br>
-        <label class="switch">
-            <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
-            <span class="slider"></span>
-        </label>
-    </div>
-                </div>  
+                    <div class="col-md-6">
+                        <label>Self Login:</label><br>
+                        <label class="switch">
+                            <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
 
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">Save Settings</button>

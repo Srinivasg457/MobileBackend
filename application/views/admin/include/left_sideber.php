@@ -422,6 +422,13 @@
                           <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
                         </a>
                       </li>
+                      <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") {
+                                    echo "active";
+                                  } ?>">
+                        <a href="<?php echo base_url('admin/ScreenshotController/webcam') ?>">
+                          <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
+                        </a>
+                      </li>
                       <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
                                     echo "active";
                                   } ?>">
