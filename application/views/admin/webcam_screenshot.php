@@ -308,7 +308,7 @@
                     >.thumbnail-gallery {
                         border-radius: 12px;
                         padding: 20px;
-                        max-width: 800px;
+                        max-width: auto;
                         margin: 0 auto;
                         text-align: center;
 
@@ -610,9 +610,8 @@
                 $("#popupID").text(id);
                 $("#popupCard").fadeIn();
 
-                async function loadScreenshots() {
-                    try {
-                        let activityDataArray1 = await fetchOverallActivityPercentage(id, date);
+                function loadScreenshots() {
+                    
                         $.ajax({
                             url: "<?= base_url('admin/ScreenshotController/get_webcam_screenshots'); ?>",
                             type: "GET",
@@ -678,8 +677,6 @@
                                             });
 
                                             if (closestScreenshot) {
-                                                const matchingActivity = activityDataArray1.find(item => item.screenshot_id == closestScreenshot.id);
-                                                const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
                                                 let timeWithoutSeconds = closestScreenshot.display_text.split(':').slice(0, 2).join(':');
 
                                                 output += `<div class="screenshot-card" style="box-sizing: border-box; width: calc(16.666% - 10px);">
@@ -729,50 +726,41 @@
                                         $('#modal-image').attr('src', clickedImageUrl);
 
                                         // Set image info
-                                        const matchingActivity = activityDataArray1.find(item => item.screenshot_id == $(this).closest('.screenshot-card').data('id'));
-                                        const overallActivity = matchingActivity ? Math.round(matchingActivity.overall_activity_percent) || 0 : 0;
+
                                         $('#image-info').html(`
-        <span style="display: inline-block; margin: 0 10px;">${clickedTime}</span>
-        <span style="display: inline-block; margin: 0 10px;">•</span>
-        <span style="display: inline-block; margin: 0 10px;">
-            Activity: <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
-        </span>
-    `);
+                                        <span style="display: inline-block; margin: 0 10px;">${clickedTime}</span>
+                                    `);
 
                                         // Clear and rebuild thumbnails
                                         $('#modal-additional-screenshots').empty();
 
                                         allScreenshotsInInterval.forEach(screenshot => {
-                                            const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
-                                            const overallActivity = matchingActivity ? Math.round(matchingActivity.overall_activity_percent) || 0 : 0;
                                             const timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
                                             const isActive = screenshot.image_url === clickedImageUrl;
 
                                             $('#modal-additional-screenshots').append(`
-    <div class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
-         style="cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
-         data-src="${screenshot.image_url}"
-         data-time="${timeWithoutSeconds}"
-         data-activity="${overallActivity}"
-         data-id="${screenshot.id}">
-         
-        <img src="${screenshot.image_url}" 
-             style="width: 100%; height: 100px; object-fit: cover; display: block; filter: ${isActive ? 'none' : 'brightness(0.7)'}; transition: filter 0.3s;">
-        
-        <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
-   
-            <span>${timeWithoutSeconds}</span>
-                <div class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                    <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
-                </div>
-            </div>
-        </div>
+                                                <div class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
+                                                    style="cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
+                                                    data-src="${screenshot.image_url}"
+                                                    data-time="${timeWithoutSeconds}"
+                                                    data-id="${screenshot.id}">
+                                                    
+                                                    <img src="${screenshot.image_url}" 
+                                                        style="width: 100%; height: 100px; object-fit: cover; display: block; filter: ${isActive ? 'none' : 'brightness(0.7)'}; transition: filter 0.3s;">
+                                                    
+                                                    <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
+                                                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                            
+                                                        <span>${timeWithoutSeconds}</span>
+                                                            <div class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                                                                <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-        ${isActive ? '<div class="active-indicator" style="position: absolute; top: 5px; right: 5px; width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; border: 2px solid white;"></div>' : ''}
-    </div>
-`);
+                                                    ${isActive ? '<div class="active-indicator" style="position: absolute; top: 5px; right: 5px; width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; border: 2px solid white;"></div>' : ''}
+                                                </div>
+                                            `);
 
 
                                         });
@@ -851,12 +839,8 @@
                                             // Update main image
                                             $('#modal-image').attr('src', newSrc);
                                             $('#image-info').html(`
-            <span style="display: inline-block; margin: 0 10px;">${newTime}</span>
-            <span style="display: inline-block; margin: 0 10px;">•</span>
-            <span style="display: inline-block; margin: 0 10px;">
-                Activity: <span style="color: ${getActivityColor(newActivity)}; font-weight: bold;">${newActivity}%</span>
-            </span>
-        `);
+                                    <span style="display: inline-block; margin: 0 10px;">${newTime}</span>
+                                `);
 
                                             // Update active state
                                             $('.thumbnail-item').removeClass('active-thumbnail')
@@ -921,10 +905,6 @@
                                 $(".screenshot-container").html("<p>Error loading screenshots. Please try again.</p>");
                             }
                         });
-                    } catch (error) {
-                        console.error("Error in loadScreenshots:", error);
-                        showToast("Error loading screenshots: " + error.message, "error");
-                    }
                 }
 
                 loadScreenshots();
