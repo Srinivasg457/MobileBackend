@@ -1,489 +1,659 @@
-<div class="content-wrapper">
-    <section class="content" style="padding-top: 0;">
-        <style>
-            .popup {
-                display: none;
-                padding: 10px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            }
+ <style>
+     .popup {
+         display: none;
+         padding: 10px;
+     }
 
-            .cancel-btn {
-                background-color: black;
-                color: white;
-                border: none;
-                border-radius: 10px;
-                font-size: 18px;
-                padding: 6px 12px;
-            }
+     .cancel-btn {
+         background-color: black;
+         color: white;
+         border: none;
+         border-radius: 10px;
+         font-size: 20px;
+     }
 
-            .cancel-btn:hover {
-                background-color: #0b3d1a;
-            }
+     .cancel-btn:hover {
+         background-color: #0b3d1a;
+     }
 
-            .header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid #ccc;
-                padding-bottom: 10px;
-                flex-wrap: wrap;
-            }
+     .header {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         border-bottom: 1px solid #ccc;
+         padding-bottom: 10px;
+         flex-wrap: wrap;
+     }
 
-            .search-row {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin: 20px 0;
-                flex-wrap: wrap;
-            }
+     .breadcrumbs {
+         font-size: 14px;
+         color: #555;
+     }
 
-            .search-row input,
-            .search-row select {
-                padding: 10px;
-                font-size: 15px;
-                width: 100%;
-                max-width: 300px;
-                box-sizing: border-box;
-                border: 1px solid #ccc;
-                border-radius: 8px;
-            }
+     .search-row {
+         display: flex;
+         align-items: center;
+         gap: 10px;
+         margin: 20px 0;
+     }
 
-            .screenshot-row {
-                /* display: flex;
-        flex-wrap: wrap;
-        gap: 10px; */
-                border: 1px solid #eee;
-                padding: 15px;
-                border-radius: 8px;
-                background: #fff;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-                margin-top: 15px;
-                overflow-y: auto;
-            }
+     .search-row input,
+     .search-row select {
+         width: 100%;
+         max-width: 100%;
+         box-sizing: border-box;
+     }
 
-            .screenshot-card {
-                /* flex: 1 1 calc(16.66% - 10px); */
-                background-color: #F4F6F9;
-                border-radius: 6px;
-                padding: 8px;
-                text-align: center;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-                transition: transform 0.2s;
-                border: 0.1px solid #a9a7a7;
+     .card-container {
+         width: 100%;
+         display: flex;
+         flex-direction: column;
 
-            }
+         >p {
+             text-align: center;
+         }
+     }
 
-            .screenshot-card:hover {
-                transform: scale(1.02);
-            }
+     .user-card {
+         /* border: 1px solid #ccc; */
+         padding: 15px;
+         border-radius: 6px;
+         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+         background-color: white;
+     }
 
-            .screenshot-card img {
-                width: 100%;
-                height: 90px;
-                object-fit: cover;
-                border-radius: 4px;
-                margin-bottom: 6px;
-            }
+     .user-info-line {
+         display: flex;
+         flex-wrap: wrap;
+         gap: 20px;
+         font-size: 14px;
+         margin-bottom: 10px;
+     }
 
-            .screenshot-card p {
-                font-size: 12px;
-                color: #333;
-                margin: 0;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
+     .user-info-line span {
+         font-weight: bold;
+     }
 
-            #screenshot-modal {
-                display: none;
-                position: fixed;
-                z-index: 1111;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                text-align: center;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-            }
+     .timestamp-boxes {
+         display: flex;
+         flex-wrap: wrap;
+         gap: 10px;
+         overflow: hidden;
+     }
 
-            #close-modal {
-                position: absolute;
-                top: 20px;
-                right: 40px;
-                font-size: 40px;
-                color: white;
-                cursor: pointer;
-            }
+     .see-more-button {
+         padding: 6px 12px;
+         font-size: 14px;
+         background-color: #007bff;
+         color: #fff;
+         border: none;
+         border-radius: 4px;
+         cursor: pointer;
+     }
 
-            #modal-image {
-                position: relative;
-                top: 75px;
-                max-width: 90%;
-                max-height: 90%;
-                border: 5px solid white;
-                border-radius: 10px;
-                box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-            }
+     .see-more-button:hover {
+         background-color: #0056b3;
+     }
 
-            /* Responsive Breakpoints */
-            @media (max-width: 992px) {
-                .screenshot-card {
-                    flex: 1 1 calc(25% - 10px);
-                }
-            }
+     .screenshot-row {
+         display: flex;
+         flex-wrap: wrap;
+         gap: 10px;
+         border: 1px solid #eee;
+         padding: 15px;
+         border-radius: 8px;
+         background: #fff;
+         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+         width: 100%;
+     }
 
-            @media (max-width: 768px) {
-                .header {
-                    flex-direction: column;
-                    align-items: flex-start;
-                }
+     .screenshot-card {
+         background-color: #F4F6F9;
+         border-radius: 6px;
+         padding: 8px;
+         text-align: center;
+         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+         transition: transform 0.2s;
+         border: 0.1px solid #a9a7a7;
+     }
 
-                .search-row input,
-                .search-row select {
-                    width: 100%;
-                }
+     .screenshot-card:hover {
+         transform: scale(1.02);
+     }
 
-                .screenshot-card {
-                    flex: 1 1 calc(33.33% - 10px);
-                }
-            }
+     .screenshot-card img {
+         width: 100%;
+         height: 110px;
+         object-fit: cover;
+         border-radius: 4px;
+         margin-bottom: 6px;
+     }
 
-            @media (max-width: 576px) {
-                .screenshot-card {
-                    flex: 1 1 calc(50% - 10px);
-                }
+     .screenshot-card p {
+         font-size: 12px;
+         color: #333;
+         margin: 0;
+         white-space: nowrap;
+         overflow: hidden;
+         text-overflow: ellipsis;
+     }
 
-                .cancel-btn {
-                    font-size: 16px;
-                    padding: 5px 10px;
-                }
+     #search-btn {
+         background-color: transparent;
+         border: none;
+         cursor: pointer;
+         font-size: 18px;
+         color: #333;
+     }
 
-                #close-modal {
-                    font-size: 30px;
-                    right: 20px;
-                }
-            }
+     @media (min-width: 1600px) {
+         .container {
+             width: auto !important;
+             max-width: none !important;
+         }
+     }
 
-            @media (max-width: 400px) {
-                .screenshot-card {
-                    flex: 1 1 100%;
-                }
+     /* ---------- Mobile Responsive Styling ---------- */
+     @media (max-width: 768px) {
+         .header {
+             flex-direction: column;
+             align-items: flex-start;
+         }
 
-                .search-row {
-                    flex-direction: column;
-                    gap: 5px;
-                }
-            }
+         .search-row {
+             flex-direction: column;
+             align-items: stretch;
+         }
 
-            @media (min-width: 1600px) {
-                .container {
-                    width: auto !important;
-                    max-width: 100% !important;
-                }
-            }
-        </style>
+         .screenshot-card {
+             width: 48%;
+         }
 
+         .user-info-line {
+             flex-direction: column;
+         }
 
-        <!-- Popup Div -->
-        <div class="popup" id="popupCard">
-            <div class="d-flex justify-content-between mb-5">
-                <h5><strong>Name:</strong> <span id="popupName"></span></h5>
-                <h5><strong>User ID:</strong> <span id="popupID"></span></h5>
-                <button class="cancel-btn" onclick="closePopup()">
-                    <i class="fa fa-times-circle"></i>
-                </button>
-            </div>
-            <div class="container" style="display: none;">
-                <div class="header">
-                    <h3>Screenshots</h3>
-                </div>
-            </div>
-            <div class="row screenshot-container"></div>
-        </div>
+         .cancel-btn {
+             font-size: 16px;
+             padding: 8px 12px;
+         }
 
-        <!-- Screenshot Section -->
-        <div class="container">
-            <div class="header">
-                <h3>Screenshots</h3>
-            </div>
+         .breadcrumbs {
+             font-size: 12px;
+         }
 
-            <!-- Filter only by date -->
-            <div class="search-row">
-                Date: <input type="date" id="datePicker" value="">
-            </div>
+         .see-more-button {
+             font-size: 12px;
+         }
 
-            <!-- Main Screenshot Row for Logged-in User -->
-            <div class="screenshot-row" id="userScreenshotRow"></div>
-        </div>
+         .screenshot-card img {
+             height: 70px;
+         }
 
-        <!-- Modal for Screenshot Preview -->
-        <div id="screenshot-modal">
-            <span id="close-modal">&times;</span>
-            <img id="modal-image">
-        </div>
+         .screenshot-card p {
+             font-size: 11px;
+         }
 
-        <script>
-            const today = new Date().toISOString().split('T')[0];
-            $('#datePicker').val(today);
+         .toast {
+             font-size: 13px;
+             min-width: 180px;
+         }
 
-            function closePopup() {
-                $('#popupCard').fadeOut();
-                $('.container').fadeIn();
-            }
+         .screenshot-row,
+         .screenshot-visible,
+         .screenshot-hidden {
+             justify-content: center;
+         }
 
-            $(document).ready(function() {
-                let activityDataArray = []; // store activity data globally
-
-                function fetchOverallActivityPercentage(date1 = '') {
-                    activityDataArray = [];
-                    return new Promise((resolve, reject) => {
-                        $.ajax({
-                            url: "<?= base_url('admin/Activity_logs/get_activity'); ?>",
-                            method: 'GET',
-                            dataType: 'json',
-                            data: {
-                                date: date1
-                            },
-                            success: function(response) {
-                                resolve(response.data); // save the array globally                                
-
-                            },
-                            error: function(xhr, status, error) {
-                                reject(error);
-                            }
-                        });
-                    });
-                }
-
-                let lastFetchedTime = null;
-
-                async function fetchUserScreenshots(date = '') {
-                    try {
-                        const activityDataArray1 = await fetchOverallActivityPercentage(date);
-                        console.log('Activity data:', activityDataArray1);
-                        $.ajax({
-                            url: "<?= base_url('/admin/ScreenshotController/get_user_screenshots'); ?>",
-                            type: "GET",
-                            dataType: "json",
-                            data: {
-                                date: date
-                            },
-                            success: function(response) {
-                                    const container = $(".screenshot-row");
-                                    console.log(response);
-
-                                    if (response.status === "success" && response.screenshots.length > 0) {
-                                        let output_screen = "";
-
-                                        const screenshotsPerGroup = 12;
-
-                                        // Group by 1 hour intervals dynamically
-                                        const groupedScreenshots = {};
-                                        response.screenshots.forEach((screenshot) => {
-                                            const time = screenshot.display_text;
-                                            const hour = time.split(":")[0];
-                                            const groupLabel = `${hour.padStart(2, '0')}:00 - ${String(Number(hour) + 1).padStart(2, '0')}:00`;
-
-                                            if (!groupedScreenshots[groupLabel]) {
-                                                groupedScreenshots[groupLabel] = [];
-                                            }
-
-                                            groupedScreenshots[groupLabel].push(screenshot);
-                                        });
-
-                                        $.each(groupedScreenshots, function(timeRange, groupScreenshots) {
-                                            const groupId = `group-${timeRange.replace(/[^a-zA-Z0-9]/g, "")}`;
-                                            output_screen += `
-                        <div class="screenshot-group" style="border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 30px;">
-                            <div style="font-weight: bold; margin-bottom: 10px;">Time: ${timeRange}</div>
-                            <div class="screenshot-visible" style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    `;
-
-                                            groupScreenshots.slice(0, screenshotsPerGroup).forEach((screenshot) => {
-                                                // Find the corresponding activity percent
-                                                const matchingActivity = activityDataArray1.find(item => item.screenshot_id == screenshot.id);
-                                                const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
-                                                let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
-
-                                                output_screen +=
-                                                    `<div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
-
-    <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
-    <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
-        <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                     <svg viewBox="0 0 36 36" width="40" height="40">
-                    <!-- Background circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="#e6e6e6"
-                    stroke-width="4"
-                    />
-                    
-                    <!-- Progress circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="green"
-                    stroke-width="4"
-                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
-                    stroke-dashoffset="25"  <!-- makes it start from top -->
-                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
-                />
-            </svg>
-            <div style="position: absolute; top: 50%; left: 50%; 
-                        transform: translate(-50%, -50%);
-                        font-size: 10px; font-weight: bold;">
-                ${Math.round(overallActivity)}%
+     }
 
 
-            </div>
-        </div>
-        <span>${timeWithoutSeconds}</span>
-    </div>
-</div>`;
+     /* For mobile responsiveness (adjust max-width as needed) */
+     @media (max-width: 768px) {
+         .screenshot-card {
+             width: 200px;
+         }
+     }
 
-                                            });
-
-
-                                            output_screen += `
-                            </div> <!-- end visible -->
-                            <div class="screenshot-hidden" id="${groupId}-extra" style="display: none; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                    `;
-
-
-                                            groupScreenshots.slice(screenshotsPerGroup).forEach((screenshot) => {
-                                                const matchingActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
-                                                const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? '0') : '0';
-                                                let timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
+     /* Add these styles to your CSS */
+     .delete-thumbnail {
+         opacity: 1;
+         /* Changed from 0 to 1 to make it always visible */
+         transform: scale(1);
+         /* Changed from 0.8 to 1 */
+         transition: all 0.2s ease;
+     }
 
 
-                                                output_screen += `
-                            <div class="screenshot-card" style="width: calc(100% / 6 - 10px); box-sizing: border-box;">
-                                <img src="${screenshot.image_url}" class="zoomable-screenshot" alt="Screenshot" style="width: 100%; cursor: pointer;">
-                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
-                                       <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                     <svg viewBox="0 0 36 36" width="40" height="40">
-                    <!-- Background circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="#e6e6e6"
-                    stroke-width="4"
-                    />
-                    
-                    <!-- Progress circle -->
-                    <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9155"
-                    fill="none"
-                    stroke="green"
-                    stroke-width="4"
-                    stroke-dasharray="${overallActivity} ${100 - overallActivity}"
-                    stroke-dashoffset="25"  <!-- makes it start from top -->
-                    transform="rotate(-90 18 18)"  <!-- rotates start point to top -->
-                />
-            </svg>
-            <div style="position: absolute; top: 50%; left: 50%; 
-                        transform: translate(-50%, -50%);
-                        font-size: 10px; font-weight: bold;cursor: pointer;"
-                        data-toggle="tooltip" data-placement="top" title="${Math.round(overallActivity)}%">
-                ${Math.round(overallActivity)}%
+
+     .delete-thumbnail:hover {
+         transform: scale(1.1);
+     }
+
+
+     .thumbnail-item.deleting {
+         transform: scale(0.8) translateY(20px);
+         opacity: 0;
+         transition: all 0.3s ease;
+     }
+
+     #screenshot-modal {
+         display: none;
+         position: fixed;
+         z-index: 1111;
+         left: 0;
+         top: 0;
+         width: 100%;
+         height: 100%;
+         background: rgba(0, 0, 0, 0.9);
+
+         >div {
+             max-width: 1200px;
+             margin: auto;
+             padding: 20px;
+             height: 100%;
+
+             >#close-modal {
+                 display: block;
+                 font-size: 40px;
+                 color: white;
+                 cursor: pointer;
+                 text-align: end;
+                 text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+             }
+
+             .main-image-container {
+                 border-radius: 12px;
+                 padding: 15px;
+                 margin-bottom: 30px;
+                 position: relative;
+                 height: 70%;
+
+                 >#modal-image {
+                     max-width: 100%;
+                     max-height: 100%;
+                     display: block;
+                     margin: 0 auto;
+                     border-radius: 8px;
+                 }
+
+                 >#image-info {
+                     color: white;
+                     text-align: center;
+                     margin-top: 15px;
+                     font-size: 16px;
+                     opacity: 0.9;
+                 }
+             }
+
+             >.thumbnail-gallery {
+                 border-radius: 12px;
+                 padding: 20px;
+                 max-width: auto;
+                 margin: 0 auto;
+                 text-align: center;
+
+                 >#modal-additional-screenshots {
+                     display: flex;
+                     flex-wrap: wrap;
+                     justify-content: center;
+                     gap: 15px;
+                 }
+             }
+         }
+     }
+
+     /* Add these styles to your CSS */
+     #screenshot-modal {
+         transition: opacity 0.3s ease;
+     }
+
+     .thumbnail-item {
+         transition: transform 0.3s ease, box-shadow 0.3s ease;
+     }
+
+     .thumbnail-item:hover {
+         transform: translateY(-5px);
+         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+     }
+
+     .active-thumbnail {
+         box-shadow: 0 0 0 3px #4CAF50;
+     }
+
+     #modal-image {
+         transition: opacity 0.3s ease;
+     }
+
+     /* Custom scrollbar for thumbnails */
+     #modal-additional-screenshots::-webkit-scrollbar {
+         height: 8px;
+         width: 8px;
+     }
+
+     #modal-additional-screenshots::-webkit-scrollbar-track {
+         background: rgba(255, 255, 255, 0.1);
+         border-radius: 10px;
+     }
+
+     #modal-additional-screenshots::-webkit-scrollbar-thumb {
+         background: rgba(255, 255, 255, 0.3);
+         border-radius: 10px;
+     }
+
+     #modal-additional-screenshots::-webkit-scrollbar-thumb:hover {
+         background: rgba(255, 255, 255, 0.5);
+     }
+ </style>
+ <div class="content-wrapper">
+     <section class="content" style="padding-top: 0;">
+         <!-- Screenshot Section -->
+         <div class="container">
+             <div class="header">
+                 <h3>Screenshots</h3>
+             </div>
+
+             <!-- Search Filters -->
+             <div class="search-row">
+                 <!-- <button id="search-btn"> -->
+                 <!-- <i class="fa fa-search"></i> -->
+                 <!-- </button> -->
+                 Date: <input type="date" id="datePicker" class="form-control" value="">
+                 <select id="sortOrder" class="form-control">
+                     <option value="">Sort By</option>
+                     <option value="ascending">Ascending</option>
+                     <option value="descending">Descending</option>
+                 </select>
+
+             </div>
+             <div class="card-container"></div>
+         </div>
+ </div>
+ </div>
+
+ <!-- Modal for Screenshot Preview -->
+ <div id="screenshot-modal">
+
+     <div>
+         <!-- Main Image Container -->
+         <span id="close-modal">&times;</span>
+
+         <div class="main-image-container">
+             <img id="modal-image">
+             <div id="image-info"></div>
+         </div>
+
+         <!-- Thumbnail Gallery -->
+         <div class="thumbnail-gallery">
+             <div id="modal-additional-screenshots">
+
+                 <!-- Repeat for additional images -->
+             </div>
+         </div>
+     </div>
+ </div>
+
+
+ <script>
+     let currentSortOrder = 'ascending';
+     $(document).ready(function() {
+         const today = new Date().toISOString().split('T')[0];
+         $('#sortOrder').on('change', function() {
+             currentSortOrder = $(this).val();
+             loadScreenshots();
+         });
+
+         $('#datePicker').val(today);
+         loadScreenshots();
+
+         $('#datePicker').on('change', function() {
+             loadScreenshots();
+         });
+
+         $('#close-modal').on('click', function() {
+             $('#screenshot-modal').hide();
+         });
+
+         $('#screenshot-modal').on('click', function(e) {
+             if (!$(e.target).closest('#screenshot-modal > div').length) {
+                 $(this).hide();
+             }
+         });
+
+     });
+
+     function fetchOverallActivityPercentage(date = '') {
+         return new Promise((resolve, reject) => {
+             $.ajax({
+                 url: "<?= base_url('admin/Activity_logs/get_activity'); ?>",
+                 method: 'GET',
+                 dataType: 'json',
+                 data: {
+                     date
+                 },
+                 success: function(response) {
+                     resolve(response.data);
+                 },
+                 error: function(xhr, status, error) {
+                     reject(error);
+                 }
+             });
+         });
+     }
+
+     let activityDataArray = []; // <-- Global declaration
+
+     async function loadScreenshots() {
+         let date = $("#datePicker").val();
+         try {
+             activityDataArray = await fetchOverallActivityPercentage(date); // <-- Just assign
+             console.log(activityDataArray);
+
+             $.ajax({
+                 url: "<?= base_url('admin/ScreenshotController/get_user_screenshots'); ?>",
+                 type: "GET",
+                 dataType: "json",
+                 data: {
+                     date
+                 },
+                 success: function(response) {
+                     if (response.status === "success" && response.screenshots.length > 0) {
+                         let output = '';
+                         const groupedByHour = {};
+
+                         response.screenshots.forEach((screenshot) => {
+                             const time = screenshot.display_text;
+                             const hour = time.split(":")[0].padStart(2, '0');
+                             const hourLabel = `${hour}:00 - ${String(Number(hour) + 1).padStart(2, '0')}:00`;
+
+                             if (!groupedByHour[hourLabel]) {
+                                 groupedByHour[hourLabel] = [];
+                             }
+                             groupedByHour[hourLabel].push(screenshot);
+                         });
+
+                         Object.keys(groupedByHour)
+                             .sort((a, b) => {
+                                 const hourA = parseInt(a.split(':')[0]);
+                                 const hourB = parseInt(b.split(':')[0]);
+                                 return currentSortOrder === 'descending' ? hourB - hourA : hourA - hourB;
+                             })
+                             .forEach(function(hourRange) {
+                                 const screenshots = groupedByHour[hourRange];
+                                 const groupId = `group-${hourRange.replace(/[^a-zA-Z0-9]/g, "")}`;
+                                 output += `
+                                <div class="screenshot-group box" style="padding: 10px; border-radius: 8px; margin-bottom: 30px;">
+                                    <div class="box-header" style="font-weight: bold; margin-bottom: 10px;">Time: ${hourRange}</div>
+                                    <div class="screenshot-visible" style="display: flex; flex-wrap: wrap; gap: 10px;">`;
+
+                                 const intervalScreenshots = {};
+                                 screenshots.forEach(screenshot => {
+                                     const [hours, minutes] = screenshot.display_text.split(':').map(Number);
+                                     const interval = Math.floor(minutes / 10) * 10;
+                                     const intervalKey = `${hours}:${interval}`;
+
+                                     if (!intervalScreenshots[intervalKey]) {
+                                         intervalScreenshots[intervalKey] = [];
+                                     }
+                                     intervalScreenshots[intervalKey].push(screenshot);
+                                 });
+
+                                 Object.keys(intervalScreenshots).forEach(intervalKey => {
+                                     const screenshotsInInterval = intervalScreenshots[intervalKey];
+                                     let closestScreenshot = null;
+                                     let smallestDiff = Infinity;
+                                     const targetMinute = parseInt(intervalKey.split(':')[1]) + 5;
+
+                                     screenshotsInInterval.forEach(screenshot => {
+                                         const minutes = parseInt(screenshot.display_text.split(':')[1]);
+                                         const diff = Math.abs(minutes - targetMinute);
+                                         if (diff < smallestDiff) {
+                                             smallestDiff = diff;
+                                             closestScreenshot = screenshot;
+                                         }
+                                     });
+
+                                     if (closestScreenshot) {
+                                         const matchingActivity = activityDataArray.find(item => item.screenshot_id == closestScreenshot.id);
+                                         const overallActivity = matchingActivity ? (matchingActivity.overall_activity_percent ?? 0) : 0;
+                                         const timeWithoutSeconds = closestScreenshot.display_text.split(':').slice(0, 2).join(':');
+
+                                         output += `
+                                        <div class="screenshot-card" style="box-sizing: border-box;" data-id="${closestScreenshot.id}">
+                                            <img src="${closestScreenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot"
+                                                style="width: 100%; cursor: pointer;"
+                                                data-interval="${intervalKey}"
+                                                data-hour-range="${hourRange}"
+                                                data-activity-percent="${Math.round(overallActivity)}">
+                                            <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                                <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                                    <svg viewBox="0 0 36 36" width="40" height="40">
+                                                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
+                                                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
+                                                            stroke-dasharray="${overallActivity} ${100 - overallActivity}"
+                                                            stroke-dashoffset="25"
+                                                            transform="rotate(-90 18 18)"/>
+                                                    </svg>
+                                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                                        data-toggle="tooltip" title="${Math.round(overallActivity)}%">
+                                                        ${Math.round(overallActivity)}%
+                                                    </div>
+                                                </div>
+                                                <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
+                                            </div>
+                                            <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
+                                        </div>`;
+                                     }
+                                 });
+
+                                 output += `</div></div>`;
+                             });
+
+                         $(".card-container").html(output);
+                         $('[data-toggle="tooltip"]').tooltip();
+
+                         $('.see-zoomable-screenshot').on('click', function() {
+                             const interval = $(this).data('interval');
+                             const hourRange = $(this).data('hour-range');
+                             const activity = $(this).data('activity-percent');
+                             const clickedTime = $(this).closest('.screenshot-card').find('p').text();
+                             const clickedImageUrl = $(this).attr('src');
+                             const screenshotId = $(this).closest('.screenshot-card').data('id');
+
+                             $('#modal-image').attr('src', clickedImageUrl);
+
+                             $('#image-info').html(`
+                                <span style="margin: 0 10px;">${clickedTime}</span>
+                                <span style="margin: 0 10px;">•</span>
+                                <span style="margin: 0 10px;">
+                                    Activity: <span style="color: ${getActivityColor(activity)}; font-weight: bold;">${activity}%</span>
+                                </span>`);
+
+                             $('#modal-additional-screenshots').empty();
+
+                             const allScreenshots = groupedByHour[hourRange].filter(screenshot => {
+                                 const [hours, minutes] = screenshot.display_text.split(':').map(Number);
+                                 return `${hours}:${Math.floor(minutes / 10) * 10}` === interval;
+                             }).sort((a, b) => a.display_text.localeCompare(b.display_text));
+
+                             allScreenshots.forEach(screenshot => {
+                                 const matchActivity = activityDataArray.find(item => item.screenshot_id == screenshot.id);
+                                 const activityPercent = matchActivity ? Math.round(matchActivity.overall_activity_percent || 0) : 0;
+                                 const time = screenshot.display_text.split(':').slice(0, 2).join(':');
+                                 const isActive = screenshot.image_url === clickedImageUrl;
+
+                                 $('#modal-additional-screenshots').append(`
+                                    <div class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
+                                        style="cursor: pointer; border-radius: 8px; overflow: hidden; position: relative;"
+                                        data-src="${screenshot.image_url}"
+                                        data-time="${time}"
+                                        data-activity="${activityPercent}">
+                                        <img src="${screenshot.image_url}" 
+                                            style="width: 100%; height: 100px; object-fit: cover; filter: ${isActive ? 'none' : 'brightness(0.7)'};">
+                                        <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <span style="color: ${getActivityColor(activityPercent)}; font-weight: bold;">${activityPercent}%</span>
+                                                <span>${time}</span>
+                                            </div>
+                                        </div>
+                                    </div>`);
+                             });
+
+                             $('#screenshot-modal').fadeIn();
+
+                             $('.thumbnail-item').on('click', function() {
+                                 const newSrc = $(this).data('src');
+                                 const newTime = $(this).data('time');
+                                 const newActivity = $(this).data('activity');
+
+                                 $('#modal-image').attr('src', newSrc);
+                                 $('#image-info').html(`
+                                    <span style="margin: 0 10px;">${newTime}</span>
+                                    <span style="margin: 0 10px;">•</span>
+                                    <span style="margin: 0 10px;">
+                                        Activity: <span style="color: ${getActivityColor(newActivity)}; font-weight: bold;">${newActivity}%</span>
+                                    </span>`);
+
+                                 $('.thumbnail-item').removeClass('active-thumbnail').find('img').css('filter', 'brightness(0.7)');
+                                 $(this).addClass('active-thumbnail').find('img').css('filter', 'none');
+
+                                 this.scrollIntoView({
+                                     behavior: 'smooth',
+                                     block: 'nearest',
+                                     inline: 'center'
+                                 });
+                             });
+                         });
+
+                         if (date === new Date().toISOString().split('T')[0]) {
+                             setTimeout(loadScreenshots, 60000); // Auto-refresh for today
+                         }
+                     } else {
+                         $(".card-container").html(`
+                            <div class="box">
+                                <div class="box-header with-border text-center">
+                                    <h3 class="box-title">
+                                        <strong class="text-right">No screenshots available.</strong>
+                                    </h3>
                                 </div>
                             </div>
-                                    <span>${timeWithoutSeconds}</span>
-                                </div>
-                            </div>
-                        `;
-                                            });
+                        `);
+                     }
+                 },
+                 error: function(xhr, status, error) {
+                     console.error("AJAX Error:", status, error);
+                     $(".card-container").html("<p>Error loading screenshots. Please try again.</p>");
+                 }
+             });
+         } catch (error) {
+             console.error("Error in loadScreenshots:", error);
+             showToast("Error loading screenshots: " + error.message, "error");
+         }
+     }
 
-                                            output_screen += `
-                            </div> <!-- end hidden -->
-                            ${groupScreenshots.length > screenshotsPerGroup ? `
-                                <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-                                    <button class="toggle-button" data-target="${groupId}-extra" style="padding: 6px 12px; font-size: 13px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">See More</button>
-                                </div>
-                            ` : ''}
-                        </div> <!-- end screenshot group -->
-                    `;
-                                        });
-
-                                        container.html(output_screen);
-                                        $('#datePicker').val(response.date);
-
-                                        // Modal functionality
-                                        $('.zoomable-screenshot').on('click', function() {
-                                            $('#modal-image').attr('src', $(this).attr('src'));
-                                            $('#screenshot-modal').fadeIn();
-                                        });
-
-                                        $('#close-modal').on('click', function() {
-                                            $('#screenshot-modal').fadeOut();
-                                        });
-
-                                        // Toggle See More / See Less
-                                        $('.toggle-button').on('click', function() {
-                                            const targetId = $(this).data('target');
-                                            const target = $(`#${targetId}`);
-                                            const isVisible = target.is(':visible');
-
-                                            if (isVisible) {
-                                                target.slideUp();
-                                                $(this).text('See More');
-                                            } else {
-                                                target.css('display', 'flex').hide().slideDown(); // Ensures flex layout is applied
-                                                $(this).text('See Less');
-                                            }
-                                        });
-
-                                        lastFetchedTime = response.screenshots[response.screenshots.length - 1].display_text;
-                                    } else {
-                                        container.html("<p>No screenshots available.</p>");
-                                        $('#datePicker').val(response.date);
-                                    }
-
-                                    // Auto-refresh after 5.5 minutes
-                                    if ($('#datePicker').val() === new Date().toISOString().split('T')[0]) {
-
-                                        setTimeout(() => {
-                                            let selectedDate = $('#datePicker').val();
-                                            fetchUserScreenshots(selectedDate);
-                                        }, 60000);
-                                    }
-                                }
-
-
-
-                                ,
-                            error: function(response) {
-                                console.log(response);
-                            }
-                        });
-                    } catch (error) {
-                        console.error("Error fetching screenshots:", error);
-                    }
-                }
-
-
-
-                // Load screenshots when date changes
-                $('#datePicker').on('change', function() {
-                    fetchUserScreenshots($(this).val());
-                });
-
-                // Initial load on page ready
-                fetchUserScreenshots();
-            });
-        </script>
-    </section>
-</div>
+     function getActivityColor(percentage) {
+         if (percentage >= 70) return '#4CAF50'; // Green
+         if (percentage >= 40) return '#FFC107'; // Amber
+         return '#F44336'; // Red
+     }
+ </script>
