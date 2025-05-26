@@ -520,148 +520,84 @@ class ScreenshotController extends Home_Controller
     //                 "message" => empty($screenshots) ? "No screenshots found for user ID {$user_id} on {$date}" : null
     //             ]));
     //     }
-    public function get_screenshots()
-    {
-        $employee_id = $this->input->get('employee_id') ?? 4;
-        $user_id = $this->input->get('user_id') ?? 3;
-        $date = '2025-05-26'; // Optional
-    
-        if (empty($user_id) && empty($employee_id)) {
-            return $this->output->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    "status" => "error",
-                    "message" => "Missing user_id or employee_id"
-                ]));
-        }
-    
-        if (empty($date)) {
-            $date = date('Y-m-d');
-        }
-    
-        $user_folder = $user_id;
-        $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
-        $compressed_path = FCPATH . "uploads/screenshots/{$user_folder}/compressed/";
-    
-        if (!is_dir($upload_path)) {
-            return $this->output->set_content_type('application/json')
-                ->set_status_header(404)
-                ->set_output(json_encode([
-                    "status" => "error",
-                    "message" => "No screenshot folder found for user ID {$user_id}"
-                ]));
-        }
-    
-        // Create compressed directory if it doesn't exist
-        if (!is_dir($compressed_path)) {
-            mkdir($compressed_path, 0755, true);
-        }
-    
-        // Fetch screenshot records from DB where status = 1
-        $this->db->select('screenshot_id, file_path, created_at');
-        $this->db->where('employee_id', $employee_id);
-        $this->db->where('user_id', $user_id);
-        $this->db->where('status', 1);
-        $this->db->like('created_at', $date);
-        $this->db->order_by('created_at', 'DESC');
-        $query = $this->db->get('screenshots');
-        $db_screenshots = $query->result_array();
-    
-        $screenshots = [];
-        $total_original_size = 0;
-        $total_compressed_size = 0;
-        $compressed_count = 0;
-        $failed_compression = 0;
-    
-        foreach ($db_screenshots as $row) {
-            $filename = basename($row['file_path']);
-            $full_path = $upload_path . $filename;
-            $compressed_filename = 'compressed_' . $filename;
-            $compressed_full_path = $compressed_path . $compressed_filename;
-        
-            if (file_exists($full_path)) {
-                $original_size = filesize($full_path) / 1024; // Size in KB
-                $total_original_size += $original_size;
-                
-                $compressed_size = 0;
-                
-                // Strictly compress to under 6KB
-                if ($this->strict_compress_image($full_path, $compressed_full_path, 6)) {
-                    $compressed_size = file_exists($compressed_full_path) ? filesize($compressed_full_path) / 1024 : 0;
-                    
-                    // Verify the size is strictly below 6KB
-                    if ($compressed_size >= 10) {
-                        // If still too large, delete the compressed version and mark as failed
-                        @unlink($compressed_full_path);
-                        $failed_compression++;
-                        continue;
-                    }
-                    
-                    $compressed_count++;
-                    $total_compressed_size += $compressed_size;
-                } else {
-                    $failed_compression++;
-                    continue;
-                }
-    
-                $formatted_time = date('H:i:s', strtotime($row['created_at']));
-        
-                $screenshots[] = [
-                    'id' => $row['screenshot_id'],
-                    'file_name' => $compressed_filename,
-                    'image_url' => base_url("uploads/screenshots/{$user_folder}/compressed/{$compressed_filename}"),
-                    'created_at' => $formatted_time,
-                    'display_text' => $formatted_time,
-                    'original_size_kb' => round($original_size, 2),
-                    'compressed_size_kb' => round($compressed_size, 2),
-                    'compression_ratio' => $original_size > 0 ? round(($original_size - $compressed_size) / $original_size * 100, 2) : 0,
-                    'compression_status' => $compressed_size < 10 ? 'success' : 'failed'
-                ];
-            }
-        }
-    
-        $compression_message = '';
-        if ($compressed_count > 0) {
-            $compression_message = "Successfully compressed {$compressed_count} images to under 6KB. ";
-        }
-        if ($failed_compression > 0) {
-            $compression_message .= "Failed to compress {$failed_compression} images to under 6KB. ";
-        }
-        
-        $compression_message .= sprintf(
-            "Total size reduced from %.2fKB to %.2fKB (%.2f%% reduction)",
-            $total_original_size,
-            $total_compressed_size,
-            $total_original_size > 0 ? (($total_original_size - $total_compressed_size) / $total_original_size * 100) : 0
-        );
-    
-        return $this->output->set_content_type('application/json')
-            ->set_status_header(200)
-            ->set_output(json_encode([
-                "status" => "success",
-                "screenshots" => $screenshots,
-                "date" => $date,
-                "employee_id" => $employee_id,
-                "user_id" => $user_id,
-                "compression_info" => [
-                    "original_total_size_kb" => round($total_original_size, 2),
-                    "compressed_total_size_kb" => round($total_compressed_size, 2),
-                    "reduction_percentage" => $total_original_size > 0 ? round(($total_original_size - $total_compressed_size) / $total_original_size * 100, 2) : 0,
-                    "compressed_images_count" => $compressed_count,
-                    "failed_compressions" => $failed_compression,
-                    "size_limit_kb" => 10
-                ],
-                "message" => empty($screenshots) ? 
-                    "No screenshots found for employee ID {$employee_id} on {$date}" : 
-                    $compression_message
-            ]));
-    }
-
-public function get_webcam_screenshots()
+public function get_screenshots()
 {
     $employee_id = $this->input->get('employee_id');
     $user_id = $this->session->userdata('id');
     $date = $this->input->get('date');
+
+    if (empty($user_id) && empty($employee_id)) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Missing user_id or employee_id"
+            ]));
+    }
+
+    if (empty($date)) {
+        $date = date('Y-m-d');
+    }
+
+    $user_folder = $user_id;
+    $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
+
+    if (!is_dir($upload_path)) {
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(404)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "No folder found for user ID {$user_id}"
+            ]));
+    }
+
+    // Fetch screenshot records from DB where status is 1
+    $this->db->select('screenshot_id, file_path, created_at');
+    $this->db->where('employee_id', $employee_id);
+    $this->db->where('user_id', $user_id);
+    $this->db->where('status', 1); // Only active screenshots
+    $this->db->like('created_at', $date);
+    $this->db->order_by('created_at', 'DESC');
+    $query = $this->db->get('screenshots');
+    $db_screenshots = $query->result_array();
+
+    $screenshots = [];
+
+    foreach ($db_screenshots as $row) {
+        $filename = basename($row['file_path']);
+        $full_path = $upload_path . $filename;
+
+        if (file_exists($full_path)) {
+            // Use created_at directly without timezone conversion
+            $formatted_time = date('H:i:s', strtotime($row['created_at']));
+
+            $screenshots[] = [
+                'id' => $row['screenshot_id'],
+                'file_name' => $filename,
+                'image_url' => base_url("uploads/screenshots/{$user_folder}/{$filename}"),
+                'created_at' => $formatted_time,
+                'display_text' => $formatted_time
+            ];
+        }
+    }
+
+    return $this->output->set_content_type('application/json')
+        ->set_status_header(200)
+        ->set_output(json_encode([
+            "status" => "success",
+            "screenshots" => $screenshots,
+            "date" => $date,
+            "user_id" => $user_id,
+            "employee_id" => $employee_id,
+            "message" => empty($screenshots) ? "No screenshots found for user ID {$user_id} on {$date}" : null
+        ]));
+}
+
+public function get_webcam_screenshots()
+{
+        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+        $date = $this->input->get('date');
 
     if (empty($user_id) && empty($employee_id)) {
         return $this->output->set_content_type('application/json')
@@ -800,8 +736,8 @@ public function get_last_screenshot()
 
    public function get_user_screenshots()
 {
-    $employee_id = $this->session->userdata('employee_id')?? 2;
-    $user_id = $this->session->userdata('user_id')?? 3;
+    $employee_id = $this->session->userdata('employee_id');
+    $employee_org_id = $this->session->userdata('employee_org_id');
     $date = $this->input->get('date'); // Optional
 
     if (empty($employee_id)) {
@@ -813,20 +749,11 @@ public function get_last_screenshot()
             ]));
     }
 
-    if (empty($user_id)) {
-        return $this->output->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Missing user_id"
-            ]));
-    }
-
     if (empty($date)) {
         $date = date('Y-m-d');
     }
 
-    $user_folder = $user_id;
+    $user_folder = $employee_org_id;
     $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
 
     if (!is_dir($upload_path)) {
@@ -834,14 +761,14 @@ public function get_last_screenshot()
             ->set_status_header(404)
             ->set_output(json_encode([
                 "status" => "error",
-                "message" => "No screenshot folder found for user ID {$user_id}"
+                "message" => "No screenshot folder found for employee ID {$employee_id}"
             ]));
     }
 
     // Fetch screenshot records from DB where status = 1
     $this->db->select('screenshot_id, file_path, created_at');
     $this->db->where('employee_id', $employee_id);
-    $this->db->where('user_id', $user_id);
+    $this->db->where('user_id', $employee_org_id); // Assuming user_id = org_id
     $this->db->where('status', 1);
     $this->db->like('created_at', $date);
     $this->db->order_by('created_at', 'DESC');
@@ -857,7 +784,7 @@ public function get_last_screenshot()
         if (file_exists($full_path)) {
             // Use created_at time directly
             $formatted_time = date('H:i:s', strtotime($row['created_at']));
-    
+
             $screenshots[] = [
                 'id' => $row['screenshot_id'],
                 'file_name' => $filename,
@@ -879,322 +806,7 @@ public function get_last_screenshot()
         ]));
 }
 
-    private function strict_compress_image($source_path, $destination_path, $max_kb)
-    {
-        $info = getimagesize($source_path);
-        $mime = $info['mime'];
 
-        // Check if WEBP format
-        if ($mime === 'image/webp') {
-            return $this->compress_webp_image($source_path, $destination_path, $max_kb);
-        }
-
-        // For other formats, convert to WEBP for better compression
-        switch ($mime) {
-            case 'image/jpeg':
-                $image = imagecreatefromjpeg($source_path);
-                break;
-            case 'image/png':
-                case 'image/gif':
-                // For PNG and GIF, convert to JPEG first for better compression
-                $image = imagecreatetruecolor($info[0], $info[1]);
-                $white = imagecolorallocate($image, 255, 255, 255);
-                imagefill($image, 0, 0, $white);
-                
-                if ($mime === 'image/png') {
-                    $original = imagecreatefrompng($source_path);
-                } else {
-                    $original = imagecreatefromgif($source_path);
-                }
-                
-                imagecopy($image, $original, 0, 0, 0, 0, $info[0], $info[1]);
-                imagedestroy($original);
-                break;
-            default:
-                return false;
-        }
-
-        // Get original dimensions
-        $original_width = imagesx($image);
-        $original_height = imagesy($image);
-        
-        // Calculate new dimensions - start with more aggressive reduction
-        $max_dimension = 800; // Maximum width or height
-        $ratio = min($max_dimension/$original_width, $max_dimension/$original_height);
-        $new_width = (int)($original_width * $ratio);
-        $new_height = (int)($original_height * $ratio);
-        
-        // Create a new image with reduced dimensions
-        $resized_image = imagecreatetruecolor($new_width, $new_height);
-        imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, $original_width, $original_height);
-        imagedestroy($image);
-        $image = $resized_image;
-
-        // Now compress with aggressive quality settings
-        $quality = 70; // Start with low quality
-        $min_quality = 15;
-        $max_iterations = 20;
-        $iteration = 0;
-        $best_quality = $quality;
-        $best_size = null;
-        
-        do {
-            // Output image to buffer
-            ob_start();
-            imagewebp($image, null, $quality);
-            $image_data = ob_get_clean();
-            $current_size = strlen($image_data) / 1024; // Size in KB
-            
-            // Track best quality that meets our size requirement
-            if ($current_size <= $max_kb) {
-                if ($best_size === null || $current_size < $best_size) {
-                    $best_quality = $quality;
-                    $best_size = $current_size;
-                }
-                
-                // Try to find the best quality within limit
-                if ($current_size < $max_kb * 0.8) { // If we're well under, try higher quality
-                    $quality += 5;
-                } else {
-                    $quality += 1;
-                }
-            } else {
-                $quality -= 5; // Reduce quality more aggressively
-            }
-            
-            $iteration++;
-        } while ($iteration < $max_iterations && $quality >= $min_quality && $quality <= 100);
-
-        // Use the best quality we found
-        if ($best_size !== null) {
-            $quality = $best_quality;
-        } else {
-            // If we didn't find a suitable quality, use minimum quality
-            $quality = $min_quality;
-            ob_start();
-            imagewebp($image, null, $quality);
-            $image_data = ob_get_clean();
-            $best_size = strlen($image_data) / 1024;
-        }
-
-        // Save final compressed image as WEBP
-        $result = imagewebp($image, $destination_path, $quality);
-        imagedestroy($image);
-        
-        // Verify the final size is strictly below max_kb
-        if (file_exists($destination_path)) {
-            $final_size = filesize($destination_path) / 1024;
-            if ($final_size >= $max_kb) {
-                // If still too large, try more aggressive compression
-                @unlink($destination_path);
-                return $this->aggressive_compress($source_path, $destination_path, $max_kb);
-            }
-        }
-        
-        return $result;
-    }
-
-    private function compress_webp_image($source_path, $destination_path, $max_kb)
-    {
-        // First try to read as WEBP
-        if (function_exists('imagecreatefromwebp')) {
-            $image = @imagecreatefromwebp($source_path);
-            if ($image === false) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
-        // Get original dimensions
-        $original_width = imagesx($image);
-        $original_height = imagesy($image);
-        
-        // Calculate new dimensions - more aggressive reduction for WEBP
-        $max_dimension = 600; // Maximum width or height for WEBP
-        $ratio = min($max_dimension/$original_width, $max_dimension/$original_height);
-        $new_width = (int)($original_width * $ratio);
-        $new_height = (int)($original_height * $ratio);
-        
-        // Create a new image with reduced dimensions
-        $resized_image = imagecreatetruecolor($new_width, $new_height);
-        imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, $original_width, $original_height);
-        imagedestroy($image);
-        $image = $resized_image;
-
-        // Now compress with very aggressive quality settings for WEBP
-        $quality = 70; // Start with very low quality for WEBP
-        $min_quality = 15;
-        $max_iterations = 25;
-        $iteration = 0;
-        $best_quality = $quality;
-        $best_size = null;
-        
-        do {
-            // Output image to buffer
-            ob_start();
-            imagewebp($image, null, $quality);
-            $image_data = ob_get_clean();
-            $current_size = strlen($image_data) / 1024; // Size in KB
-            
-            // Track best quality that meets our size requirement
-            if ($current_size <= $max_kb) {
-                if ($best_size === null || $current_size < $best_size) {
-                    $best_quality = $quality;
-                    $best_size = $current_size;
-                }
-                
-                // Try to find the best quality within limit
-                if ($current_size < $max_kb * 0.7) { // If we're well under, try higher quality
-                    $quality += 3;
-                } else {
-                    $quality += 1;
-                }
-            } else {
-                $quality -= 5; // Reduce quality more aggressively
-            }
-            
-            $iteration++;
-        } while ($iteration < $max_iterations && $quality >= $min_quality && $quality <= 100);
-
-        // Use the best quality we found
-        if ($best_size !== null) {
-            $quality = $best_quality;
-        } else {
-            // If we didn't find a suitable quality, use minimum quality
-            $quality = $min_quality;
-            ob_start();
-            imagewebp($image, null, $quality);
-            $image_data = ob_get_clean();
-            $best_size = strlen($image_data) / 1024;
-        }
-
-        // Save final compressed image
-        $result = imagewebp($image, $destination_path, $quality);
-        imagedestroy($image);
-        
-        // Verify the final size is strictly below max_kb
-        if (file_exists($destination_path)) {
-            $final_size = filesize($destination_path) / 1024;
-            if ($final_size >= $max_kb) {
-                // If still too large, try more aggressive compression
-                @unlink($destination_path);
-                return $this->aggressive_compress($source_path, $destination_path, $max_kb);
-            }
-        }
-        
-        return $result;
-    }
-
-    private function aggressive_compress($source_path, $destination_path, $max_kb)
-    {
-        $info = getimagesize($source_path);
-        $mime = $info['mime'];
-
-        // Always convert to WEBP for maximum compression
-        switch ($mime) {
-            case 'image/jpeg':
-                $image = imagecreatefromjpeg($source_path);
-                break;
-            case 'image/png':
-            case 'image/gif':
-                // For PNG and GIF, convert to JPEG first
-                $image = imagecreatetruecolor($info[0], $info[1]);
-                $white = imagecolorallocate($image, 255, 255, 255);
-                imagefill($image, 0, 0, $white);
-                
-                if ($mime === 'image/png') {
-                    $original = imagecreatefrompng($source_path);
-                } else {
-                    $original = imagecreatefromgif($source_path);
-                }
-                
-                imagecopy($image, $original, 0, 0, 0, 0, $info[0], $info[1]);
-                imagedestroy($original);
-                break;
-            case 'image/webp':
-                $image = imagecreatefromwebp($source_path);
-                break;
-            default:
-                return false;
-        }
-
-        // Get original dimensions
-        $original_width = imagesx($image);
-        $original_height = imagesy($image);
-        
-        // Calculate very small dimensions (fixed small size)
-        $max_dimension = 400; // Maximum width or height
-        $ratio = min($max_dimension/$original_width, $max_dimension/$original_height);
-        $new_width = (int)($original_width * $ratio);
-        $new_height = (int)($original_height * $ratio);
-        
-        // Create a new image with very small dimensions
-        $resized_image = imagecreatetruecolor($new_width, $new_height);
-        imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, $original_width, $original_height);
-        imagedestroy($image);
-        $image = $resized_image;
-
-        // Use extremely low quality settings
-        $quality = 70; // Start with minimum reasonable quality
-        $min_quality = 15;
-        $max_iterations = 30;
-        $iteration = 0;
-        $best_size = null;
-        
-        do {
-            // Output image to buffer
-            ob_start();
-            imagewebp($image, null, $quality);
-            $image_data = ob_get_clean();
-            $current_size = strlen($image_data) / 1024; // Size in KB
-            
-            // Track if we meet our target
-            if ($current_size <= $max_kb) {
-                $best_size = $current_size;
-                break;
-            }
-            
-            // Reduce quality aggressively
-            $quality -= 2;
-            $iteration++;
-        } while ($iteration < $max_iterations && $quality >= $min_quality);
-
-        // If we didn't meet the target, use the smallest we could get
-        if ($best_size === null || $best_size >= $max_kb) {
-            // Try with absolute minimum quality and even smaller dimensions
-            $max_dimension = 500;
-            $ratio = min($max_dimension/$original_width, $max_dimension/$original_height);
-            $new_width = (int)($original_width * $ratio);
-            $new_height = (int)($original_height * $ratio);
-            
-            $resized_image = imagecreatetruecolor($new_width, $new_height);
-            imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, $original_width, $original_height);
-            imagedestroy($image);
-            $image = $resized_image;
-            
-            ob_start();
-            imagewebp($image, null, $min_quality);
-            $image_data = ob_get_clean();
-            $best_size = strlen($image_data) / 1024;
-            $quality = $min_quality;
-        }
-
-        // Save final compressed image
-        $result = imagewebp($image, $destination_path, $quality);
-        imagedestroy($image);
-        
-        // Final verification
-        if (file_exists($destination_path)) {
-            $final_size = filesize($destination_path) / 1024;
-            if ($final_size >= $max_kb) {
-                @unlink($destination_path);
-                return false;
-            }
-        }
-        
-        return $result;
-    }
 
 
     //hard delete
