@@ -29,6 +29,14 @@ class ScreenshotController extends Home_Controller
         $data['main_content'] = $this->load->view('admin/webcam_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
+    public function EmployeewebCam()
+    {
+        $data = array();
+        $data['page_title'] = 'Employee Webcam screenshots';
+        $data['main_page'] = 'Analytics';
+        $data['main_content'] = $this->load->view('admin/employee/webcam_screenshot', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
 
     //  public function store_screenshot() {
     //     if ($this->input->server('REQUEST_METHOD') !== 'POST') {
@@ -587,9 +595,9 @@ public function get_screenshots()
 
 public function get_webcam_screenshots()
 {
-    $employee_id = $this->input->get('employee_id');
-    $user_id = $this->session->userdata('id');
-    $date = $this->input->get('date');
+        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+        $date = $this->input->get('date');
 
     if (empty($user_id) && empty($employee_id)) {
         return $this->output->set_content_type('application/json')
@@ -728,8 +736,8 @@ public function get_last_screenshot()
 
    public function get_user_screenshots()
 {
-    $employee_id =2;
-    $employee_org_id = 3;
+    $employee_id = $this->session->userdata('employee_id');
+    $employee_org_id = $this->session->userdata('employee_org_id');
     $date = $this->input->get('date'); // Optional
 
     if (empty($employee_id)) {
