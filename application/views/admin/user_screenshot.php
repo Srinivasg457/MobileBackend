@@ -1,4 +1,4 @@
-   <style>
+<style>
        /* .main-sidebar {
     position: fixed;
     top: 0;
@@ -284,15 +284,15 @@
                    padding: 15px;
                    margin-bottom: 30px;
                    position: relative;
-                   height: 70%;
 
                    >#modal-image {
-                       max-width: 100%;
-                       max-height: 100%;
+                      
                        display: block;
                        margin: 0 auto;
                        border-radius: 10px;
-                       border: 1px solid black;
+                       border: 2px solid white;
+                       width: 900px;
+                       height: 450px;
                    }
 
                    >#image-info {
