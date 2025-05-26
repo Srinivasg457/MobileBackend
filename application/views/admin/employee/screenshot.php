@@ -599,7 +599,7 @@
                                     </div>`);
                              });
 
-                             $('#screenshot-modal').fadeIn();
+                             $('#screenshot-modal').show();
 
                              $('.thumbnail-item').on('click', function() {
                                  const newSrc = $(this).data('src');
