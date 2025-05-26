@@ -136,7 +136,7 @@
 
        .screenshot-card img {
            width: 100%;
-           height: 90px;
+           height: 110px;
            object-fit: cover;
            border-radius: 4px;
            margin-bottom: 6px;
@@ -285,7 +285,6 @@
                    margin-bottom: 30px;
                    position: relative;
                    height: 70%;
-                   background-color: whitesmoke;
 
                    >#modal-image {
                        max-width: 100%;
@@ -374,28 +373,28 @@
 
                <!-- Search Filters -->
                <div class="search-row">
-                   Employee: <select id="employeeSelect" class="form-control single_select"></select>
+              <select id="employeeSelect" class="form-control single_select"></select>
                    <!-- <button id="search-btn"> -->
                    <!-- <i class="fa fa-search"></i> -->
                    </button>
-                   Date: <input type="date" id="datePicker" class="form-control" value="">
+              <input type="date" id="datePicker" class="form-control" value="">
                    <select class="form-control">
                        <option>Sort By</option>
                    </select>
                </div>
 
-               <div class="box">
+               <div class="box" style="background-color: #F4F6F9; box-shadow: none !important">
                    <div class="box-header with-border">
-                       <div class="row">
+                       <!-- <div class="row">
                            <div class="col-lg-6">
                                <h3 class="box-title"><strong class="text-right">Employee Name: <span id="employeeName"></span> </strong></h3>
                            </div>
                            <div class="col-lg-6">
                                <h3 class="box-title"><strong class="text-right">Role: <span id="employRole"></span>#</strong></h3>
                            </div>
-                       </div>
+                       </div> -->
                    </div>
-                   <div class="box-body">
+                   <div class="box-body" style="padding: inherit !important;">
                        <div class="card-container"></div>
                    </div>
                </div>
@@ -635,7 +634,7 @@
                                                         data-id="${screenshot.id}">
                                                         
                                                         <img src="${screenshot.image_url}" 
-                                                            style="width: 100%; height: 100px; object-fit: cover; display: block; filter: ${isActive ? 'none' : 'brightness(0.7)'}; transition: filter 0.3s;">
+                                                            style="width: 100%; height: 100px; object-fit: cover; display: block;filter:transition'}; transition: filter 0.3s;">
                                                         
                                                         <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
                                                             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
