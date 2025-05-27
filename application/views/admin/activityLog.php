@@ -715,15 +715,6 @@
                 }
             });
 
-        });
-        $('#employeeSelect').on('change', function() {
-            const employeeId = $(this).val();
-            currentEmployeeId = employeeId;
-            const date = $('#datePicker').val();
-            fetchActivity(currentEmployeeId, date); // No need to manually clear here
-        });
-
-
         function triggerFilter() {
             const employee = $('#employeeSelect').val();
             const date = $('#datePicker').val();
@@ -734,5 +725,7 @@
             }
             fetchActivity(employee, date)
         }
-        $('#datePicker').on('change', triggerFilter);
+        $('#datePicker, #employeeSelect').on('change', triggerFilter);
+
+    });
     </script>
