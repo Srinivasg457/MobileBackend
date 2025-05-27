@@ -181,6 +181,8 @@
     <section class="content">
         <div class="container mt-4">
             <h3>Organization Settings</h3>
+            <div class="box mt-5">
+                <div class="box-body">
             <form id="orgSettingsForm">
                 <div class="row mt-5">
                     <!-- Screenshot Flag -->
@@ -280,6 +282,8 @@
                 </div>
             </form>
         </div>
+            </div>
+        </div>
     </section>
 </div>
 
@@ -363,10 +367,11 @@
                 data: formData,
                 success: function(response) {
                     console.log(response);
-                    showToast(`Settings saved successfully`, 'success');
+                    swal("Success!", "Employee Settings saved successfully.", "success");
                 },
-                error: function(xhr) {
-                    showToast(`Error saving settings`, 'error');
+                error: function(res) {
+                    const errorMsg = res.responseJSON?.message || "Something went wrong.";
+                    swal("Error!", errorMsg, "error");
                 }
             });
         });

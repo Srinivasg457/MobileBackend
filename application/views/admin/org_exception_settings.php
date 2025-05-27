@@ -101,6 +101,9 @@
         <div class="container mt-4">
             <h3>Employee Settings</h3>
 
+
+            <div class="box mt-5">
+                <div class="box-body">
             <div class="form-group">
                 <label for="employeeSelect">Select Employee:</label>
                 <select id="employeeSelect" class="form-control single_select"></select>
@@ -196,17 +199,19 @@
                             <span class="slider"></span>
                         </label>
                     </div>
-                </div>
 
-                <div class="mt-3">
+
+                <div class="col-12 mt-5">
                     <button type="submit" class="btn btn-info">Save Settings</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </section>
 </div>
 
-<div id="toast-container" style="position: fixed;top: 0;"></div>
 
 <script>
     let currentEmployeeId = null;
@@ -257,14 +262,6 @@
         return isValid;
     }
 
-
-
-    function showToast(message, type) {
-        const toast = $(`<div class="toast toast-${type}">${message}</div>`);
-        $('#toast-container').append(toast);
-        setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
-    }
-
     $(document).ready(function() {
         // Load employees
         $.ajax({
@@ -273,18 +270,18 @@
             dataType: "json",
             success: function(response) {
                 let employeeSelect = $('#employeeSelect');
-                employeeSelect.empty().append(`<option value="">-- Select --</option>`);
+                employeeSelect.empty().append(`<option value="">-- Select Employee --</option>`);
 
                 if (response.status === "success" && response.employees.length > 0) {
                     response.employees.forEach(emp => {
                         employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
                     });
                 } else {
-                    showToast("No employees found for this user.", "error");
+                    $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
                 }
             },
             error: function() {
-                showToast("Failed to fetch employees.", "error");
+                $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
             }
         });
 
@@ -402,11 +399,12 @@
                 method: 'POST',
                 data: dataObj,
                 success: function(res) {
-                    showToast(res, 'success');
+                    swal("Success!", "Employee Settings saved successfully.", "success");
                 },
                 error: function(res) {
                     console.log(res);
-                    showToast('Something went wrong while saving settings.', 'error');
+                    const errorMsg = res.responseJSON?.message || "Something went wrong.";
+                    swal("Error!", errorMsg, "error");
                 }
             });
         });
