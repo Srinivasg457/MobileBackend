@@ -189,7 +189,8 @@ class ScreenshotController extends Home_Controller
         // Validate the provided timestamp format
         try {
             $timestamp_object = new DateTime($provided_timestamp);
-            $formatted_timestamp = $timestamp_object->format('Ymd_His'); // Change format here
+            $formatted_timestamp = $timestamp_object->format('Ymd_His');
+            $timestamp = $timestamp_object->getTimestamp();
         } catch (Exception $e) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(400)
@@ -198,23 +199,34 @@ class ScreenshotController extends Home_Controller
                     "message" => "Invalid timestamp format. Please use a format that DateTime can parse."
                 ]));
         }
-
-        // Define upload path using user_id
-        $upload_path = FCPATH . "uploads/screenshots/{$user_id}/";
-
-        // Create the directory if it doesn't exist
-        if (!is_dir($upload_path)) {
-            mkdir($upload_path, 0755, true);
+    
+        // Define upload paths - original and compressed
+        $original_upload_path = FCPATH . "uploads/screenshots/{$user_id}/{$employee_id}/";
+        $compressed_upload_path = FCPATH . "uploads/screenshots_compressed/{$user_id}/{$employee_id}/";
+    
+        // Create the directories if they don't exist
+        if (!is_dir($original_upload_path)) {
+            mkdir($original_upload_path, 0755, true);
         }
-
-        // Get file extension and construct file name
+        if (!is_dir($compressed_upload_path)) {
+            mkdir($compressed_upload_path, 0755, true);
+        }
+    
+        // Get file extension and construct file names
         $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
-        $file_name = "screenshot_{$employee_id}_{$formatted_timestamp}." . $file_extension; // Use formatted timestamp
-
-        $full_path = $upload_path . $file_name;
-        $relative_path = "uploads/screenshots/{$user_id}/{$file_name}";
-
-        if (!move_uploaded_file($_FILES['screenshot']['tmp_name'], $full_path)) {
+        $file_name = "screenshot_{$employee_id}_{$formatted_timestamp}.{$file_extension}";
+    
+        // Original file paths
+        $original_full_path = $original_upload_path . $file_name;
+        $original_relative_path = "uploads/screenshots/{$user_id}/{$employee_id}/{$file_name}";
+    
+        // Compressed file paths
+        $compressed_file_name = "screenshot_{$employee_id}_{$formatted_timestamp}.jpg"; // Always save compressed as JPG
+        $compressed_full_path = $compressed_upload_path . $compressed_file_name;
+        $compressed_relative_path = "uploads/screenshots_compressed/{$user_id}/{$employee_id}/{$compressed_file_name}";
+    
+        // Move uploaded file to original location
+        if (!move_uploaded_file($_FILES['screenshot']['tmp_name'], $original_full_path)) {
             return $this->output->set_content_type('application/json')
                 ->set_status_header(500)
                 ->set_output(json_encode([
@@ -222,18 +234,24 @@ class ScreenshotController extends Home_Controller
                     "message" => "Failed to move uploaded file"
                 ]));
         }
-
+        // Compress the image (target size 100KB)
+        $compression_success = $this->compressScreenshot($original_full_path, $compressed_full_path, 100);
+    
+        if (!$compression_success) {
+            // If compression fails, use original path for both
+            $compressed_relative_path = $original_relative_path;
+        }
         // Insert record into DB
         $data = [
             'user_id' => $user_id,
             'employee_id' => $employee_id,
-            'file_path' => $relative_path,
+            'file_path' => $original_relative_path,
+            'compressed_path' => $compressed_relative_path,
             'file_type' => $file_extension,
-            'created_at' => date('Y-m-d H:i:s', strtotime($provided_timestamp)), // Use original timestamp value
+            'created_at' => date('Y-m-d H:i:s', $timestamp),
             'overall_activity_percent' => $overall_activity_percent,
             'is_active' => $is_active
         ];
-
         if (!$this->db->insert('screenshots', $data)) {
             $error = $this->db->error();
             return $this->output->set_content_type('application/json')
@@ -244,14 +262,103 @@ class ScreenshotController extends Home_Controller
                     "error" => $error
                 ]));
         }
-
+            $screenshot_id = $this->db->insert_id();
+    
         return $this->output->set_content_type('application/json')
             ->set_status_header(201)
             ->set_output(json_encode([
                 "status" => "success",
                 "message" => "Screenshot stored successfully",
-                "file_path" => $relative_path
+                "original_path" => $original_relative_path,
+                "compressed_path" => $compressed_relative_path,
+                "screenshot_id" => $screenshot_id
             ]));
+    }
+    
+    private function compressScreenshot($source, $destination, $target_size_kb) {
+        // Check if GD is installed
+        if (!extension_loaded('gd')) {
+            error_log("GD library not available");
+            return false;
+        }
+    
+        // Get image info
+        $info = getimagesize($source);
+        if (!$info) {
+            error_log("Invalid image file");
+            return false;
+        }
+    
+        // Allow JPEG/PNG/WebP
+        if (!in_array($info['mime'], ['image/jpeg', 'image/png', 'image/webp'])) {
+            error_log("Unsupported image type");
+            return false;
+        }
+    
+        // Load image
+        switch ($info['mime']) {
+            case 'image/jpeg':
+                $image = imagecreatefromjpeg($source);
+                break;
+            case 'image/png':
+                $image = imagecreatefrompng($source);
+                // Convert PNG to JPEG with white background
+                $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+                imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+                imagealphablending($bg, TRUE);
+                imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+                imagedestroy($image);
+                $image = $bg;
+                break;
+            case 'image/webp':
+                $image = imagecreatefromwebp($source);
+                break;
+            default:
+                return false;
+        }
+    
+        if (!$image) {
+            error_log("Failed to load image");
+            return false;
+        }
+    
+        // Resize settings - more aggressive for 5KB target
+        $max_width = 300; // Reduced from 800
+        $width = imagesx($image);
+        $height = imagesy($image);
+    
+        // Resize if needed
+        if ($width > $max_width) {
+            $new_height = (int)($height * $max_width / $width);
+            $resized = imagescale($image, $max_width, $new_height);
+            imagedestroy($image);
+            $image = $resized;
+        }
+    
+        // Compression attempt with more aggressive settings
+        $quality = 50; // Start lower
+        $min_quality = 5; // Go much lower
+        $success = false;
+    
+        do {
+            // Save as JPEG
+            imagejpeg($image, $destination, $quality);
+            
+            // Check size
+            $current_size = filesize($destination) / 1024; // KB
+    
+            if ($current_size <= $target_size_kb) {
+                $success = true;
+                break;
+            }
+    
+            $quality -= 5;
+        } while ($quality >= $min_quality);
+    
+        // Clean up
+        imagedestroy($image);
+    
+        return $success;
     }
     public function store_webcam()
 {
@@ -306,7 +413,7 @@ class ScreenshotController extends Home_Controller
     $formatted_timestamp = date('y-m-d H-i-s', $timestamp);
     
     // Define upload paths - original and compressed
-    $original_upload_path = FCPATH . "uploads/webcam_screenshots/{$user_id}/{$employee_id}/";
+    $original_upload_path = FCPATH . "uploads/webcam/{$user_id}/{$employee_id}/";
     $compressed_upload_path = FCPATH . "uploads/webcam_compressed/{$user_id}/{$employee_id}/";
 
     // Create the directories if they don't exist
@@ -323,7 +430,7 @@ class ScreenshotController extends Home_Controller
 
     // Original file paths
     $original_full_path = $original_upload_path . $file_name;
-    $original_relative_path = "uploads/webcam_screenshots/{$user_id}/{$employee_id}/{$file_name}";
+    $original_relative_path = "uploads/webcam/{$user_id}/{$employee_id}/{$file_name}";
 
     // Compressed file paths
     $compressed_file_name = "webcam_{$formatted_timestamp}.jpg"; // Always save compressed as JPG
@@ -492,20 +599,8 @@ public function get_screenshots()
         $date = date('Y-m-d');
     }
 
-    $user_folder = $user_id;
-    $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
-
-    if (!is_dir($upload_path)) {
-        return $this->output->set_content_type('application/json')
-            ->set_status_header(404)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "No folder found for user ID {$user_id}"
-            ]));
-    }
-
     // Fetch screenshot records from DB where status is 1
-    $this->db->select('screenshot_id, file_path, created_at');
+    $this->db->select('screenshot_id, compressed_path, created_at');
     $this->db->where('employee_id', $employee_id);
     $this->db->where('user_id', $user_id);
     $this->db->where('status', 1); // Only active screenshots
@@ -517,17 +612,18 @@ public function get_screenshots()
     $screenshots = [];
 
     foreach ($db_screenshots as $row) {
-        $filename = basename($row['file_path']);
-        $full_path = $upload_path . $filename;
-
-        if (file_exists($full_path)) {
+        // Get the filename from compressed_path
+        $filename = basename($row['compressed_path']);        
+        // Check if the compressed file exists
+        $compressed_full_path = FCPATH . $row['compressed_path'];        
+        if (file_exists($compressed_full_path)) {
             // Use created_at directly without timezone conversion
             $formatted_time = date('H:i:s', strtotime($row['created_at']));
 
             $screenshots[] = [
                 'id' => $row['screenshot_id'],
                 'file_name' => $filename,
-                'image_url' => base_url("uploads/screenshots/{$user_folder}/{$filename}"),
+                'image_url' => base_url($row['compressed_path']),
                 'created_at' => $formatted_time,
                 'display_text' => $formatted_time
             ];
