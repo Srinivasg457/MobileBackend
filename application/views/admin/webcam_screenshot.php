@@ -275,11 +275,12 @@
                  height: 70%;
 
                  >#modal-image {
-                     max-width: 100%;
-                     max-height: 100%;
-                     display: block;
-                     margin: 0 auto;
-                     border-radius: 8px;
+                    display: block;
+                       margin: 0 auto;
+                       border-radius: 10px;
+                       border: 2px solid white;
+                       width: 900px;
+                       height: 450px;
                  }
 
                  >#image-info {

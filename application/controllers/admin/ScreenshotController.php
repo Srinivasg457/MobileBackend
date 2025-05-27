@@ -305,22 +305,33 @@ class ScreenshotController extends Home_Controller
     // Format timestamp for filename (yy-mm-dd hh-mm-ss)
     $formatted_timestamp = date('y-m-d H-i-s', $timestamp);
     
-    // Define upload path using user_id and employee_id
-    $upload_path = FCPATH . "uploads/webcam/{$user_id}/{$employee_id}/";
+    // Define upload paths - original and compressed
+    $original_upload_path = FCPATH . "uploads/webcam_screenshots/{$user_id}/{$employee_id}/";
+    $compressed_upload_path = FCPATH . "uploads/webcam_compressed/{$user_id}/{$employee_id}/";
 
-    // Create the directory if it doesn't exist
-    if (!is_dir($upload_path)) {
-        mkdir($upload_path, 0755, true);
+    // Create the directories if they don't exist
+    if (!is_dir($original_upload_path)) {
+        mkdir($original_upload_path, 0755, true);
+    }
+    if (!is_dir($compressed_upload_path)) {
+        mkdir($compressed_upload_path, 0755, true);
     }
 
-    // Get file extension and construct file name
+    // Get file extension and construct file names
     $file_extension = strtolower(pathinfo($_FILES['webcam_image']['name'], PATHINFO_EXTENSION));
     $file_name = "webcam_{$formatted_timestamp}.{$file_extension}";
 
-    $full_path = $upload_path . $file_name;
-    $relative_path = "uploads/webcam/{$user_id}/{$employee_id}/{$file_name}";
+    // Original file paths
+    $original_full_path = $original_upload_path . $file_name;
+    $original_relative_path = "uploads/webcam_screenshots/{$user_id}/{$employee_id}/{$file_name}";
 
-    if (!move_uploaded_file($_FILES['webcam_image']['tmp_name'], $full_path)) {
+    // Compressed file paths
+    $compressed_file_name = "webcam_{$formatted_timestamp}.jpg"; // Always save compressed as JPG
+    $compressed_full_path = $compressed_upload_path . $compressed_file_name;
+    $compressed_relative_path = "uploads/webcam_compressed/{$user_id}/{$employee_id}/{$compressed_file_name}";
+
+    // Move uploaded file to original location
+    if (!move_uploaded_file($_FILES['webcam_image']['tmp_name'], $original_full_path)) {
         return $this->output->set_content_type('application/json')
             ->set_status_header(500)
             ->set_output(json_encode([
@@ -329,15 +340,23 @@ class ScreenshotController extends Home_Controller
             ]));
     }
 
-    // Insert record into DB
+    // Compress the image (target size 100KB)
+    $compression_success = $this->compressImage($original_full_path, $compressed_full_path, 100);
+
+    if (!$compression_success) {
+        // If compression fails, use original path for both
+        $compressed_relative_path = $original_relative_path;
+    }
+
     $data = [
         'user_id' => $user_id,
         'employee_id' => $employee_id,
-        'file_path' => $relative_path,
+        'file_path' => $original_relative_path, // original path
+        'compressed_path' => $compressed_relative_path, // compressed path
         'file_type' => $file_extension,
-        'status' => 1, // Assuming 1 means active/successful
+        'status' => 1,
         'created_at' => date('Y-m-d H:i:s', $timestamp),
-        'is_active' => 1 // Assuming you want this to be active by default
+        'is_active' => 1
     ];
 
     if (!$this->db->insert('webcam', $data)) {
@@ -359,167 +378,101 @@ class ScreenshotController extends Home_Controller
         ->set_output(json_encode([
             "status" => "success",
             "message" => "Webcam image stored successfully",
-            "file_path" => $relative_path,
+            "original_path" => $original_relative_path,
+            "compressed_path" => $compressed_relative_path,
             "webcam_id" => $webcam_id
         ]));
 }
-    // public function store_webcam_screenshot()
-    // {
-    //     if ($this->input->server('REQUEST_METHOD') !== 'POST') {
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(405)
-    //             ->set_output(json_encode([
-    //                 "status" => "error",
-    //                 "message" => "Invalid request method"
-    //             ]));
-    //     }
-    
-    //     $user_id = $this->input->get_request_header('user_id', TRUE);
-    //     $employee_id = $this->input->get_request_header('employee_id', TRUE);
-    //     $provided_timestamp = $this->input->get_request_header('timestamp', TRUE);
-    
-    //     // Check required headers
-    //     $missing_fields = [];
-    //     if (empty($user_id)) $missing_fields[] = 'user_id';
-    //     if (empty($employee_id)) $missing_fields[] = 'employee_id';
-    //     if (empty($provided_timestamp)) $missing_fields[] = 'timestamp';
-    
-    //     if (!empty($missing_fields)) {
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 "status" => "error",
-    //                 "message" => "Missing required headers: " . implode(', ', $missing_fields)
-    //             ]));
-    //     }
-    
-    //     // Check file upload
-    //     if (empty($_FILES['webcam_image']['tmp_name'])) {
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 "status" => "error",
-    //                 "message" => "No webcam image uploaded"
-    //             ]));
-    //     }
-    
-    //     // Validate and parse timestamp
-    //     try {
-    //         $timestamp_object = new DateTime($provided_timestamp);
-    //     } catch (Exception $e) {
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 "status" => "error",
-    //                 "message" => "Invalid timestamp format"
-    //             ]));
-    //     }
-    
-    //     // Read binary file content
-    //     $file_data = file_get_contents($_FILES['webcam_image']['tmp_name']);
-    //     $file_type = $_FILES['webcam_image']['type'];
-    
-    //     // Prepare data for DB insert
-    //     $insert_data = [
-    //         'user_id' => $user_id,
-    //         'employee_id' => $employee_id,
-    //         'file_data' => $file_data,
-    //         'file_type' => $file_type,
-    //         'created_at' => $timestamp_object->format('Y-m-d H:i:s')
-    //     ];
-    
-    //     // Insert into DB
-    //     if (!$this->db->insert('webcam', $insert_data)) {
-    //         $error = $this->db->error();
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(500)
-    //             ->set_output(json_encode([
-    //                 "status" => "error",
-    //                 "message" => "Database insertion failed",
-    //                 "error" => $error
-    //             ]));
-    //     }
-    
-    //     return $this->output->set_content_type('application/json')
-    //         ->set_status_header(201)
-    //         ->set_output(json_encode([
-    //             "status" => "success",
-    //             "message" => "Webcam screenshot saved successfully"
-    //         ]));
-    // }
-    
+
+private function compressImage($source, $destination, $target_size_kb) {
+// Check if GD is installed
+if (!extension_loaded('gd')) {
+    error_log("GD library not available");
+    return false;
+}
+
+// Get image info
+$info = getimagesize($source);
+if (!$info) {
+    error_log("Invalid image file");
+    return false;
+}
+
+// Allow JPEG/PNG/WebP
+if (!in_array($info['mime'], ['image/jpeg', 'image/png', 'image/webp'])) {
+    error_log("Unsupported image type");
+    return false;
+}
+
+// Load image
+switch ($info['mime']) {
+    case 'image/jpeg':
+        $image = imagecreatefromjpeg($source);
+        break;
+    case 'image/png':
+        $image = imagecreatefrompng($source);
+        // Convert PNG to JPEG with white background
+        $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+        imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+        imagealphablending($bg, TRUE);
+        imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+        imagedestroy($image);
+        $image = $bg;
+        break;
+    case 'image/webp':
+        $image = imagecreatefromwebp($source);
+        break;
+    default:
+        return false;
+}
+
+if (!$image) {
+    error_log("Failed to load image");
+    return false;
+}
+
+    // Resize settings - more aggressive for 5KB target
+    $max_width = 100; // Reduced from 800
+    $width = imagesx($image);
+    $height = imagesy($image);
+
+    // Resize if needed
+    if ($width > $max_width) {
+        $new_height = (int)($height * $max_width / $width);
+        $resized = imagescale($image, $max_width, $new_height);
+        imagedestroy($image);
+        $image = $resized;
+    }
+
+    // Compression attempt with more aggressive settings
+    $quality = 50; // Start lower
+    $min_quality = 5; // Go much lower
+    $success = false;
+
+    do {
+        // Save as JPEG
+        imagejpeg($image, $destination, $quality);
+        
+        // Check size
+        $current_size = filesize($destination) / 1024; // KB
+
+        if ($current_size <= $target_size_kb) {
+            $success = true;
+            break;
+        }
+
+        $quality -= 5;
+    } while ($quality >= $min_quality);
+
+    // Clean up
+    imagedestroy($image);
+
+    return $success;
+}
+
+
 
     
-    //     public function get_screenshots() {
-    //          $employee_id = $this->input->get('employee_id');
-    //         // $user_id = $this->input->get('user_id');
-    //         $user_id = $this->session->userdata('id');
-    //         $date = $this->input->get('date');
-
-    //         if (empty($user_id) && empty($employee_id)) {
-    //             return $this->output->set_content_type('application/json')
-    //                 ->set_status_header(400)
-    //                 ->set_output(json_encode([
-    //                     "status" => "error",
-    //                     "message" => "Missing user_id or employee_id"
-    //                 ]));
-    //         }
-
-    //         if (empty($date)) {
-    //             $date = date('Y-m-d');
-    //         }
-
-    //         // Use user_id as folder name directly
-    //         $user_folder = $user_id;
-    //         $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
-
-    //         if (!is_dir($upload_path)) {
-    //             return $this->output->set_content_type('application/json')
-    //                 ->set_status_header(404)
-    //                 ->set_output(json_encode([
-    //                     "status" => "error",
-    //                     "message" => "No folder found for user ID {$user_id}"
-    //                 ]));
-    //         }
-
-    //         $screenshots = [];
-    //         $files = scandir($upload_path);
-
-    //         foreach ($files as $file) {
-    //             if (strpos($file, "screenshot_{$employee_id}") === 0 && strpos($file, str_replace('-', '', $date)) !== false) {
-    //                 preg_match('/screenshot_(\d+)_(\d{8})_(\d{6})\.(\w{3,4})/', $file, $matches);
-
-    //                 if (isset($matches[2]) && isset($matches[3])) {
-    //                     $file_date = $matches[2];
-    //                     $file_time = $matches[3];
-    //                     $file_extension = $matches[4];
-
-    //                     if ($file_date == str_replace('-', '', $date)) {
-    //                         $formatted_time = date('H:i:s', strtotime($file_time));
-    //                         $file_path = base_url("uploads/screenshots/{$user_folder}/{$file}");
-
-    //                         $screenshots[] = [
-    //                             'file_name' => $file,
-    //                             'image_url' => $file_path,
-    //                             'created_at' => $formatted_time,
-    //                             'display_text' => $formatted_time
-    //                         ];
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         return $this->output->set_content_type('application/json')
-    //             ->set_status_header(200)
-    //             ->set_output(json_encode([
-    //                 "status" => "success",
-    //                 "screenshots" => $screenshots,
-    //                 "date" => $date,
-    //                 "user_id" => $user_id,
-    //                 "employee_id" => $employee_id,
-    //                 "message" => empty($screenshots) ? "No screenshots found for user ID {$user_id} on {$date}" : null
-    //             ]));
-    //     }
 public function get_screenshots()
 {
     $employee_id = $this->input->get('employee_id');
@@ -612,29 +565,29 @@ public function get_webcam_screenshots()
         $date = date('Y-m-d');
     }
 
-    // Fetch webcam screenshot records from DB where status is 1
-    $this->db->select('webcam_id, file_path, created_at, status, user_id, employee_id');
+    // Fetch records from database
+    $this->db->select('webcam_id, compressed_path, created_at, status, user_id, employee_id');
     $this->db->where('employee_id', $employee_id);
     $this->db->where('user_id', $user_id);
-    $this->db->where('status', 1); // Only active screenshots
-    $this->db->like('created_at', $date);
+    $this->db->where('status', 1);
+    $this->db->where('DATE(created_at)', $date); // More precise than LIKE
     $this->db->order_by('created_at', 'DESC');
     $query = $this->db->get('webcam');
     $db_screenshots = $query->result_array();
 
     $screenshots = [];
-
     foreach ($db_screenshots as $row) {
-        $filename = basename($row['file_path']);
-        $created_at = new DateTime($row['created_at']);
+        // Use the compressed_path from database
+        $file_path = !empty($row['compressed_path']) ? $row['compressed_path'] : $row['file_path'];
+        $filename = basename($file_path);
         
         $screenshots[] = [
             'id' => (string)$row['webcam_id'],
-            'image_url' => base_url( $row['file_path']),
-            'file_type' => pathinfo($filename, PATHINFO_EXTENSION), // Changed from 'Message' to 'file_type'
+            'image_url' => base_url($file_path),
+            'file_type' => pathinfo($filename, PATHINFO_EXTENSION),
             'status' => (int)$row['status'],
             'is_active' => 1,
-            'display_text' => $created_at->format('H:i:'), // Changed from 'Time' to 'captured_at'
+            'display_text' => date('H:i:', strtotime($row['created_at'])),
             'user_id' => (string)$row['user_id'],
             'employee_id' => (string)$row['employee_id']
         ];
