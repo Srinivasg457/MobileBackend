@@ -483,13 +483,14 @@
     <div class="manual-entry-container">
         <h2>Activity</h2>
 
-        <div class="entry-header">
-            <label>Employee
+        <div class="row mb-5">
+            <div class="col-lg-4 mb-5"><label class="control-label">Employee </label>
                 <select id="employeeSelect" class="form-control single_select"></select>
-            </label>
-            <label>Date
+            </div>
+            <div class="col-lg-4"></div>
+            <div class="col-lg-4 mb-5"> <label class="control-label">Date </label>
                 <input type="date" id="datePicker" class="form-control" value="">
-            </label>
+            </div>
 
         </div>
 
@@ -694,18 +695,23 @@
                 dataType: "json",
                 success: function(response) {
                     let employeeSelect = $('#employeeSelect');
-                    employeeSelect.empty().append(`<option value="">-- Select Employee --</option>`);
-
                     if (response.status === "success" && response.employees.length > 0) {
                         response.employees.forEach(emp => {
                             employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
                         });
+
+                        const randomIndex = Math.floor(Math.random() * response.employees.length);
+                        const randomEmployee = response.employees[randomIndex];
+                        employeeSelect.val(randomEmployee.id);
+                        $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`); // ✅ Set name on auto-load
+                        let currentDate = $('#datePicker').val();
+                        fetchActivity(randomEmployee.id, currentDate);
                     } else {
-                        showToast("No employees found for this user.", "error");
+                        employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
                     }
                 },
                 error: function() {
-                    showToast("Failed to fetch employees.", "error");
+                    $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
                 }
             });
 
