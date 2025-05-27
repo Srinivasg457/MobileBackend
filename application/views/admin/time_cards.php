@@ -142,26 +142,26 @@
 
 
     <div class="filter-controls" style="font-family: 'Segoe UI', Arial, sans-serif; margin: 20px auto; padding: 20px; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 5px rgba(0,0,0,0.1);  width: 100%;">
-        <div style="display: flex; flex-wrap: wrap; gap: 130px; align-items: center; justify-content: space-between;">
+        <div class="row mb-5">
             <!-- Employee Select -->
-            <div class="filter-group" style="flex: 1; min-width: 250px; max-width: 300px;">
-                <label for="employeeSelect" style="display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Employee</label>
-                <select id="employeeSelect" style="width: 130%; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 6px; background-color: white; font-size: 14px; color: #2d3748; transition: all 0.3s; outline: none; border:1px solid lightgrey" onfocus="this.style.borderColor='#4299e1'">
-               </select>
+            <div class="col-lg-3 mb-5">
+                <label for="employeeSelect" class="control-label">Employee</label>
+                <select id="employeeSelect" class="form-control single_select">
+                </select>
             </div>
 
             <!-- Date and Time Filters -->
-            <div style="display: flex; gap: 20px; flex: 2; flex-wrap: wrap; justify-content: space-between; min-width: 300px;">
+            <!-- <div style="display: flex; gap: 20px; flex: 2; flex-wrap: wrap; justify-content: space-between; min-width: 300px;"> -->
                 <!-- Date Picker -->
-                <div class="filter-group" style="flex: 1; min-width: 180px;">
-                    <label for="datePicker" style="display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Date</label>
-                    <input type="date" id="datePicker" style="width: 100%; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 6px; background-color: white; font-size: 14px; color: #2d3748; transition: all 0.3s; outline: none;border:1px solid lightgrey" onfocus="this.style.borderColor='#4299e1'">
+                <div class="col-lg-3 mb-5">
+                    <label for="datePicker" class="control-label">Date</label>
+                    <input type="date" id="datePicker" class="form-control">
                 </div>
 
                 <!-- From Time -->
-                <div class="filter-group" style="flex: 0.8; min-width: 120px;">
-                    <label for="fromTime" style="display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">From</label>
-                    <select id="fromTime" style="width: 100%; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 6px; background-color: white; font-size: 14px; color: #2d3748; transition: all 0.3s; outline: none;border:1px solid lightgrey" onfocus="this.style.borderColor='#4299e1'">
+                <div class="col-lg-3 mb-5">
+                    <label for="fromTime" class="control-label">From</label>
+                    <select id="fromTime" class="form-control single_select">
                         <option value="00:00">00:00</option>
                         <option value="01:00">01:00</option>
                         <option value="02:00">02:00</option>
@@ -190,9 +190,9 @@
                 </div>
 
                 <!-- To Time -->
-                <div class="filter-group" style="flex: 0.8; min-width: 120px;">
-                    <label for="toTime" style="display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">To</label>
-                    <select id="toTime" style="width: 100%; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 6px; background-color: white; font-size: 14px; color: #2d3748; transition: all 0.3s; outline: none;border:1px solid lightgrey" onfocus="this.style.borderColor='#4299e1'">
+                <div class="col-lg-3 mb-5">
+                    <label for="toTime" class="control-label">To</label>
+                    <select id="toTime" class="form-control single_select">
                         <option value="01:00">01:00</option>
                         <option value="02:00">02:00</option>
                         <option value="03:00">03:00</option>
@@ -218,7 +218,6 @@
                         <option value="23:00">23:00</option>
                         <option value="23:59">23:59</option>
                     </select>
-                </div>
             </div>
         </div>
     </div>
@@ -273,22 +272,25 @@
                 dataType: "json",
                 success: function(response) {
                     let employeeSelect = $('#employeeSelect');
-                    employeeSelect.empty().append(`<option value="">-- Select Employee --</option>`);
-
                     if (response.status === "success" && response.employees.length > 0) {
                         response.employees.forEach(emp => {
                             employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
                         });
+
+                        // Select a random employee
+                        const randomIndex = Math.floor(Math.random() * response.employees.length);
+                        const randomEmployee = response.employees[randomIndex];
+                        employeeSelect.val(randomEmployee.id);
+                        $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`);
+                        fetchActivityData(null, null, randomEmployee.id); // ✅ Pass random employee to fetch data
                     } else {
-                        showToast("No employees found for this user.", "error");
+                        employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
                     }
                 },
                 error: function() {
-                    showToast("Failed to fetch employees.", "error");
+                    $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
                 }
             });
-
-            fetchActivityData();
         });
         $('#employeeSelect, #datePicker').change(function() {
             clearTimeout(debounceTimer);
@@ -344,11 +346,8 @@
             fetchActivityData(fromTime, toTime);
         });
 
-
-
-
-        function fetchActivityData(fromTime = null, toTime = null) {
-    const employee = $('#employeeSelect').val();
+        function fetchActivityData(fromTime = null, toTime = null, employeeId = null) {
+    const employee = employeeId || $('#employeeSelect').val();
     const date = $('#datePicker').val();
 
     const selectedDate = new Date(date);

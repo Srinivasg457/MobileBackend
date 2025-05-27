@@ -1,15 +1,4 @@
 <style>
-       /* .main-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 250px;
-    z-index: 1000;
-    overflow-y: auto;
-    } */
-
-
        .popup {
            display: none;
            padding: 10px;
@@ -785,8 +774,16 @@
                                        //    setTimeout(loadScreenshots, 60000);
                                    }
 
-                               } else {
-                                   $(".card-container").html("<p>No screenshots available.</p>");
+                            } else {
+                                $(".card-container").html(`
+                            <div class="box">
+                                <div class="box-header with-border text-center">
+                                    <h3 class="box-title">
+                                        <strong class="text-right">No screenshots available.</strong>
+                                    </h3>
+                                </div>
+                            </div>
+                        `);
                                }
                            },
                            error: function(xhr, status, error) {
@@ -819,28 +816,26 @@
                        dataType: "json",
                        success: function(response) {
                            let employeeSelect = $('#employeeSelect');
-                           employeeSelect.empty().append(`<option value="">-- Select Employee --</option>`);
-
-                           if (response.status === "success" && response.employees.length > 0) {
+                        if (response.status === "success" && response.employees.length > 0) {
                                response.employees.forEach(emp => {
                                    employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
                                });
 
-                               const randomIndex = Math.floor(Math.random() * response.employees.length);
+                            const randomIndex = Math.floor(Math.random() * response.employees.length);
                                const randomEmployee = response.employees[randomIndex];
                                employeeSelect.val(randomEmployee.id);
                                $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`); // ✅ Set name on auto-load
                                const date = $('#datePicker').val();
                                loadScreenshots(randomEmployee.id, date);
                            } else {
-                               showToast("No employees found for this user.", "error");
-                           }
+                            employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
+                        }
                        },
 
 
                        error: function() {
-                           showToast("Failed to fetch employees.", "error");
-                       }
+                        $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
+                    }
                    });
                    $('#employeeSelect').on('change', function() {
                        const employeeNameText = $(this).find('option:selected').text().split(' (')[0];
@@ -849,10 +844,10 @@
                        let currentEmployeeId = employeeId;
                        const date = $('#datePicker').val();
 
-                       loadScreenshots(currentEmployeeId, date); // No need to manually clear here
+                    loadScreenshots(currentEmployeeId, date); // No need to manually clear here
                    });
 
-               });
+            });
                $('#datePicker').on('change', function() {
                    console.log("onchage");
                    let employeeId = $('#employeeSelect').val();
