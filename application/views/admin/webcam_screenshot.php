@@ -1,16 +1,5 @@
 <style>
-     /* .main-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 250px;
-    z-index: 1000;
-    overflow-y: auto;
-    } */
-
-
-     .popup {
+    .popup {
          display: none;
          padding: 10px;
      }
@@ -731,8 +720,16 @@
                          } else {
                              console.log("no screenshot");
 
-                             $(".card-container").html("<p>No Webcam Images available.</p>");
-                         }
+                            $(".card-container").html(`
+                            <div class="box">
+                                <div class="box-header with-border text-center">
+                                    <h3 class="box-title">
+                                        <strong class="text-right">No webcam images available.</strong>
+                                    </h3>
+                                </div>
+                            </div>
+                        `);
+                        }
                      },
                      error: function(xhr, status, error) {
                          console.error("AJAX Error:", status, error);
@@ -767,14 +764,14 @@
                              const date = $('#datePicker').val();
                              loadScreenshots(randomEmployee.id, date);
                          } else {
-                             showToast("No employees found for this user.", "error");
-                         }
+                            employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
+                        }
                      },
 
 
                      error: function() {
-                         showToast("Failed to fetch employees.", "error");
-                     }
+                        $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
+                    }
                  });
                  $('#employeeSelect').on('change', function() {
                      const employeeNameText = $(this).find('option:selected').text().split(' (')[0];
@@ -786,7 +783,7 @@
                      loadScreenshots(currentEmployeeId, date); // No need to manually clear here
                  });
 
-             });
+            });
              $('#datePicker').on('change', function() {
                  console.log("onchage");
                  let employeeId = $('#employeeSelect').val();
