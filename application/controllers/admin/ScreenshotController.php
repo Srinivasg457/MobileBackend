@@ -323,7 +323,7 @@ class ScreenshotController extends Home_Controller
         }
     
         // Resize settings - more aggressive for 5KB target
-        $max_width = 300; // Reduced from 800
+        $max_width = 500; // Reduced from 800
         $width = imagesx($image);
         $height = imagesy($image);
     
