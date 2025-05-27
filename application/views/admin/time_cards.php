@@ -291,7 +291,7 @@
                     $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
                 }
             });
-        });
+        
         $('#employeeSelect, #datePicker').change(function() {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
@@ -633,6 +633,6 @@ function renderAreaChart(labels, mouseData, keyData, timestamps) {
     chart = new ApexCharts(document.querySelector("#activityChart"), options);
     chart.render();
 }
-
+        });
     </script>
 </div>
