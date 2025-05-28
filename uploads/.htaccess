@@ -1,0 +1,10 @@
+# Disable directory listing
+
+Options -Indexes
+
+# Block all direct HTTP access to files in this directory
+
+<FilesMatch ".\*">
+Order allow,deny
+Deny from all
+</FilesMatch>
