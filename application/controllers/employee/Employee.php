@@ -107,7 +107,8 @@ class Employee extends Home_Controller
     }
 
     $employee_id = $this->session->userdata('employee_id');
-    $user_id = $this->session->userdata('user_id'); // Make sure you store this in session during login
+    $this->session->userdata('employee_org_id');
+ // Make sure you store this in session during login
 
     $current_password = $this->input->post('current_password', true);
     $new_password = $this->input->post('new_password', true);
