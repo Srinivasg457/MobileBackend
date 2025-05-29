@@ -58,32 +58,7 @@ class MY_Controller extends CI_Controller
             );
             $this->admin_model->edit_option($data, 1, 'settings');
         }
-        $this->load->library('session');
-
-        // List of public URLs
-        $public_paths = [
-            'auth/login',
-            'auth/log',
-            'auth/forgot_password',
-            'auth/register',
-            'auth/verify_email',
-            'auth/invitation',
-            'api/login',
-        ];
-
-        // Get current URI path
-        $current_path = uri_string();
-
-        // If not a public page and not logged in, block access
-        if (!in_array($current_path, $public_paths)) {
-            $org_logged_in = $this->session->userdata('logged_in');
-            $emp_logged_in = $this->session->userdata('employee_logged_in');
-
-            if (!$org_logged_in && !$emp_logged_in) {
-                redirect('auth/login'); // redirect to login page
-                exit;
-            }
-        }
+       
 
     }
 
