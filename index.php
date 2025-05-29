@@ -1,4 +1,14 @@
 <?php
+session_start();
+
+// Example: if user is not logged in
+if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
+    // Allow access to login page
+    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    if ($path !== '/login') {
+        header("Location: /login");
+        exit;
+    }
 /**
  * CodeIgniter
  *
