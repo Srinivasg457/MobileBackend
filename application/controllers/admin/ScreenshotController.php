@@ -206,11 +206,18 @@ class ScreenshotController extends Home_Controller
         $compressed_upload_path = FCPATH . "uploads/screenshots_compressed/{$user_id}/{$employee_id}/";
     
         // Create the directories if they don't exist
-        if (!is_dir($original_upload_path)) {
-            mkdir($original_upload_path, 0777, true); // Step 1: Create with 0777
-            chmod($original_upload_path, 0777);       // Step 2: Force 777 after creation
-        }
-    
+      // Ensure original upload path exists and has 0777 permission
+if (!is_dir($original_upload_path)) {
+    mkdir($original_upload_path, 0777, true);
+}
+chmod($original_upload_path, 0777);
+
+// Ensure compressed upload path exists and has 0777 permission
+if (!is_dir($compressed_upload_path)) {
+    mkdir($compressed_upload_path, 0777, true);
+}
+chmod($compressed_upload_path, 0777);
+
         // Get file extension and construct file names
         $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
         $file_name = "screenshot_{$employee_id}_{$formatted_timestamp}.{$file_extension}";
@@ -273,6 +280,7 @@ class ScreenshotController extends Home_Controller
                 "screenshot_id" => $screenshot_id
             ]));
     }
+    
     
     private function compressScreenshot($source, $destination, $target_size_kb) {
         // Check if GD is installed
