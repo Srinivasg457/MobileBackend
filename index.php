@@ -1,19 +1,4 @@
 <?php
-session_start();
-
-$public_paths = ['/login', '/auth', '/api/login']; // Adjust for your routes
-$current_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-// Check for all session flags
-$org_logged_in = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
-$emp_logged_in = isset($_SESSION['employee_logged_in']) && $_SESSION['employee_logged_in'] === true;
-
-// Allow access to login routes, or if already logged in
-if (!in_array($current_path, $public_paths) && !$org_logged_in && !$emp_logged_in) {
-    header("Location: /login"); // Adjust to your route
-    exit();
-}
-
 /**
  * CodeIgniter
  *
