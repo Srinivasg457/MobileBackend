@@ -1,6 +1,22 @@
+# DirectoryIndex index.php
+# RewriteEngine on                       
+# RewriteCond $1 !^(index\.php|(.*)\.swf|forums|images|css|downloads|js|robots\.txt|favicon\.ico)
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^(.*)$ ./index.php?$1 [L,QSA] 
+
+
+
+
 DirectoryIndex index.php
-RewriteEngine on                       
-RewriteCond $1 !^(index\.php|(.*)\.swf|forums|images|css|downloads|js|robots\.txt|favicon\.ico)
+RewriteEngine On
+
+# Allow access to specific public assets
+RewriteCond %{REQUEST_URI} !^/(index\.php|(.*)\.swf|forums|images|css|downloads|js|robots\.txt|favicon\.ico)$ [NC]
+
+# If the request is not a real file or directory
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ ./index.php?$1 [L,QSA] 
+
+# Route everything else through index.php
+RewriteRule ^(.*)$ index.php?$1 [L,QSA]
