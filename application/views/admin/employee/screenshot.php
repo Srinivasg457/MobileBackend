@@ -466,13 +466,14 @@
               console.log(activityDataArray);
 
               $.ajax({
-                  url: "<?= base_url('admin/ScreenshotController/get_user_screenshots'); ?>",
+                  url: "<?= base_url('admin/ScreenshotController/get_screenshots'); ?>",
                   type: "GET",
                   dataType: "json",
                   data: {
                       date
                   },
                   success: function(response) {
+                            console.log(response);
                       if (response.status === "success" && response.screenshots.length > 0) {
                           let output = '';
                           const groupedByHour = {};

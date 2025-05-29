@@ -581,9 +581,9 @@ if (!$image) {
     
 public function get_screenshots()
 {
-    $employee_id = $this->input->get('employee_id');
-    $user_id = $this->session->userdata('id');
-    $date = $this->input->get('date');
+        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+        $date = $this->input->get('date');
 
     if (empty($user_id) && empty($employee_id)) {
         return $this->output->set_content_type('application/json')
@@ -599,7 +599,7 @@ public function get_screenshots()
     }
 
     // Fetch screenshot records from DB where status is 1
-    $this->db->select('screenshot_id, compressed_path, created_at');
+    $this->db->select('screenshot_id, compressed_path, overall_activity_percent, created_at');
     $this->db->where('employee_id', $employee_id);
     $this->db->where('user_id', $user_id);
     $this->db->where('status', 1); // Only active screenshots
@@ -624,8 +624,9 @@ public function get_screenshots()
                 'file_name' => $filename,
                 'image_url' => base_url($row['compressed_path']),
                 'created_at' => $formatted_time,
-                'display_text' => $formatted_time
-            ];
+                'display_text' => $formatted_time,
+                'percentage' => $row['overall_activity_percent'],
+                ];
         }
     }
 
