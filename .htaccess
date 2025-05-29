@@ -7,13 +7,13 @@
 
 
 
-DirectoryIndex index.php
 RewriteEngine On
+RewriteBase /
 
-# Allow direct access to public files (like assets)
-RewriteCond %{REQUEST_URI} !^/(index\.php|login|login\.php|api|assets|css|js|images|robots\.txt|favicon\.ico)$ [NC]
+# Allow access to existing files and folders
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Redirect everything else to index.php
-RewriteRule ^(.*)$ index.php?$1 [L,QSA]
+# Rewrite everything else to index.php
+RewriteRule ^(.*)$ index.php/$1 [L]
+
