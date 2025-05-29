@@ -206,13 +206,18 @@ class ScreenshotController extends Home_Controller
         $compressed_upload_path = FCPATH . "uploads/screenshots_compressed/{$user_id}/{$employee_id}/";
     
         // Create the directories if they don't exist
-        if (!is_dir($original_upload_path)) {
-            mkdir($original_upload_path, 0777, true);
-        }
-        if (!is_dir($compressed_upload_path)) {
-            mkdir($compressed_upload_path, 0777, true);
-        }
-    
+      // Ensure original upload path exists and has 0777 permission
+if (!is_dir($original_upload_path)) {
+    mkdir($original_upload_path, 0777, true);
+}
+chmod($original_upload_path, 0777);
+
+// Ensure compressed upload path exists and has 0777 permission
+if (!is_dir($compressed_upload_path)) {
+    mkdir($compressed_upload_path, 0777, true);
+}
+chmod($compressed_upload_path, 0777);
+
         // Get file extension and construct file names
         $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
         $file_name = "screenshot_{$employee_id}_{$formatted_timestamp}.{$file_extension}";
@@ -275,6 +280,7 @@ class ScreenshotController extends Home_Controller
                 "screenshot_id" => $screenshot_id
             ]));
     }
+    
     
     private function compressScreenshot($source, $destination, $target_size_kb) {
         // Check if GD is installed
@@ -583,9 +589,9 @@ if (!$image) {
     
 public function get_screenshots()
 {
-    $employee_id = $this->input->get('employee_id');
-    $user_id = $this->session->userdata('id');
-    $date = $this->input->get('date');
+        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+        $date = $this->input->get('date');
 
     if (empty($user_id) && empty($employee_id)) {
         return $this->output->set_content_type('application/json')
@@ -601,7 +607,7 @@ public function get_screenshots()
     }
 
     // Fetch screenshot records from DB where status is 1
-    $this->db->select('screenshot_id, compressed_path, created_at');
+    $this->db->select('screenshot_id, compressed_path, overall_activity_percent, created_at');
     $this->db->where('employee_id', $employee_id);
     $this->db->where('user_id', $user_id);
     $this->db->where('status', 1); // Only active screenshots
@@ -626,8 +632,9 @@ public function get_screenshots()
                 'file_name' => $filename,
                 'image_url' => base_url($row['compressed_path']),
                 'created_at' => $formatted_time,
-                'display_text' => $formatted_time
-            ];
+                'display_text' => $formatted_time,
+                'percentage' => $row['overall_activity_percent'],
+                ];
         }
     }
 
