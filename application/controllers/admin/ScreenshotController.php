@@ -176,6 +176,7 @@ class ScreenshotController extends Home_Controller
                 ]));
         }
 
+
         // Validate is_active
         if (!in_array($is_active, [0, 1, 2], true)) {
             return $this->output->set_content_type('application/json')
@@ -206,10 +207,10 @@ class ScreenshotController extends Home_Controller
     
         // Create the directories if they don't exist
         if (!is_dir($original_upload_path)) {
-            mkdir($original_upload_path, 0755, true);
+            mkdir($original_upload_path, 0777, true);
         }
         if (!is_dir($compressed_upload_path)) {
-            mkdir($compressed_upload_path, 0755, true);
+            mkdir($compressed_upload_path, 0777, true);
         }
     
         // Get file extension and construct file names
