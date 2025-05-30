@@ -511,9 +511,15 @@
                             });
 
                             // Process each hour
-                            $.each(groupedByHour, function(hourRange, screenshots) {
+                            Object.keys(groupedByHour).sort((a, b) => {
+                                const hourA = parseInt(a.split(':')[0]);
+                                const hourB = parseInt(b.split(':')[0]);
+                                return currentSortOrder === 'descending' ? hourB - hourA : hourA - hourB;
+                            }).forEach(hourRange => {
+                                const screenshots = groupedByHour[hourRange];
+
                                 const groupId = `group-${hourRange.replace(/[^a-zA-Z0-9]/g, "")}`;
-                                output += `<div class="screenshot-group box" style="border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 30px;">
+                                output += `<div class="screenshot-group box" style="padding: 10px; border-radius: 8px; margin-bottom: 30px;">
                                 <div class="box-header" style="font-weight: bold; margin-bottom: 10px;">Time: ${hourRange}</div>
                                 <div class="screenshot-visible">`;
 
@@ -603,22 +609,22 @@
                                     const isActive = screenshot.image_url === clickedImageUrl;
 
                                     $('#modal-additional-screenshots').append(`
-                                                <div class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
+                                                <div id="screenshot-${screenshot.id}" class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
                                                     style="border:2px solid white;cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
                                                     data-src="${screenshot.image_url}"
                                                     data-time="${timeWithoutSeconds}"
                                                     data-id="${screenshot.id}">
                                                     
-                                                    <img src="${screenshot.image_url}" 
+                                                    <img id="main-image"  src="${screenshot.image_url}" 
                                                         style="width: 100%; height: 100px; object-fit: cover; display: block; filter:transition: filter 0.3s;">
                                                     
                                                     <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
                                                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                             
                                                         <span>${timeWithoutSeconds}</span>
-                                                            <div class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                                                                <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
-                                                            </div>
+                                                         <div data-id="${screenshot.id}" data-empID="${$('#employeeSelect').val()}" class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                                                        <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
+                                                    </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -626,71 +632,9 @@
 
 
                                 });
-                                // Handle delete button clicks
-                                $('.delete-thumbnail').on('click', function(e) {
-                                    e.stopPropagation();
-                                    const thumbnailItem = $(this).closest('.thumbnail-item');
-                                    const screenshotId = thumbnailItem.data('id');
-                                    const isActive = thumbnailItem.hasClass('active-thumbnail');
 
-                                    showConfirmationAlert(
-                                        "Are you sure you want to delete this screenshot?",
-                                        "warning",
-                                        function() {
-                                            $.ajax({
-                                                url: "/admin/ScreenshotController/delete_webcam_screenshot",
-                                                type: "POST",
-                                                data: {
-                                                    webcam_id: screenshotId,
-                                                    employee_id: id
-                                                },
-                                                success: function(response) {
-                                                    if (response.status == 1) {
-                                                        swal("Failed!", response.message || "Could not delete screenshot.", "error");
-                                                    } else {
-                                                        // Visual feedback
-                                                        thumbnailItem.addClass('deleting');
-
-                                                        // If deleting the active thumbnail, select a new one
-                                                        if (isActive) {
-                                                            const nextThumbnail = $('.thumbnail-item').not(thumbnailItem).first();
-                                                            if (nextThumbnail.length) {
-                                                                nextThumbnail.click();
-                                                            } else {
-                                                                $('#screenshot-modal').fadeOut();
-                                                            }
-                                                        }
-
-                                                        // Remove after animation
-                                                        setTimeout(() => {
-                                                            thumbnailItem.remove();
-                                                            swal({
-                                                                title: "Deleted!",
-                                                                text: "Screenshot deleted successfully.",
-                                                                type: "success",
-                                                                showConfirmButton: false,
-                                                                timer: 1500
-                                                            });
-
-                                                            // If no more thumbnails, close modal
-                                                            if ($('.thumbnail-item').length === 0) {
-                                                                $('#screenshot-modal').fadeOut();
-                                                            }
-                                                        }, 300);
-
-                                                        // Refresh the main view
-                                                        //  setTimeout(loadScreenshots, 500);
-                                                    }
-                                                },
-                                                error: function(xhr) {
-                                                    swal("Error!", "Something went wrong.", "error");
-                                                }
-                                            });
-                                        }
-                                    );
-                                });
                                 // Show the modal
-                                $('#screenshot-modal').fadeIn();
+                                $('#screenshot-modal').show();
 
                                 // Handle thumbnail clicks
                                 $('.thumbnail-item').on('click', function() {
@@ -725,37 +669,10 @@
                                 if (percentage >= 40) return '#FFC107'; // Amber
                                 return '#F44336'; // Red
                             }
-                            // Delete screenshot
-                            $(".delete-screenshot").on('click', function(e) {
-                                e.stopPropagation();
-                                const screenshotId = $(this).data("id");
-                                const message = "Are you sure you want to delete this screenshot?";
-                                showConfirmationAlert(message, "warning", function() {
-                                    $.ajax({
-                                        url: "/admin/ScreenshotController/delete_webcam_screenshot",
-                                        type: "POST",
-                                        data: {
-                                            webcam_id: screenshotId,
-                                            employee_id: id
-                                        },
-                                        success: function(response) {
-                                            if (response.status == 1) {
-                                                swal("Failed!", response.message || "Could not delete screenshot.", "error");
-                                            } else {
-                                                swal("Deleted!", "Screenshot deleted successfully.", "success");
-                                                //  loadScreenshots();
-                                            }
-                                        },
-                                        error: function(xhr) {
-                                            swal("Error!", "Something went wrong.", "error");
-                                        }
-                                    });
-                                });
-                            });
 
                             // Auto-refresh if current date
                             if (date === new Date().toISOString().split('T')[0]) {
-                                //  setTimeout(loadScreenshots, 60000);
+                                setTimeout(loadScreenshots, 60000);
                             }
 
                         } else {
@@ -765,7 +682,7 @@
                             <div class="box">
                                 <div class="box-header with-border text-center">
                                     <h3 class="box-title">
-                                        <strong class="text-right">No webcam images available.</strong>
+                                        <strong class="text-right">No Webcam Images available.</strong>
                                     </h3>
                                 </div>
                             </div>
@@ -778,12 +695,17 @@
                     }
                 });
             }
-            $('#close-modal').on('click', function() {
-                $('#screenshot-modal').fadeOut();
-            });
 
+
+            let currentSortOrder = 'ascending';
             $(document).ready(function() {
                 const today = new Date().toISOString().split('T')[0];
+                $('#sortOrder').on('change', function() {
+                    currentSortOrder = $(this).val();
+                    let currentEmployeeId = $('#employeeSelect').val();
+                    let date = $('#datePicker').val();
+                    loadScreenshots(currentEmployeeId, date);
+                });
                 $('#datePicker').val(today);
                 $.ajax({
                     url: "<?= base_url('/admin/ScreenshotController/list_employees_by_user') ?>",
@@ -834,10 +756,77 @@
                 loadScreenshots(currentEmployeeId, date); // No need to manually clear here
             });
             // Close modal when clicking outside content
+            function closeScreenshotModal() {
+                $('#screenshot-modal').fadeOut();
+                const date = $('#datePicker').val();
+                const id = $('#employeeSelect').val();
+                loadScreenshots(id, date);
+            }
+
+            // Close on close button click
+            $('#close-modal').on('click', closeScreenshotModal);
+
+            // Close when clicking outside modal content
             $('#screenshot-modal').on('click', function(e) {
-                // Check if the clicked target is the modal background
-                if ($(e.target).is('#screenshot-modal')) {
-                    $('#screenshot-modal').fadeOut();
+                if (!$(e.target).closest('#screenshot-modal > div').length) {
+                    closeScreenshotModal();
                 }
+            });
+            $(document).on('click', '.delete-thumbnail', function() {
+                const screenshotId = $(this).data('id');
+                const empId = $(this).data('empid');
+                const $thumbnail = $(this); // store reference for removing on success
+                console.log(screenshotId, empId);
+
+
+                showConfirmationAlert("Are you sure you want to delete this webcam screenshot?", "warning", function() {
+                    $.ajax({
+                        url: "<?= base_url('admin/ScreenshotController/delete_webcam_screenshot'); ?>",
+                        method: 'POST',
+                        data: {
+                            webcam_id: screenshotId,
+                            employee_id: empId
+                        },
+                        success: function(response) {
+
+                            if (response.message === "Webcam screenshot marked as deleted.") {
+                                swal("Deleted!", "Webcam screenshot has been deleted.", "success");
+
+                                const $deletedThumb = $(`#screenshot-${screenshotId}`);
+
+                                // Try to get the next or previous sibling BEFORE removing the element
+                                let $nextThumb = $deletedThumb.next('.thumbnail-item');
+                                if ($nextThumb.length === 0) {
+                                    $nextThumb = $deletedThumb.prev('.thumbnail-item');
+                                }
+
+                                // Fade out and remove the deleted thumbnail
+                                $deletedThumb.fadeOut(300, function() {
+                                    $(this).remove();
+
+                                    const remainingItems = $('.thumbnail-item');
+                                    console.log(remainingItems.length);
+
+                                    if (remainingItems.length === 0) {
+                                        closeScreenshotModal();
+                                        $('#screenshot-modal').fadeOut();
+                                    } else if ($nextThumb.length > 0) {
+                                        // Add active class to the nearest thumb
+                                        $nextThumb.addClass('active-thumbnail');
+
+                                        // Simulate click to reload the modal with the selected thumbnail
+                                        console.log($nextThumb.find('img'));
+                                        $nextThumb.find('#main-image').trigger('click');
+                                    }
+                                });
+                            } else {
+                                swal("Error", response.message || "Something went wrong!", "error");
+                            }
+                        },
+                        error: function(error) {
+                            swal("Error", "Failed to communicate with the server.", "error");
+                        }
+                    });
+                });
             });
         </script>
