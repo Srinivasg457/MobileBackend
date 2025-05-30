@@ -14,11 +14,21 @@ class Notification extends CI_Controller {
  
 
     public function send_notification()
-    {
+{
+    try {
+        // Load input and session helpers
+        $this->load->helper('security');
+
+        // Fetch inputs securely
         $employee_id = $this->input->post('employee_id', true);
         $description = $this->input->post('description', true);
-        $user_id = $this->session->userdata('user_id'); // user who is sending notification
-    
+
+        // Get user_id from session or POST (for Postman/local testing)
+        $user_id = $this->session->userdata('user_id');
+        if (empty($user_id)) {
+            $user_id = $this->input->post('user_id', true); // fallback
+        }
+
         // Validate inputs
         if (empty($user_id) || empty($employee_id) || empty($description)) {
             return $this->output
@@ -29,27 +39,28 @@ class Notification extends CI_Controller {
                     'message' => 'User ID, Employee ID, and Description are required.'
                 ]));
         }
-    
-        // Insert into notifications table
+
+        // Prepare data
         $data = [
             'user_id'     => $user_id,
             'employee_id' => $employee_id,
             'description' => $description,
             'created_at'  => date('Y-m-d H:i:s')
         ];
-    
+
+        // Insert into DB
         $this->db->insert('notifications', $data);
-    
+
         if ($this->db->affected_rows() > 0) {
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(200)
                 ->set_output(json_encode([
                     'status' => 'success',
-                    'user_id'     => $user_id,
+                    'user_id' => $user_id,
                     'employee_id' => $employee_id,
                     'description' => $description,
-                    'created_at'  => date('Y-m-d H:i:s'),
+                    'created_at' => $data['created_at'],
                     'message' => 'Notification sent successfully.'
                 ]));
         } else {
@@ -61,7 +72,19 @@ class Notification extends CI_Controller {
                     'message' => 'Failed to send notification.'
                 ]));
         }
+    } catch (Exception $e) {
+        log_message('error', 'Notification Error: ' . $e->getMessage());
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred.'
+            ]));
     }
+}
+
     
 
     // Optional: View all notifications for an employee
