@@ -31,9 +31,6 @@
        }
 
        .search-row {
-           display: flex;
-           align-items: center;
-           gap: 10px;
            margin: 20px 0;
        }
 
@@ -217,7 +214,7 @@
                         display: block;
                         margin: 0 auto;
                         border-radius: 8px;
-                    border: 1px solid white;
+                    border: 2px solid white;
                     }
 
                    >#image-info {
@@ -682,7 +679,7 @@
 
                                     $('#modal-additional-screenshots').append(`
                                     <div class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
-                                        style="border:1px solid white;cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
+                                        style="border:2px solid white;cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
                                         data-src="${screenshot.image_url}"
                                         data-time="${timeWithoutSeconds}"
                                         data-activity="${overallActivity}"
