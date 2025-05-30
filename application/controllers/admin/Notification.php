@@ -94,9 +94,9 @@ class Notification extends Home_Controller {
 
 public function get_notifications()
 {
-    // Get user_id and employee_id from session
-    $employee_id = 2;
-    $user_id = 3;
+        // Get user_id and employee_id from session
+        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
     // Validate both user_id and employee_id
     if (empty($user_id) || empty($employee_id)) {
