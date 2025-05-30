@@ -643,9 +643,11 @@
                                 }
 
                                 // Auto-refresh if current date
-                                if (date === new Date().toISOString().split('T')[0]) {
-                                    setTimeout(loadScreenshots, 60000);
-                                }
+                                setTimeout(function() {
+                                    if (date === new Date().toISOString().split('T')[0]) {
+                                        loadScreenshots()
+                                    }
+                                }, 6000);
 
                             } else {
                                 console.log("no screenshot");
@@ -666,12 +668,19 @@
                         }
                     });
                 }
-                $('#close-modal').on('click', function() {
-                    $('#screenshot-modal').hide();
-                });
+                // Close modal when clicking outside content
+                function closeScreenshotModal() {
+                    $('#screenshot-modal').fadeOut();
+                    loadScreenshots();
+                }
+
+                // Close on close button click
+                $('#close-modal').on('click', closeScreenshotModal);
+
+                // Close when clicking outside modal content
                 $('#screenshot-modal').on('click', function(e) {
                     if (!$(e.target).closest('#screenshot-modal > div').length) {
-                        $(this).hide();
+                        closeScreenshotModal();
                     }
                 });
 
