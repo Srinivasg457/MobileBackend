@@ -207,16 +207,12 @@ class ScreenshotController extends Home_Controller
     
         // Create the directories if they don't exist
       // Ensure original upload path exists and has 0777 permission
-if (!is_dir($original_upload_path)) {
-    mkdir($original_upload_path, 0777, true);
-}
-chmod($original_upload_path, 0777);
-
-// Ensure compressed upload path exists and has 0777 permission
-if (!is_dir($compressed_upload_path)) {
-    mkdir($compressed_upload_path, 0777, true);
-}
-chmod($compressed_upload_path, 0777);
+      if (!is_dir($original_upload_path)) {
+        mkdir($original_upload_path, 0755, true);
+    }
+    if (!is_dir($compressed_upload_path)) {
+        mkdir($compressed_upload_path, 0755, true);
+    }
 
         // Get file extension and construct file names
         $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
