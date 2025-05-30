@@ -715,7 +715,7 @@
                                     if (date === new Date().toISOString().split('T')[0]) {
                                         loadScreenshots(id, date)
                                     }
-                                }, 10000);
+                                }, 6000);
                             });
                         } else {
                             $(".card-container").html(
