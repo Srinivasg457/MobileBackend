@@ -462,6 +462,13 @@
                       <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
                     </a>
                   </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Notification") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/Notification') ?>">
+                      <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
+                    </a>
+                  </li>
                   <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
                                 echo "active";
                               } ?>">

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Notification extends CI_Controller {
+class Notification extends Home_Controller {
 
     public function __construct() {
         parent::__construct();
@@ -11,7 +11,13 @@ class Notification extends CI_Controller {
         $this->load->helper('form');
     }
 
- 
+    public function index()
+    {
+        $data = array();
+        $data['page_title'] = 'Notification';
+        $data['main_content'] = $this->load->view('admin/notification', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
 
     public function send_notification()
 {

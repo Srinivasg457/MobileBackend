@@ -688,7 +688,7 @@
                                             data-activity="${overallActivity}"
                                             data-id="${screenshot.id}">
 
-                                            <img src="${screenshot.image_url}" 
+                                            <img id="main-image" src="${screenshot.image_url}" 
                                                 style="width: 100%; height: 100px; object-fit: cover; display: block; filter: transition; transition: filter 0.3s;">
 
                                             <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
@@ -801,8 +801,33 @@
 
                             if (response === "Soft deleted successfully.") {
                                 swal("Deleted!", "Screenshot has been deleted.", "success");
-                                $(`#screenshot-${screenshotId}`).fadeOut(300, function() {
+
+                                const $deletedThumb = $(`#screenshot-${screenshotId}`);
+
+                                // Try to get the next or previous sibling BEFORE removing the element
+                                let $nextThumb = $deletedThumb.next('.thumbnail-item');
+                                if ($nextThumb.length === 0) {
+                                    $nextThumb = $deletedThumb.prev('.thumbnail-item');
+                                }
+
+                                // Fade out and remove the deleted thumbnail
+                                $deletedThumb.fadeOut(300, function() {
                                     $(this).remove();
+
+                                    const remainingItems = $('.thumbnail-item');
+                                    console.log(remainingItems.length);
+
+                                    if (remainingItems.length === 0) {
+                                        closeScreenshotModal();
+                                        $('#screenshot-modal').fadeOut();
+                                    } else if ($nextThumb.length > 0) {
+                                        // Add active class to the nearest thumb
+                                        $nextThumb.addClass('active-thumbnail');
+
+                                        // Simulate click to reload the modal with the selected thumbnail
+                                        console.log($nextThumb.find('img'));
+                                        $nextThumb.find('#main-image').trigger('click');
+                                    }
                                 });
                             } else {
                                 swal("Error", response.message || "Something went wrong!", "error");

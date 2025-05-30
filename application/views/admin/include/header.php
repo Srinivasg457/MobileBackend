@@ -67,7 +67,13 @@
     <link href="<?php echo base_url() ?>assets/admin/css/style-over.php?color=<?php echo settings()->site_color; ?>&rgb=<?php echo $rgb ?>" rel="stylesheet">
   <?php endif ?>
 
+<?php
+    // for security purpose
+    if (!$this->session->userdata('logged_in') && !$this->session->userdata('employee_logged_in')) {
+  redirect('login');
 
+  }
+  ?>
   <style type="text/css">
     .content-wrapper,
     body,
