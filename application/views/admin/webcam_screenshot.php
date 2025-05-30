@@ -671,13 +671,16 @@
                             }
 
                             // Auto-refresh if current date
-                            if (date === new Date().toISOString().split('T')[0]) {
-                                setTimeout(loadScreenshots, 60000);
-                            }
+                            setTimeout(function() {
+                                // $('#screenshot-modal').fadeOut();
+                                let date = $('#datePicker').val();
+                                let id = $('#employeeSelect').val();
+                                if (date === new Date().toISOString().split('T')[0]) {
+                                    loadScreenshots(id, date)
+                                }
+                            }, 1000);
 
                         } else {
-                            console.log("no screenshot");
-
                             $(".card-container").html(`
                             <div class="box">
                                 <div class="box-header with-border text-center">
