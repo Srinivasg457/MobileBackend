@@ -208,7 +208,7 @@
                 padding: 15px;
                 margin-bottom: 30px;
                 position: relative;
-                /* height: 70%; */
+                height: 70%;
 
                 >#modal-image {
                     max-width: 100%;
@@ -238,8 +238,11 @@
 
                 >#modal-additional-screenshots {
                     display: grid;
-                    grid-template-columns: repeat(6, 1fr);
-                    gap: 10px;
+                    grid-template-columns: repeat(6, auto);
+
+                    .thumbnail-item {
+                        margin: 0px 5px;
+                    }
                 }
             }
         }
