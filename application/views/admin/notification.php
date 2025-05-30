@@ -207,12 +207,6 @@
                     var isChecked = $(this).is(':checked');
                     $('.notification-checkbox').prop('checked', isChecked).trigger('change');
                 });
-
-                // Initial fetch
-                fetchNotifications();
-
-                // Optional: Refresh notifications periodically
-                setInterval(fetchNotifications, 60000); // Every 60 seconds
             });
         </script>
 
