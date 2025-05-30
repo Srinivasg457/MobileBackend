@@ -91,6 +91,43 @@ class Notification extends Home_Controller {
     }
 }
 
+
+public function get_notifications()
+{
+    // Get user_id and employee_id from session
+    $employee_id = 2;
+    $user_id = 3;
+
+    // Validate both user_id and employee_id
+    if (empty($user_id) || empty($employee_id)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'User ID and Employee ID are required from session.'
+            ]));
+    }
+
+    // Fetch notifications from database (status removed)
+    $this->db->select('notification_id, user_id, employee_id, description, created_at'); // status removed
+    $this->db->from('notifications');
+    $this->db->where('user_id', $user_id);
+    $this->db->where('employee_id', $employee_id);
+    $this->db->order_by('created_at', 'DESC');
+
+    $query = $this->db->get();
+    $notifications = $query->result_array();
+
+    // Return response
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_status_header(200)
+        ->set_output(json_encode([
+            'status' => 'success',
+            'data' => $notifications
+        ]));
+}
     
 
     // Optional: View all notifications for an employee
