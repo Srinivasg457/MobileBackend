@@ -722,20 +722,8 @@ public function get_last_screenshot()
             ]));
     }
 
-    $user_folder = $user_id;
-    $upload_path = FCPATH . "uploads/screenshots/{$user_folder}/";
-
-    if (!is_dir($upload_path)) {
-        return $this->output->set_content_type('application/json')
-            ->set_status_header(404)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "No folder found for user ID {$user_id}"
-            ]));
-    }
-
-    // Get the most recent screenshot of today
-    $this->db->select('screenshot_id, file_path, created_at');
+        // Get the most recent screenshot of today with compressed path
+    $this->db->select('screenshot_id, compressed_path, created_at');
     $this->db->where('employee_id', $employee_id);
     $this->db->where('user_id', $user_id);
     $this->db->where('status', 1); // Only active screenshots
@@ -746,16 +734,18 @@ public function get_last_screenshot()
     $row = $query->row_array();
 
     if ($row) {
-        $filename = basename($row['file_path']);
-        $full_path = $upload_path . $filename;
-
-        if (file_exists($full_path)) {
+        // Get the filename from compressed_path
+        $filename = basename($row['compressed_path']);
+        // Check if the compressed file exists
+        $compressed_full_path = FCPATH . $row['compressed_path'];
+        if (file_exists($compressed_full_path)) {
+            $filename = basename($row['compressed_path']);
             $formatted_time = date('H:i:s', strtotime($row['created_at']));
 
             $screenshot = [
                 'id' => $row['screenshot_id'],
                 'file_name' => $filename,
-                'image_url' => base_url("uploads/screenshots/{$user_folder}/{$filename}"),
+                'image_url' => base_url($row['compressed_path']),
                 'created_at' => $formatted_time,
                 'display_text' => $formatted_time
             ];
