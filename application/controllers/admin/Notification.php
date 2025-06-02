@@ -98,6 +98,60 @@ class Notification extends Home_Controller {
 }
 
 
+public function desktop_notifications()
+{
+    // Set the default timezone to Indian Standard Time (UTC+5:30)
+    date_default_timezone_set('Asia/Kolkata');
+
+    // Get user_id and employee_id from session
+    $employee_id = 4;
+    $user_id =3;
+
+    // Validate both user_id and employee_id
+    if (empty($user_id) || empty($employee_id)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'User ID and Employee ID are required from session.'
+            ]));
+    }
+
+    // Fetch notifications from database with employee name using JOIN
+    // Only where description is "User is inactive for a while"
+    $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+    $this->db->from('notifications n');
+    $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+    $this->db->where('n.user_id', $user_id);
+    $this->db->where('n.employee_id', $employee_id);
+    $this->db->where('n.description', 'User is inactive for a while');
+    $this->db->order_by('n.created_at', 'DESC');
+    $this->db->limit(1);  // This will return only the latest record
+
+    $query = $this->db->get();
+    $notifications = $query->result_array();
+
+    // Convert MySQL timestamps to Indian time (if needed)
+    foreach ($notifications as &$notification) {
+        if (isset($notification['created_at'])) {
+            $datetime = new DateTime($notification['created_at'], new DateTimeZone('UTC'));
+            $datetime->setTimezone(new DateTimeZone('Asia/Kolkata'));
+            $notification['created_at'] = $datetime->format('Y-m-d H:i:s');
+        }
+    }
+
+    // Return response
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_status_header(200)
+        ->set_output(json_encode([
+            'status' => 'success',
+            'data' => $notifications
+        ]));
+}
+
+
 public function get_notifications()
 {
     // Set the default timezone to Indian Standard Time (UTC+5:30)
@@ -124,6 +178,7 @@ public function get_notifications()
     $this->db->join('employees e', 'n.employee_id = e.id', 'left');
     $this->db->where('n.user_id', $user_id);
     $this->db->where('n.employee_id', $employee_id);
+    $this->db->where('n.description !=', 'User is inactive for a while'); // Exclude inactive notifications
     $this->db->order_by('n.created_at', 'DESC');
     $this->db->limit(1);  // This will return only the latest record
 
@@ -153,3 +208,5 @@ public function get_notifications()
         echo json_encode($query->result());
     }
 }
+
+

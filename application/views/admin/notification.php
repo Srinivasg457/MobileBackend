@@ -119,6 +119,7 @@
                 display: flex;
                 gap: 20px;
                 justify-content: center;
+                margin-bottom: 20px;
             }
 
             .box {
@@ -129,6 +130,8 @@
                 align-items: center;
                 font-size: 16px;
                 border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
             }
 
             .desktop {
@@ -142,11 +145,18 @@
                 background-color: #ecf0f1;
                 border: 1px solid #2c3e50;
             }
+
+            .box.active {
+                background-color: #3498db;
+                color: white;
+                border-color: #3498db;
+                font-weight: bold;
+            }
         </style>
         <h2 style="text-align: center;">Notifications</h2>
         <div class="container">
             <div class="box desktop">Desktop</div>
-            <div class="box webcam">Webcam</div>
+            <div class="box webcam active">Webcam</div>
         </div>
 
         <div class="notification-container" id="notifications-list">
@@ -154,8 +164,15 @@
         </div>
 
         <script>
-    // Function to fetch notifications for all employees
-    function loadAllEmployees() {
+    // Main function to load webcam notifications
+    function loadWebcamNotifications() {
+        // Set active tab
+        $('.box.webcam').addClass('active');
+        $('.box.desktop').removeClass('active');
+        
+        // Clear existing notifications
+        $('#notifications-list').html('');
+
         $.ajax({
             url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
             method: 'GET',
@@ -163,7 +180,7 @@
             success: function(response) {
                 if (response.status === 'success' && response.employees.length > 0) {
                     response.employees.forEach(function(employee) {
-                        fetchNotifications(employee.id, employee.name); // Pass both ID and name
+                        fetchWebcamNotifications(employee.id, employee.name);
                     });
                 } else {
                     $('#notifications-list').html(
@@ -179,8 +196,40 @@
         });
     }
 
-    // Function to fetch notifications for a specific employee
-    function fetchNotifications(employeeId, employeeName) {
+    // Function to load desktop notifications
+    function loadDesktopNotifications() {
+        // Set active tab
+        $('.box.desktop').addClass('active');
+        $('.box.webcam').removeClass('active');
+        
+        // Clear existing notifications
+        $('#notifications-list').html('');
+
+        $.ajax({
+            url: "<?= base_url('admin/Notification/desktop_notifications') ?>",
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log(response);
+                if (response.status === 'success' && response.data.length > 0) {
+                    displayDesktopNotifications(response.data);
+                } else {
+                    $('#notifications-list').html(
+                        '<div class="notification">No desktop notifications found.</div>'
+                    );
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading desktop notifications', error);
+                $('#notifications-list').html(
+                    '<div class="error-message">Error loading desktop notifications.</div>'
+                );
+            }
+        });
+    }
+
+    // Function to fetch webcam notifications for a specific employee
+    function fetchWebcamNotifications(employeeId, employeeName) {
         $.ajax({
             url: "<?= base_url('admin/Notification/get_notifications') ?>",
             type: 'GET',
@@ -195,7 +244,7 @@
                     const sortedNotifications = response.data.sort((a, b) => {
                         return (a.status === 0) ? -1 : (b.status === 0 ? 1 : 0);
                     });
-                    displayNotifications(employeeId, employeeName, sortedNotifications); // Pass name here
+                    displayWebcamNotifications(employeeId, employeeName, sortedNotifications);
                 }
             },
             error: function(xhr, status, error) {
@@ -204,46 +253,84 @@
         });
     }
 
-    // Function to display notifications for a single employee
- function displayNotifications(employeeId, employeeName, notifications) {
-    if (notifications.length === 0) return;
+    // Function to display webcam notifications for a single employee
+    function displayWebcamNotifications(employeeId, employeeName, notifications) {
+        if (notifications.length === 0) return;
 
-    let html = '';
+        let html = '';
 
-    notifications.forEach(function(notification) {
-        const timeAgo = formatTimeAgo(notification.created_at);
+        notifications.forEach(function(notification) {
+            const timeAgo = formatTimeAgo(notification.created_at);
 
-        const isOnline = notification.status == 1;
-        const statusHtml = isOnline ?
-            `<span class="status online">ONLINE</span>` :
-            `<span class="status offline">OFFLINE</span>`;
+            const isOnline = notification.status == 1;
+            const statusHtml = isOnline ?
+                `<span class="status online">ONLINE</span>` :
+                `<span class="status offline">OFFLINE</span>`;
 
-        // Hide description and time if online
-        const descriptionHtml = isOnline ? '' : 
-            `<span class="desc">Message :${notification.description}</span>`;
-        const timeHtml = isOnline ? '' : 
-            `<div class="time">${timeAgo}</div>`;
+            const descriptionHtml = isOnline ? '' : 
+                `<span class="desc">Message :${notification.description}</span>`;
+            const timeHtml = isOnline ? '' : 
+                `<div class="time">${timeAgo}</div>`;
 
-        html += `
-            <div class="notification">
-                <div class="profile">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
-                    <div class="details">
-                        <span class="name">Emp Name :${employeeName}</span>
-                        ${descriptionHtml}
+            html += `
+                <div class="notification">
+                    <div class="profile">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
+                        <div class="details">
+                            <span class="name">Emp Name :${employeeName}</span>
+                            ${descriptionHtml}
+                        </div>
+                    </div>
+                    <div class="right">
+                        ${statusHtml}
+                        ${timeHtml}
                     </div>
                 </div>
-                <div class="right">
-                    ${statusHtml}
-                    ${timeHtml}
-                </div>
-            </div>
-        `;
-    });
+            `;
+        });
 
-    // Append to list (not replace) to show all employees' messages
-    $('#notifications-list').append(html);
-}
+        $('#notifications-list').append(html);
+    }
+
+    // Function to display desktop notifications
+    function displayDesktopNotifications(notifications,employeeId, employeeName) {
+        if (notifications.length === 0) return;
+
+        let html = '';
+
+        notifications.forEach(function(notification) {
+            const timeAgo = formatTimeAgo(notification.created_at);
+
+            const isOnline = notification.status == 1;
+            const statusHtml = isOnline ?
+                `<span class="status online">ONLINE</span>` :
+                `<span class="status offline">OFFLINE</span>`;
+
+            const descriptionHtml = isOnline ? '' : 
+                `<span class="desc">Message :${notification.description}</span>`;
+            const timeHtml = isOnline ? '' : 
+                `<div class="time">${timeAgo}</div>`;
+
+            html += `
+                <div class="notification">
+                    <div class="profile">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
+                        <div class="details">
+                            <span class="name">Emp Name :${notification.employee_name}</span>
+                            ${descriptionHtml}
+                        </div>
+                    </div>
+                    <div class="right">
+                        ${statusHtml}
+                        ${timeHtml}
+                    </div>
+                </div>
+            `;
+        });
+
+        $('#notifications-list').html(html);
+    }
+
     // Function to format time ago from created_at
     function formatTimeAgo(createdAt) {
         const createdDate = new Date(createdAt);
@@ -258,11 +345,16 @@
 
     // On document ready
     $(document).ready(function() {
-        loadAllEmployees();
+        // Load webcam notifications initially
+        loadWebcamNotifications();
+        
+        // Set up click handlers
+        $('.box.webcam').on('click', function() {
+            loadWebcamNotifications();
+        });
+        
+        $('.box.desktop').on('click', function() {
+            loadDesktopNotifications();
+        });
     });
 </script>
-
-
-
-    </section>
-</div>
