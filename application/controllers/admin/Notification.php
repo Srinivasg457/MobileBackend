@@ -20,76 +20,82 @@ class Notification extends Home_Controller {
     }
 
     public function send_notification()
-{
-    try {
-        // Load input and session helpers
-        $this->load->helper('security');
-
-        // Fetch inputs securely
-        $employee_id = $this->input->post('employee_id', true);
-        $description = $this->input->post('description', true);
-
-        // Get user_id from session or POST (for Postman/local testing)
-        $user_id = $this->session->userdata('user_id');
-        if (empty($user_id)) {
-            $user_id = $this->input->post('user_id', true); // fallback
-        }
-
-        // Validate inputs
-        if (empty($user_id) || empty($employee_id) || empty($description)) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    'status' => 'error',
-                    'message' => 'User ID, Employee ID, and Description are required.'
-                ]));
-        }
-
-        // Prepare data
-        $data = [
-            'user_id'     => $user_id,
-            'employee_id' => $employee_id,
-            'description' => $description,
-            'created_at'  => date('Y-m-d H:i:s')
-        ];
-
-        // Insert into DB
-        $this->db->insert('notifications', $data);
-
-        if ($this->db->affected_rows() > 0) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(200)
-                ->set_output(json_encode([
-                    'status' => 'success',
-                    'user_id' => $user_id,
-                    'employee_id' => $employee_id,
-                    'description' => $description,
-                    'created_at' => $data['created_at'],
-                    'message' => 'Notification sent successfully.'
-                ]));
-        } else {
+    {
+        try {
+            // Load input and session helpers
+            $this->load->helper('security');
+    
+            // Fetch inputs securely
+            $employee_id = $this->input->post('employee_id', true);
+            $description = $this->input->post('description', true);
+            $status = $this->input->post('status', true); // New status field (1 or 0)
+    
+            // Get user_id from session or POST (for Postman/local testing)
+            $user_id = $this->session->userdata('user_id');
+            if (empty($user_id)) {
+                $user_id = $this->input->post('user_id', true); // fallback
+            }
+    
+            // Validate inputs
+            if (empty($user_id) || empty($employee_id) || empty($description)) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(400)
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'User ID, Employee ID, and Description are required.'
+                    ]));
+            }
+    
+            // Validate status (must be 0 or 1)
+            $status = ($status === '1' || $status === 1) ? 1 : 0;
+    
+            // Prepare data
+            $data = [
+                'user_id'     => $user_id,
+                'employee_id' => $employee_id,
+                'description' => $description,
+                'status'      => $status, // Added status field
+                'created_at'  => date('Y-m-d H:i:s')
+            ];
+    
+            // Insert into DB
+            $this->db->insert('notifications', $data);
+    
+            if ($this->db->affected_rows() > 0) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(200)
+                    ->set_output(json_encode([
+                        'status' => 'success',
+                        'user_id' => $user_id,
+                        'employee_id' => $employee_id,
+                        'description' => $description,
+                        'notification_status' => $status, // Include status in response
+                        'created_at' => $data['created_at'],
+                        'message' => 'Notification sent successfully.'
+                    ]));
+            } else {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(500)
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Failed to send notification.'
+                    ]));
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Notification Error: ' . $e->getMessage());
+    
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
                 ->set_output(json_encode([
                     'status' => 'error',
-                    'message' => 'Failed to send notification.'
+                    'message' => 'An unexpected error occurred.'
                 ]));
         }
-    } catch (Exception $e) {
-        log_message('error', 'Notification Error: ' . $e->getMessage());
-
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(500)
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'An unexpected error occurred.'
-            ]));
     }
-}
 
 
 public function get_notifications()
@@ -109,12 +115,13 @@ public function get_notifications()
             ]));
     }
 
-    // Fetch notifications from database (status removed)
-    $this->db->select('notification_id, user_id, employee_id, description, created_at'); // status removed
-    $this->db->from('notifications');
-    $this->db->where('user_id', $user_id);
-    $this->db->where('employee_id', $employee_id);
-    $this->db->order_by('created_at', 'DESC');
+    // Fetch notifications from database with employee name using JOIN
+    $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+    $this->db->from('notifications n');
+    $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+    $this->db->where('n.user_id', $user_id);
+    $this->db->where('n.employee_id', $employee_id);
+    $this->db->order_by('n.created_at', 'DESC');
 
     $query = $this->db->get();
     $notifications = $query->result_array();
@@ -128,8 +135,6 @@ public function get_notifications()
             'data' => $notifications
         ]));
 }
-    
-
     // Optional: View all notifications for an employee
     public function view_by_employee($employee_id) {
         $query = $this->db->get_where('notifications', ['employee_id' => $employee_id]);
