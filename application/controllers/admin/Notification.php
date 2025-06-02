@@ -103,9 +103,10 @@ public function desktop_notifications()
     // Set the default timezone to Indian Standard Time (UTC+5:30)
     date_default_timezone_set('Asia/Kolkata');
 
-    // Get user_id and employee_id from session
-    $employee_id = 4;
-    $user_id =3;
+        // Get user_id and employee_id from session
+        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+
 
     // Validate both user_id and employee_id
     if (empty($user_id) || empty($employee_id)) {
