@@ -14,6 +14,15 @@ class Admin_model extends CI_Model {
         return;
     } 
 
+    // employee edit function
+    function edit_option_employee($action, $id, $user_id, $table)
+    {
+        $this->db->where('id', $id);
+        $this->db->where('user_id', $user_id);
+        $this->db->update($table, $action);
+        return;
+    }
+
     // edit function
     function edit_option_md5($action, $id, $table){
         $this->db->where('md5(id)', $id);
@@ -415,7 +424,19 @@ class Admin_model extends CI_Model {
         $query = $this->db->get();
         $query = $query->row();  
         return $query;
-    } 
+    }
+    
+    // select by Employee id
+    function get_by_employeeId($id, $user_id, $table)
+    {
+        $this->db->select();
+        $this->db->from($table);
+        $this->db->where('id', $id);
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get();
+        $query = $query->row();
+        return $query;
+    }
 
     // select by id
     function get_by_md5_id($id,$table)
