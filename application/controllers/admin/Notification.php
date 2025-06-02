@@ -20,82 +20,87 @@ class Notification extends Home_Controller {
     }
 
     public function send_notification()
-{
-    try {
-        // Load input and session helpers
-        $this->load->helper('security');
-
-        // Fetch inputs securely
-        $employee_id = $this->input->post('employee_id', true);
-        $description = $this->input->post('description', true);
-        $status = $this->input->post('status', true); // New status field (1 or 0)
-
-        // Get user_id from session or POST (for Postman/local testing)
-        $user_id = $this->session->userdata('user_id');
-        if (empty($user_id)) {
-            $user_id = $this->input->post('user_id', true); // fallback
-        }
-
-        // Validate inputs
-        if (empty($user_id) || empty($employee_id) || empty($description)) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    'status' => 'error',
-                    'message' => 'User ID, Employee ID, and Description are required.'
-                ]));
-        }
-
-        // Validate status (must be 0 or 1)
-        $status = ($status === '1' || $status === 1) ? 1 : 0;
-
-        // Prepare data
-        $data = [
-            'user_id'     => $user_id,
-            'employee_id' => $employee_id,
-            'description' => $description,
-            'status'      => $status, // Added status field
-            'created_at'  => date('Y-m-d H:i:s')
-        ];
-
-        // Insert into DB
-        $this->db->insert('notifications', $data);
-
-        if ($this->db->affected_rows() > 0) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(200)
-                ->set_output(json_encode([
-                    'status' => 'success',
-                    'user_id' => $user_id,
-                    'employee_id' => $employee_id,
-                    'description' => $description,
-                    'notification_status' => $status, // Include status in response
-                    'created_at' => $data['created_at'],
-                    'message' => 'Notification sent successfully.'
-                ]));
-        } else {
+    {
+        try {
+            // Load input and session helpers
+            $this->load->helper('security');
+    
+            // Fetch inputs securely
+            $employee_id = $this->input->post('employee_id', true);
+            $description = $this->input->post('description', true);
+            $status = $this->input->post('status', true); // New status field (1 or 0)
+    
+            // Get user_id from session or POST (for Postman/local testing)
+            $user_id = $this->session->userdata('user_id');
+            if (empty($user_id)) {
+                $user_id = $this->input->post('user_id', true); // fallback
+            }
+    
+            // Validate inputs
+            if (empty($user_id) || empty($employee_id) || empty($description)) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(400)
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'User ID, Employee ID, and Description are required.'
+                    ]));
+            }
+    
+            // Validate status (must be 0 or 1)
+            $status = ($status === '1' || $status === 1) ? 1 : 0;
+    
+            // Set timezone to Indian Standard Time
+            date_default_timezone_set('Asia/Kolkata');
+            $created_at = date('Y-m-d H:i:s');
+    
+            // Prepare data
+            $data = [
+                'user_id'     => $user_id,
+                'employee_id' => $employee_id,
+                'description' => $description,
+                'status'      => $status,
+                'created_at'  => $created_at
+            ];
+    
+            // Insert into DB
+            $this->db->insert('notifications', $data);
+    
+            if ($this->db->affected_rows() > 0) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(200)
+                    ->set_output(json_encode([
+                        'status' => 'success',
+                        'user_id' => $user_id,
+                        'employee_id' => $employee_id,
+                        'description' => $description,
+                        'notification_status' => $status,
+                        'created_at' => $created_at,
+                        'timezone' => 'IST (Asia/Kolkata)', // Indicate the timezone
+                        'message' => 'Notification sent successfully.'
+                    ]));
+            } else {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(500)
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Failed to send notification.'
+                    ]));
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Notification Error: ' . $e->getMessage());
+    
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
                 ->set_output(json_encode([
                     'status' => 'error',
-                    'message' => 'Failed to send notification.'
+                    'message' => 'An unexpected error occurred.'
                 ]));
         }
-    } catch (Exception $e) {
-        log_message('error', 'Notification Error: ' . $e->getMessage());
-
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(500)
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'An unexpected error occurred.'
-            ]));
     }
-}
 
 
 public function desktop_notifications()
@@ -103,10 +108,9 @@ public function desktop_notifications()
     // Set the default timezone to Indian Standard Time (UTC+5:30)
     date_default_timezone_set('Asia/Kolkata');
 
-        // Get user_id and employee_id from session
-        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
-        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
-
+    // Get user_id and employee_id from session
+    $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+    $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
     // Validate both user_id and employee_id
     if (empty($user_id) || empty($employee_id)) {
@@ -120,13 +124,13 @@ public function desktop_notifications()
     }
 
     // Fetch notifications from database with employee name using JOIN
-    // Only where description is "User is inactive for a while"
+    // Where description is either "User is inactive for a while" or "User is active now"
     $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
     $this->db->from('notifications n');
     $this->db->join('employees e', 'n.employee_id = e.id', 'left');
     $this->db->where('n.user_id', $user_id);
     $this->db->where('n.employee_id', $employee_id);
-    $this->db->where('n.description', 'User is inactive for a while');
+    $this->db->where_in('n.description', ['User is inactive for a while', 'User is active now']);
     $this->db->order_by('n.created_at', 'DESC');
     $this->db->limit(1);  // This will return only the latest record
 
@@ -151,7 +155,6 @@ public function desktop_notifications()
             'data' => $notifications
         ]));
 }
-
 
 public function get_notifications()
 {
@@ -209,5 +212,3 @@ public function get_notifications()
         echo json_encode($query->result());
     }
 }
-
-
