@@ -1,221 +1,267 @@
 <div class="content-wrapper">
     <section class="content">
 
-
         <style>
-            .btn-group {
+            .notification-container {
+                margin: auto;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+                padding: 20px;
+                max-width: 1200px;
+                border: 1px solid black;
+            }
+
+            .notification {
                 display: flex;
-                gap: 25px;
-                justify-content: end;
+                align-items: flex-start;
+                justify-content: space-between;
+                border-bottom: 1px solid #eee;
+                padding: 16px 0;
             }
 
-
-            /* New mobile-responsive styles */
-            @media (max-width: 768px) {
-                .row {
-                    flex-direction: column;
-                    margin: 15px auto !important;
-                }
-
-                .col-lg-6 {
-                    width: 100%;
-                    margin-bottom: 15px;
-                }
-
-                #employee-select {
-                    width: 100%;
-                }
-
-                .btn-group {
-                    flex-wrap: wrap;
-                    gap: 10px;
-                    justify-content: flex-start;
-                }
-
-                .btn-group button {
-                    flex: 1 0 100px;
-                    margin: 5px 0 !important;
-                }
-
-                .content-wrapper h3 {
-                    font-size: 1.5rem;
-                    text-align: center;
-                }
-
-                .btn-sm {
-                    padding: 0.25rem 0.5rem;
-                    font-size: 0.8rem;
-                }
+            .notification:last-child {
+                border-bottom: none;
             }
 
-            @media (max-width: 480px) {
-                .btn-group {
-                    flex-direction: column;
-                }
+            .profile {
+                display: flex;
+                align-items: center;
+            }
 
-                .btn-group button {
-                    width: 100%;
-                }
+            .profile img {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                margin-right: 12px;
+                object-fit: cover;
+            }
 
-                #toast-container {
-                    left: 10px;
-                    right: 10px;
-                    top: 10px;
-                }
+            .details {
+                display: flex;
+                flex-direction: column;
+            }
 
-                .toast {
-                    min-width: auto;
-                    width: calc(100% - 20px);
-                }
+            .name {
+                font-weight: bold;
+                margin-bottom: 2px;
+            }
+
+            .desc {
+                color: #888;
+                font-size: 14px;
+            }
+
+            .right {
+                text-align: right;
+            }
+
+            .status {
+                display: inline-block;
+                margin-top: 8px;
+                padding: 4px 12px;
+                font-size: 13px;
+                border-radius: 12px;
+                width: max-content;
+            }
+
+            .right {
+                text-align: right;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 4px;
+                /* Adds small space between status and time */
+            }
+
+            .status {
+                margin-top: 0;
+                /* Remove the previous margin */
+            }
+
+            .time {
+                color: #aaa;
+                font-size: 12px;
+                /* Slightly smaller for better hierarchy */
+            }
+
+            .online {
+                background-color: #dcfce7;
+                color: #166534;
+                border: 2px solid #166534;
+            }
+
+            .offline {
+                background-color: #fee2e2;
+                color: #991b1b;
+                border: 2px solid #991b1b;
+            }
+
+            .time {
+                color: #aaa;
+                font-size: 16px;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 20px;
+                color: #888;
+            }
+
+            .error-message {
+                color: #cc4c4c;
+                text-align: center;
+                padding: 20px;
             }
         </style>
+        <style>
+            .container {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+            }
 
+            .box {
+                width: 250px;
+                height: 50px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 16px;
+                border-radius: 8px;
+            }
 
+            .desktop {
+                color: #2c3e50;
+                background-color: #ecf0f1;
+                border: 1px solid #2c3e50;
+            }
 
-        <h3>Notifications</h3>
-        <div class="row" style="margin: 25px auto;">
-            <div class="col-lg-6">
-                <select id="employeeSelect" class="form-control single_select"></select>
-
-            </div>
-            <!-- <div class="col-lg-6 align-content-center justify-content-center mt-3">
-          <div class="btn-group">
-              <button id="approved-btn" class="btn btn-success btn-sm m-5">Approved</button>
-              <button id="unapproved-btn" class="btn btn-warning btn-sm m-5">Unapproved</button>
-          </div>
-      </div> -->
+            .webcam {
+                color: #2c3e50;
+                background-color: #ecf0f1;
+                border: 1px solid #2c3e50;
+            }
+        </style>
+        <h2 style="text-align: center;">Notifications</h2>
+        <div class="container">
+            <div class="box desktop">Desktop</div>
+            <div class="box webcam">Webcam</div>
         </div>
 
-        <hr>
-
-        <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
-            <table class="table table-hover cushover">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox"></th>
-                        <th>Notification Id</th>
-                        <th>Employee Id</th>
-                        <th>Posted At</th>
-                        <th>Message</th>
-                    </tr>
-                </thead>
-                <tbody id="log-data">
-                    <!-- Rows will be populated by JavaScript -->
-                </tbody>
-            </table>
+        <div class="notification-container" id="notifications-list">
+            <!-- <div class="loading">Loading notifications...</div> -->
         </div>
 
         <script>
-            $(document).ready(function() {
-                $('#employeeSelect').on('change', function() {
-                    const employeeNameText = $(this).find('option:selected').text().split(' (')[0];
-                    console.log("onchage");
-                    let employeeId = $(this).val();
-                    let currentEmployeeId = employeeId;
-                    fetchNotifications(currentEmployeeId);
-                    // No need to manually clear here
-                });
-                $.ajax({
-                    url: "<?= base_url('/admin/ScreenshotController/list_employees_by_user') ?>",
-                    method: "GET",
-                    dataType: "json",
-                    success: function(response) {
-                        let employeeSelect = $('#employeeSelect');
-                        if (response.status === "success" && response.employees.length > 0) {
-                            response.employees.forEach(emp => {
-                                employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
-                            });
-
-                            const randomIndex = Math.floor(Math.random() * response.employees.length);
-                            const randomEmployee = response.employees[randomIndex];
-                            employeeSelect.val(randomEmployee.id);
-                            $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`); // ✅ Set name on auto-load
-                            fetchNotifications(randomEmployee.id);
-
-                        } else {
-                            employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
-                        }
-                    },
-
-
-                    error: function() {
-                        $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
-                    }
-                });
-                // Function to fetch and display notifications
-                function fetchNotifications(employeeId) {
-                    $.ajax({
-                        url: "<?= base_url('admin/Notification/get_notifications'); ?>",
-                        type: 'GET',
-                        dataType: 'json',
-                        data: {
-                            employee_id: employeeId
-                        },
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                $('#log-data').empty();
-
-                                if (response.data.length === 0) {
-                                    $('#log-data').html('<tr><td colspan="6" class="text-center">No notifications found</td></tr>');
-                                    return;
-                                }
-
-                                $.each(response.data, function(index, notification) {
-                                    var postedAt = new Date(notification.created_at);
-                                    var formattedDate = postedAt.toLocaleString();
-                                    var statusBadge = notification.status == 1 ?
-                                        '<span class="badge badge-success">read</span>' :
-                                        '<span class="badge badge-warning">unread</span>';
-
-                                    var row = `
-                                <tr class="notification-row" data-id="${notification.notification_id}" data-status="${notification.status}">
-                                    <td><input type="checkbox" class="notification-checkbox" data-id="${notification.notification_id}"></td>
-                                    <td>${notification.notification_id}</td>
-                                    <td>${notification.employee_id}</td>
-                                    <td>${formattedDate}</td>
-                                    <td>${notification.description}</td>
-                                </tr>
-                            `;
-
-                                    $('#log-data').append(row);
-                                });
-
-                                // Add click event to rows to mark as read
-                                $('.notification-row').click(function() {
-                                    var notificationId = $(this).data('id');
-                                    var currentStatus = $(this).data('status');
-
-                                    if (currentStatus == 0) { // Only update if unread
-                                        updateNotificationStatus(notificationId, 1);
-                                    }
-                                });
-                            } else {
-                                $('#log-data').html('<tr><td colspan="6" class="text-center">' + response.message + '</td></tr>');
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            $('#log-data').html('<tr><td colspan="6" class="text-center">Error loading notifications: ' + error + '</td></tr>');
-                        }
+    // Function to fetch notifications for all employees
+    function loadAllEmployees() {
+        $.ajax({
+            url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success' && response.employees.length > 0) {
+                    response.employees.forEach(function(employee) {
+                        fetchNotifications(employee.id, employee.name); // Pass both ID and name
                     });
+                } else {
+                    $('#notifications-list').html(
+                        '<div class="notification">No employees found.</div>'
+                    );
                 }
+            },
+            error: function() {
+                $('#notifications-list').html(
+                    '<div class="error-message">Error loading employees.</div>'
+                );
+            }
+        });
+    }
 
-                // Function to update notification status
+    // Function to fetch notifications for a specific employee
+    function fetchNotifications(employeeId, employeeName) {
+        $.ajax({
+            url: "<?= base_url('admin/Notification/get_notifications') ?>",
+            type: 'GET',
+            data: {
+                employee_id: employeeId,
+                employee_name: employeeName
+            },
+            dataType: 'json',
+            success: function(response) {
+                console.log(response);
+                if (response.status === 'success') {
+                    const sortedNotifications = response.data.sort((a, b) => {
+                        return (a.status === 0) ? -1 : (b.status === 0 ? 1 : 0);
+                    });
+                    displayNotifications(employeeId, employeeName, sortedNotifications); // Pass name here
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading notifications for employee ID ' + employeeId, error);
+            }
+        });
+    }
 
+    // Function to display notifications for a single employee
+ function displayNotifications(employeeId, employeeName, notifications) {
+    if (notifications.length === 0) return;
 
-                // Select all functionality
-                $('#select-all').change(function() {
-                    var isChecked = $(this).is(':checked');
-                    $('.notification-checkbox').prop('checked', isChecked).trigger('change');
-                });
+    let html = '';
 
-                // Initial fetch
-                fetchNotifications();
+    notifications.forEach(function(notification) {
+        const timeAgo = formatTimeAgo(notification.created_at);
 
-                // Optional: Refresh notifications periodically
-                setInterval(fetchNotifications, 60000); // Every 60 seconds
-            });
-        </script>
+        const isOnline = notification.status == 1;
+        const statusHtml = isOnline ?
+            `<span class="status online">ONLINE</span>` :
+            `<span class="status offline">OFFLINE</span>`;
+
+        // Hide description and time if online
+        const descriptionHtml = isOnline ? '' : 
+            `<span class="desc">Message :${notification.description}</span>`;
+        const timeHtml = isOnline ? '' : 
+            `<div class="time">${timeAgo}</div>`;
+
+        html += `
+            <div class="notification">
+                <div class="profile">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
+                    <div class="details">
+                        <span class="name">Emp Name :${employeeName}</span>
+                        ${descriptionHtml}
+                    </div>
+                </div>
+                <div class="right">
+                    ${statusHtml}
+                    ${timeHtml}
+                </div>
+            </div>
+        `;
+    });
+
+    // Append to list (not replace) to show all employees' messages
+    $('#notifications-list').append(html);
+}
+    // Function to format time ago from created_at
+    function formatTimeAgo(createdAt) {
+        const createdDate = new Date(createdAt);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - createdDate) / 1000);
+
+        if (diffInSeconds < 60) return 'just now';
+        if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' mins ago';
+        if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' hours ago';
+        return Math.floor(diffInSeconds / 86400) + ' days ago';
+    }
+
+    // On document ready
+    $(document).ready(function() {
+        loadAllEmployees();
+    });
+</script>
+
 
     </section>
-
 </div>
