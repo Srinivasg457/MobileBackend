@@ -28,6 +28,7 @@ class Notification extends Home_Controller {
         // Fetch inputs securely
         $employee_id = $this->input->post('employee_id', true);
         $description = $this->input->post('description', true);
+        $status = $this->input->post('status', true); // New status field (1 or 0)
 
         // Get user_id from session or POST (for Postman/local testing)
         $user_id = $this->session->userdata('user_id');
@@ -46,11 +47,15 @@ class Notification extends Home_Controller {
                 ]));
         }
 
+        // Validate status (must be 0 or 1)
+        $status = ($status === '1' || $status === 1) ? 1 : 0;
+
         // Prepare data
         $data = [
             'user_id'     => $user_id,
             'employee_id' => $employee_id,
             'description' => $description,
+            'status'      => $status, // Added status field
             'created_at'  => date('Y-m-d H:i:s')
         ];
 
@@ -66,6 +71,7 @@ class Notification extends Home_Controller {
                     'user_id' => $user_id,
                     'employee_id' => $employee_id,
                     'description' => $description,
+                    'notification_status' => $status, // Include status in response
                     'created_at' => $data['created_at'],
                     'message' => 'Notification sent successfully.'
                 ]));
@@ -94,9 +100,12 @@ class Notification extends Home_Controller {
 
 public function get_notifications()
 {
-        // Get user_id and employee_id from session
-        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
-        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+    // Set the default timezone to Indian Standard Time (UTC+5:30)
+    date_default_timezone_set('Asia/Kolkata');
+
+    // Get user_id and employee_id from session
+    $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+    $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
     // Validate both user_id and employee_id
     if (empty($user_id) || empty($employee_id)) {
@@ -109,15 +118,26 @@ public function get_notifications()
             ]));
     }
 
-    // Fetch notifications from database (status removed)
-    $this->db->select('notification_id, user_id, employee_id, description, created_at'); // status removed
-    $this->db->from('notifications');
-    $this->db->where('user_id', $user_id);
-    $this->db->where('employee_id', $employee_id);
-    $this->db->order_by('created_at', 'DESC');
+    // Fetch notifications from database with employee name using JOIN
+    $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+    $this->db->from('notifications n');
+    $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+    $this->db->where('n.user_id', $user_id);
+    $this->db->where('n.employee_id', $employee_id);
+    $this->db->order_by('n.created_at', 'DESC');
+    $this->db->limit(1);  // This will return only the latest record
 
     $query = $this->db->get();
     $notifications = $query->result_array();
+
+    // Convert MySQL timestamps to Indian time (if needed)
+    foreach ($notifications as &$notification) {
+        if (isset($notification['created_at'])) {
+            $datetime = new DateTime($notification['created_at'], new DateTimeZone('UTC'));
+            $datetime->setTimezone(new DateTimeZone('Asia/Kolkata'));
+            $notification['created_at'] = $datetime->format('Y-m-d H:i:s');
+        }
+    }
 
     // Return response
     return $this->output
@@ -127,10 +147,7 @@ public function get_notifications()
             'status' => 'success',
             'data' => $notifications
         ]));
-}
-    
-
-    // Optional: View all notifications for an employee
+} // Optional: View all notifications for an employee
     public function view_by_employee($employee_id) {
         $query = $this->db->get_where('notifications', ['employee_id' => $employee_id]);
         echo json_encode($query->result());
