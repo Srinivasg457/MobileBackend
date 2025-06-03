@@ -65,7 +65,11 @@
 
         <div class="form-group">
           <label><?php echo trans('email') ?> <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" required name="email" value="<?php echo html_escape($employee[0]['email']); ?>">
+          <input type="text" class="form-control" required  <?php if ($page_title == "Edit") {
+                                                              echo "readonly";
+                                                            } else {
+                                                              echo "";
+                                                            } ?> name="email" value="<?php echo html_escape($employee[0]['email']); ?>">
         </div>
 
         <div class="row">
