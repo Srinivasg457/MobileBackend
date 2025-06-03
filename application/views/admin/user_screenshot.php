@@ -594,6 +594,20 @@
                                 // One screenshot per interval (closest to 5-minute mark)
                                 Object.keys(intervalScreenshots).forEach(intervalKey => {
                                     const screenshotsInInterval = intervalScreenshots[intervalKey];
+
+                                    // Step 1: Compute average activity
+                                    let total = 0;
+                                    let count = 0;
+
+                                    screenshotsInInterval.forEach(screenshot => {
+                                        const value = screenshot.percentage ? parseInt(screenshot.percentage) : 0;
+                                        total += value;
+                                        count++;
+                                    });
+
+                                    const averageActivity = count > 0 ? Math.round(total / count) : 0;
+
+                                    // Step 2: Find screenshot closest to 5-minute mark
                                     let closestScreenshot = null;
                                     let smallestDiff = Infinity;
                                     const targetMinute = parseInt(intervalKey.split(':')[1]) + 5;
@@ -607,37 +621,38 @@
                                         }
                                     });
 
+                                    // Step 3: Generate HTML using average activity
                                     if (closestScreenshot) {
-                                        const overallActivity = closestScreenshot.percentage ? parseInt(closestScreenshot.percentage) : 0;
                                         const timeWithoutSeconds = closestScreenshot.display_text.split(':').slice(0, 2).join(':');
 
                                         output += `<div class="screenshot-card" style="box-sizing: border-box;">
-                        <img src="${closestScreenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" 
-                            style="width: 100%; cursor: pointer;"
-                            data-interval="${intervalKey}"
-                            data-hour-range="${hourRange}"
-                            data-activity-percent="${overallActivity}">
-                        <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                            <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                                <svg viewBox="0 0 36 36" width="40" height="40">
-                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
-                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
-                                        stroke-dasharray="${overallActivity} ${100 - overallActivity}"
-                                        stroke-dashoffset="25"
-                                        transform="rotate(-90 18 18)"
-                                    />
-                                </svg>
-                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
-                                    data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
-                                    ${overallActivity}%
-                                </div>
-                            </div>
-                            <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
-                        </div>
-                        <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
-                                 </div>`;
-                                    }
+                                                <img src="${closestScreenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" 
+                                                    style="width: 100%; cursor: pointer;"
+                                                    data-interval="${intervalKey}"
+                                                    data-hour-range="${hourRange}"
+                                                    data-activity-percent="${averageActivity}">
+                                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                                    <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                                        <svg viewBox="0 0 36 36" width="40" height="40">
+                                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
+                                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
+                                                                stroke-dasharray="${averageActivity} ${100 - averageActivity}"
+                                                                stroke-dashoffset="25"
+                                                                transform="rotate(0 18 18)"
+                                                            />
+                                                        </svg>
+                                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                                            data-toggle="tooltip" data-placement="top" title="${averageActivity}%">
+                                                            ${averageActivity}%
+                                                        </div>
+                                                    </div>
+                                                    <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
+                                                </div>
+                                                <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
+                                            </div>`;
+                                                                        }
                                 });
+
 
                                 output += `</div></div>`;
                             });
@@ -665,12 +680,12 @@
                                 // Set modal main image and info
                                 $('#modal-image').attr('src', clickedImageUrl);
                                 $('#image-info').html(`
-                            <span style="display: inline-block; margin: 0 10px;">${clickedTime}</span>
-                            <span style="display: inline-block; margin: 0 10px;">•</span>
-                            <span style="display: inline-block; margin: 0 10px;">
-                                Activity: <span style="color: ${getActivityColor(activity)}; font-weight: bold;">${activity}%</span>
-                            </span>
-                        `);
+                                    <span style="display: inline-block; margin: 0 10px;">${clickedTime}</span>
+                                    <span style="display: inline-block; margin: 0 10px;">•</span>
+                                    <span style="display: inline-block; margin: 0 10px;">
+                                        Activity: <span style="color: ${getActivityColor(activity)}; font-weight: bold;">${activity}%</span>
+                                    </span>
+                                            `);
 
                                 // Clear and add thumbnails
                                 $('#modal-additional-screenshots').empty();
@@ -681,27 +696,27 @@
                                     const isActive = screenshot.image_url === clickedImageUrl;
 
                                     $('#modal-additional-screenshots').append(`
-                                        <div id="screenshot-${screenshot.id}" class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
-                                            style="border:2px solid white;cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
-                                            data-src="${screenshot.image_url}"
-                                            data-time="${timeWithoutSeconds}"
-                                            data-activity="${overallActivity}"
-                                            data-id="${screenshot.id}">
+                                                    <div id="screenshot-${screenshot.id}" class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
+                                                        style="border:2px solid white;cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
+                                                        data-src="${screenshot.image_url}"
+                                                        data-time="${timeWithoutSeconds}"
+                                                        data-activity="${overallActivity}"
+                                                        data-id="${screenshot.id}">
 
-                                            <img id="main-image" src="${screenshot.image_url}" 
-                                                style="width: 100%; height: 100px; object-fit: cover; display: block; filter: transition; transition: filter 0.3s;">
+                                                        <img id="main-image" src="${screenshot.image_url}" 
+                                                            style="width: 100%; height: 100px; object-fit: cover; display: block; filter: transition; transition: filter 0.3s;">
 
-                                            <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
-                                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                                    <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
-                                                    <span>${timeWithoutSeconds}</span>
-                                                    <div data-id="${screenshot.id}" data-empID="${$('#employeeSelect').val()}" class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                                                        <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
+                                                        <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
+                                                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                                                <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
+                                                                <span>${timeWithoutSeconds}</span>
+                                                                <div data-id="${screenshot.id}" data-empID="${$('#employeeSelect').val()}" class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                                                                    <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        `);
+                                                    `);
                                 });
 
                                 // Show modal

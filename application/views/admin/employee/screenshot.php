@@ -551,6 +551,20 @@
                         // One screenshot per interval (closest to 5-minute mark)
                         Object.keys(intervalScreenshots).forEach(intervalKey => {
                             const screenshotsInInterval = intervalScreenshots[intervalKey];
+
+                            // Step 1: Compute average activity
+                            let total = 0;
+                            let count = 0;
+
+                            screenshotsInInterval.forEach(screenshot => {
+                                const value = screenshot.percentage ? parseInt(screenshot.percentage) : 0;
+                                total += value;
+                                count++;
+                            });
+
+                            const averageActivity = count > 0 ? Math.round(total / count) : 0;
+
+                            // Step 2: Find screenshot closest to 5-minute mark
                             let closestScreenshot = null;
                             let smallestDiff = Infinity;
                             const targetMinute = parseInt(intervalKey.split(':')[1]) + 5;
@@ -564,37 +578,38 @@
                                 }
                             });
 
+                            // Step 3: Generate HTML using average activity
                             if (closestScreenshot) {
-                                const overallActivity = closestScreenshot.percentage ? parseInt(closestScreenshot.percentage) : 0;
                                 const timeWithoutSeconds = closestScreenshot.display_text.split(':').slice(0, 2).join(':');
 
                                 output += `<div class="screenshot-card" style="box-sizing: border-box;">
-                        <img src="${closestScreenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" 
-                            style="width: 100%; cursor: pointer;"
-                            data-interval="${intervalKey}"
-                            data-hour-range="${hourRange}"
-                            data-activity-percent="${overallActivity}">
-                        <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                            <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                                <svg viewBox="0 0 36 36" width="40" height="40">
-                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
-                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
-                                        stroke-dasharray="${overallActivity} ${100 - overallActivity}"
-                                        stroke-dashoffset="25"
-                                        transform="rotate(-90 18 18)"
-                                    />
-                                </svg>
-                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
-                                    data-toggle="tooltip" data-placement="top" title="${overallActivity}%">
-                                    ${overallActivity}%
+                                <img src="${closestScreenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" 
+                                    style="width: 100%; cursor: pointer;"
+                                    data-interval="${intervalKey}"
+                                    data-hour-range="${hourRange}"
+                                    data-activity-percent="${averageActivity}">
+                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                    <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                        <svg viewBox="0 0 36 36" width="40" height="40">
+                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
+                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
+                                                stroke-dasharray="${averageActivity} ${100 - averageActivity}"
+                                                stroke-dashoffset="25"
+                                                transform="rotate(0 18 18)"
+                                            />
+                                        </svg>
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                            data-toggle="tooltip" data-placement="top" title="${averageActivity}%">
+                                            ${averageActivity}%
+                                        </div>
+                                    </div>
+                                    <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
                                 </div>
-                            </div>
-                            <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
-                        </div>
-                        <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
-                                 </div>`;
+                                <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
+                            </div>`;
                             }
                         });
+
 
                         output += `</div></div>`;
                     });
