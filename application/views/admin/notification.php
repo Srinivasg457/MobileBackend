@@ -230,28 +230,44 @@
                 if (notifications.length === 0) return;
 
                 let html = '';
+
                 notifications.forEach(function(notification) {
                     const timeAgo = formatTimeAgo(notification.created_at);
-                    const isOnline = notification.status == 1;
 
-                    html += `
+                    const isOnline = notification.status == 1;
+            const statusHtml = isOnline ?
+                `<span class="status online">ONLINE</span>` :
+                `<span class="status offline">OFFLINE</span>`;
+
+            // Always show description if it contains the webcam permission message
+            const showDescription = !isOnline || 
+                (notification.description && notification.description.includes("Webcam permission denied by system"));
+            
+            const descriptionHtml = showDescription ? 
+                `<span class="desc">Message :${notification.description}</span>` : '';
+                
+            const timeHtml = isOnline ? '' : 
+                `<div class="time">${timeAgo}</div>`;
+
+            html += `
                 <div class="notification">
                     <div class="profile">
                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
                         <div class="details">
-                            <span class="name">Emp Name: ${employeeName}</span>
-                            ${isOnline ? '' : `<span class="desc">Message: ${notification.description}</span>`}
+                            <span class="name">Emp Name :${employeeName}</span>
+                            ${descriptionHtml}
                         </div>
                     </div>
                     <div class="right">
-                        ${isOnline ? '<span class="status online">ONLINE</span>' : '<span class="status offline">OFFLINE</span>'}
-                        ${isOnline ? '' : `<div class="time">${timeAgo}</div>`}
+                        ${statusHtml}
+                        ${timeHtml}
                     </div>
-                </div>`;
-                });
+                </div>
+            `;
+        });
 
-                $('#notifications-list').append(html);
-            }
+        $('#notifications-list').append(html);
+        }
 
             // Desktop Notifications
             function fetchDesktopNotifications(employeeId, employeeName) {
