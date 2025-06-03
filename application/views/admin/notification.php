@@ -241,7 +241,7 @@
 
             // Always show description if it contains the webcam permission message
             const showDescription = !isOnline || 
-                (notification.description && notification.description.includes("Webcam permission denied by system"));
+                (notification.description && notification.description.includes("webcam is closed, but the user is online"));
             
             const descriptionHtml = showDescription ? 
                 `<span class="desc">Message :${notification.description}</span>` : '';
