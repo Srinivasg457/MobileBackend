@@ -150,7 +150,7 @@ class Hrm extends Home_Controller {
             'business_id' => $this->business->uid,
             'name' => $this->input->post('name', true),
             'department_id' => $this->input->post('department', true),
-            'role_id' => $this->input->post('role', true), // ✅ Add this line
+            // 'role_id' => $this->input->post('role', true), // ✅ Add this line
             'email' => $email,
             'phone' => $this->input->post('phone', true),
             'address' => $this->input->post('address', true),
