@@ -130,7 +130,7 @@ public function desktop_notifications()
     $this->db->join('employees e', 'n.employee_id = e.id', 'left');
     $this->db->where('n.user_id', $user_id);
     $this->db->where('n.employee_id', $employee_id);
-    $this->db->where_in('n.description', ['User is inactive for a while', 'User is active now']);
+    $this->db->where_in('n.description', ['User is inactive for a while', 'User is active now','User sign off']);
     $this->db->order_by('n.created_at', 'DESC');
     $this->db->limit(1);  // This will return only the latest record
 
