@@ -102,113 +102,141 @@ class Notification extends Home_Controller {
         }
     }
 
-
-public function desktop_notifications()
-{
-    // Set the default timezone to Indian Standard Time (UTC+5:30)
-    date_default_timezone_set('Asia/Kolkata');
-
-    // Get user_id and employee_id from session
-    $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
-    $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
-
-    // Validate both user_id and employee_id
-    if (empty($user_id) || empty($employee_id)) {
+    public function desktop_notifications()
+    {
+        date_default_timezone_set('Asia/Kolkata');
+        $employee_id = $this->input->get('employee_id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+    
+        if (empty($user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'User ID is required from session.'
+                ]));
+        }
+    
+        $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+        $this->db->from('notifications n');
+        $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+        $this->db->where('n.user_id', $user_id);
+        
+        if (!empty($employee_id)) {
+            $this->db->where('n.employee_id', $employee_id);
+        }
+        
+        $this->db->where_in('n.description', ['User is inactive for a while', 'User is active now', 'User sign off']);
+        $this->db->order_by('n.created_at', 'DESC');
+        $this->db->limit(1);
+    
+        $query = $this->db->get();
+        $notifications = $query->result_array();
+    
+        foreach ($notifications as &$notification) {
+            if (isset($notification['created_at'])) {
+                $datetime = new DateTime($notification['created_at'], new DateTimeZone('UTC'));
+                $datetime->setTimezone(new DateTimeZone('Asia/Kolkata'));
+                $notification['created_at'] = $datetime->format('Y-m-d H:i:s');
+            }
+        }
+    
         return $this->output
             ->set_content_type('application/json')
-            ->set_status_header(400)
+            ->set_status_header(200)
             ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'User ID and Employee ID are required from session.'
+                'status' => 'success',
+                'data' => $notifications
             ]));
     }
-
-    // Fetch notifications from database with employee name using JOIN
-    // Where description is either "User is inactive for a while" or "User is active now"
-    $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
-    $this->db->from('notifications n');
-    $this->db->join('employees e', 'n.employee_id = e.id', 'left');
-    $this->db->where('n.user_id', $user_id);
-    $this->db->where('n.employee_id', $employee_id);
-    $this->db->where_in('n.description', ['User is inactive for a while', 'User is active now','User sign off']);
-    $this->db->order_by('n.created_at', 'DESC');
-    $this->db->limit(1);  // This will return only the latest record
-
-    $query = $this->db->get();
-    $notifications = $query->result_array();
-
-    // Convert MySQL timestamps to Indian time (if needed)
-    foreach ($notifications as &$notification) {
-        if (isset($notification['created_at'])) {
-            $datetime = new DateTime($notification['created_at'], new DateTimeZone('UTC'));
-            $datetime->setTimezone(new DateTimeZone('Asia/Kolkata'));
-            $notification['created_at'] = $datetime->format('Y-m-d H:i:s');
+    
+    public function get_notifications()
+    {
+        date_default_timezone_set('Asia/Kolkata');
+        $employee_id = $this->input->get('employee_id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+    
+        if (empty($user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'User ID is required from session.'
+                ]));
         }
-    }
-
-    // Return response
-    return $this->output
-        ->set_content_type('application/json')
-        ->set_status_header(200)
-        ->set_output(json_encode([
-            'status' => 'success',
-            'data' => $notifications
-        ]));
-}
-
-public function get_notifications()
-{
-    // Set the default timezone to Indian Standard Time (UTC+5:30)
-    date_default_timezone_set('Asia/Kolkata');
-
-    // Get user_id and employee_id from session
-    $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
-    $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
-
-    // Validate both user_id and employee_id
-    if (empty($user_id) || empty($employee_id)) {
+    
+        $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+        $this->db->from('notifications n');
+        $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+        $this->db->where('n.user_id', $user_id);
+        
+        if (!empty($employee_id)) {
+            $this->db->where('n.employee_id', $employee_id);
+        }
+        
+        $this->db->where('n.description !=', 'User is inactive for a while');
+        $this->db->order_by('n.created_at', 'DESC');
+        $this->db->limit(1);
+    
+        $query = $this->db->get();
+        $notifications = $query->result_array();
+    
+        foreach ($notifications as &$notification) {
+            if (isset($notification['created_at'])) {
+                $datetime = new DateTime($notification['created_at'], new DateTimeZone('UTC'));
+                $datetime->setTimezone(new DateTimeZone('Asia/Kolkata'));
+                $notification['created_at'] = $datetime->format('Y-m-d H:i:s');
+            }
+        }
+    
         return $this->output
             ->set_content_type('application/json')
-            ->set_status_header(400)
+            ->set_status_header(200)
             ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'User ID and Employee ID are required from session.'
+                'status' => 'success',
+                'data' => $notifications
             ]));
     }
-
-    // Fetch notifications from database with employee name using JOIN
-    $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
-    $this->db->from('notifications n');
-    $this->db->join('employees e', 'n.employee_id = e.id', 'left');
-    $this->db->where('n.user_id', $user_id);
-    $this->db->where('n.employee_id', $employee_id);
-    $this->db->where('n.description !=', 'User is inactive for a while'); // Exclude inactive notifications
-    $this->db->order_by('n.created_at', 'DESC');
-    $this->db->limit(1);  // This will return only the latest record
-
-    $query = $this->db->get();
-    $notifications = $query->result_array();
-
-    // Convert MySQL timestamps to Indian time (if needed)
-    foreach ($notifications as &$notification) {
-        if (isset($notification['created_at'])) {
-            $datetime = new DateTime($notification['created_at'], new DateTimeZone('UTC'));
-            $datetime->setTimezone(new DateTimeZone('Asia/Kolkata'));
-            $notification['created_at'] = $datetime->format('Y-m-d H:i:s');
+    
+    public function list_employees_by_user()
+    {
+        $user_id = 3; // Or get from session: $this->session->userdata('id');
+    
+        if (empty($user_id) || !is_numeric($user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Valid user ID required'
+                ]));
         }
-    }
-
-    // Return response
-    return $this->output
-        ->set_content_type('application/json')
-        ->set_status_header(200)
-        ->set_output(json_encode([
-            'status' => 'success',
-            'data' => $notifications
-        ]));
-} // Optional: View all notifications for an employee
-    public function view_by_employee($employee_id) {
-        $query = $this->db->get_where('notifications', ['employee_id' => $employee_id]);
-        echo json_encode($query->result());
+    
+        $employees = $this->db
+            ->select('id, name, email')
+            ->where('user_id', $user_id)
+            ->get('employees')
+            ->result_array();
+    
+        if ($employees) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode([
+                    'status' => 'success',
+                    'user_id' => (int)$user_id,
+                    'employees' => $employees,
+                ]));
+        } else {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(404)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'No employees found for the given user ID'
+                ]));
+        }
     }
 }
