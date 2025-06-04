@@ -755,31 +755,56 @@ class Auth extends Home_Controller
             redirect(base_url());
         }
 
-        $mail =  strtolower(trim($this->input->post('email',true))); 
-        $valid = $this->auth_model->check_email($mail);
-        $random_number = random_string('numeric',4);
+        $mail = strtolower(trim($this->input->post('email', true)));
+        $random_number = random_string('numeric', 4);
         $random_pass = hash_password($random_number);
+
+        // Step 1: Check in employees table
+        $valid = $this->auth_model->check_emloyee_email($mail);
+
         if ($valid) {
-           
-           foreach($valid as $row){
+            foreach ($valid as $row) {
                 $data['email'] = $row->email;
                 $data['name'] = $row->name;
                 $data['password'] = $random_number;
                 $user_id = $row->id;
+
+                $this->send_recovery_mail($data);
+
+                $user_data = array('password' => $random_pass);
+                $this->common_model->edit_option($user_data, $user_id, 'employees');
+
+                $url = base_url('login');
+                echo json_encode(array('st' => 1, 'url' => $url));
+                return; // exit after processing employee
+            }
+        }
+
+        // Step 2: If not found in employees, check in users table
+        $valid = $this->auth_model->check_email($mail);
+
+        if ($valid) {
+            foreach ($valid as $row) {
+                $data['email'] = $row->email;
+                $data['name'] = $row->name;
+                $data['password'] = $random_number;
+                $user_id = $row->id;
+
                 $this->send_recovery_mail($data);
 
                 $user_data = array('password' => $random_pass);
                 $this->common_model->edit_option($user_data, $user_id, 'users');
-                
-                $url = base_url('login');
-                echo json_encode(array('st'=>1, 'url' => $url));
-            }
 
-        } else {
-            echo json_encode(array('st'=>2));
+                $url = base_url('login');
+                echo json_encode(array('st' => 1, 'url' => $url));
+                return; // exit after processing user
+            }
         }
-        
+
+        // Step 3: If email not found in either table
+        echo json_encode(array('st' => 2));
     }
+
 
     //send reset code to user email
     public function send_recovery_mail($user)
@@ -789,7 +814,14 @@ class Auth extends Home_Controller
         $data['password'] = $user['password'];
         $data['email'] = $user['email'];
         $subject = 'Password Recovery';
-        $msg = 'Hello '.$user['name'].'<br> We have reset your password, Please use this <b>'.$user['password'].'</b> code to login your account';
+        $logo = '<img width="100" src="' . base_url('uploads/thumbnail/2_thumb-100x100.png') . '" alt="Workroom" style="display:block; margin:0 auto;width: 150px;">';
+
+        $msg = $logo;
+        $msg .= '<br><br>';
+        $msg .= 'Hello ' . $user['name'] . ',<br>';
+        $msg .= 'We have reset your password. Please use this <b>' . $user['password'] . '</b> code to login to your account.';
+
+        // $msg = 'Hello '.$user['name'].'<br> We have reset your password, Please use this <b>'.$user['password'].'</b> code to login your account';
         $this->email_model->send_email($user['email'], $subject, $msg);
     }
 
