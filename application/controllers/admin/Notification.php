@@ -104,7 +104,6 @@ class Notification extends Home_Controller {
 
     public function desktop_notifications()
     {
-        date_default_timezone_set('Asia/Kolkata');
         $employee_id = $this->input->get('employee_id');
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
     
@@ -134,14 +133,6 @@ class Notification extends Home_Controller {
         $query = $this->db->get();
         $notifications = $query->result_array();
     
-        foreach ($notifications as &$notification) {
-            if (isset($notification['created_at'])) {
-                $datetime = new DateTime($notification['created_at'], new DateTimeZone('UTC'));
-                $datetime->setTimezone(new DateTimeZone('Asia/Kolkata'));
-                $notification['created_at'] = $datetime->format('Y-m-d H:i:s');
-            }
-        }
-    
         return $this->output
             ->set_content_type('application/json')
             ->set_status_header(200)
@@ -153,7 +144,6 @@ class Notification extends Home_Controller {
     
     public function get_notifications()
     {
-        date_default_timezone_set('Asia/Kolkata');
         $employee_id = $this->input->get('employee_id');
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
     
@@ -176,20 +166,11 @@ class Notification extends Home_Controller {
             $this->db->where('n.employee_id', $employee_id);
         }
         
-        $this->db->where('n.description !=', 'User is inactive for a while');
         $this->db->order_by('n.created_at', 'DESC');
         $this->db->limit(1);
     
         $query = $this->db->get();
         $notifications = $query->result_array();
-    
-        foreach ($notifications as &$notification) {
-            if (isset($notification['created_at'])) {
-                $datetime = new DateTime($notification['created_at'], new DateTimeZone('UTC'));
-                $datetime->setTimezone(new DateTimeZone('Asia/Kolkata'));
-                $notification['created_at'] = $datetime->format('Y-m-d H:i:s');
-            }
-        }
     
         return $this->output
             ->set_content_type('application/json')
@@ -199,7 +180,6 @@ class Notification extends Home_Controller {
                 'data' => $notifications
             ]));
     }
-    
     public function list_employees_by_user()
     {
         $user_id = 3; // Or get from session: $this->session->userdata('id');
