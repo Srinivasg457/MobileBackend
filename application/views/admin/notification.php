@@ -295,9 +295,11 @@
             '<span class="status online">ONLINE</span>' :
             '<span class="status offline">OFFLINE</span>';
 
-        const showDescription = !isOnline || 
-            (notification.description && notification.description.includes("webcam is closed, but the user is online"));
-        
+            const showDescription = !isOnline || 
+        (notification.description && 
+         (notification.description.includes("webcam is closed, but the user is online") ||
+          notification.description.includes("Webcam permission denied by system, but the user is online")));
+            
         const descriptionHtml = showDescription ? 
             '<span class="desc">Message: ' + notification.description + '</span>' : '';
             
