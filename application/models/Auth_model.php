@@ -136,6 +136,20 @@ class Auth_model extends CI_Model {
             return false;
         }
     }
+    // check post email
+    public function check_emloyee_email($email)
+    {
+        $this->db->select('*');
+        $this->db->from('employees');
+        $this->db->where('email', $email);
+        $this->db->limit(1);
+        $query = $this->db->get();
+        if ($query->num_rows() == 1) {
+            return $query->result();
+        } else {
+            return false;
+        }
+    }
 
 
     // check valid user by id
