@@ -2,6 +2,19 @@
     <section class="content">
 
         <style>
+            .send-email {
+                padding: 4px 8px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+
+            .send-email:hover {
+                background-color: #0056b3;
+            }
+
             .notification-container {
                 margin: auto;
                 background: white;
@@ -12,13 +25,24 @@
                 /* border: 1px solid black; */
             }
 
-            .notification {
+            /* .notification {
                 display: flex;
                 align-items: flex-start;
                 justify-content: space-between;
                 border-bottom: 1px solid #eee;
                 padding: 16px 0;
+            } */
+            .notification {
+                display: grid;
+                grid-template-columns: 70% auto;
+                /* Example: image | details | right section */
+                align-items: start;
+                padding: 16px 0;
+                border-bottom: 1px solid #eee;
+                gap: 16px;
+                /* spacing between columns */
             }
+
 
             .notification:last-child {
                 border-bottom: none;
@@ -113,8 +137,29 @@
                 text-align: center;
                 padding: 20px;
             }
-        </style>
-        <style>
+
+            .button-loader {
+                border: 2px solid #f3f3f3;
+                border-top: 2px solid #3498db;
+                border-radius: 50%;
+                width: 14px;
+                height: 14px;
+                animation: spin 0.8s linear infinite;
+                display: inline-block;
+                vertical-align: middle;
+                margin-left: 6px;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
             .container {
                 display: flex;
                 gap: 20px;
@@ -152,6 +197,24 @@
                 border-color: #3498db;
                 font-weight: bold;
             }
+
+            @media (max-width: 768px) {
+                .notification {
+                    grid-template-columns: 1fr;
+                    grid-template-rows: auto auto;
+                }
+
+                .notification .profile,
+                .notification .details,
+                .notification .right {
+                    grid-column: 1 / -1;
+                }
+
+                .notification .right {
+                    margin-top: 12px;
+                    text-align: left;
+                }
+            }
         </style>
         <h2 style="text-align: center;">Notifications</h2>
         <div class="container">
@@ -164,258 +227,346 @@
         </div>
 
         <script>
-    // Main function to load notifications
-    function loadNotifications(application) {
-        // Set active tab
-        if (application === "web") {
-            $('.box.webcam').addClass('active');
-            $('.box.desktop').removeClass('active');
-        } else {
-            $('.box.desktop').addClass('active');
-            $('.box.webcam').removeClass('active');
-        }
-
-        // Clear existing notifications
-        $('#notifications-list').html('');
-
-        $.ajax({
-            url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
-            method: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success' && response.employees.length > 0) {
-                    // First show all employees as signed off
-                    const initialNotifications = response.employees.map(function(employee) {
-                        return {
-                            employeeId: employee.id,
-                            employeeName: employee.name,
-                            notification: {
-                                status: 0,
-                                description: 'User sign off',
-                                created_at: new Date().toISOString()
-                            }
-                        };
-                    });
-                    
-                    // Display initial notifications sorted (offline first)
-                    displaySortedNotifications(application, initialNotifications);
-
-                    // Then fetch actual status from server
-                    response.employees.forEach(function(employee) {
-                        if (application === "web") {
-                            fetchWebcamNotifications(employee.id, employee.name);
-                        } else {
-                            fetchDesktopNotifications(employee.id, employee.name);
-                        }
-                    });
+            // Main function to load notifications
+            function loadNotifications(application) {
+                // Set active tab
+                if (application === "web") {
+                    $('.box.webcam').addClass('active');
+                    $('.box.desktop').removeClass('active');
                 } else {
-                    $('#notifications-list').html(
-                        '<div class="notification">No employees found.</div>'
-                    );
+                    $('.box.desktop').addClass('active');
+                    $('.box.webcam').removeClass('active');
                 }
-            },
-            error: function() {
-                $('#notifications-list').html(
-                    '<div class="error-message">Error loading employees.</div>'
-                );
-            }
-        });
-    }
 
-    // Helper function to display notifications in sorted order (offline first)
-    function displaySortedNotifications(application, notificationsData) {
-        // Sort notifications - offline first (status 0), then online (status 1)
-        notificationsData.sort((a, b) => a.notification.status - b.notification.status);
-        
-        // Clear existing notifications
-        $('#notifications-list').html('');
-        
-        // Display each notification in sorted order
-        notificationsData.forEach(data => {
-            if (application === "web") {
-                displayWebcamNotification(data.employeeId, data.employeeName, data.notification);
-            } else {
-                displayDesktopNotification(data.employeeId, data.employeeName, data.notification);
-            }
-        });
-    }
+                // Clear existing notifications
+                $('#notifications-list').html('');
 
-    // Webcam Notifications
-    function fetchWebcamNotifications(employeeId, employeeName) {
-        $.ajax({
-            url: "<?= base_url('admin/Notification/get_notifications') ?>",
-            type: 'GET',
-            data: {
-                employee_id: employeeId,
-                employee_name: employeeName
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success' && response.data.length > 0) {
-                    // Get all current notifications
-                    const currentNotifications = [];
-                    $('.notification').each(function() {
-                        const name = $(this).find('.name').text().replace('Emp Name: ', '');
-                        const isOnline = $(this).find('.status').hasClass('online');
-                        currentNotifications.push({
-                            employeeName: name,
-                            notification: {
-                                status: isOnline ? 1 : 0,
-                                description: $(this).find('.desc').text().replace('Message: ', '') || '',
-                                created_at: $(this).find('.time').text() || new Date().toISOString()
-                            }
-                        });
-                    });
-                    
-                    // Update the notification for this employee
-                    const updatedNotifications = currentNotifications.map(notif => {
-                        if (notif.employeeName === employeeName) {
-                            return {
-                                employeeName: employeeName,
-                                notification: response.data[0]
-                            };
+                $.ajax({
+                    url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success' && response.employees.length > 0) {
+                            // First show all employees as signed off
+                            const initialNotifications = response.employees.map(function(employee) {
+                                return {
+                                    employeeId: employee.id,
+                                    employeeName: employee.name,
+                                    notification: {
+                                        status: 0,
+                                        description: 'User sign off',
+                                        created_at: new Date().toISOString()
+                                    }
+                                };
+                            });
+
+                            // Display initial notifications sorted (offline first)
+                            // displaySortedNotifications(application, initialNotifications);
+
+                            // Then fetch actual status from server
+                            response.employees.forEach(function(employee) {
+                                if (application === "web") {
+                                    fetchWebcamNotifications(employee.id, employee.name, employee.email);
+                                } else {
+                                    fetchDesktopNotifications(employee.id, employee.name, employee.email);
+                                }
+                            });
+                        } else {
+                            $('#notifications-list').html(
+                                '<div class="notification">No employees found.</div>'
+                            );
                         }
-                        return notif;
-                    });
-                    
-                    // Display sorted notifications
-                    displaySortedNotifications("web", updatedNotifications);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading webcam notifications for employee ID ' + employeeId, error);
+                    },
+                    error: function() {
+                        $('#notifications-list').html(
+                            '<div class="error-message">Error loading employees.</div>'
+                        );
+                    }
+                });
             }
-        });
-    }
 
-    function displayWebcamNotification(employeeId, employeeName, notification) {
-        const timeAgo = formatTimeAgo(notification.created_at);
-        const isOnline = notification.status == 1;
-        const statusHtml = isOnline ?
-            '<span class="status online">ONLINE</span>' :
-            '<span class="status offline">OFFLINE</span>';
+            // Helper function to display notifications in sorted order (offline first)
+            function displaySortedNotifications(application, notificationsData) {
 
-            const showDescription = !isOnline || 
-        (notification.description && 
-         (notification.description.includes("webcam is closed, but the user is online") ||
-          notification.description.includes("Webcam permission denied by system, but the user is online")));
-            
-        const descriptionHtml = showDescription ? 
-            '<span class="desc">Message: ' + notification.description + '</span>' : '';
-            
-        const timeHtml = isOnline ? '' : 
-            '<div class="time">' + timeAgo + '</div>';
+                notificationsData.sort((a, b) => a.notification.status - b.notification.status);
+                // $('#notifications-list').html('');
+                notificationsData.forEach(data => {
+                    if (application === "web") {
+                        displayWebcamNotification(data.employeeId, data.employeeName, data.employeeEmail, data.notification);
+                    } else {
+                        displayDesktopNotification(data.employeeId, data.employeeName, data.employeeEmail, data.notification);
+                    }
+                });
+            }
 
-        const html = 
-            '<div class="notification">' +
-                '<div class="profile">' +
-                    '<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">' +
-                    '<div class="details">' +
-                        '<span class="name">Emp Name: ' + employeeName + '</span>' +
-                        descriptionHtml +
-                    '</div>' +
-                '</div>' +
-                '<div class="right">' +
-                    statusHtml +
-                    timeHtml +
-                '</div>' +
-            '</div>';
 
-        $('#notifications-list').append(html);
-    }
 
-    // Desktop Notifications
-    function fetchDesktopNotifications(employeeId, employeeName) {
-        $.ajax({
-            url: "<?= base_url('admin/Notification/desktop_notifications') ?>",
-            type: 'GET',
-            data: {
-                employee_id: employeeId,
-                employee_name: employeeName
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success' && response.data.length > 0) {
-                    // Get all current notifications
-                    const currentNotifications = [];
-                    $('.notification').each(function() {
-                        const name = $(this).find('.name').text().replace('Emp Name: ', '');
-                        const isOnline = $(this).find('.status').hasClass('online');
-                        currentNotifications.push({
-                            employeeName: name,
-                            notification: {
-                                status: isOnline ? 1 : 0,
-                                description: $(this).find('.desc').text().replace('Message: ', '') || '',
-                                created_at: $(this).find('.time').text() || new Date().toISOString()
-                            }
-                        });
-                    });
-                    
-                    // Update the notification for this employee
-                    const updatedNotifications = currentNotifications.map(notif => {
-                        if (notif.employeeName === employeeName) {
-                            return {
+            // Webcam Notifications
+            function fetchWebcamNotifications(employeeId, employeeName, employeeEmail) {
+                $.ajax({
+                    url: "<?= base_url('admin/Notification/get_notifications') ?>",
+                    type: 'GET',
+                    data: {
+                        employee_id: employeeId,
+                        employee_name: employeeName
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+
+                        if (response.status === 'success' && response.data.length > 0) {
+                            // Get all current notifications from DOM
+                            // const currentNotifications = [];
+                            // $('.notification').each(function() {
+                            //     const empId = $(this).data('emp-id');
+                            //     const empName = $(this).find('.name').text().replace('Emp Name: ', '');
+                            //     const isOnline = $(this).find('.status').hasClass('online');
+
+                            //     currentNotifications.push({
+                            //         employeeId: empId,
+                            //         employeeName: empName,
+                            //         notification: {
+                            //             status: isOnline ? 1 : 0,
+                            //             description: $(this).find('.desc').text().replace('Message: ', '') || '',
+                            //             created_at: $(this).find('.time').text() || new Date().toISOString()
+                            //         }
+                            //     });
+                            // });
+
+                            // Update the matched employee's notification by ID
+                            // const updatedNotifications = currentNotifications.map(notif => {
+                            //     if (parseInt(notif.employeeId) === parseInt(employeeId)) {
+                            //         return {
+                            //             employeeId: employeeId,
+                            //             employeeName: employeeName,
+                            //             notification: response.data[0]
+                            //         };
+                            //     }
+                            //     return notif;
+                            // });
+
+                            const formattedData = [{
+                                employeeId: employeeId,
                                 employeeName: employeeName,
-                                notification: response.data[0]
-                            };
+                                employeeEmail: employeeEmail,
+                                notification: {
+                                    status: parseInt(response.data[0].status), // ensure it's number
+                                    description: response.data[0].description,
+                                    created_at: response.data[0].created_at
+                                }
+                            }];
+
+                            displaySortedNotifications("web", formattedData);
                         }
-                        return notif;
-                    });
-                    
-                    // Display sorted notifications
-                    displaySortedNotifications("desk", updatedNotifications);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading desktop notifications', error);
+
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading webcam notifications for employee ID ' + employeeId, error);
+                    }
+                });
             }
-        });
-    }
 
-    function displayDesktopNotification(employeeId, employeeName, notification) {
-        const timeAgo = formatTimeAgo(notification.created_at);
-        const isOnline = notification.status == 1;
 
-        const html = 
-            '<div class="notification">' +
-                '<div class="profile">' +
-                    '<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">' +
-                    '<div class="details">' +
-                        '<span class="name">Emp Name: ' + employeeName + '</span>' +
-                        (isOnline ? '' : '<span class="desc">Message: ' + notification.description + '</span>') +
-                    '</div>' +
-                '</div>' +
-                '<div class="right">' +
-                    (isOnline ? '<span class="status online">ONLINE</span>' : '<span class="status offline">OFFLINE</span>') +
-                    (isOnline ? '' : '<div class="time">' + timeAgo + '</div>') +
-                '</div>' +
-            '</div>';
+            function displayWebcamNotification(employeeId, employeeName, employeeEmail, notification) {
+                const timeAgo = formatTimeAgo(notification.created_at);
+                const isOnline = notification.status == 1;
 
-        $('#notifications-list').append(html);
-    }
+                const statusHtml = isOnline ?
+                    '<span class="status online">ONLINE</span>' :
+                    '<span class="status offline">OFFLINE</span>';
 
-    function formatTimeAgo(createdAt) {
-        const createdDate = new Date(createdAt);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - createdDate) / 1000);
+                const showDescription = !isOnline ||
+                    (notification.description &&
+                        (notification.description.includes("webcam is closed, but the user is online") ||
+                            notification.description.includes("Webcam permission denied by system, but the user is online")));
 
-        if (diffInSeconds < 60) return 'just now';
-        if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' mins ago';
-        if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' hours ago';
-        return Math.floor(diffInSeconds / 86400) + ' days ago';
-    }
+                const descriptionHtml = showDescription ?
+                    '<span class="desc">Message: ' + notification.description + '</span>' :
+                    '';
 
-    $(document).ready(function() {
-        // Initially load webcam notifications
-        loadNotifications("web");
+                const timeHtml = isOnline ? '' : '<div class="time">' + timeAgo + '</div>';
 
-        // Tab click handlers
-        $('.box.webcam').on('click', function() {
-            loadNotifications("web");
-        });
+                const sendButtonHtml = showDescription ?
+                    `<button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>` :
+                    '';
 
-        $('.box.desktop').on('click', function() {
-            loadNotifications("desk");
-        });
-    });
-</script>
+                const html =
+                    `<div class="notification">
+                        <div class="profile">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
+                            <div class="details">
+                                <span class="name">Emp Name: ${employeeName}</span>
+                                ${descriptionHtml}
+                            </div>
+                        </div>
+                      <div class="right" style="display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 40px;">
+                        <div>
+                            <div class="status-wrapper">${statusHtml}</div>
+                            <div class="time-wrapper">${timeHtml}</div>
+                        </div>
+                        <div class="button-wrapper">
+                            ${sendButtonHtml}
+                        </div>
+                    </div>
+
+                    </div>`;
+
+                $('#notifications-list').append(html);
+            }
+
+
+            // Desktop Notifications
+            function fetchDesktopNotifications(employeeId, employeeName, employeeEmail) {
+                $.ajax({
+                    url: "<?= base_url('admin/Notification/desktop_notifications') ?>",
+                    type: 'GET',
+                    data: {
+                        employee_id: employeeId,
+                        employee_name: employeeName
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success' && response.data.length > 0) {
+                            // Get all current notifications
+                            // const currentNotifications = [];
+                            // $('.notification').each(function() {
+                            //     const name = $(this).find('.name').text().replace('Emp Name: ', '');
+                            //     const isOnline = $(this).find('.status').hasClass('online');
+                            //     currentNotifications.push({
+                            //         employeeName: name,
+                            //         notification: {
+                            //             status: isOnline ? 1 : 0,
+                            //             description: $(this).find('.desc').text().replace('Message: ', '') || '',
+                            //             created_at: $(this).find('.time').text() || new Date().toISOString()
+                            //         }
+                            //     });
+                            // });
+
+                            // // Update the notification for this employee
+                            // const updatedNotifications = currentNotifications.map(notif => {
+                            //     if (notif.employeeName === employeeName) {
+                            //         return {
+                            //             employeeName: employeeName,
+                            //             notification: response.data[0]
+                            //         };
+                            //     }
+                            //     return notif;
+                            // });
+                            const formattedData = [{
+                                employeeId: employeeId,
+                                employeeName: employeeName,
+                                employeeEmail: employeeEmail,
+                                notification: {
+                                    status: parseInt(response.data[0].status), // ensure it's number
+                                    description: response.data[0].description,
+                                    created_at: response.data[0].created_at
+                                }
+                            }];
+
+                            displaySortedNotifications("desk", formattedData);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading desktop notifications', error);
+                    }
+                });
+            }
+
+            function displayDesktopNotification(employeeId, employeeName, employeeEmail, notification) {
+                const timeAgo = formatTimeAgo(notification.created_at);
+                const isOnline = notification.status == 1;
+
+                const sendButtonHtml = (!isOnline) ?
+                    `<button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>` :
+                    '';
+
+                const html =
+                    `<div class="notification">
+            <div class="profile">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
+                <div class="details">
+                    <span class="name">Emp Name: ${employeeName}</span>
+                    ${isOnline ? '' : `<span class="desc">Message: ${notification.description}</span>`}
+                </div>
+            </div>
+            <div class="right" style="display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 40px;">
+            <div>
+                <div class="status-wrapper">
+                    ${isOnline ? '<span class="status online">ONLINE</span>' : '<span class="status offline">OFFLINE</span>'}
+                </div>
+                ${isOnline ? '' : `
+                    <div class="time-wrapper">
+                        <div class="time">${timeAgo}</div>
+                    </div>
+                   
+                `}
+                 </div>
+                 <div class="button-wrapper">
+                        ${sendButtonHtml}
+                    </div>
+            </div>
+               </div>`;
+
+                $('#notifications-list').append(html);
+            }
+
+
+
+            function formatTimeAgo(createdAt) {
+                const createdDate = new Date(createdAt);
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - createdDate) / 1000);
+
+                if (diffInSeconds < 60) return 'just now';
+                if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' mins ago';
+                if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' hours ago';
+                return Math.floor(diffInSeconds / 86400) + ' days ago';
+            }
+
+            $(document).ready(function() {
+                // Initially load webcam notifications
+                loadNotifications("web");
+
+                // Tab click handlers
+                $('.box.webcam').on('click', function() {
+                    loadNotifications("web");
+                });
+
+                $('.box.desktop').on('click', function() {
+                    loadNotifications("desk");
+                });
+            });
+            $(document).on('click', '.send-email', function() {
+                const $btn = $(this);
+                const employeeId = $btn.data('id');
+                const employeeName = $btn.data('name');
+                const employeeEmail = $btn.data('email');
+                const description = $btn.data('description');
+
+                // Disable button and add loader
+                $btn.prop('disabled', true);
+                const originalText = $btn.html();
+                $btn.html('Sending... <span class="button-loader"></span>');
+
+                $.ajax({
+                    url: "<?= base_url('admin/Notification/send__alter_mail') ?>",
+                    type: "POST",
+                    data: {
+                        employee_id: employeeId,
+                        employee_name: employeeName,
+                        employee_email: employeeEmail,
+                        message: description
+                    },
+                    success: function(response) {
+                        swal("Success", "Alert email sent successfully!", "success");
+                    },
+                    error: function(xhr, status, error) {
+                        swal("Error", "Failed to send alert email.", "error");
+                    },
+                    complete: function() {
+                        // Restore original button state
+                        $btn.html(originalText);
+                        $btn.prop('disabled', false);
+                    }
+                });
+            });
+        </script>
