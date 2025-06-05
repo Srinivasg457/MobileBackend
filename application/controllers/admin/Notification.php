@@ -237,12 +237,21 @@ class Notification extends Home_Controller {
                     'message' => 'Missing required fields.'
                 ]));
         }
-        // Compose email
-        $subject = "Attention Required: Notification for $employeeName";  
-        $logo = '<img width="100" src="' . base_url('uploads/thumbnail/2_thumb-100x100.png') . '" alt="Workroom" style="display:block; margin:0 auto;width: 150px;">';
-        $msg = $logo;
-        $msg .= '<br><br>';
-        $msg .= "Hi $employeeName,\n\nWe have detected the following issue:\n\n\"$message\"\n\nPlease take necessary action.\n\nRegards,\nAdmin";
+        $subject = "Attention Required: Notification for $employeeName";
+
+        // $logo = '<img width="100" src="' . base_url('uploads/thumbnail/2_thumb-100x100.png') . '" alt="Workroom" style="display:block; margin:0 auto;width: 150px;">';
+
+        // $msg = $logo;
+
+        // $msg .= '<br><br>';
+        // $msg .= "<p><strong>To: $employeeName</strong></p>";
+        // $msg .= '<hr style="border: 1px solid #eee; margin: 15px 0;">';
+        $msg .= "<p>Hi $employeeName,</p>";
+        $msg .= "<p>We have detected the following issue:</p>";
+        $msg .= '<p style="font-weight: 700">"' . $message . '"</p>';
+        $msg .= "<p>It has come to my attention that your desktop application has been <b> closed </b> or <b>logged out</b>. To ensure uninterrupted workflow and access to necessary tools, kindly <b> log in </b> again at your earliest convenience.</p>";
+        $msg .= "<p>If you encounter any issues or require assistance, please don't hesitate to reach out to the IT support team.</p>";
+        $msg .= "<p>Regards,<br>Admin</p>";
 
         // $msg = 'Hello '.$user['name'].'<br> We have reset your password, Please use this <b>'.$user['password'].'</b> code to login your account';
         $this->email_model->send_email($employeeEmail, $subject, $msg);
