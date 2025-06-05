@@ -661,6 +661,111 @@ return $this->output
 }
 
 
+public function store_Employee_Activity()
+{
+    // Allow only POST
+    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(405)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Only POST requests are allowed"
+            ]));
+    }
+
+    // Required headers
+    $required_headers = [
+        'user_id'             => 'user_id',
+        'employee_id'         => 'employee_id',
+        'total_mouse_movement'=> 'total_mouse_movement',
+        'total_keystrokes'    => 'total_keystrokes'
+    ];
+
+    $headers = [];
+    $missing_fields = [];
+
+    // Validate headers
+    foreach ($required_headers as $field => $label) {
+        $value = $this->input->get_request_header($field, TRUE);
+        if (empty($value)) {
+            $missing_fields[] = $label;
+        }
+        $headers[$field] = $value;
+    }
+
+    if (!empty($missing_fields)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Missing required headers: " . implode(', ', $missing_fields)
+            ]));
+    }
+
+    // Validate numeric values
+    if (!is_numeric($headers['total_mouse_movement']) || $headers['total_mouse_movement'] < 0) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Total mouse movement must be a non-negative number"
+            ]));
+    }
+
+    if (!is_numeric($headers['total_keystrokes']) || $headers['total_keystrokes'] < 0) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Total keystrokes must be a non-negative number"
+            ]));
+    }
+
+    $data = [
+        'user_id'             => $headers['user_id'],
+        'employee_id'         => $headers['employee_id'],
+        'created_at'          => date('Y-m-d H:i:s'),
+        'total_mouse_movement'=> (int)$headers['total_mouse_movement'],
+        'total_keystrokes'    => (int)$headers['total_keystrokes']
+    ];
+
+    // Use workroom_db connection
+     // Start database transaction
+     $this->db->trans_start();
+        
+     $inserted = $this->db->insert('Employee_Activity', $data);
+     $log_id = $this->db->insert_id();
+     
+     $this->db->trans_complete();
+ 
+     if (!$this->db->trans_status() || !$inserted) {
+         $error = $this->db->error();
+         return $this->output
+             ->set_content_type('application/json')
+             ->set_status_header(500)
+             ->set_output(json_encode([
+                 "status" => "error",
+                 "message" => "Failed to store time log",
+                 "error" => $error['message'] ?? 'Unknown database error'
+             ]));
+     }
+
+    log_message('info', "Employee activity created for employee {$headers['employee_id']} with ID $activity_id");
+
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_status_header(201)
+        ->set_output(json_encode([
+            "status" => "success",
+            "message" => "Employee activity stored successfully",
+            "data" => $data
+        ]));
+}
+
 
 }
 ?>
