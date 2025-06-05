@@ -219,4 +219,32 @@ class Notification extends Home_Controller {
                 ]));
         }
     }
+    //send reset code to user email
+    public function send__alter_mail()
+    {
+        // Get POST data
+        $employeeId = $this->input->post('employee_id');
+        $employeeName = $this->input->post('employee_name');
+        $employeeEmail = $this->input->post('employee_email');
+        $message = $this->input->post('message');
+
+        // Basic validation
+        if (empty($employeeEmail) || empty($message)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Missing required fields.'
+                ]));
+        }
+        // Compose email
+        $subject = "Attention Required: Notification for $employeeName";  
+        $logo = '<img width="100" src="' . base_url('uploads/thumbnail/2_thumb-100x100.png') . '" alt="Workroom" style="display:block; margin:0 auto;width: 150px;">';
+        $msg = $logo;
+        $msg .= '<br><br>';
+        $msg .= "Hi $employeeName,\n\nWe have detected the following issue:\n\n\"$message\"\n\nPlease take necessary action.\n\nRegards,\nAdmin";
+
+        // $msg = 'Hello '.$user['name'].'<br> We have reset your password, Please use this <b>'.$user['password'].'</b> code to login your account';
+        $this->email_model->send_email($employeeEmail, $subject, $msg);
+    }
 }
