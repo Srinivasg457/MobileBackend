@@ -685,12 +685,14 @@ public function store_Employee_Activity()
     $headers = [];
     $missing_fields = [];
 
-    // Validate headers
+    // Validate headers (allow 0 as valid)
     foreach ($required_headers as $field => $label) {
         $value = $this->input->get_request_header($field, TRUE);
-        if (empty($value)) {
+
+        if ($value === null) { // allows 0
             $missing_fields[] = $label;
         }
+
         $headers[$field] = $value;
     }
 
@@ -705,23 +707,45 @@ public function store_Employee_Activity()
     }
 
     // Validate numeric values
-    if (!is_numeric($headers['total_mouse_movement']) || $headers['total_mouse_movement'] < 0) {
+    if (!is_numeric($headers['total_mouse_movement'])) {
         return $this->output
             ->set_content_type('application/json')
             ->set_status_header(400)
             ->set_output(json_encode([
                 "status" => "error",
-                "message" => "Total mouse movement must be a non-negative number"
+                "message" => "Total mouse movement must be a number"
             ]));
     }
 
-    if (!is_numeric($headers['total_keystrokes']) || $headers['total_keystrokes'] < 0) {
+    $mouse_movement = (int)$headers['total_mouse_movement'];
+    if ($mouse_movement < 0 || $mouse_movement > 20) {
         return $this->output
             ->set_content_type('application/json')
             ->set_status_header(400)
             ->set_output(json_encode([
                 "status" => "error",
-                "message" => "Total keystrokes must be a non-negative number"
+                "message" => "Total mouse movement must be between 0 and 20"
+            ]));
+    }
+
+    if (!is_numeric($headers['total_keystrokes'])) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Total keystrokes must be a number"
+            ]));
+    }
+
+    $keystrokes = (int)$headers['total_keystrokes'];
+    if ($keystrokes < 0 || $keystrokes > 40) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Total keystrokes must be between 0 and 40"
             ]));
     }
 
@@ -729,30 +753,29 @@ public function store_Employee_Activity()
         'user_id'             => $headers['user_id'],
         'employee_id'         => $headers['employee_id'],
         'created_at'          => date('Y-m-d H:i:s'),
-        'total_mouse_movement'=> (int)$headers['total_mouse_movement'],
-        'total_keystrokes'    => (int)$headers['total_keystrokes']
+        'total_mouse_movement'=> $mouse_movement,
+        'total_keystrokes'    => $keystrokes
     ];
 
-    // Use workroom_db connection
-     // Start database transaction
-     $this->db->trans_start();
-        
-     $inserted = $this->db->insert('Employee_Activity', $data);
-     $log_id = $this->db->insert_id();
-     
-     $this->db->trans_complete();
- 
-     if (!$this->db->trans_status() || !$inserted) {
-         $error = $this->db->error();
-         return $this->output
-             ->set_content_type('application/json')
-             ->set_status_header(500)
-             ->set_output(json_encode([
-                 "status" => "error",
-                 "message" => "Failed to store time log",
-                 "error" => $error['message'] ?? 'Unknown database error'
-             ]));
-     }
+    // Start database transaction
+    $this->db->trans_start();
+
+    $inserted = $this->db->insert('Employee_Activity', $data);
+    $activity_id = $this->db->insert_id();
+
+    $this->db->trans_complete();
+
+    if (!$this->db->trans_status() || !$inserted) {
+        $error = $this->db->error();
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Failed to store activity log",
+                "error" => $error['message'] ?? 'Unknown database error'
+            ]));
+    }
 
     log_message('info', "Employee activity created for employee {$headers['employee_id']} with ID $activity_id");
 

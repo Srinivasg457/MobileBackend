@@ -30,42 +30,42 @@
 
         <div class="form-group">
           <div class="form-group d-flex" style="gap: 20px;">
-  
-  <!-- Department Field -->
-                  <div style="flex: 1;">
-                    <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
-                    <select class="form-control single_select" name="department">
-                      <option value=""><?php echo trans('select') ?></option>
-                      <?php foreach ($departments as $department): ?>
-                        <option value="<?php echo html_escape($department->id); ?>"
-                          <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
-                          <?php echo html_escape($department->name); ?>
-                        </option>
-                      <?php endforeach ?>
-                    </select>
-                  </div>
 
-                  <!-- Role Field -->
-                  <div style="flex: 1;">
-                  <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
-                  <select class="form-control single_select" name="role">
-                  <option value=""><?php echo trans('select'); ?></option>
-                  <?php foreach ($roles as $role): ?>
-                    <option value="<?php echo html_escape($role->id); ?>"
-                      <?php if (!empty($employee) && $employee[0]['role_id'] == $role->id) echo 'selected'; ?>>
-                      <?php echo html_escape($role->name); ?>
-                    </option>
-                  <?php endforeach; ?>
-                </select>
-                  </div>
-                </div>
+            <!-- Department Field -->
+            <div style="flex: 1;">
+              <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
+              <select class="form-control single_select" name="department">
+                <option value=""><?php echo trans('select') ?></option>
+                <?php foreach ($departments as $department): ?>
+                  <option value="<?php echo html_escape($department->id); ?>"
+                    <?php if (!empty($employee) && $employee[0]['department_id'] == $department->id) echo 'selected'; ?>>
+                    <?php echo html_escape($department->name); ?>
+                  </option>
+                <?php endforeach ?>
+              </select>
+            </div>
+
+            <!-- Role Field -->
+            <div class="hide" style="flex: 1;">
+              <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
+              <select class="form-control single_select" name="role">
+                <option value=""><?php echo trans('select'); ?></option>
+                <?php foreach ($roles as $role): ?>
+                  <option value="<?php echo html_escape($role->id); ?>"
+                    <?php if (!empty($employee) && $employee[0]['role_id'] == $role->id) echo 'selected'; ?>>
+                    <?php echo html_escape($role->name); ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
           <label><?php echo trans('employee-name') ?> <span class="text-danger">*</span></label>
           <input type="text" class="form-control" required name="name" value="<?php echo html_escape($employee[0]['name']); ?>">
         </div>
 
         <div class="form-group">
           <label><?php echo trans('email') ?> <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" required  <?php if ($page_title == "Edit") {
+          <input type="text" class="form-control" required <?php if ($page_title == "Edit") {
                                                               echo "readonly";
                                                             } else {
                                                               echo "";
@@ -209,7 +209,13 @@
                 <tr id="row_<?php echo html_escape($employee->id); ?>">
 
                   <td><?php echo $i; ?></td>
-                  <td><img src="<?php echo base_url($employee->thumb) ?>"></td>
+                  <td>
+                    <?php if (!empty($employee->thumb)) : ?>
+                      <img src="<?php echo base_url($employee->thumb) ?>" style="border-radius: 50px; height: 50px; width: 50px;">
+                    <?php else : ?>
+                      <i class="bi bi-person-circle" style="font-size: 50px; color: #8B8B8B;"></i>
+                    <?php endif; ?>
+                  </td>
                   <td>
                     <p class="mb-0"><?php echo html_escape($employee->name); ?></p>
                     <p class="mb-0"><?php echo html_escape($employee->email); ?></p>
