@@ -790,5 +790,560 @@ public function store_Employee_Activity()
 }
 
 
+// public function store_Time_Log()
+// {
+//     // Allow only POST
+//     if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_status_header(405)
+//             ->set_output(json_encode([
+//                 "status" => "error",
+//                 "message" => "Only POST requests are allowed"
+//             ]));
+//     }
+
+//     // Required headers based on the SQL query
+//     $required_headers = [
+//         'employee_id'        => 'employee_id',
+//         'user_id'           => 'user_id',
+//         'log_date'           => 'log_date',
+//         'start_time'         => 'start_time',
+//         'end_time'          => 'end_time',
+//         'total_active_time' => 'total_active_time',
+//         'total_idle_time'   => 'total_idle_time',
+     
+//     ];
+
+//     $headers = [];
+//     $missing_fields = [];
+
+//     // Validate headers (allow 0 as valid)
+//     foreach ($required_headers as $field => $label) {
+//         $value = $this->input->get_request_header($field, TRUE);
+
+//         if ($value === null) { // allows 0
+//             $missing_fields[] = $label;
+//         }
+
+//         $headers[$field] = $value;
+//     }
+
+//     if (!empty($missing_fields)) {
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_status_header(400)
+//             ->set_output(json_encode([
+//                 "status" => "error",
+//                 "message" => "Missing required headers: " . implode(', ', $missing_fields)
+//             ]));
+//     }
+
+//     // Validate numeric values for IDs
+//     $numeric_fields = [
+//         'employee_id' => ['min' => 1, 'max' => PHP_INT_MAX],
+//         'user_id' => ['min' => 1, 'max' => PHP_INT_MAX]
+//     ];
+
+//     foreach ($numeric_fields as $field => $limits) {
+//         if (!is_numeric($headers[$field])) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => ucfirst(str_replace('_', ' ', $field)) . " must be a number"
+//                 ]));
+//         }
+
+//         $value = (int)$headers[$field];
+//         if ($value < $limits['min'] || $value > $limits['max']) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => ucfirst(str_replace('_', ' ', $field)) . " must be between {$limits['min']} and {$limits['max']}"
+//                 ]));
+//         }
+//     }
+
+//     // Validate date format
+//     if (!DateTime::createFromFormat('Y-m-d', $headers['log_date'])) {
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_status_header(400)
+//             ->set_output(json_encode([
+//                 "status" => "error",
+//                 "message" => "Invalid log date format. Expected YYYY-MM-DD"
+//             ]));
+//     }
+
+//     // Validate time formats (start_time, end_time)
+//     $time_fields = ['start_time', 'end_time'];
+//     foreach ($time_fields as $field) {
+//         if (!DateTime::createFromFormat('H:i:s', $headers[$field])) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => "Invalid $field format. Expected HH:MM:SS"
+//                 ]));
+//         }
+//     }
+
+//     // Validate duration formats (total_active_time, total_idle_time)
+//     $duration_fields = ['total_active_time', 'total_idle_time'];
+//     foreach ($duration_fields as $field) {
+//         if (!preg_match('/^([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/', $headers[$field])) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => "Invalid $field format. Must be in HH:MM:SS format"
+//                 ]));
+//         }
+        
+//         // Additional check to ensure values are valid
+//         $parts = explode(':', $headers[$field]);
+//         $hours = (int)$parts[0];
+//         $minutes = (int)$parts[1];
+//         $seconds = (int)$parts[2];
+        
+//         if ($hours > 23 || $minutes > 59 || $seconds > 59) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => "Invalid $field value. Hours must be 0-23, minutes and seconds 0-59"
+//                 ]));
+//         }
+//     }
+
+
+
+//     $current_time = date('Y-m-d H:i:s');
+//     $data = [
+//         'employee_id'        => $headers['employee_id'],
+//         'user_id'            => $headers['user_id'],
+//         'log_date'           => $headers['log_date'],
+//         'start_time'         => $headers['start_time'],
+//         'end_time'           => $headers['end_time'],
+//         'total_active_time' => $headers['total_active_time'], // Stored as HH:MM:SS
+//         'total_idle_time'    => $headers['total_idle_time'], // Stored as HH:MM:SS
+     
+//         'created_at'         => $current_time,
+//         'updated_at'        => $current_time
+//     ];
+
+//     // Start database transaction
+//     $this->db->trans_start();
+
+//     $inserted = $this->db->insert('time_logs', $data);
+//     $log_id = $this->db->insert_id();
+
+//     $this->db->trans_complete();
+
+//     if (!$this->db->trans_status() || !$inserted) {
+//         $error = $this->db->error();
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_status_header(500)
+//             ->set_output(json_encode([
+//                 "status" => "error",
+//                 "message" => "Failed to store time log",
+//                 "error" => $error['message'] ?? 'Unknown database error'
+//             ]));
+//     }
+
+//     log_message('info', "Time log created for employee {$headers['employee_id']} with ID $log_id");
+
+//     return $this->output
+//         ->set_content_type('application/json')
+//         ->set_status_header(201)
+//         ->set_output(json_encode([
+//             "status" => "success",
+//             "message" => "Time log stored successfully",
+//             "data" => $data
+//         ]));
+// }
+
+// public function store_Time_Log()
+// {
+//     // Allow only POST
+//     if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_status_header(405)
+//             ->set_output(json_encode([
+//                 "status" => "error",
+//                 "message" => "Only POST requests are allowed"
+//             ]));
+//     }
+
+//     // Required headers based on the SQL query
+//     $required_headers = [
+//         'employee_id'        => 'employee_id',
+//         'user_id'           => 'user_id',
+//         'log_date'           => 'log_date',
+//         'start_time'         => 'start_time',
+//         'end_time'          => 'end_time',
+//         'total_active_time' => 'total_active_time',
+//         'total_idle_time'   => 'total_idle_time',
+//         'status'            => 'status'
+//     ];
+
+//     $headers = [];
+//     $missing_fields = [];
+
+//     // Validate headers (allow 0 as valid)
+//     foreach ($required_headers as $field => $label) {
+//         $value = $this->input->get_request_header($field, TRUE);
+
+//         if ($value === null) { // allows 0
+//             $missing_fields[] = $label;
+//         }
+
+//         $headers[$field] = $value;
+//     }
+
+//     if (!empty($missing_fields)) {
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_status_header(400)
+//             ->set_output(json_encode([
+//                 "status" => "error",
+//                 "message" => "Missing required headers: " . implode(', ', $missing_fields)
+//             ]));
+//     }
+
+//     // Validate numeric values for IDs and status
+//     $numeric_fields = [
+//         'employee_id' => ['min' => 1, 'max' => PHP_INT_MAX],
+//         'user_id' => ['min' => 1, 'max' => PHP_INT_MAX],
+//         'status' => ['min' => 0, 'max' => 1] // Assuming status is 0 or 1 (or adjust as needed)
+//     ];
+
+//     foreach ($numeric_fields as $field => $limits) {
+//         if (!is_numeric($headers[$field])) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => ucfirst(str_replace('_', ' ', $field)) . " must be a number"
+//                 ]));
+//         }
+
+//         $value = (int)$headers[$field];
+//         if ($value < $limits['min'] || $value > $limits['max']) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => ucfirst(str_replace('_', ' ', $field)) . " must be between {$limits['min']} and {$limits['max']}"
+//                 ]));
+//         }
+//     }
+
+//     // Validate date format
+//     if (!DateTime::createFromFormat('Y-m-d', $headers['log_date'])) {
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_status_header(400)
+//             ->set_output(json_encode([
+//                 "status" => "error",
+//                 "message" => "Invalid log date format. Expected YYYY-MM-DD"
+//             ]));
+//     }
+
+//     // Validate time formats (start_time, end_time)
+//     $time_fields = ['start_time', 'end_time'];
+//     foreach ($time_fields as $field) {
+//         if (!DateTime::createFromFormat('H:i:s', $headers[$field])) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => "Invalid $field format. Expected HH:MM:SS"
+//                 ]));
+//         }
+//     }
+
+//     // Validate duration formats (total_active_time, total_idle_time)
+//     $duration_fields = ['total_active_time', 'total_idle_time'];
+//     foreach ($duration_fields as $field) {
+//         if (!preg_match('/^([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/', $headers[$field])) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => "Invalid $field format. Must be in HH:MM:SS format"
+//                 ]));
+//         }
+        
+//         // Additional check to ensure values are valid
+//         $parts = explode(':', $headers[$field]);
+//         $hours = (int)$parts[0];
+//         $minutes = (int)$parts[1];
+//         $seconds = (int)$parts[2];
+        
+//         if ($hours > 23 || $minutes > 59 || $seconds > 59) {
+//             return $this->output
+//                 ->set_content_type('application/json')
+//                 ->set_status_header(400)
+//                 ->set_output(json_encode([
+//                     "status" => "error",
+//                     "message" => "Invalid $field value. Hours must be 0-23, minutes and seconds 0-59"
+//                 ]));
+//         }
+//     }
+
+//     $current_time = date('Y-m-d H:i:s');
+//     $data = [
+//         'employee_id'        => $headers['employee_id'],
+//         'user_id'            => $headers['user_id'],
+//         'log_date'           => $headers['log_date'],
+//         'start_time'         => $headers['start_time'],
+//         'end_time'           => $headers['end_time'],
+//         'total_active_time'  => $headers['total_active_time'], // Stored as HH:MM:SS
+//         'total_idle_time'    => $headers['total_idle_time'], // Stored as HH:MM:SS
+//         'status'             => (int)$headers['status'],
+//         'created_at'         => $current_time,
+//         'updated_at'        => $current_time
+//     ];
+
+//     // Start database transaction
+//     $this->db->trans_start();
+
+//     $inserted = $this->db->insert('time_logs', $data);
+//     $log_id = $this->db->insert_id();
+
+//     $this->db->trans_complete();
+
+//     if (!$this->db->trans_status() || !$inserted) {
+//         $error = $this->db->error();
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_status_header(500)
+//             ->set_output(json_encode([
+//                 "status" => "error",
+//                 "message" => "Failed to store time log",
+//                 "error" => $error['message'] ?? 'Unknown database error'
+//             ]));
+//     }
+
+//     log_message('info', "Time log created for employee {$headers['employee_id']} with ID $log_id");
+
+//     return $this->output
+//         ->set_content_type('application/json')
+//         ->set_status_header(201)
+//         ->set_output(json_encode([
+//             "status" => "success",
+//             "message" => "Time log stored successfully",
+//             "data" => $data
+//         ]));
+// }
+
+
+
+
+
+
+public function store_Time_Log()
+{
+    // Allow only POST
+    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(405)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Only POST requests are allowed"
+            ]));
+    }
+
+    // Required headers based on the SQL query
+    $required_headers = [
+        'employee_id'        => 'employee_id',
+        'user_id'           => 'user_id',
+        'log_date'           => 'log_date',
+        'start_time'         => 'start_time',
+        'end_time'          => 'end_time',
+        'total_active_time' => 'total_active_time',
+        'total_idle_time'   => 'total_idle_time',
+        'status'            => 'status'
+    ];
+
+    $headers = [];
+    $missing_fields = [];
+
+    // Validate headers (allow 0 as valid)
+    foreach ($required_headers as $field => $label) {
+        $value = $this->input->get_request_header($field, TRUE);
+
+        if ($value === null) { // allows 0
+            $missing_fields[] = $label;
+        }
+
+        $headers[$field] = $value;
+    }
+
+    if (!empty($missing_fields)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Missing required headers: " . implode(', ', $missing_fields)
+            ]));
+    }
+
+    // Validate numeric values for IDs
+    $numeric_fields = [
+        'employee_id' => ['min' => 1, 'max' => PHP_INT_MAX],
+        'user_id' => ['min' => 1, 'max' => PHP_INT_MAX]
+    ];
+
+    foreach ($numeric_fields as $field => $limits) {
+        if (!is_numeric($headers[$field])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => ucfirst(str_replace('_', ' ', $field)) . " must be a number"
+                ]));
+        }
+
+        $value = (int)$headers[$field];
+        if ($value < $limits['min'] || $value > $limits['max']) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => ucfirst(str_replace('_', ' ', $field)) . " must be between {$limits['min']} and {$limits['max']}"
+                ]));
+        }
+    }
+
+    // Validate status is an integer (any value)
+    if (!is_numeric($headers['status'])) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Status must be an integer value"
+            ]));
+    }
+
+    // Validate date format
+    if (!DateTime::createFromFormat('Y-m-d', $headers['log_date'])) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Invalid log date format. Expected YYYY-MM-DD"
+            ]));
+    }
+
+    // Validate time formats (start_time, end_time)
+    $time_fields = ['start_time', 'end_time'];
+    foreach ($time_fields as $field) {
+        if (!DateTime::createFromFormat('H:i:s', $headers[$field])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Invalid $field format. Expected HH:MM:SS"
+                ]));
+        }
+    }
+
+    // Validate duration formats (total_active_time, total_idle_time)
+    $duration_fields = ['total_active_time', 'total_idle_time'];
+    foreach ($duration_fields as $field) {
+        if (!preg_match('/^([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/', $headers[$field])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Invalid $field format. Must be in HH:MM:SS format"
+                ]));
+        }
+        
+        // Additional check to ensure values are valid
+        $parts = explode(':', $headers[$field]);
+        $hours = (int)$parts[0];
+        $minutes = (int)$parts[1];
+        $seconds = (int)$parts[2];
+        
+        if ($hours > 23 || $minutes > 59 || $seconds > 59) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    "status" => "error",
+                    "message" => "Invalid $field value. Hours must be 0-23, minutes and seconds 0-59"
+                ]));
+        }
+    }
+
+    $current_time = date('Y-m-d H:i:s');
+    $data = [
+        'employee_id'        => $headers['employee_id'],
+        'user_id'            => $headers['user_id'],
+        'log_date'           => $headers['log_date'],
+        'start_time'         => $headers['start_time'],
+        'end_time'           => $headers['end_time'],
+        'total_active_time' => $headers['total_active_time'], // Stored as HH:MM:SS
+        'total_idle_time'    => $headers['total_idle_time'], // Stored as HH:MM:SS
+        'status'             => (int)$headers['status'],
+        'created_at'         => $current_time,
+        'updated_at'        => $current_time
+    ];
+
+    // Start database transaction
+    $this->db->trans_start();
+
+    $inserted = $this->db->insert('time_logs', $data);
+    $log_id = $this->db->insert_id();
+
+    $this->db->trans_complete();
+
+    if (!$this->db->trans_status() || !$inserted) {
+        $error = $this->db->error();
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "Failed to store time log",
+                "error" => $error['message'] ?? 'Unknown database error'
+            ]));
+    }
+
+    log_message('info', "Time log created for employee {$headers['employee_id']} with ID $log_id");
+
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_status_header(201)
+        ->set_output(json_encode([
+            "status" => "success",
+            "message" => "Time log stored successfully",
+            "data" => $data
+        ]));
+}
 }
 ?>
