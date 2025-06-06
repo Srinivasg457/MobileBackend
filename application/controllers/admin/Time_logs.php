@@ -394,7 +394,6 @@ return $this->output
     ]));
 
     }
-
     public function update_timelog()
     {
         // Validate request method
@@ -463,6 +462,37 @@ return $this->output
             if (strtotime($end_datetime) <= strtotime($existing->start_time)) {
                 throw new Exception("End time must be after start time");
             }
+    
+            // Function to convert various time formats to HH:MM:SS
+            function convertToHHMMSS($time) {
+                // If already in HH:MM:SS format
+                if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
+                    return $time;
+                }
+                
+                // If in HH-MM-SS format
+                if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $time)) {
+                    return str_replace('-', ':', $time);
+                }
+                
+                // If it's a decimal number (hours)
+                if (is_numeric($time)) {
+                    $hours = (float)$time;
+                    $total_seconds = (int)($hours * 3600);
+                    
+                    $hours = floor($total_seconds / 3600);
+                    $minutes = floor(($total_seconds % 3600) / 60);
+                    $seconds = $total_seconds % 60;
+                    
+                    return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
+                }
+                
+                throw new Exception("Invalid time format");
+            }
+    
+            $active_time = convertToHHMMSS($headers['total_active_time']);
+            $idle_time = convertToHHMMSS($headers['total_idle_time']);
+    
         } catch (Exception $e) {
             return $this->output
                 ->set_content_type('application/json')
@@ -473,33 +503,12 @@ return $this->output
                 ]));
         }
     
-        // Validate numerical values
-        if (!is_numeric($headers['total_active_time']) || $headers['total_active_time'] < 0) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    "status" => "error",
-                    "message" => "Total active time must be a positive number"
-                ]));
-        }
-    
-        if (!is_numeric($headers['total_idle_time']) || $headers['total_idle_time'] < 0) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    "status" => "error",
-                    "message" => "Total idle time must be a positive number"
-                ]));
-        }
-    
         // Prepare update data
         $current_time = date('Y-m-d H:i:s');
         $data = [
             'end_time' => $end_datetime,
-            'total_active_time' => (float)$headers['total_active_time'],
-            'total_idle_time' => (float)$headers['total_idle_time'],
+            'total_active_time' => $active_time,
+            'total_idle_time' => $idle_time,
             'status' => $headers['status'],
             'updated_at' => $current_time
         ];
@@ -542,9 +551,9 @@ return $this->output
                 "status" => "success",
                 "message" => "Time log updated successfully",
                 "data" => [
-                    "original_data" => $existing,  // The record before update
-                    "updated_data" => $updated_record,  // The record after update
-                    "changes_applied" => $data  // The changes that were applied
+                    "original_data" => $existing,
+                    "updated_data" => $updated_record,
+                    "changes_applied" => $data
                 ]
             ]));
     }
