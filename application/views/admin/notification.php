@@ -229,7 +229,6 @@
         <script>
             // Main function to load notifications
             function loadNotifications(application) {
-                // Set active tab
                 if (application === "web") {
                     $('.box.webcam').addClass('active');
                     $('.box.desktop').removeClass('active');
@@ -238,57 +237,53 @@
                     $('.box.webcam').removeClass('active');
                 }
 
-                // Clear existing notifications
                 $('#notifications-list').html('');
 
+                // Choose API endpoint based on application
+                const url = application === "web" ?
+                    "<?= base_url('admin/Notification/get_notifications') ?>" :
+                    "<?= base_url('admin/Notification/desktop_notifications') ?>";
+
                 $.ajax({
-                    url: "<?= base_url('/admin/Monitoring_room/list_employees_by_user') ?>",
+                    url: url,
                     method: 'GET',
                     dataType: 'json',
                     success: function(response) {
-                        if (response.status === 'success' && response.employees.length > 0) {
-                            // First show all employees as signed off
-                            const initialNotifications = response.employees.map(function(employee) {
-                                return {
-                                    employeeId: employee.id,
-                                    employeeName: employee.name,
-                                    notification: {
-                                        status: 0,
-                                        description: 'User sign off',
-                                        created_at: new Date().toISOString()
-                                    }
-                                };
-                            });
-
-                            // Display initial notifications sorted (offline first)
-                            // displaySortedNotifications(application, initialNotifications);
-
-                            // Then fetch actual status from server
-                            response.employees.forEach(function(employee) {
-                                if (application === "web") {
-                                    fetchWebcamNotifications(employee.id, employee.name, employee.email);
-                                } else {
-                                    fetchDesktopNotifications(employee.id, employee.name, employee.email);
+                        if (response.status === 'success' && response.data.length > 0) {
+                            console.log(response);
+                            
+                            const formattedData = response.data.map(item => ({
+                                employeeId: item.employee_id,
+                                employeeName: item.employee_name,
+                                employeeEmail: "", // If you want email, return it in the API
+                                notification: {
+                                    status: parseInt(item.status),
+                                    description: item.description,
+                                    created_at: item.created_at
                                 }
-                            });
+                            }));
+
+                            // Display all notifications in one go
+                            displaySortedNotifications(application, formattedData);
                         } else {
                             $('#notifications-list').html(
-                                '<div class="notification">No employees found.</div>'
+                                '<div class="notification">No notifications found.</div>'
                             );
                         }
                     },
                     error: function() {
                         $('#notifications-list').html(
-                            '<div class="error-message">Error loading employees.</div>'
+                            '<div class="error-message">Error loading notifications.</div>'
                         );
                     }
                 });
             }
 
+
             // Helper function to display notifications in sorted order (offline first)
             function displaySortedNotifications(application, notificationsData) {
 
-                notificationsData.sort((a, b) => a.notification.status - b.notification.status);
+                // notificationsData.sort((a, b) => a.notification.status - b.notification.status);
                 // $('#notifications-list').html('');
                 notificationsData.forEach(data => {
                     if (application === "web") {
@@ -481,32 +476,32 @@
 
                 const html =
                     `<div class="notification">
-            <div class="profile">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
-                <div class="details">
-                    <span class="name">Emp Name: ${employeeName}</span>
-                    ${isOnline ? '' : `<span class="desc">Message: ${notification.description}</span>`}
-                </div>
-            </div>
-            <div class="right" style="display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 40px;">
-            <div>
-                <div class="status-wrapper">
-                    ${isOnline ? '<span class="status online">ONLINE</span>' : '<span class="status offline">OFFLINE</span>'}
-                </div>
-                ${isOnline ? '' : `
-                    <div class="time-wrapper">
-                        <div class="time">${timeAgo}</div>
-                    </div>
-                   
-                `}
-                 </div>
-                 <div class="button-wrapper">
-                        ${sendButtonHtml}
-                    </div>
-            </div>
-               </div>`;
+                        <div class="profile">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
+                            <div class="details">
+                                <span class="name">Emp Name: ${employeeName}</span>
+                                ${isOnline ? '' : `<span class="desc">Message: ${notification.description}</span>`}
+                            </div>
+                        </div>
+                        <div class="right" style="display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 40px;">
+                        <div>
+                            <div class="status-wrapper">
+                                ${isOnline ? '<span class="status online">ONLINE</span>' : '<span class="status offline">OFFLINE</span>'}
+                            </div>
+                            ${isOnline ? '' : `
+                                <div class="time-wrapper">
+                                    <div class="time">${timeAgo}</div>
+                                </div>
+                            
+                            `}
+                            </div>
+                            <div class="button-wrapper">
+                                    ${sendButtonHtml}
+                                </div>
+                        </div>
+                        </div>`;
 
-                $('#notifications-list').append(html);
+                            $('#notifications-list').append(html);
             }
 
 
