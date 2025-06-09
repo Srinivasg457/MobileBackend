@@ -92,6 +92,8 @@ $route['employeedashboard'] = 'employee/Employee';
 $route['employeedashboard/screenshot'] = 'employee/Employee/screenshot';
 
 $route['organization'] = 'admin/Organization_settings';
+$route['organization/edit'] = 'admin/Organization_settings/Organization_settings_edit';
+
 $route['organization/org_exception'] = 'admin/Organization_settings/org_exception_settings';
 
 $route['employee/report'] = 'employee/Report';
