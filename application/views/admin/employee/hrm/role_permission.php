@@ -93,7 +93,7 @@
 
 <!-- Roles & Permissions Form -->
 <div class="content-wrapper">
-    <h2 class="mb-5">Roles & Permissions</h2>
+    <!-- <h2 class="mb-5">Roles & Permissions</h2> -->
     <!-- Feature Details Modal -->
     <div class="modal fade" id="featureDetailsModal" tabindex="-1" aria-labelledby="featureDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -300,7 +300,7 @@
     </div>
 
     <div class="list_area container">
-        <h3 class="box-title"><?php echo "roles" ?> <a href="#" class="pull-right btn btn-info btn-sm rounded create_role_permssion mx-5">
+        <h3 class="box-title"><?php echo "Roles & Permissions" ?> <a href="#" class="pull-right btn btn-info btn-sm rounded create_role_permssion mx-5">
                 <i class="fa fa-plus"></i> Assign Permission to Role</a>
         </h3>
 

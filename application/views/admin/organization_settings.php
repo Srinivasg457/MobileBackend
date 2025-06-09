@@ -191,12 +191,12 @@
             <?php else: ?>
                 <h3 class="box-title">Organization Settings
                     <a href="<?= base_url('organization/edit') ?>" class="pull-right btn btn-info btn-sm rounded">
-                        <i class="fa fa-edit"></i> Edit
+                        <i class="fa fa-edit"></i> Edit Settings
                     </a>
                 </h3>
             <?php endif; ?>
 
-            <div class="box">
+            <div class="box mt-20">
                 <div class="box-body">
                     <form id="orgSettingsForm" class="validate-form <?= $is_edit_mode ? '' : 'readonly-form' ?>" role="form">
                         <div class="row mt-5">
@@ -275,7 +275,7 @@
                                 <label class="form-label">Mouse Movement Threshold:</label>
                                 <input type="number" name="mouse_move_threshold" class="form-control" id="mouse_move_threshold"
                                     value="<?= isset($settings['mouse_move_threshold']) ? $settings['mouse_move_threshold'] : '' ?>"
-                                    <?= $is_edit_mode ? '' : 'readonly' ?> />
+                                    readonly />
                             </div>
 
                             <!-- Keystroke Flag -->
@@ -294,7 +294,7 @@
                                 <label class="form-label">Keystroke Threshold:</label>
                                 <input type="number" name="key_stroke_threshold" class="form-control" id="key_stroke_threshold"
                                     value="<?= isset($settings['key_stroke_threshold']) ? $settings['key_stroke_threshold'] : '' ?>"
-                                    <?= $is_edit_mode ? '' : 'readonly' ?> />
+                                    readonly/>
                             </div>
 
                             <!-- Idle Time Flag -->
