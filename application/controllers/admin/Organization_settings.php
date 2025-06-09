@@ -17,6 +17,15 @@ class Organization_settings extends Home_Controller {
         }
         $data = array();
         $data['page_title'] = 'Organization settings';
+        $data["settings"] = $this->PreLoading_get_org_settings();
+        $data['main_content'] = $this->load->view('admin/organization_settings', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
+    public function Organization_settings_edit()
+    {
+        $data = array();
+        $data['page_title'] = 'Edit';
+        $data["settings"] = $this->PreLoading_get_org_settings();
         $data['main_content'] = $this->load->view('admin/organization_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
@@ -176,7 +185,7 @@ class Organization_settings extends Home_Controller {
    
     public function get_org_settings()
 {
-    $user_id = $this->input->get('user_id');
+    $user_id = $this->input->get('id');
 
     if (!$user_id) {
         echo json_encode(['error' => 'Missing user_id parameter.']);
@@ -191,6 +200,23 @@ class Organization_settings extends Home_Controller {
         echo json_encode(['error' => 'No settings found for this user.']);
     }
 }
+    public function PreLoading_get_org_settings()
+    {
+        $user_id = $this->session->userdata('id');
+
+        if (!$user_id) {
+            return ['error' => 'Missing user_id parameter.'];
+        }
+
+        $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
+
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        } else {
+            return ['error' => 'No settings found for this user.'];
+        }
+    }
+
 
     public function get_org_exception_settings($employee_id)
 {

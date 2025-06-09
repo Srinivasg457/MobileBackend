@@ -177,125 +177,172 @@
 }
 </style>
 <div id="toast-container" style="position: fixed;top: 0;"></div>
+<?php $is_edit_mode = (isset($page_title) && $page_title == "Edit"); ?>
+
 <div class="content-wrapper" style="min-height: 760.5px;">
     <section class="content">
         <div class="container mt-4">
-            <h3>Organization Settings</h3>
-            <div class="box mt-5">
+            <?php if ($is_edit_mode): ?>
+                <h3 class="box-title">Edit Organization Settings
+                    <a href="<?= base_url('organization') ?>" class="pull-right btn btn-default  rounded btn-sm">
+                        <i class="fa fa-angle-left"></i> <?= trans('back') ?>
+                    </a>
+                </h3>
+            <?php else: ?>
+                <h3 class="box-title">Organization Settings
+                    <a href="<?= base_url('organization/edit') ?>" class="pull-right btn btn-info btn-sm rounded">
+                        <i class="fa fa-edit"></i> Edit
+                    </a>
+                </h3>
+            <?php endif; ?>
+
+            <div class="box">
                 <div class="box-body">
-            <form id="orgSettingsForm">
-                <div class="row mt-5">
-                    <!-- Screenshot Flag -->
-                    <div class="col-md-6 form-group">
-                        <label class="form-label">Screenshot Flag:</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" name="screenshot_flag" value="1" class="toggle-flag" data-target="screenshot_time_interval" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
+                    <form id="orgSettingsForm" class="validate-form <?= $is_edit_mode ? '' : 'readonly-form' ?>" role="form">
+                        <div class="row mt-5">
 
-                    <!-- Screenshot Interval -->
-                    <div class="col-md-6 form-group">
-                        <label class="form-label">Screenshot Interval (mins):</label>
-                        <select name="screenshot_time_interval" class="form-control target-input single_select" id="screenshot_time_interval">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option selected value="5">5</option>
-                            <option value="10">10</option>
-                        </select>
-                    </div>
+                            <!-- Screenshot Flag -->
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Screenshot Flag:</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="screenshot_flag" value="1" class="toggle-flag" data-target="screenshot_time_interval"
+                                        <?= isset($settings['screenshot_flag']) && $settings['screenshot_flag'] ? 'checked' : '' ?>
+                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
 
-                    <!-- Webcam Flag -->
-                    <div class="col-md-6 form-group">
-                        <label class="form-label">Webcam Flag:</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" name="webcam_flag" value="1" class="toggle-flag" data-target="webcam_time_interval" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
+                            <!-- Screenshot Interval -->
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Screenshot Interval (mins):</label>
 
-                    <!-- Webcam Interval -->
-                    <div class="col-md-6 form-group">
-                        <label class="form-label">Webcam Interval (mins):</label>
-                        <select name="webcam_time_interval" class="form-control single_select" id="webcam_time_interval">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option selected value="5">5</option>
-                            <option value="10">10</option>
-                        </select>
-                    </div>
+                                <?php if ($is_edit_mode): ?>
+                                    <select name="screenshot_time_interval" class="form-control target-input" id="screenshot_time_interval">
+                                        <?php foreach ([1, 2, 5, 10] as $val): ?>
+                                            <option value="<?= $val ?>" <?= (isset($settings['screenshot_time_interval']) && $settings['screenshot_time_interval'] == $val) ? 'selected' : '' ?>>
+                                                <?= $val ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php else: ?>
+                                    <input type="text" class="form-control" value="<?= isset($settings['screenshot_time_interval']) ? $settings['screenshot_time_interval'] : '' ?>" readonly>
+                                <?php endif; ?>
+                            </div>
 
-                    <!-- Mouse Movement Flag -->
-                    <div class="col-md-6 form-group">
-                        <label class="form-label">Mouse Movement Flag:</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" name="mouse_move_flag" value="1" class="toggle-flag" data-target="mouse_move_threshold" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
 
-                    <!-- Mouse Movement Threshold -->
-                    <div class="col-md-6">
-                        <label class="form-label">Mouse Movement Threshold:</label>
-                        <input type="number" name="mouse_move_threshold" class="form-control" id="mouse_move_threshold" value="20" placeholder="" />
-                    </div>
+                            <!-- Webcam Flag -->
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Webcam Flag:</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="webcam_flag" value="1" class="toggle-flag" data-target="webcam_time_interval"
+                                        <?= isset($settings['webcam_flag']) && $settings['webcam_flag'] ? 'checked' : '' ?>
+                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
 
-                    <!-- Keystroke Flag -->
-                    <div class="col-md-6 form-group">
-                        <label class="form-label">Keystroke Flag:</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" name="key_stroke_flag" value="1" class="toggle-flag" data-target="key_stroke_threshold" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
+                            <!-- Webcam Interval -->
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Webcam Interval (mins):</label>
 
-                    <!-- Keystroke Threshold -->
-                    <div class="col-md-6">
-                        <label class="form-label">Keystroke Threshold:</label>
-                        <input type="number" name="key_stroke_threshold" class="form-control" id="key_stroke_threshold" value="40" placeholder="" />
-                    </div>
+                                <?php if ($is_edit_mode): ?>
+                                    <select name="webcam_time_interval" class="form-control" id="webcam_time_interval">
+                                        <?php foreach ([1, 2, 5, 10] as $val): ?>
+                                            <option value="<?= $val ?>" <?= (isset($settings['webcam_time_interval']) && $settings['webcam_time_interval'] == $val) ? 'selected' : '' ?>>
+                                                <?= $val ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php else: ?>
+                                    <input type="text" class="form-control" value="<?= isset($settings['webcam_time_interval']) ? $settings['webcam_time_interval'] : '' ?>" readonly>
+                                <?php endif; ?>
+                            </div>
 
-                    <!-- Idle Time Flag -->
-                    <div class="col-md-6 form-group">
-                        <label class="form-label">Idle Time Flag:</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" name="idle_time_flag" value="1" class="toggle-flag" data-target="timecards_time_interval" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
 
-                    <!-- Timecards Interval -->
-                    <div class="col-md-6">
-                        <label>Timecards Interval (mins):</label>
-                        <!-- <select name="timecards_time_interval" class="form-control interval-field">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                        </select> -->
-                        <input type="text" name="timecards_time_interval" class="form-control" value="1" readonly>
-                    </div>
+                            <!-- Mouse Movement Flag -->
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Mouse Movement Flag:</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="mouse_move_flag" value="1" class="toggle-flag" data-target="mouse_move_threshold"
+                                        <?= isset($settings['mouse_move_flag']) && $settings['mouse_move_flag'] ? 'checked' : '' ?>
+                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Mouse Movement Threshold -->
+                            <div class="col-md-6">
+                                <label class="form-label">Mouse Movement Threshold:</label>
+                                <input type="number" name="mouse_move_threshold" class="form-control" id="mouse_move_threshold"
+                                    value="<?= isset($settings['mouse_move_threshold']) ? $settings['mouse_move_threshold'] : '' ?>"
+                                    <?= $is_edit_mode ? '' : 'readonly' ?> />
+                            </div>
+
+                            <!-- Keystroke Flag -->
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Keystroke Flag:</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="key_stroke_flag" value="1" class="toggle-flag" data-target="key_stroke_threshold"
+                                        <?= isset($settings['key_stroke_flag']) && $settings['key_stroke_flag'] ? 'checked' : '' ?>
+                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Keystroke Threshold -->
+                            <div class="col-md-6">
+                                <label class="form-label">Keystroke Threshold:</label>
+                                <input type="number" name="key_stroke_threshold" class="form-control" id="key_stroke_threshold"
+                                    value="<?= isset($settings['key_stroke_threshold']) ? $settings['key_stroke_threshold'] : '' ?>"
+                                    <?= $is_edit_mode ? '' : 'readonly' ?> />
+                            </div>
+
+                            <!-- Idle Time Flag -->
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Idle Time Flag:</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="idle_time_flag" value="1" class="toggle-flag" data-target="timecards_time_interval"
+                                        <?= isset($settings['idle_time_flag']) && $settings['idle_time_flag'] ? 'checked' : '' ?>
+                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Timecards Interval -->
+                            <div class="col-md-6">
+                                <label class="form-label">Timecards Interval (mins):</label>
+                                <input type="text" name="timecards_time_interval" class="form-control" id="timecards_time_interval"
+                                    value="<?= isset($settings['timecards_time_interval']) ? $settings['timecards_time_interval'] : '' ?>"
+                                    <?= $is_edit_mode ? '' : 'readonly' ?>>
+                            </div>
+                        </div>
+
+                        <?php if ($is_edit_mode): ?>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-info">Save Settings</button>
+                            </div>
+                        <?php endif; ?>
+                    </form>
                 </div>
-
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-info">Save Settings</button>
-                </div>
-            </form>
-        </div>
             </div>
         </div>
     </section>
 </div>
 
-<script>
-    function showToast(message, type) {
-        const toast = $(`<div class="toast toast-${type}">${message}</div>`);
-        $('#toast-container').append(toast);
-        setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
+<!-- Optional CSS for graying out form -->
+<style>
+    .readonly-form input[readonly],
+    .readonly-form select:disabled,
+    .readonly-form input:disabled {
+        background-color: #f9f9f9;
+        pointer-events: none;
+        opacity: 0.8;
     }
+</style>
 
+
+<script>
     $(document).ready(function() {
-        // Initialize toggle flags
         function initializeToggleStates() {
             $('.toggle-flag').each(function() {
                 const targetId = $(this).data('target');
@@ -308,8 +355,7 @@
         $('.toggle-flag').change(function() {
             const targetId = $(this).data('target');
             const targetInput = $('#' + targetId);
-            const isChecked = $(this).is(':checked');
-            targetInput.prop('disabled', !isChecked);
+            targetInput.prop('disabled', !$(this).is(':checked'));
         });
 
         initializeToggleStates();
@@ -318,20 +364,19 @@
             e.preventDefault();
 
             let isValid = true;
-            $('.is-invalid').removeClass('is-invalid'); // Reset errors
+            $('.is-invalid').removeClass('is-invalid');
 
             // Validate required fields
             $(this).find(':input').each(function() {
-                const $input = $(this);
-                if ($input.attr('name') && $input.val() === '') {
-                    $input.addClass('is-invalid');
+                if ($(this).attr('name') && $(this).val() === '') {
+                    $(this).addClass('is-invalid');
                     isValid = false;
                 }
             });
 
             // Validate Keystroke
             const keystrokeVal = parseInt($('#key_stroke_threshold').val());
-            if (keystrokeVal > 40 || 0 >= keystrokeVal) {
+            if (keystrokeVal > 40 || keystrokeVal <= 0) {
                 $('#key_stroke_threshold').addClass('is-invalid');
                 showToast("Keystroke threshold must be between 1 and 40", "error");
                 isValid = false;
@@ -339,35 +384,28 @@
 
             // Validate Mouse Movement
             const mouseVal = parseInt($('#mouse_move_threshold').val());
-            if (mouseVal > 20 || 0 >= mouseVal) {
+            if (mouseVal > 20 || mouseVal <= 0) {
                 $('#mouse_move_threshold').addClass('is-invalid');
                 showToast("Mouse movement threshold must be between 1 and 20", "error");
                 isValid = false;
             }
 
-            if (!isValid) {
-                return;
-            }
+            if (!isValid) return;
 
-            // Prepare data for submission
             const formData = {};
             $(this).find(':input').each(function() {
                 if (this.name) {
-                    if ($(this).hasClass('toggle-flag')) {
-                        formData[this.name] = $(this).is(':checked') ? 1 : 0;
-                    } else {
-                        formData[this.name] = $(this).val();
-                    }
+                    formData[this.name] = $(this).hasClass('toggle-flag') ? ($(this).is(':checked') ? 1 : 0) : $(this).val();
                 }
             });
 
             $.ajax({
-                url: "admin/Organization_settings/save_org_settings",
+                url: "<?php echo base_url('admin/Organization_settings/save_org_settings') ?>",
                 method: "POST",
                 data: formData,
                 success: function(response) {
-                    console.log(response);
-                    swal("Success!", "Employee Settings saved successfully.", "success");
+                    swal("Success!", response, "success");
+                    window.location.href = "<?= base_url('organization') ?>";
                 },
                 error: function(res) {
                     const errorMsg = res.responseJSON?.message || "Something went wrong.";

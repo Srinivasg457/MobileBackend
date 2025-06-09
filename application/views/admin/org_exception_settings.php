@@ -104,105 +104,105 @@
 
             <div class="box mt-5">
                 <div class="box-body">
-            <div class="form-group">
-                <label for="employeeSelect">Select Employee:</label>
-                <select id="employeeSelect" class="form-control single_select"></select>
-            </div>
-
-            <form id="orgExceptionForm">
-                <div class="row" style="max-width: 1000px;">
-                    <!-- Screenshot -->
-                    <div class="col-md-6">
-                        <label>Screenshot Flag:</label><br>
-                        <label class="switch">
-                            <input type="checkbox" name="screenshot_flag" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Screenshot Interval (mins):</label>
-                        <select name="screenshot_time_interval" class="form-control interval-field single_select">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                        </select>
+                    <div class="form-group">
+                        <label for="employeeSelect">Select Employee:</label>
+                        <select id="employeeSelect" class="form-control single_select"></select>
                     </div>
 
-                    <!-- Webcam -->
-                    <div class="col-md-6">
-                        <label>Webcam Flag:</label><br>
-                        <label class="switch">
-                            <input type="checkbox" name="webcam_flag" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Webcam Interval (mins):</label>
-                        <select name="webcam_time_interval" class="form-control interval-field single_select">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                        </select>
-                    </div>
+                    <form id="orgExceptionForm">
+                        <div class="row" style="max-width: 1000px;">
+                            <!-- Screenshot -->
+                            <div class="col-md-6">
+                                <label>Screenshot Flag:</label><br>
+                                <label class="switch">
+                                    <input type="checkbox" name="screenshot_flag" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Screenshot Interval (mins):</label>
+                                <select name="screenshot_time_interval" class="form-control interval-field">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </div>
 
-                    <!-- Mouse Move -->
-                    <div class="col-md-6">
-                        <label>Mouse Move Flag:</label><br>
-                        <label class="switch">
-                            <input type="checkbox" name="mouse_move_flag" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Mouse Move Threshold:</label>
-                        <input type="number" name="mouse_move_threshold" class="form-control" value="20" />
-                    </div>
+                            <!-- Webcam -->
+                            <div class="col-md-6">
+                                <label>Webcam Flag:</label><br>
+                                <label class="switch">
+                                    <input type="checkbox" name="webcam_flag" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Webcam Interval (mins):</label>
+                                <select name="webcam_time_interval" class="form-control interval-field">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </div>
 
-                    <!-- Keystroke -->
-                    <div class="col-md-6">
-                        <label>Keystroke Flag:</label><br>
-                        <label class="switch">
-                            <input type="checkbox" name="key_stroke_flag" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Keystroke Threshold:</label>
-                        <input type="number" name="key_stroke_threshold" class="form-control" value="40" />
-                    </div>
+                            <!-- Mouse Move -->
+                            <div class="col-md-6">
+                                <label>Mouse Move Flag:</label><br>
+                                <label class="switch">
+                                    <input type="checkbox" name="mouse_move_flag" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Mouse Move Threshold:</label>
+                                <input type="number" name="mouse_move_threshold" class="form-control" value="20" />
+                            </div>
 
-                    <!-- Idle Time -->
-                    <div class="col-md-6">
-                        <label>Idle Time Flag:</label><br>
-                        <label class="switch">
-                            <input type="checkbox" name="idle_time_flag" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Timecards Interval (mins):</label>
-                        <!-- <select name="timecards_time_interval" class="form-control interval-field">
+                            <!-- Keystroke -->
+                            <div class="col-md-6">
+                                <label>Keystroke Flag:</label><br>
+                                <label class="switch">
+                                    <input type="checkbox" name="key_stroke_flag" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Keystroke Threshold:</label>
+                                <input type="number" name="key_stroke_threshold" class="form-control" value="40" />
+                            </div>
+
+                            <!-- Idle Time -->
+                            <div class="col-md-6">
+                                <label>Idle Time Flag:</label><br>
+                                <label class="switch">
+                                    <input type="checkbox" name="idle_time_flag" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Timecards Interval (mins):</label>
+                                <!-- <select name="timecards_time_interval" class="form-control interval-field">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="5">5</option>
                             <option value="10">10</option>
                         </select> -->
-                        <input type="text" name="timecards_time_interval" class="form-control" value="1" readonly>
-                    </div>
+                                <input type="text" name="timecards_time_interval" class="form-control" value="1" readonly>
+                            </div>
 
-                    <div class="col-md-6">
-                        <label>Self Login:</label><br>
-                        <label class="switch">
-                            <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
+                            <div class="col-md-6">
+                                <label>Self Login:</label><br>
+                                <label class="switch">
+                                    <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
 
 
-                <div class="col-12 mt-5">
-                    <button type="submit" class="btn btn-info">Save Settings</button>
+                            <div class="col-12 mt-5">
+                                <button type="submit" class="btn btn-info">Save Settings</button>
                             </div>
                         </div>
                     </form>
