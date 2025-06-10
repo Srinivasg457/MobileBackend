@@ -45,47 +45,41 @@ class Organization_settings extends Home_Controller {
     // Method to insert or update org settings for a user
     public function save_org_settings()
     {
-        date_default_timezone_set('Asia/Kolkata'); // Set timezone to IST
-
         $user_id = $this->session->userdata('id');
-        $now = date('Y-m-d H:i:s');
-    
+        // Get data from POST request (replace with actual form data)
         $data = [
-            'user_id'                  => $user_id,
-            'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE),
+            'user_id'               => $user_id,
+            'screenshot_flag'       => $this->input->post('screenshot_flag', TRUE),
             'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
-            'webcam_flag'              => $this->input->post('webcam_flag', TRUE),
-            'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
-            'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE),
-            'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
-            'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE),
-            'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
-            'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE),
-            'timecards_time_interval'  => 5,
-            'updated_at'               => $now
+            'webcam_flag'           => $this->input->post('webcam_flag', TRUE),
+            'webcam_time_interval'  => $this->input->post('webcam_time_interval', TRUE),
+            'mouse_move_flag'       => $this->input->post('mouse_move_flag', TRUE),
+            'mouse_move_threshold'  => $this->input->post('mouse_move_threshold', TRUE),
+            'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
+            'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
+            'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
+            'timecards_time_interval' => 5
         ];
-    
+
         // Check if settings exist for this user
         $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
-    
+
         if ($query->num_rows() > 0) {
             // Update existing org settings
             $this->db->where('user_id', $user_id);
             $this->db->update('org_settings', $data);
         } else {
-            // Include created_at for insert
-            $data['created_at'] = $now;
+            // Insert new org settings
             $this->db->insert('org_settings', $data);
         }
-    
+
         // Check for errors
         if ($this->db->affected_rows() > 0) {
             echo "Settings saved successfully!";
         } else {
-            echo "No changes in the saved settings.";
+            echo "Failed to save settings.";
         }
     }
-    
 
     // // Method to insert or update organization exception settings for a specific employee
     // public function save_org_exception_settings($employee_id)
@@ -138,10 +132,8 @@ class Organization_settings extends Home_Controller {
 
     public function save_org_exception_settings($employee_id)
     {
-        date_default_timezone_set('Asia/Kolkata'); // Set timezone to IST
         $user_id = $this->session->userdata('id');
         $self_login = $this->input->post('self_login') ? 1 : 0;
-        $now = date('Y-m-d H:i:s');
     
         $data = [
             'user_id'                  => $user_id,
@@ -155,8 +147,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
-            'timecards_time_interval'  => 5,
-            'updated_at'               => $now
+            'timecards_time_interval'  => 5
         ];
     
         $employee_data = [
@@ -171,17 +162,14 @@ class Organization_settings extends Home_Controller {
         ]);
     
         if ($query->num_rows() > 0) {
-            // Update
             $this->db->where('employee_id', $employee_id);
             $this->db->where('user_id', $user_id);
             $this->db->update('organization_exception_setting', $data);
         } else {
-            // Insert
-            $data['created_at'] = $now;
             $this->db->insert('organization_exception_setting', $data);
         }
     
-        // Update employee record
+        // Update self_login and settings_status
         $this->db->where('id', $employee_id);
         $this->db->where('user_id', $user_id);
         $this->db->update('employees', $employee_data);
