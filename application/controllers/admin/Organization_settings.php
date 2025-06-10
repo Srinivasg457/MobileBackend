@@ -81,47 +81,51 @@ class Organization_settings extends Home_Controller {
     //     }
     // }
     public function save_org_settings()
-{
-    $user_id = $this->session->userdata('id');
+    {
+        $user_id = $this->session->userdata('id');
 
-    // Get current time in Asia/Kolkata using base controller method
-    $now = $this->get_time_by_timezone('Asia/Kolkata'); // This comes from MY_Controller
+        // Prepare data from POST request
+        $data = [
+            'user_id'                  => $user_id,
+            'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE),
+            'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
+            'webcam_flag'              => $this->input->post('webcam_flag', TRUE),
+            'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
+            'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE),
+            'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
+            'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE),
+            'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
+            'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE),
+            'timecards_time_interval'  => 5,
+            'time_zone'                => $this->input->post('time_zone_selected', TRUE) // <-- Added this line for timezone
+        ];
 
-    $data = [
-        'user_id'                   => $user_id,
-        'screenshot_flag'           => $this->input->post('screenshot_flag', TRUE),
-        'screenshot_time_interval'  => $this->input->post('screenshot_time_interval', TRUE),
-        'webcam_flag'               => $this->input->post('webcam_flag', TRUE),
-        'webcam_time_interval'      => $this->input->post('webcam_time_interval', TRUE),
-        'mouse_move_flag'           => $this->input->post('mouse_move_flag', TRUE),
-        'mouse_move_threshold'      => $this->input->post('mouse_move_threshold', TRUE),
-        'key_stroke_flag'           => $this->input->post('key_stroke_flag', TRUE),
-        'key_stroke_threshold'      => $this->input->post('key_stroke_threshold', TRUE),
-        'idle_time_flag'            => $this->input->post('idle_time_flag', TRUE),
-        'timecards_time_interval'   => 5,
-        'updated_at'                => $now // manually updating timestamp
-    ];
+        // Clean data for XSS prevention
+        $data = $this->security->xss_clean($data);
 
-    // Check if settings exist for this user
-    $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
+        // Check if settings exist for this user
+        $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
 
-    if ($query->num_rows() > 0) {
-        // Update existing org settings
-        $this->db->where('user_id', $user_id);
-        $this->db->update('org_settings', $data);
-    } else {
-        // Insert new org settings
-        $data['created_at'] = $now; // set created_at manually
-        $this->db->insert('org_settings', $data);
+        if ($query->num_rows() > 0) {
+            // Update existing org settings
+            $this->db->where('user_id', $user_id);
+            $this->db->update('org_settings', $data);
+        } else {
+            // Insert new org settings
+            $this->db->insert('org_settings', $data);
+        }
+
+        // Check for errors and provide feedback
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('msg', 'Organization settings saved successfully!');
+            // Redirect to the settings page or a success page
+            redirect($_SERVER['HTTP_REFERER']); // Redirect back to the previous page
+        } else {
+            $this->session->set_flashdata('error', 'Failed to save organization settings or no changes made.');
+            redirect($_SERVER['HTTP_REFERER']);
+        }
     }
 
-    // Check for success
-    if ($this->db->affected_rows() > 0) {
-        echo "Settings saved successfully!";
-    } else {
-        echo "Failed to save settings.";
-    }
-}
 
 
    
@@ -176,69 +180,70 @@ class Organization_settings extends Home_Controller {
     //         echo "No changes in the saved employee settings.";
     //     }
     // }
-    
+
+
     public function save_org_exception_settings($employee_id)
-{
-    $user_id = $this->session->userdata('id');
-    $self_login = $this->input->post('self_login') ? 1 : 0;
-
-    // Get timezone-aware timestamp
-    $now = $this->get_time_by_timezone('Asia/Kolkata');
-
-    $data = [
-        'user_id'                  => $user_id,
-        'employee_id'              => $employee_id,
-        'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
-        'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
-        'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
-        'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
-        'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
-        'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
-        'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
-        'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
-        'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
-        'timecards_time_interval'  => 5,
-        'updated_at'               => $now
-    ];
-
-    $employee_data = [
-        'settings_status' => 2,
-        'self_login'      => $self_login
-    ];
-
-    // Check if exception settings already exist
-    $query = $this->db->get_where('organization_exception_setting', [
-        'user_id'     => $user_id,
-        'employee_id' => $employee_id
-    ]);
-
-    if ($query->num_rows() > 0) {
-        // Update existing exception settings
-        $this->db->where('employee_id', $employee_id);
-        $this->db->where('user_id', $user_id);
-        $this->db->update('organization_exception_setting', $data);
-    } else {
-        // Set created_at manually on insert
-        $data['created_at'] = $now;
-        $this->db->insert('organization_exception_setting', $data);
-    }
-
-    // Update employee's self_login and settings_status
-    $this->db->where('id', $employee_id);
-    $this->db->where('user_id', $user_id);
-    $this->db->update('employees', $employee_data);
-
-    if ($this->db->affected_rows() > 0) {
-        echo "Employee settings saved successfully!";
-    } else {
-        echo "No changes in the saved employee settings.";
-    }
-}
-
+    {
+        $user_id = $this->session->userdata('id');
+        $self_login = $this->input->post('self_login') ? 1 : 0;
     
+        // Prepare data for organization_exception_setting table
+        $data = [
+            'user_id'                  => $user_id,
+            'employee_id'              => $employee_id,
+            'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
+            'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
+            'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
+            'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
+            'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
+            'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
+            'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
+            'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
+            'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
+            'timecards_time_interval'  => 5,
+            'time_zone'                => $this->input->post('time_zone_selected', TRUE) // <-- Added this line for timezone
+        ];
+    
+        // Clean data for XSS prevention
+        $data = $this->security->xss_clean($data);
 
-
-   
+        // Prepare data for employees table update
+        $employee_data = [
+            'settings_status' => 2,
+            'self_login'      => $self_login
+        ];
+    
+        // Check if exception settings exist for this employee and user
+        $query = $this->db->get_where('organization_exception_setting', [
+            'user_id' => $user_id,
+            'employee_id' => $employee_id
+        ]);
+    
+        if ($query->num_rows() > 0) {
+            // Update existing exception settings
+            $this->db->where('employee_id', $employee_id);
+            $this->db->where('user_id', $user_id);
+            $this->db->update('organization_exception_setting', $data);
+        } else {
+            // Insert new exception settings
+            $this->db->insert('organization_exception_setting', $data);
+        }
+    
+        // Update self_login and settings_status in the 'employees' table
+        $this->db->where('id', $employee_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->update('employees', $employee_data);
+    
+        // Check for errors and provide feedback
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('msg', 'Employee exception settings saved successfully!');
+            redirect($_SERVER['HTTP_REFERER']);
+        } else {
+            $this->session->set_flashdata('error', 'Failed to save employee exception settings or no changes made.');
+            redirect($_SERVER['HTTP_REFERER']);
+        }
+    }
+     
     public function get_org_settings()
 {
     $user_id = $this->input->get('id');
@@ -329,5 +334,20 @@ public function get_organization_settings()
     }
 }
 
+public function get_all_countries_for_dropdown()
+    {
+        $this->db->select('id, name'); // Select the ID and the country name column
+        $this->db->order_by('name', 'ASC'); // Order alphabetically by country name
+        $query = $this->db->get('country');
+        return $query->result_array();
+    }
+
+public function get_all_timezones_for_dropdown()
+{
+    $this->db->select('id, name'); // Select the ID and the timezone name column
+    $this->db->order_by('name', 'ASC'); // Order alphabetically by timezone name
+    $query = $this->db->get('time_zone');
+    return $query->result_array();
+}
 }
 ?>
