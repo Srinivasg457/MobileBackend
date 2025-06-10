@@ -46,40 +46,42 @@ class Organization_settings extends Home_Controller {
     public function save_org_settings()
     {
         $user_id = $this->session->userdata('id');
-        // Get data from POST request (replace with actual form data)
+    
         $data = [
-            'user_id'               => $user_id,
-            'screenshot_flag'       => $this->input->post('screenshot_flag', TRUE),
+            'user_id'                  => $user_id,
+            'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE),
             'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
-            'webcam_flag'           => $this->input->post('webcam_flag', TRUE),
-            'webcam_time_interval'  => $this->input->post('webcam_time_interval', TRUE),
-            'mouse_move_flag'       => $this->input->post('mouse_move_flag', TRUE),
-            'mouse_move_threshold'  => $this->input->post('mouse_move_threshold', TRUE),
-            'key_stroke_flag'       => $this->input->post('key_stroke_flag', TRUE),
-            'key_stroke_threshold'  => $this->input->post('key_stroke_threshold', TRUE),
-            'idle_time_flag'        => $this->input->post('idle_time_flag', TRUE),
-            'timecards_time_interval' => 5
+            'webcam_flag'              => $this->input->post('webcam_flag', TRUE),
+            'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
+            'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE),
+            'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
+            'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE),
+            'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
+            'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE),
+            'timecards_time_interval'  => 5,
+            'updated_at'               => date('Y-m-d H:i:s') // Optional: only if not auto-managed by MySQL
         ];
-
+    
         // Check if settings exist for this user
         $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
-
+    
         if ($query->num_rows() > 0) {
             // Update existing org settings
             $this->db->where('user_id', $user_id);
             $this->db->update('org_settings', $data);
         } else {
-            // Insert new org settings
+            unset($data['updated_at']); // Let DB set default on insert
             $this->db->insert('org_settings', $data);
         }
-
+    
         // Check for errors
         if ($this->db->affected_rows() > 0) {
             echo "Settings saved successfully!";
         } else {
-            echo "Failed to save settings.";
+            echo "No changes in the saved settings.";
         }
     }
+    
 
     // // Method to insert or update organization exception settings for a specific employee
     // public function save_org_exception_settings($employee_id)
@@ -131,55 +133,58 @@ class Organization_settings extends Home_Controller {
     // }
 
     public function save_org_exception_settings($employee_id)
-{
-    $user_id = $this->session->userdata('id');
-    $self_login = $this->input->post('self_login') ? 1 : 0;
-
-    $data = [
-        'user_id'                  => $user_id,
-        'employee_id'              => $employee_id,
-        'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
-        'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
-        'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
-        'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
-        'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
-        'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
-        'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
-        'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
-        'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
-        'timecards_time_interval'  => 5
-    ];
-
-    $employee_data = [
-        'settings_status' => 2,
-        'self_login' => $self_login
-    ];
-
-    // Check if exception settings exist
-    $query = $this->db->get_where('organization_exception_setting', [
-        'user_id' => $user_id,
-        'employee_id' => $employee_id
-    ]);
-
-    if ($query->num_rows() > 0) {
-        $this->db->where('employee_id', $employee_id);
+    {
+        $user_id = $this->session->userdata('id');
+        $self_login = $this->input->post('self_login') ? 1 : 0;
+    
+        $data = [
+            'user_id'                  => $user_id,
+            'employee_id'              => $employee_id,
+            'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
+            'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
+            'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
+            'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
+            'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
+            'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
+            'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
+            'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
+            'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
+            'timecards_time_interval'  => 5,
+            'updated_at'               => date('Y-m-d H:i:s') // Add this only if needed manually
+        ];
+    
+        $employee_data = [
+            'settings_status' => 2,
+            'self_login' => $self_login
+        ];
+    
+        // Check if exception settings exist
+        $query = $this->db->get_where('organization_exception_setting', [
+            'user_id' => $user_id,
+            'employee_id' => $employee_id
+        ]);
+    
+        if ($query->num_rows() > 0) {
+            $this->db->where('employee_id', $employee_id);
+            $this->db->where('user_id', $user_id);
+            $this->db->update('organization_exception_setting', $data);
+        } else {
+            unset($data['updated_at']); // Ensure only created row uses default timestamp
+            $this->db->insert('organization_exception_setting', $data);
+        }
+    
+        // Update self_login and settings_status
+        $this->db->where('id', $employee_id);
         $this->db->where('user_id', $user_id);
-        $this->db->update('organization_exception_setting', $data);
-    } else {
-        $this->db->insert('organization_exception_setting', $data);
+        $this->db->update('employees', $employee_data);
+    
+        if ($this->db->affected_rows() > 0) {
+            echo "Employee settings saved successfully!";
+        } else {
+            echo "No changes in the saved employee settings.";
+        }
     }
-
-    // Update self_login and settings_status
-    $this->db->where('id', $employee_id);
-    $this->db->where('user_id', $user_id);
-    $this->db->update('employees', $employee_data);
-
-    if ($this->db->affected_rows() > 0) {
-        echo "Employee settings saved successfully!";
-    } else {
-        echo "No changes in the saved employee settings.";
-    }
-}
+    
 
 
    
