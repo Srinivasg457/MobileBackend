@@ -184,6 +184,13 @@
                   <i class="bi bi-box mr-5"></i> <span><?php echo trans('pricing-package') ?></span>
                 </a>
               </li>
+              <li class="<?php if (isset($page_title) && $page_title == "App-Package") {
+                            echo "active";
+                          } ?>">
+                <a href="<?php echo base_url('admin/package/app_pack') ?>">
+                  <i class="bi bi-box mr-5"></i> <span><?php echo "App-package"?></span>
+                </a>
+              </li>
 
               <li class="<?php if (isset($page_title) && $page_title == "Feature") {
                             echo "active";
@@ -675,7 +682,7 @@
 
               <?php endif ?>
 
-              <!-- <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
+              <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
                 <li class="<?php if (isset($page_title) && $page_title == "Subscription") {
                               echo "active";
                             } ?>">
@@ -683,7 +690,7 @@
                     <i class="bi bi-clock mr-5"></i> <span><?php echo trans('subscription') ?></span>
                   </a>
                 </li>
-              <?php endif; ?> -->
+              <?php endif; ?>
 
             <?php endif; ?>
           <?php endif ?>
