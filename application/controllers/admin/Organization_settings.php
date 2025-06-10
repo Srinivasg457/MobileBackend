@@ -45,6 +45,8 @@ class Organization_settings extends Home_Controller {
     // Method to insert or update org settings for a user
     public function save_org_settings()
     {
+        date_default_timezone_set('Asia/Kolkata'); // Set timezone to IST
+
         $user_id = $this->session->userdata('id');
         $now = date('Y-m-d H:i:s');
     
@@ -136,6 +138,7 @@ class Organization_settings extends Home_Controller {
 
     public function save_org_exception_settings($employee_id)
     {
+        date_default_timezone_set('Asia/Kolkata'); // Set timezone to IST
         $user_id = $this->session->userdata('id');
         $self_login = $this->input->post('self_login') ? 1 : 0;
         $now = date('Y-m-d H:i:s');
@@ -189,6 +192,7 @@ class Organization_settings extends Home_Controller {
             echo "No changes in the saved employee settings.";
         }
     }
+    
     
 
 
