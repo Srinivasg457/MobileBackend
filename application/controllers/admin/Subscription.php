@@ -19,6 +19,8 @@ class Subscription extends Home_Controller {
         $data['user'] = $this->common_model->get_my_package();
         $data['packages'] = $this->admin_model->get_active_packages('package');
         $data['features'] = $this->admin_model->select_asc('package_features');
+        $data['packages'] = $this->admin_model->select_asc('app_package');
+        $data['features'] = $this->admin_model->select_asc('app_package_feature');
         if(user()->user_type == 'trial'){$page_load = 'trial_subscription';}else{$page_load = 'subscription';}
         $data['main_content'] = $this->load->view('admin/user/'.$page_load, $data, TRUE);
         $this->load->view('admin/index', $data);
