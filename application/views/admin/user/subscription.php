@@ -1,6 +1,370 @@
 <div class="content-wrapper">
   <!-- Main content -->
   <section class="content"> 
+  <style>
+  .row {
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  .flex-paragraphs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+  }
+
+  .flex-paragraphs p {
+    flex: 1 1 calc(50% - 20px); /* Two items per row with spacing */
+    margin: 0;
+    min-width: 250px; /* Prevent paragraphs from becoming too narrow */
+  }
+  
+  .box {
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 20px;
+    background: white;
+  }
+  .text-center{
+    text-align: left !important;
+  }
+
+</style>
+      
+  <div class="row" style="display: flex; justify-content: center; width: 100%;">
+    <div class="box add_area" style="max-width: 800px; width: 100%;">
+        <div class="box-header flex-between">
+            <div>
+                <h3 class="box-title"><?php echo trans('subscription') ?></h3>
+            </div>
+           
+        </div>
+
+        <div class="box-body flex-paragraphs">
+            <p><?php echo trans('your-subscription') ?>: <strong><?php echo html_escape($user->package_name) ?> <?php echo trans('plan') ?></strong></p>
+            <p><?php echo trans('price') ?>: <strong><?php echo price_formatted($user->amount, 'site') ?> </strong></p>
+            <p><?php echo trans('billing-frequency') ?> : <strong><?php echo ucfirst(html_escape($user->billing_type)) ?></strong></p>
+            <p><?php echo trans('last-billing') ?> : <strong><?php echo my_date_show($user->created_at) ?></strong></p>
+            <p><?php echo trans('next-billing') ?> : <strong><?php echo my_date_show($user->expire_on); ?></strong> 
+                <strong class="text-danger">(<?php echo date_dif(date('Y-m-d'), $user->expire_on) ?> <?php echo trans('days-left') ?>)</strong>
+            </p>
+        </div>
+
+        <div class="box-footer text-center soft-<?php echo ($user->status == 'verified') ? "success" : "danger"; ?>">
+            <?php echo trans('payment-status') ?>: &emsp;
+            <i class="fa fa-<?php echo ($user->status == 'verified') ? "check" : "times"; ?>"></i> 
+            <?php echo ucfirst(html_escape($user->status)) ?>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    <?php if (isset($page_title) && $page_title != "Edit"): ?>
+        <div class="list_area box container" style="display: <?php if (strlen(settings()->purchase_code) != 36) {
+                                                                    echo "none";
+                                                                } ?>">
+
+            <div class="box-header with-border">
+                <h3 class="box-title"><?php echo trans('manage-packages') ?></h3>
+            </div>
+
+            <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
+                <div class="col-md-12 col-sm-12 col-xs-12 scroll p-0">
+                    <table class="table table-hover table-stripe">
+                    <tbody>
+    <thead class="thead-dark">
+        <tr>
+            <td width="20%">
+                <h3 class="font-weight-normal">Feature Name</h3>
+            </td>
+            <?php $i = 1;
+            foreach ($packages as $package): ?>
+                <td class="text-center">
+                    <?php if ($package->is_active == 1) {
+                        $status = "0";
+                    } else {
+                        $status = "1";
+                    }; ?>
+                  
+
+                    <h2 class="mt-10"><span class="label label-primary"><?php echo html_escape($package->name); ?></span> </h2>
+                    <p class="mb-15"><?php echo price_formatted($package->price, 'site'); ?> <span class="fs-14"><?php echo trans('per-year') ?></span> <br> <?php echo price_formatted($package->monthly_price, 'site'); ?> <span class="fs-14"> <?php echo trans('per-month') ?></p>
+
+                    <!-- <a href="#packageModal_<?php echo html_escape($package->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-package') ?></a> -->
+                </td>
+            <?php $i++;
+            endforeach; ?>
+            <td></td>
+        </tr>
+    </thead>
+
+    <?php
+    foreach ($features as $feature): ?>
+
+        <?php if (get_user_info() == FALSE) {
+            $uval = 'd-none';
+        } ?>
+
+        <tr class="<?php if ($feature->id == 6) {
+                        echo $uval;
+                    } ?>">
+            <td width="20%"><?php echo html_escape($feature->name); ?> <br>
+                <span class="text-danger"><?php if (!empty($feature->text)) {
+                                                echo html_escape('(' . $feature->text . ')');
+                                            } ?></span>
+            </td>
+            <td class="text-center">
+                <?php if ($feature->free == "none"): ?>
+                    <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
+                <?php else: ?>
+                    <!-- <?php echo trans('monthly') ?> -->
+                    <strong><?php echo html_escape($feature->free); ?></strong> <span class="vr"></span>
+                    <!-- <?php echo trans('yearly') ?><strong><?php echo html_escape($feature->year_basic); ?></strong> -->
+                <?php endif ?>
+            </td>
+            <td class="text-center">
+                <?php if ($feature->basic == "none"): ?>
+                    <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
+                <?php else: ?>
+                    <!-- <?php echo trans('monthly') ?> -->
+                    <strong><?php echo html_escape($feature->basic); ?></strong> <span class="vr"></span>
+                    <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_basic); ?></strong> -->
+                <?php endif ?>
+            </td>
+            <td class="text-center">
+                <?php if ($feature->standard == "none"): ?>
+                    <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
+                <?php else: ?>
+                    <!-- <?php echo trans('monthly') ?>  -->
+                    <strong><?php echo html_escape($feature->standard); ?></strong><span class="vr"></span>
+                    <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_standared); ?></strong> -->
+                <?php endif ?>
+            </td>
+            <td class="text-center">
+                <?php if ($feature->premium == "none"): ?>
+                    <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
+                <?php else: ?>
+                    <!-- <?php echo trans('monthly') ?>  -->
+                    <strong><?php echo html_escape($feature->premium); ?></strong><span class="vr"></span>
+                    <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_premium); ?></strong> -->
+                <?php endif ?>
+            </td>
+            <td class="text-center">
+                <?php if ($feature->customization == "none"): ?>
+                    <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
+                <?php else: ?>
+                    <!-- <?php echo trans('monthly') ?>  -->
+                    <strong><?php echo html_escape($feature->customization); ?></strong> <span class="vr"></span>
+                    <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_basic); ?></strong> -->
+                <?php endif ?>
+            </td>
+            <!-- <td width="5%"><a href="#featureModal_<?php echo html_escape($feature->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-features') ?></a></td> -->
+        </tr>
+    <?php endforeach ?>
+</tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    <?php endif; ?>
+
+
+
+
+<?php foreach ($features as $feature): ?>
+<div id="featureModal_<?php echo html_escape($feature->id) ?>" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="vcenter" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-zoom modal-md">
+        <?php print_r($feature) ?>
+        <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/package/update_features/' . $feature->id) ?>" role="form" novalidate>
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="vcenter"><?php echo trans('update') ?> - <?php echo html_escape($feature->name) ?></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="nav-tabs-customs">
+
+                        <div class="row">
+
+                            <div class="col-md-12 mb-20">
+                                <div class="form-group row">
+                                    <label class="col-sm-12 text-left control-label col-form-label"><?php echo trans('name') ?></label>
+                                    <div class="col-sm-12">
+                                        <input type="text" class="form-control" name="name" value="<?php echo html_escape($feature->name) ?>">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <!-- mohthly -->
+                                <div class="monthly_area">
+                                      <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('monthly') ?> <?php echo 'free-limit' ?></label>
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="basic" value="<?php echo $feature->free; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('monthly') ?> <?php echo trans('basic-limit') ?></label>
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="basic" value="<?php echo $feature->basic; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('monthly') ?> <?php echo trans('standared-limit') ?></label>
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="standared" value="<?php echo $feature->standard; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('monthly') ?> <?php echo trans('premium-limit') ?></label>
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="premium" value="<?php echo $feature->premium; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('monthly') ?> <?php echo 'Customization-limit' ?></label>
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="premium" value="<?php echo $feature->customization; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- <div class="col-md-6">
+                                <div class="yearly_area">
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('yearly') ?> <?php echo trans('basic-limit') ?></label>
+                                        <div class="col-sm-12">
+                                            <input type="number" class="form-control" name="year_basic" value="<?php echo $feature->year_basic; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('yearly') ?> <?php echo trans('standared-limit') ?></label>
+                                        <div class="col-sm-12">
+                                            <input type="number" class="form-control" name="year_standared" value="<?php echo $feature->year_standared; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('yearly') ?> <?php echo trans('premium-limit') ?></label>
+                                        <div class="col-sm-12">
+                                            <input type="number" class="form-control" name="year_premium" value="<?php echo $feature->year_premium; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"><?php echo trans('yearly') ?> <?php echo 'Customization-limit' ?> </label>
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="year_premium" value="<?php echo $feature->customization; ?>">
+                                            <p class="small text-info"><i class="fa fa-info-circle"></i> <?php echo trans('limit-suggestions'); ?></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <!-- csrf token -->
+                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
+                    <button type="submit" class="btn btn-info waves-effect pull-left"><i class="fa fa-check"></i> <?php echo trans('save-changes') ?></button>
+                </div>
+            </div>
+        </form>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<?php endforeach; ?>
+
+
+<?php foreach ($packages as $package): ?>
+<div id="packageModal_<?php echo html_escape($package->id) ?>" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="vcenter" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-zoom modal-md">
+        <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/package/app_update/' . $package->id) ?>" role="form" novalidate>
+            <div class="modal-content modal-md">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="vcenter"><?php echo trans('update-package') ?> - <?php echo html_escape($package->name) ?></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group row">
+                        <label class="col-sm-12 text-left control-label col-form-label"><?php echo trans('name') ?></label>
+                        <div class="col-sm-12">
+                            <input type="text" class="form-control" name="name" value="<?php echo html_escape($package->name) ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-12 text-left control-label col-form-label"><?php echo trans('monthly-price') ?></label>
+                        <div class="col-sm-12">
+                            <input type="text" class="form-control" name="monthly_price" value="<?php echo html_escape($package->monthly_price) ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-12 text-left control-label col-form-label"><?php echo trans('yearly-price') ?></label>
+                        <div class="col-sm-12">
+                            <input type="text" class="form-control" name="yearly_price" value="<?php echo html_escape($package->yearly_price) ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group row mt-20 hide">
+                        <label for="inputEmail3" class="col-sm-12 text-left control-label col-form-label"></label>
+                        <div class="col-sm-12">
+                            <input type="checkbox" name="is_special" value="1" id="md_checkbox_3" class="filled-in chk-col-blue" <?php if ($package->is_special == 1) {
+                                                                                                                                        echo "checked";
+                                                                                                                                    } ?> />
+                            <label for="md_checkbox_3"><?php echo trans('is-popular-packages') ?>?</label>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class="modal-footer">
+                    <!-- csrf token -->
+                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
+                    <button type="submit" class="btn btn-info waves-effect pull-right"><?php echo trans('save-changes') ?></button>
+                </div>
+            </div>
+        </form>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<?php endforeach; ?>
+      
+  </section>
+  
+
+</div>
+
+<!-- <div class="content-wrapper">
+  <section class="content"> 
     <div class="row">
         <div class="col-md-4">
             <div class="box add_area">
@@ -231,4 +595,4 @@
     </div>
   </section>
 
-</div>
+
