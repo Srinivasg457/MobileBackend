@@ -251,11 +251,11 @@
                     success: function(response) {
                         if (response.status === 'success' && response.data.length > 0) {
                             console.log(response);
-                            
+
                             const formattedData = response.data.map(item => ({
                                 employeeId: item.employee_id,
                                 employeeName: item.employee_name,
-                                employeeEmail: "", // If you want email, return it in the API
+                                employeeEmail: item.email, // If you want email, return it in the API
                                 notification: {
                                     status: parseInt(item.status),
                                     description: item.description,
@@ -501,7 +501,7 @@
                         </div>
                         </div>`;
 
-                            $('#notifications-list').append(html);
+                $('#notifications-list').append(html);
             }
 
 
@@ -536,6 +536,8 @@
                 const employeeName = $btn.data('name');
                 const employeeEmail = $btn.data('email');
                 const description = $btn.data('description');
+                console.log(employeeEmail);
+
 
                 // Disable button and add loader
                 $btn.prop('disabled', true);
@@ -543,7 +545,7 @@
                 $btn.html('Sending... <span class="button-loader"></span>');
 
                 $.ajax({
-                    url: "<?= base_url('admin/Notification/send__alter_mail') ?>",
+                    url: "<?= base_url('admin/Notification/send_alert_mail') ?>",
                     type: "POST",
                     data: {
                         employee_id: employeeId,

@@ -90,19 +90,18 @@
         right: 10px;
         z-index: 9999;
     }
-            .content-wrapper{
-    height: unset !important;
-    min-height: unset !important;
-}
+
+    .content-wrapper {
+        height: unset !important;
+        min-height: unset !important;
+    }
 </style>
 
 <div class="content-wrapper">
     <section class="content">
         <div class="container mt-4">
-            <h3>Employee Settings</h3>
-
-
-            <div class="box mt-5">
+            <h3 class="box-title">Employee Settings</h3>
+            <div class="box mt-20">
                 <div class="box-body">
                     <div class="form-group">
                         <label for="employeeSelect">Select Employee:</label>
@@ -157,7 +156,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label>Mouse Move Threshold:</label>
-                                <input type="number" name="mouse_move_threshold" class="form-control" value="20" />
+                                <input type="number" name="mouse_move_threshold" class="form-control" value="20" readonly />
                             </div>
 
                             <!-- Keystroke -->
@@ -170,7 +169,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label>Keystroke Threshold:</label>
-                                <input type="number" name="key_stroke_threshold" class="form-control" value="40" />
+                                <input type="number" name="key_stroke_threshold" class="form-control" value="40" readonly />
                             </div>
 
                             <!-- Idle Time -->

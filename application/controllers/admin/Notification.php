@@ -158,7 +158,7 @@ class Notification extends Home_Controller {
 
         if (!empty($employee_id)) {
             // If employee_id given, get latest notification for that employee only
-            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
             $this->db->from('notifications n');
             $this->db->join('employees e', 'n.employee_id = e.id', 'left');
             $this->db->where('n.user_id', $user_id);
@@ -179,7 +179,7 @@ class Notification extends Home_Controller {
                 ->get_compiled_select();
 
             // Main query joins on latest notification per employee
-            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
             $this->db->from('notifications n');
             $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
             $this->db->join('employees e', 'n.employee_id = e.id', 'left');
@@ -219,7 +219,7 @@ class Notification extends Home_Controller {
 
         if (!empty($employee_id)) {
             // If employee_id given, get latest notification for that employee only
-            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
             $this->db->from('notifications n');
             $this->db->join('employees e', 'n.employee_id = e.id', 'left');
             $this->db->where('n.user_id', $user_id);
@@ -240,7 +240,7 @@ class Notification extends Home_Controller {
                 ->get_compiled_select();
 
             // Main query joins on latest notification per employee
-            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
+            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
             $this->db->from('notifications n');
             $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
             $this->db->join('employees e', 'n.employee_id = e.id', 'left');
@@ -350,7 +350,7 @@ class Notification extends Home_Controller {
         }
     }
     //send reset code to user email
-    public function send__alter_mail()
+    public function send_alert_mail()
     {
         // Get POST data
         $employeeId = $this->input->post('employee_id');
