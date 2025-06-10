@@ -334,18 +334,20 @@ public function get_organization_settings()
     }
 }
 
-public function get_all_countries_for_dropdown()
+
+
+    public function get_all_countries_for_dropdown()
     {
         $this->db->select('id, name'); // Select the ID and the country name column
         $this->db->order_by('name', 'ASC'); // Order alphabetically by country name
         $query = $this->db->get('country');
         return $query->result_array();
     }
-
+ 
     public function get_all_timezones_list_for_dropdown()
     {
         $timezones =$this->admin_model->select_asc('time_zone');
-
+ 
         if ($timezones === null) {
             $response = [
                 'status'  => 'error',
@@ -368,12 +370,19 @@ public function get_all_countries_for_dropdown()
             ];
             $this->output->set_status_header(200); // OK
         }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> c22666452cd74f23dbd8a684ba8d2e7d22812b9a
         // Set content type to JSON and output the response
         $this->output
              ->set_content_type('application/json')
              ->set_output(json_encode($response));
     }
+<<<<<<< HEAD
     
+=======
+>>>>>>> c22666452cd74f23dbd8a684ba8d2e7d22812b9a
 }
 ?>
