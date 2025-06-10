@@ -46,6 +46,7 @@ class Organization_settings extends Home_Controller {
     public function save_org_settings()
     {
         $user_id = $this->session->userdata('id');
+        $now = date('Y-m-d H:i:s');
     
         $data = [
             'user_id'                  => $user_id,
@@ -59,7 +60,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE),
             'timecards_time_interval'  => 5,
-            'updated_at'               => date('Y-m-d H:i:s') // Optional: only if not auto-managed by MySQL
+            'updated_at'               => $now
         ];
     
         // Check if settings exist for this user
@@ -70,7 +71,8 @@ class Organization_settings extends Home_Controller {
             $this->db->where('user_id', $user_id);
             $this->db->update('org_settings', $data);
         } else {
-            unset($data['updated_at']); // Let DB set default on insert
+            // Include created_at for insert
+            $data['created_at'] = $now;
             $this->db->insert('org_settings', $data);
         }
     
@@ -136,6 +138,7 @@ class Organization_settings extends Home_Controller {
     {
         $user_id = $this->session->userdata('id');
         $self_login = $this->input->post('self_login') ? 1 : 0;
+        $now = date('Y-m-d H:i:s');
     
         $data = [
             'user_id'                  => $user_id,
@@ -150,7 +153,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
             'timecards_time_interval'  => 5,
-            'updated_at'               => date('Y-m-d H:i:s') // Add this only if needed manually
+            'updated_at'               => $now
         ];
     
         $employee_data = [
@@ -165,15 +168,17 @@ class Organization_settings extends Home_Controller {
         ]);
     
         if ($query->num_rows() > 0) {
+            // Update
             $this->db->where('employee_id', $employee_id);
             $this->db->where('user_id', $user_id);
             $this->db->update('organization_exception_setting', $data);
         } else {
-            unset($data['updated_at']); // Ensure only created row uses default timestamp
+            // Insert
+            $data['created_at'] = $now;
             $this->db->insert('organization_exception_setting', $data);
         }
     
-        // Update self_login and settings_status
+        // Update employee record
         $this->db->where('id', $employee_id);
         $this->db->where('user_id', $user_id);
         $this->db->update('employees', $employee_data);
