@@ -200,7 +200,38 @@ class Home_Controller extends MY_Controller
             'delete' => (bool)$access->is_delete
         ];
     }
-    
+    public function get_time_by_timezone($timezone = 'Asia/Kolkata')
+    {
+        try {
+            if (empty($timezone) || !is_string($timezone)) {
+                throw new InvalidArgumentException('Timezone must be a non-empty string.');
+            }
+
+            $allTimezones = timezone_identifiers_list();
+            $matchedTimezone = null;
+
+            foreach ($allTimezones as $tz) {
+                if (strtolower($tz) === strtolower($timezone)) {
+                    $matchedTimezone = $tz;
+                    break;
+                }
+            }
+
+            if (!$matchedTimezone) {
+                throw new Exception('Invalid timezone specified: ' . htmlspecialchars($timezone));
+            }
+
+            $date = new DateTime('now', new DateTimeZone($matchedTimezone));
+            return $date->format('Y-m-d H:i:s');
+
+        } catch (InvalidArgumentException $e) {
+            log_message('error', 'Timezone error (invalid argument): ' . $e->getMessage());
+            return 'Invalid input for timezone.';
+        } catch (Exception $e) {
+            log_message('error', 'Timezone error: ' . $e->getMessage());
+            return 'Failed to get time: ' . $e->getMessage();
+        }
+    }
     
 
 }
