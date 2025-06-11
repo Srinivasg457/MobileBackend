@@ -81,24 +81,41 @@ class Organization_settings extends Home_Controller {
     //     }
     // }
     public function save_org_settings()
-    {
-        $user_id = $this->session->userdata('id');
+{
+    // Check if this is an AJAX request
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+    }
+
+    $user_id = $this->session->userdata('id');
+    
+    // Validate required fields
+    if (empty($this->input->post('time_zone_selected'))) {
+        $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(400)
+            ->set_output(json_encode([
+                'success' => false,
+                'message' => 'Timezone is required'
+            ]));
+        return;
+    }
 
         // Prepare data from POST request
         $data = [
             'user_id'                  => $user_id,
-            'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE),
+            'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
             'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
-            'webcam_flag'              => $this->input->post('webcam_flag', TRUE),
+            'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
             'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
-            'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE),
+            'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
             'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
-            'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE),
+            'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
-            'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE),
-            'timecards_time_interval'  => 5,
-            'time_zone'                => $this->input->post('time_zone_selected', TRUE) // <-- Added this line for timezone
-        ];
+            'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
+            'timecards_time_interval'  => $this->input->post('timecards_time_interval', TRUE),
+            'time_zone'                => $this->input->post('time_zone_selected', TRUE)
+            ];
 
         // Clean data for XSS prevention
         $data = $this->security->xss_clean($data);
@@ -106,23 +123,34 @@ class Organization_settings extends Home_Controller {
         // Check if settings exist for this user
         $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
 
+        $this->db->trans_start(); // Start transaction
+
         if ($query->num_rows() > 0) {
-            // Update existing org settings
-            $this->db->where('user_id', $user_id);
-            $this->db->update('org_settings', $data);
+        // Update existing org settings
+        $this->db->where('user_id', $user_id);
+        $this->db->update('org_settings', $data);
         } else {
-            // Insert new org settings
-            $this->db->insert('org_settings', $data);
+        // Insert new org settings
+        $this->db->insert('org_settings', $data);
         }
 
-        // Check for errors and provide feedback
-        if ($this->db->affected_rows() > 0) {
-            $this->session->set_flashdata('msg', 'Organization settings saved successfully!');
-            // Redirect to the settings page or a success page
-            redirect($_SERVER['HTTP_REFERER']); // Redirect back to the previous page
+        $this->db->trans_complete(); // Complete transaction
+
+        if ($this->db->trans_status() === FALSE) {
+        $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode([
+                'success' => false,
+                'message' => 'Database error occurred'
+            ]));
         } else {
-            $this->session->set_flashdata('error', 'Failed to save organization settings or no changes made.');
-            redirect($_SERVER['HTTP_REFERER']);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'success' => true,
+                'message' => 'Organization settings saved successfully!'
+            ]));
         }
     }
 
@@ -344,7 +372,71 @@ public function get_organization_settings()
         return $query->result_array();
     }
  
+    // public function get_all_timezones_list_for_dropdown()
+    // {
+    //     $timezones =$this->admin_model->select_asc('time_zone');
+ 
+    //     if ($timezones === null) {
+    //         $response = [
+    //             'status'  => 'error',
+    //             'message' => 'An unexpected error occurred while fetching timezones.'
+    //         ];
+    //         $this->output->set_status_header(500); // Internal Server Error
+    //     } elseif (empty($timezones)) {
+    //         $response = [
+    //             'status'  => 'success', // Indicate the API call was successful, but data is empty
+    //             'data'    => [],
+    //             'message' => 'No timezones found in the database.'
+    //         ];
+    //         $this->output->set_status_header(200); // OK
+    //     } else {
+    //         // Timezones were successfully retrieved
+    //         $response = [
+    //             'status'  => 'success',
+    //             'data'    => $timezones,
+    //             'message' => 'Timezones retrieved successfully.'
+    //         ];
+    //         $this->output->set_status_header(200); // OK
+    //     }
+ 
+    //     // Set content type to JSON and output the response
+    //     $this->output
+    //          ->set_content_type('application/json')
+    //          ->set_output(json_encode($response));
+    // }
     public function get_all_timezones_list_for_dropdown()
+{
+    $this->db->select('id, name'); // Select the ID and timezone name columns
+    $this->db->order_by('name', 'ASC'); // Order alphabetically by timezone name
+    $query = $this->db->get('time_zone'); // Changed from 'country' to 'time_zone'
+    $timezones = $query->result_array();
+
+    if ($timezones === null) {
+        $response = [
+            'status'  => 'error',
+            'message' => 'An unexpected error occurred while fetching timezones.'
+        ];
+        $this->output->set_status_header(500); // Internal Server Error
+    } elseif (empty($timezones)) {
+        $response = [
+            'status'  => 'success',
+            'data'    => [],
+            'message' => 'No timezones found in the database.'
+        ];
+        $this->output->set_status_header(200); // OK
+    } else {
+        $response = [
+            'status'  => 'success',
+            'data'    => $timezones,
+            'message' => 'Timezones retrieved successfully in alphabetical order.'
+        ];
+        $this->output->set_status_header(200); // OK
+    }
+
+    $this->output
+         ->set_content_type('application/json')
+         ->set_output(json_encode($response));
+}
     {
         $timezones =$this->admin_model->select_asc('time_zone');
  
