@@ -72,19 +72,66 @@
                     </div>
 
                     <?php if (isset($page_title) && $page_title != "Edit"): ?>
-                      <div class="form-group">
-                          <label><?php echo trans('country') ?></label>
-                          <select class="selectfield textfield--grey single_select col-sm-12" name="country" style="width: 100%">
-                              <option value=""><?php echo trans('select') ?></option>
-                              <?php foreach ($countries as $country): ?>
-                                  <option value="<?php echo html_escape($country->id); ?>">
-                                      <?php echo html_escape($country->name); ?> (<?php echo html_escape($country->currency_code); ?>)
-                                  </option>
-                              <?php endforeach ?>
-                          </select>
-                      </div>
-                    <?php endif; ?>
+    <div class="form-group">
+        <label><?php echo trans('country') ?></label>
+        <select class="selectfield textfield--grey single_select col-sm-12" name="country" style="width: 100%">
+            <option value=""><?php echo trans('select') ?></option>
+            <?php foreach ($countries as $country): ?>
+                <option value="<?php echo html_escape($country->id); ?>">
+                    <?php echo html_escape($country->name); ?> (<?php echo html_escape($country->currency_code); ?>)
+                </option>
+            <?php endforeach ?>
+        </select>
+    </div>
 
+    <div class="form-group">
+        
+            <label>Timezone:</label>
+            <select id="timezoneSelect" class="form-control selectfield textfield--grey single_select" name="timezone" style="width: 100%">
+                <option value="">Select Timezone</option>
+                <?php 
+                // Assuming $timezones is an array of timezone objects/arrays available in your context
+                if (isset($timezones)): 
+                    foreach ($timezones as $tz): ?>
+                        <option value="<?php echo html_escape($tz['value'] ?? $tz->value); ?>">
+                            <?php echo html_escape($tz['name'] ?? $tz->name); ?>
+                        </option>
+                    <?php endforeach; 
+                endif; ?>
+            </select>
+        
+    </div>
+<?php endif; ?>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "<?= base_url('/admin/Organization_settings/get_timezone_list') ?>",
+
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status) {
+                var dropdown = $('#timezoneSelect');
+                dropdown.empty();
+                dropdown.append('<option value="">Select Timezone</option>');
+
+                $.each(response.data, function(index, value) {
+                    // Use full string as both value and label
+                    dropdown.append('<option value="' + value + '">' + value + '</option>');
+                });
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error: ', error);
+            alert('Failed to load timezones.');
+        }
+    });
+});
+</script>
                     <div class="form-group clearfix">
                       <label><?php echo trans('status') ?></label><br>
 
