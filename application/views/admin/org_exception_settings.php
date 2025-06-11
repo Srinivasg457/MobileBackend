@@ -103,13 +103,21 @@
             <h3 class="box-title">Employee Settings</h3>
             <div class="box mt-20">
                 <div class="box-body">
-                    <div class="form-group">
+                <div class="form-group row">  <!-- Added 'row' class here -->
+                    <div class="col-md-6">
                         <label for="employeeSelect">Select Employee:</label>
                         <select id="employeeSelect" class="form-control single_select"></select>
                     </div>
+                    <div class="col-md-6">
+                        <label>Timezone:</label>
+                        <select name="time_zone_selected" class="form-control" id="timezoneDropdown" required>
+                            <!-- Options will be loaded via JavaScript -->
+                        </select>
+                    </div>
+                </div>
 
                     <form id="orgExceptionForm">
-                        <div class="row" style="max-width: 1000px;">
+                        <div class="row" style="max-width: 1000px;padding:30px">
                             <!-- Screenshot -->
                             <div class="col-md-6">
                                 <label>Screenshot Flag:</label><br>
@@ -388,7 +396,9 @@
             dataObj['webcam_time_interval'] = $('[name="webcam_time_interval"]').val();
             dataObj['mouse_move_threshold'] = $('[name="mouse_move_threshold"]').val();
             dataObj['key_stroke_threshold'] = $('[name="key_stroke_threshold"]').val();
-            dataObj['timecards_time_interval'] = $('[name="timecards_time_interval"]').val();
+            dataObj['timecards_time_interval'] = $('[name="timecards_time_interval"]').val();      
+            // Add timezone value to the data object with the correct name
+            dataObj['time_zone_selected'] = $('#timezoneDropdown').val();
 
             console.log(currentEmployeeId);
             console.log(dataObj);
@@ -410,4 +420,67 @@
 
 
     });
+</script>
+\<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Get all timezones and sort them
+    const timezones = Intl.supportedValuesOf('timeZone').sort();
+    
+    // Add options to select
+    $.each(timezones, function(i, timezone) {
+        $('#timezoneDropdown').append($('<option>', {
+            value: timezone,
+            text: timezone
+        }));
+    });
+    
+    // Initialize select2
+    $('#timezoneDropdown').select2({
+        placeholder: "Select a timezone",
+        allowClear: true
+    });
+});
+</script>
+        <script>
+        
+$(document).ready(function() {
+    // Fetch timezones and populate dropdown
+    $.ajax({
+        url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'success') {
+                const dropdown = $('#timezoneDropdown');
+                dropdown.empty();
+                
+                // Add default option
+                dropdown.append($('<option>', {
+                    value: '',
+                    text: 'Select a timezone'
+                }));
+                
+                // Add timezone options
+                $.each(response.data, function(index, timezone) {
+                    dropdown.append($('<option>', {
+                        value: timezone.id,
+                        text: timezone.name
+                    }));
+                });
+                
+                // If you need to set a selected value (e.g., from saved settings)
+                // dropdown.val(savedTimezoneId);
+            } else {
+                console.error('Error fetching timezones:', response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX error:', error);
+        }
+    });
+});
+
 </script>
