@@ -184,13 +184,6 @@
                   <i class="bi bi-box mr-5"></i> <span><?php echo trans('pricing-package') ?></span>
                 </a>
               </li>
-              <li class="<?php if (isset($page_title) && $page_title == "App-Package") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/package/app_pack') ?>">
-                  <i class="bi bi-box mr-5"></i> <span><?php echo "App-package"?></span>
-                </a>
-              </li>
 
               <li class="<?php if (isset($page_title) && $page_title == "Feature") {
                             echo "active";
