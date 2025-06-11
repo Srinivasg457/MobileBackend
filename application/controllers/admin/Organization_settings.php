@@ -364,46 +364,6 @@ public function get_organization_settings()
 
 
 
-    public function get_all_countries_for_dropdown()
-    {
-        $this->db->select('id, name'); // Select the ID and the country name column
-        $this->db->order_by('name', 'ASC'); // Order alphabetically by country name
-        $query = $this->db->get('country');
-        return $query->result_array();
-    }
- 
-    // public function get_all_timezones_list_for_dropdown()
-    // {
-    //     $timezones =$this->admin_model->select_asc('time_zone');
- 
-    //     if ($timezones === null) {
-    //         $response = [
-    //             'status'  => 'error',
-    //             'message' => 'An unexpected error occurred while fetching timezones.'
-    //         ];
-    //         $this->output->set_status_header(500); // Internal Server Error
-    //     } elseif (empty($timezones)) {
-    //         $response = [
-    //             'status'  => 'success', // Indicate the API call was successful, but data is empty
-    //             'data'    => [],
-    //             'message' => 'No timezones found in the database.'
-    //         ];
-    //         $this->output->set_status_header(200); // OK
-    //     } else {
-    //         // Timezones were successfully retrieved
-    //         $response = [
-    //             'status'  => 'success',
-    //             'data'    => $timezones,
-    //             'message' => 'Timezones retrieved successfully.'
-    //         ];
-    //         $this->output->set_status_header(200); // OK
-    //     }
- 
-    //     // Set content type to JSON and output the response
-    //     $this->output
-    //          ->set_content_type('application/json')
-    //          ->set_output(json_encode($response));
-    // }
     public function get_all_timezones_list_for_dropdown()
 {
     $this->db->select('id, name'); // Select the ID and timezone name columns
@@ -437,5 +397,110 @@ public function get_organization_settings()
          ->set_content_type('application/json')
          ->set_output(json_encode($response));
 }
+
+public function get_country_list()
+{
+    try {
+        $countries = $this->db->select('name, code')->get('country')->result_array();
+
+        if (empty($countries)) {
+            return $this->output
+                ->set_status_header(404)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => false, 'message' => 'No countries found']));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => true, 'data' => $countries]));
+    } catch (Exception $e) {
+        return $this->output
+            ->set_status_header(500)
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => false, 'message' => 'Server error', 'error' => $e->getMessage()]));
+    }
+}
+public function get_timezones_by_country_code()
+{
+    // Accept from GET or POST param
+    $country_code = $this->input->get('country_code', true) ?: $this->input->post('country_code', true);
+    $country_code = strtoupper(trim($country_code));
+
+    if (!$country_code) {
+        return $this->output
+            ->set_status_header(400)
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => false, 'message' => 'Country code is required']));
+    }
+
+    try {
+        $timezones = DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $country_code);
+
+        if (empty($timezones)) {
+            return $this->output
+                ->set_status_header(404)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => false, 'message' => 'No timezones found for this country code']));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => true, 'data' => $timezones]));
+    } catch (Exception $e) {
+        return $this->output
+            ->set_status_header(500)
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => false, 'message' => 'Server error', 'error' => $e->getMessage()]));
+    }
+}
+
+public function get_timezone_list()
+{
+    try {
+        $timezones = $this->db
+            ->select('utc_offset, time_zone_names') // Removed `id` since we’re overriding it
+            ->order_by('utc_offset', 'ASC')
+            ->get('world_time_zones')
+            ->result_array();
+
+        if (empty($timezones)) {
+            return $this->output
+                ->set_status_header(404)
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'No time zones found'
+                ]));
+        }
+
+        $formatted = [];
+        $i = 1;
+        foreach ($timezones as $tz) {
+         //   $formatted[] = "{$i}/{$tz['utc_offset']}/{$tz['time_zone_names']}";
+         $formatted[] = "{$i} / {$tz['utc_offset']} / {$tz['time_zone_names']}";
+
+            $i++;
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => true,
+                'data' => $formatted
+            ]));
+
+    } catch (Exception $e) {
+        return $this->output
+            ->set_status_header(500)
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => false,
+                'message' => 'Server error',
+                'error' => $e->getMessage()
+            ]));
+    }
+}
+
+
 }
 ?>
