@@ -437,5 +437,36 @@ public function get_organization_settings()
          ->set_content_type('application/json')
          ->set_output(json_encode($response));
 }
+    {
+        $timezones =$this->admin_model->select_asc('time_zone');
+ 
+        if ($timezones === null) {
+            $response = [
+                'status'  => 'error',
+                'message' => 'An unexpected error occurred while fetching timezones.'
+            ];
+            $this->output->set_status_header(500); // Internal Server Error
+        } elseif (empty($timezones)) {
+            $response = [
+                'status'  => 'success', // Indicate the API call was successful, but data is empty
+                'data'    => [],
+                'message' => 'No timezones found in the database.'
+            ];
+            $this->output->set_status_header(200); // OK
+        } else {
+            // Timezones were successfully retrieved
+            $response = [
+                'status'  => 'success',
+                'data'    => $timezones,
+                'message' => 'Timezones retrieved successfully.'
+            ];
+            $this->output->set_status_header(200); // OK
+        }
+
+        // Set content type to JSON and output the response
+        $this->output
+             ->set_content_type('application/json')
+             ->set_output(json_encode($response));
+    }
 }
 ?>
