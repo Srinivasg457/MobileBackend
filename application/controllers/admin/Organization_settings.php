@@ -458,7 +458,7 @@ public function get_timezone_list()
 {
     try {
         $timezones = $this->db
-            ->select('utc_offset, time_zone_names') // Removed `id` since we’re overriding it
+            ->select('utc_offset, time_zone_names')
             ->order_by('utc_offset', 'ASC')
             ->get('world_time_zones')
             ->result_array();
@@ -474,12 +474,8 @@ public function get_timezone_list()
         }
 
         $formatted = [];
-        $i = 1;
         foreach ($timezones as $tz) {
-         //   $formatted[] = "{$i}/{$tz['utc_offset']}/{$tz['time_zone_names']}";
-         $formatted[] = "{$i} / {$tz['utc_offset']} / {$tz['time_zone_names']}";
-
-            $i++;
+            $formatted[] = "{$tz['utc_offset']} / {$tz['time_zone_names']}";
         }
 
         return $this->output
@@ -500,6 +496,62 @@ public function get_timezone_list()
             ]));
     }
 }
+
+function getTimezoneLabel($timezoneName) {
+    try {
+        $tz = new DateTimeZone($timezoneName);
+        $now = new DateTime("now", $tz);
+
+        // Get UTC offset in ±HH:MM format
+        $offsetFormatted = $now->format('P');
+        $utcLabel = "UTC" . $offsetFormatted;
+
+        // Try to get abbreviation (like CET, WAT)
+        $abbreviation = $now->format('T');  // timezone abbreviation
+
+        return "/ $utcLabel / " . timezone_name_from_abbr($abbreviation) . " ($abbreviation)";
+    } catch (Exception $e) {
+        return "/ Invalid timezone /";
+    }
+}
+
+public function get_timezone_info()
+{
+    header('Content-Type: application/json');
+
+    $timezone = $this->input->get('timezone'); // For CI3
+    // $timezone = $this->request->getGet('timezone'); // Uncomment for CI4
+
+    if (empty($timezone)) {
+        http_response_code(400);
+        echo json_encode([
+            'status' => false,
+            'message' => 'Missing timezone parameter.'
+        ]);
+        return;
+    }
+
+    try {
+        $tz = new DateTimeZone($timezone);
+        $now = new DateTime('now', $tz);
+
+        echo json_encode([
+            'status'   => true,
+            'timezone' => $timezone,
+            'timestamp'=> $now->getTimestamp(),
+            'datetime' => $now->format('Y-m-d H:i:s'),
+            'offset'   => $now->format('P') // UTC offset like +05:30
+        ]);
+    } catch (Exception $e) {
+        http_response_code(400);
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid timezone.',
+            'error' => $e->getMessage()
+        ]);
+    }
+}
+
 
 
 }
