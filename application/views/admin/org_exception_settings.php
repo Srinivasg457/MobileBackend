@@ -110,9 +110,9 @@
                     </div>
                     <div class="col-md-6">
                         <label>Timezone:</label>
-                        <select name="time_zone_selected" class="form-control" id="timezoneDropdown" required>
-                            <!-- Options will be loaded via JavaScript -->
-                        </select>
+                        <select id="timezoneSelect" class="form-control">
+    <option value="">Select Timezone</option>
+</select>
                     </div>
                 </div>
 
@@ -398,7 +398,7 @@
             dataObj['key_stroke_threshold'] = $('[name="key_stroke_threshold"]').val();
             dataObj['timecards_time_interval'] = $('[name="timecards_time_interval"]').val();      
             // Add timezone value to the data object with the correct name
-            dataObj['time_zone_selected'] = $('#timezoneDropdown').val();
+            dataObj['time_zone_selected'] = $('#timezoneSelect').val();
 
             console.log(currentEmployeeId);
             console.log(dataObj);
@@ -421,10 +421,10 @@
 
     });
 </script>
-\<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- \<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
 
-<script>
+<!-- <script>
 $(document).ready(function() {
     // Get all timezones and sort them
     const timezones = Intl.supportedValuesOf('timeZone').sort();
@@ -443,44 +443,75 @@ $(document).ready(function() {
         allowClear: true
     });
 });
-</script>
+</script> -->
         <script>
         
+// $(document).ready(function() {
+//     // Fetch timezones and populate dropdown
+//     $.ajax({
+//         url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
+//         type: 'GET',
+//         dataType: 'json',
+//         success: function(response) {
+//             if (response.status === 'success') {
+//                 const dropdown = $('#timezoneDropdown');
+//                 dropdown.empty();
+                
+//                 // Add default option
+//                 dropdown.append($('<option>', {
+//                     value: '',
+//                     text: 'Select a timezone'
+//                 }));
+                
+//                 // Add timezone options
+//                 $.each(response.data, function(index, timezone) {
+//                     dropdown.append($('<option>', {
+//                         value: timezone.id,
+//                         text: timezone.name
+//                     }));
+//                 });
+                
+//                 // If you need to set a selected value (e.g., from saved settings)
+//                 // dropdown.val(savedTimezoneId);
+//             } else {
+//                 console.error('Error fetching timezones:', response.message);
+//             }
+//         },
+//         error: function(xhr, status, error) {
+//             console.error('AJAX error:', error);
+//         }
+//     });
+// });
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
 $(document).ready(function() {
-    // Fetch timezones and populate dropdown
     $.ajax({
-        url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
+        url: "<?= base_url('/admin/Organization_settings/get_timezone_list') ?>",
+
         type: 'GET',
         dataType: 'json',
         success: function(response) {
-            if (response.status === 'success') {
-                const dropdown = $('#timezoneDropdown');
+            if (response.status) {
+                var dropdown = $('#timezoneSelect');
                 dropdown.empty();
-                
-                // Add default option
-                dropdown.append($('<option>', {
-                    value: '',
-                    text: 'Select a timezone'
-                }));
-                
-                // Add timezone options
-                $.each(response.data, function(index, timezone) {
-                    dropdown.append($('<option>', {
-                        value: timezone.id,
-                        text: timezone.name
-                    }));
+                dropdown.append('<option value="">Select Timezone</option>');
+
+                $.each(response.data, function(index, value) {
+                    // Use full string as both value and label
+                    dropdown.append('<option value="' + value + '">' + value + '</option>');
                 });
-                
-                // If you need to set a selected value (e.g., from saved settings)
-                // dropdown.val(savedTimezoneId);
             } else {
-                console.error('Error fetching timezones:', response.message);
+                alert(response.message);
             }
         },
         error: function(xhr, status, error) {
-            console.error('AJAX error:', error);
+            console.error('AJAX Error: ', error);
+            alert('Failed to load timezones.');
         }
     });
 });
-
 </script>
+
