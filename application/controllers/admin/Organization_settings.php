@@ -370,19 +370,11 @@ public function get_organization_settings()
             ];
             $this->output->set_status_header(200); // OK
         }
-<<<<<<< HEAD
 
-=======
- 
->>>>>>> c22666452cd74f23dbd8a684ba8d2e7d22812b9a
         // Set content type to JSON and output the response
         $this->output
              ->set_content_type('application/json')
              ->set_output(json_encode($response));
     }
-<<<<<<< HEAD
-    
-=======
->>>>>>> c22666452cd74f23dbd8a684ba8d2e7d22812b9a
 }
 ?>
