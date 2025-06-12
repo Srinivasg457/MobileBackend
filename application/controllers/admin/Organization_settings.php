@@ -18,7 +18,6 @@ class Organization_settings extends Home_Controller {
         $data = array();
         $data['page_title'] = 'Organization settings';
         $data["settings"] = $this->PreLoading_get_org_settings();
-        $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/organization_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
@@ -27,6 +26,8 @@ class Organization_settings extends Home_Controller {
         $data = array();
         $data['page_title'] = 'Edit';
         $data["settings"] = $this->PreLoading_get_org_settings();
+        $data['countries'] = $this->admin_model->select('country');
+        // $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/organization_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
@@ -38,7 +39,8 @@ class Organization_settings extends Home_Controller {
         }
         $data = array();
         $data['page_title'] = 'Ex Organization settings';
-        $data["timezone"] = $this->admin_model->get_timezone_list();
+        $data['countries'] = $this->admin_model->select('country');
+        // $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
@@ -291,6 +293,38 @@ class Organization_settings extends Home_Controller {
         echo json_encode(['error' => 'No settings found for this user.']);
     }
 }
+    // public function PreLoading_get_org_settings()
+    // {
+    //     $user_id = $this->session->userdata('id');
+
+    //     if (!$user_id) {
+    //         return ['error' => 'Missing user_id parameter.'];
+    //     }
+
+    //     // Fetch org_settings
+    //     $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
+
+    //     if ($query->num_rows() > 0) {
+    //         $settings = $query->row_array();
+
+    //         // Fetch user's timezone from users table
+    //         $user = $this->db
+    //             ->select('timezone',)
+    //             ->get_where('users', ['id' => $user_id])
+    //             ->row_array();
+
+    //         // Add timezone to settings array
+    //         if ($user && isset($user['timezone'])) {
+    //             $settings['timezone'] = $user['timezone'];
+    //         } else {
+    //             $settings['timezone'] = null; // or default value
+    //         }
+
+    //         return $settings;
+    //     } else {
+    //         return ['error' => 'No settings found for this user.'];
+    //     }
+    // }
     public function PreLoading_get_org_settings()
     {
         $user_id = $this->session->userdata('id');
@@ -299,10 +333,34 @@ class Organization_settings extends Home_Controller {
             return ['error' => 'Missing user_id parameter.'];
         }
 
+        // Fetch org_settings
         $query = $this->db->get_where('org_settings', ['user_id' => $user_id]);
 
         if ($query->num_rows() > 0) {
-            return $query->row_array();
+            $settings = $query->row_array();
+
+            // Fetch user's timezone and country code from users table
+            $user = $this->db
+                ->select('timezone, country')
+                ->get_where('users', ['id' => $user_id])
+                ->row_array();
+
+            // Add timezone to settings
+            $settings['timezone'] = $user['timezone'] ?? null;
+
+            // Fetch country name from country table using country_code
+            if (!empty($user['country'])) {
+                $country = $this->db
+                    ->select('name')
+                    ->get_where('country', ['id' => $user['country']])
+                    ->row_array();
+
+                $settings['country_name'] = $country['name'] ?? null;
+            } else {
+                $settings['country_name'] = null;
+            }
+
+            return $settings;
         } else {
             return ['error' => 'No settings found for this user.'];
         }

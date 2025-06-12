@@ -199,19 +199,36 @@
             <div class="box mt-20">
                 <div class="box-body">
                     <form id="orgSettingsForm" class="validate-form <?= $is_edit_mode ? '' : 'readonly-form' ?>" role="form">
-                                                    <!-- Timezone Dropdown -->
-                        <div class="col-md-6 form-group">
-                            <label class="form-label">Select Timezone:</label>
-                                <select name="time_zone" id="timezone" class="form-control single_select">
-                                    <option value="">-- Select Timezone --</option>
-                                    <?php foreach ($timezone as $tz): print_r($tz); ?>
-                                        <option value="<?= htmlspecialchars($tz) ?>"><?= htmlspecialchars($tz) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                        </div>
 
-               
                         <div class="row mt-5">
+                            <div class="col-12 p-0 form-group">
+                                <?php if ($is_edit_mode): ?>
+                                    <div class="form-group row mt-5">
+                                        <div class="col-md-6 form-group">
+                                            <label><?php echo trans('country') ?>:</label>
+                                            <select class="selectfield textfield--grey single_select col-sm-12" name="country" id="country_select" style="width: 100%">
+                                                <option value=""><?php echo trans('select') ?></option>
+                                                <?php foreach ($countries as $country): ?>
+                                                    <option value="<?php echo html_escape($country->id); ?>"
+                                                        <?php echo (isset($settings['country_name']) && $settings['country_name'] == $country->name) ? 'selected' : ''; ?>>
+                                                        <?php echo html_escape($country->name); ?>
+                                                    </option>
+                                                <?php endforeach ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label class="form-label">Timezone:</label>
+                                            <select name="time_zone" id="timezone" class="form-control single_select">
+                                                <option value="<?php echo html_escape($country->id); ?>"><?php echo $settings['timezone']; ?></option>
+                                            </select>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="col-md-12">
+                                            <label class="form-label">Timezone:</label>
+                                            <input type="text" class="form-control" value="<?= isset($settings['timezone']) ? $settings['timezone'] : 'No Timezone selected' ?>" readonly>
+                                        <?php endif; ?>
+                                        </div>
+                                    </div>
 
                             <!-- Screenshot Flag -->
                             <div class="col-md-6 form-group">
@@ -309,7 +326,7 @@
                                 <label class="form-label">Keystroke Threshold:</label>
                                 <input type="number" name="key_stroke_threshold" class="form-control" id="key_stroke_threshold"
                                     value="<?= isset($settings['key_stroke_threshold']) ? $settings['key_stroke_threshold'] : '' ?>"
-                                    readonly/>
+                                    readonly />
                             </div>
 
                             <!-- Idle Time Flag -->
@@ -356,44 +373,42 @@
 </style>
 <script>
     $(document).ready(function() {
-        <?php if ($is_edit_mode): ?>
-            $.ajax({
-                url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    console.log('Full response:', response); // Debug the full response
+        $('#country_select').on('change', function() {
+            var country_id = $(this).val();
+            console.log(country_id);
 
-                    if (response.status === 'success' && response.data && response.data.length > 0) {
-                        const timezoneSelect = $('#timezone');
-                        const currentTimezone = "<?= isset($settings['timezone']) ? $settings['timezone'] : '' ?>";
 
-                        // Clear any existing options except the first one
-                        timezoneSelect.find('option:not(:first)').remove();
+            // Clear existing timezones
+            $('#timezone').html('<option value="">Loading...</option>');
 
-                        response.data.forEach(function(item) {
-                            // Check the actual property names in your response
-                            const timezoneValue = item.time_zone || item.value || item.id || item;
-                            const timezoneLabel = item.time_zone || item.label || item.name || item;
-
-                            const selected = timezoneValue === currentTimezone ? 'selected' : '';
-                            timezoneSelect.append(`<option value="${timezoneValue}" ${selected}>${timezoneLabel}</option>`);
-                        });
-                    } else {
-                        console.log('No data or error:', response.message);
+            if (country_id) {
+                $.ajax({
+                    url: '<?= base_url('admin/organization_settings/get_timezones_by_country_id') ?>',
+                    type: 'GET',
+                    data: {
+                        country_id: country_id
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status) {
+                            let options = '<option value="">Select</option>';
+                            $.each(response.data, function(index, value) {
+                                options += '<option value="' + value + '">' + value + '</option>';
+                            });
+                            $('#timezone').html(options);
+                        } else {
+                            $('#timezone').html('<option value="">No timezones found</option>');
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#timezone').html('<option value="">Error fetching timezones</option>');
                     }
-                },
-                error: function(xhr) {
-                    console.error("Error fetching timezones:", xhr.responseText);
-                }
-            });
-        <?php endif; ?>
-    });
-</script>
+                });
+            } else {
+                $('#timezone').html('<option value="">Select</option>');
+            }
+        });
 
-
-<script>
-    $(document).ready(function() {
         function initializeToggleStates() {
             $('.toggle-flag').each(function() {
                 const targetId = $(this).data('target');

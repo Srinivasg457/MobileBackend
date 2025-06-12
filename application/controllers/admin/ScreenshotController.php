@@ -985,7 +985,7 @@ public function get_last_screenshot()
         // $data['user'] = $this->User_model->get_user_by_id($user_id, "users");
         // 2. Get employees from the employees table matching the provided user_id
         $employees = $this->db
-            ->select('id, name, email') // Select the employee details you need
+            ->select('id, name, email, country') // Select the employee details you need
             ->where('user_id', $user_id)
             ->get('employees')
             ->result_array();

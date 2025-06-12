@@ -104,20 +104,33 @@
             <div class="box mt-20">
                 <div class="box-body">
                     <div class="form-group row"> <!-- Added 'row' class here -->
-                        <div class="col-md-6">
-                            <label for="employeeSelect">Select Employee:</label>
+                        <div class="col-md-12">
+                            <label for="employeeSelect">Employee:</label>
                             <select id="employeeSelect" class="form-control single_select"></select>
                         </div>
+                    </div>
+                    <div class="form-group row mt-5">
                         <div class="col-md-6">
-                            <label class="form-label">Select Timezone:</label>
+                            <label><?php echo trans('country') ?>:</label>
+                            <select class="selectfield textfield--grey single_select col-sm-12" name="country" id="country_select" style="width: 100%">
+                                <option value=""><?php echo trans('select') ?></option>
+                                <?php foreach ($countries as $country): ?>
+                                    <option value="<?php echo html_escape($country->id); ?>">
+                                        <?php echo html_escape($country->name); ?>
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Timezone:</label>
                             <select name="time_zone" id="timezone" class="form-control single_select">
-                                <option value="">-- Select Timezone --</option>
+                                <option value="">Select</option>
                                 <?php foreach ($timezone as $tz): print_r($tz); ?>
                                     <option value="<?= htmlspecialchars($tz) ?>"><?= htmlspecialchars($tz) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                    </div>
+
 
                     <form id="orgExceptionForm">
                         <div class="row" style="max-width: 1000px;padding:30px">
@@ -273,27 +286,69 @@
     }
 
     $(document).ready(function() {
+        $('#country_select').on('change', function() {
+            var country_id = $(this).val();
+            console.log(country_id);
+
+
+            // Clear existing timezones
+            $('#timezone').html('<option value="">Loading...</option>');
+
+            if (country_id) {
+                $.ajax({
+                    url: '<?= base_url('admin/organization_settings/get_timezones_by_country_id') ?>',
+                    type: 'GET',
+                    data: {
+                        country_id: country_id
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status) {
+                            let options = '<option value="">Select</option>';
+                            $.each(response.data, function(index, value) {
+                                options += '<option value="' + value + '">' + value + '</option>';
+                            });
+                            $('#timezone').html(options);
+                        } else {
+                            $('#timezone').html('<option value="">No timezones found</option>');
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#timezone').html('<option value="">Error fetching timezones</option>');
+                    }
+                });
+            } else {
+                $('#timezone').html('<option value="">Select</option>');
+            }
+        });
         // Load employees
         $.ajax({
             url: "<?= base_url('/admin/ScreenshotController/list_employees_by_user') ?>",
             method: "GET",
             dataType: "json",
             success: function(response) {
+                console.log(response);
+
                 let employeeSelect = $('#employeeSelect');
-                employeeSelect.empty().append(`<option value="">-- Select Employee --</option>`);
+                let countrySelect = $('#country_select');
+
+                employeeSelect.empty().append(`<option value="">Select</option>`);
 
                 if (response.status === "success" && response.employees.length > 0) {
                     response.employees.forEach(emp => {
-                        employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
+                        employeeSelect.append(`<option value="${emp.id}" data-country="${emp.country}">${emp.name} (${emp.email})</option>`);
                     });
+
+
                 } else {
-                    $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
+                    employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
                 }
             },
             error: function() {
                 $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
             }
         });
+
 
         // Checkbox toggle
         $('#orgExceptionForm').on('change', 'input[type="checkbox"]', function() {
@@ -304,6 +359,16 @@
         $('#employeeSelect').on('change', function() {
             const employeeId = $(this).val();
             currentEmployeeId = employeeId;
+            // ✅ FIXED: Get selected option's data-country
+            let selectedCountryId = $(this).find(':selected').data('country');
+            console.log(selectedCountryId);
+
+            if (selectedCountryId) {
+                $('#country_select').val(selectedCountryId).trigger('change');
+            } else {
+                $('#country_select').val('');
+            }
+
 
             // If no employee selected, reset to default values
             if (!employeeId) {
