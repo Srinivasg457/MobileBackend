@@ -622,45 +622,5 @@ public function get_user_timestamp()
         ]);
     }
 }
-
-public function get_user_datetime($user_id = null)
-{
-    // Check for user ID from POST/GET or session
-    $param_user_id = $this->input->get_post('user_id');
-    if (!empty($param_user_id)) {
-        $user_id = $param_user_id;
-    } elseif (!$user_id) {
-        $user_id = $this->session->userdata('id');
-    }
-
-    // Validate user ID
-    if (empty($user_id) || !is_numeric($user_id)) {
-        return 'User ID is missing or invalid.';
-    }
-
-    // Load database
-    $this->load->database();
-
-    // Fetch user from DB
-    $user = $this->db->get_where('users', ['id' => $user_id])->row();
-
-    if (!$user) {
-        return 'User not found.';
-    }
-
-    if (empty($user->timezone)) {
-        return 'Please update your timezone in profile settings.';
-    }
-
-    // Get timestamp in user's timezone
-    try {
-        $tz = new DateTimeZone($user->timezone);
-        $now = new DateTime('now', $tz);
-        return $now->format('Y-m-d H:i:s');
-    } catch (Exception $e) {
-        return 'Invalid timezone: ' . $e->getMessage();
-    }
-}
-
 }
 ?>
