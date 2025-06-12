@@ -536,21 +536,21 @@ public function get_timezone_info()
         $now = new DateTime('now', $tz);
 
         echo json_encode([
-            'status'   => true,
-            'timezone' => $timezone,
-            'timestamp'=> $now->getTimestamp(),
-            'datetime' => $now->format('Y-m-d H:i:s'),
-            'offset'   => $now->format('P') // UTC offset like +05:30
+            'status'    => true,
+            'timezone'  => $timezone,
+            'timestamp' => $now->format('Y-m-d H:i:s'), // Changed from getTimestamp()
+            'offset'    => $now->format('P')             // +05:30 style offset
         ]);
     } catch (Exception $e) {
         http_response_code(400);
         echo json_encode([
-            'status' => false,
+            'status'  => false,
             'message' => 'Invalid timezone.',
-            'error' => $e->getMessage()
+            'error'   => $e->getMessage()
         ]);
     }
 }
+
 
 
 
