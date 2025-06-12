@@ -564,31 +564,54 @@ public function get_country_list()
     }
 }
 
-public function get_timezone_info()
+public function get_user_timestamp()
 {
     header('Content-Type: application/json');
 
-    $timezone = $this->input->get('timezone'); // For CI3
-    // $timezone = $this->request->getGet('timezone'); // Uncomment for CI4
+    // Get user_id from session
+    $user_id = $this->session->userdata('id');
 
-    if (empty($timezone)) {
+    // Optional: allow override via GET/POST for testing
+    $param_user_id = $this->input->get_post('user_id');
+    if (!empty($param_user_id)) {
+        $user_id = $param_user_id;
+    }
+
+    // Validate
+    if (empty($user_id) || !is_numeric($user_id)) {
         http_response_code(400);
         echo json_encode([
             'status' => false,
-            'message' => 'Missing timezone parameter.'
+            'message' => 'User ID not found in session or params.'
+        ]);
+        return;
+    }
+
+    // Load DB if not autoloaded
+    $this->load->database();
+
+    // Fetch user timezone
+    $user = $this->db->get_where('users', ['id' => $user_id])->row();
+
+    if (!$user || empty($user->timezone)) {
+        http_response_code(404);
+        echo json_encode([
+            'status' => false,
+            'message' => 'User not found or timezone not set.'
         ]);
         return;
     }
 
     try {
-        $tz = new DateTimeZone($timezone);
+        $tz = new DateTimeZone($user->timezone);
         $now = new DateTime('now', $tz);
 
         echo json_encode([
             'status'    => true,
-            'timezone'  => $timezone,
-            'timestamp' => $now->format('Y-m-d H:i:s'), // Changed from getTimestamp()
-            'offset'    => $now->format('P')             // +05:30 style offset
+            'user_id'   => $user_id,
+            'timezone'  => $user->timezone,
+            'datetime'  => $now->format('Y-m-d H:i:s'),
+            'offset'    => $now->format('P') // e.g., +05:30
         ]);
     } catch (Exception $e) {
         http_response_code(400);
@@ -599,7 +622,6 @@ public function get_timezone_info()
         ]);
     }
 }
-
 
 
 
