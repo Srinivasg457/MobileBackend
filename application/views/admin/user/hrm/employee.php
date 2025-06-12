@@ -17,7 +17,7 @@
         <?php endif; ?>
       </div>
 
-      <form id="cat-form" method="post" enctype="multipart/form-data" class="validate-form mt-20 p-30" action="<?php echo base_url('admin/hrm/employee_add') ?>" role="form" novalidate>
+      <form id="cat-form" method="post" enctype="multipart/form-data" class="validate-form mt-20 p-30" action="<?php echo base_url('admin/hrm/employee_add') ?>" role="form">
 
         <div class="form-group">
           <?php if (isset($page_title) && $page_title == "Edit"): ?>
@@ -65,7 +65,7 @@
 
         <div class="form-group">
           <label><?php echo trans('email') ?> <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" required <?php if ($page_title == "Edit") {
+          <input type="email" class="form-control" required <?php if ($page_title == "Edit") {
                                                               echo "readonly";
                                                             } else {
                                                               echo "";
@@ -213,7 +213,7 @@
                     <?php if (!empty($employee->thumb)) : ?>
                       <img src="<?php echo base_url($employee->thumb) ?>" style="border-radius: 50px; height: 50px; width: 50px;">
                     <?php else : ?>
-                      <i class="bi bi-person-circle" style="font-size: 50px; color: #8B8B8B;"></i>
+                      <img src="<?php echo base_url("assets/images/avatar.png") ?>" style="border-radius: 50px; height: 50px; width: 50px;">
                     <?php endif; ?>
                   </td>
                   <td>
