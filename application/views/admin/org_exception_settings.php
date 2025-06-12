@@ -103,18 +103,21 @@
             <h3 class="box-title">Employee Settings</h3>
             <div class="box mt-20">
                 <div class="box-body">
-                <div class="form-group row">  <!-- Added 'row' class here -->
-                    <div class="col-md-6">
-                        <label for="employeeSelect">Select Employee:</label>
-                        <select id="employeeSelect" class="form-control single_select"></select>
+                    <div class="form-group row"> <!-- Added 'row' class here -->
+                        <div class="col-md-6">
+                            <label for="employeeSelect">Select Employee:</label>
+                            <select id="employeeSelect" class="form-control single_select"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Select Timezone:</label>
+                            <select name="time_zone" id="timezone" class="form-control single_select">
+                                <option value="">-- Select Timezone --</option>
+                                <?php foreach ($timezone as $tz): print_r($tz); ?>
+                                    <option value="<?= htmlspecialchars($tz) ?>"><?= htmlspecialchars($tz) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label>Timezone:</label>
-                        <select id="timezoneSelect" class="form-control">
-    <option value="">Select Timezone</option>
-</select>
-                    </div>
-                </div>
 
                     <form id="orgExceptionForm">
                         <div class="row" style="max-width: 1000px;padding:30px">
@@ -444,74 +447,41 @@ $(document).ready(function() {
     });
 });
 </script> -->
-        <script>
-        
-// $(document).ready(function() {
-//     // Fetch timezones and populate dropdown
-//     $.ajax({
-//         url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
-//         type: 'GET',
-//         dataType: 'json',
-//         success: function(response) {
-//             if (response.status === 'success') {
-//                 const dropdown = $('#timezoneDropdown');
-//                 dropdown.empty();
-                
-//                 // Add default option
-//                 dropdown.append($('<option>', {
-//                     value: '',
-//                     text: 'Select a timezone'
-//                 }));
-                
-//                 // Add timezone options
-//                 $.each(response.data, function(index, timezone) {
-//                     dropdown.append($('<option>', {
-//                         value: timezone.id,
-//                         text: timezone.name
-//                     }));
-//                 });
-                
-//                 // If you need to set a selected value (e.g., from saved settings)
-//                 // dropdown.val(savedTimezoneId);
-//             } else {
-//                 console.error('Error fetching timezones:', response.message);
-//             }
-//         },
-//         error: function(xhr, status, error) {
-//             console.error('AJAX error:', error);
-//         }
-//     });
-// });
-
-</script>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(document).ready(function() {
-    $.ajax({
-        url: "<?= base_url('/admin/Organization_settings/get_timezone_list') ?>",
+    // $(document).ready(function() {
+    //     // Fetch timezones and populate dropdown
+    //     $.ajax({
+    //         url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         success: function(response) {
+    //             if (response.status === 'success') {
+    //                 const dropdown = $('#timezoneDropdown');
+    //                 dropdown.empty();
 
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.status) {
-                var dropdown = $('#timezoneSelect');
-                dropdown.empty();
-                dropdown.append('<option value="">Select Timezone</option>');
+    //                 // Add default option
+    //                 dropdown.append($('<option>', {
+    //                     value: '',
+    //                     text: 'Select a timezone'
+    //                 }));
 
-                $.each(response.data, function(index, value) {
-                    // Use full string as both value and label
-                    dropdown.append('<option value="' + value + '">' + value + '</option>');
-                });
-            } else {
-                alert(response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error: ', error);
-            alert('Failed to load timezones.');
-        }
-    });
-});
+    //                 // Add timezone options
+    //                 $.each(response.data, function(index, timezone) {
+    //                     dropdown.append($('<option>', {
+    //                         value: timezone.id,
+    //                         text: timezone.name
+    //                     }));
+    //                 });
+
+    //                 // If you need to set a selected value (e.g., from saved settings)
+    //                 // dropdown.val(savedTimezoneId);
+    //             } else {
+    //                 console.error('Error fetching timezones:', response.message);
+    //             }
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error('AJAX error:', error);
+    //         }
+    //     });
+    // });
 </script>
-

@@ -42,6 +42,7 @@ class Users extends Home_Controller {
         $data['packages'] = $this->admin_model->select_asc('package');
         $data['countries'] = $this->admin_model->select_asc('country');
         $data['users'] = $this->admin_model->get_all_users(0 , $config['per_page'], $page * $config['per_page'], $type);
+        $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/users', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
@@ -111,7 +112,8 @@ class Users extends Home_Controller {
                     'status' => 1,
                     'email_verified' => 1,
                     'referral_id' => substr(random_string('alnum', 5).mt_rand(), 0, 10),
-                    'created_at' => my_date_now()
+                    'created_at' => my_date_now(),
+                    'timezone' => $this->input->post('time_zone', true),
                 );
 
 
