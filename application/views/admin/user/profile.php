@@ -51,7 +51,7 @@
             <option value=""><?php echo trans('select') ?></option>
             <?php foreach ($countries as $country): ?>
                 <option value="<?php echo html_escape($country->id); ?>">
-                    <?php echo html_escape($country->name); ?> (<?php echo html_escape($country->currency_code); ?>)
+                    <?php echo html_escape($country->name); ?>
                 </option>
             <?php endforeach ?>
         </select>
