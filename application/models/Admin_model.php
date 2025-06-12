@@ -413,8 +413,31 @@ class Admin_model extends CI_Model {
         $query = $this->db->get();
         $query = $query->result_array();  
         return $query;
-    } 
+    }
+    public function get_timezone_list()
+    {
+        try {
+            $timezones = $this->db
+                ->select('utc_offset, time_zone_names')
+                ->order_by('utc_offset', 'ASC')
+                ->get('world_time_zones')
+                ->result_array();
 
+            if (empty($timezones)) {
+                return []; // Return empty array if no timezones found
+            }
+
+            $formatted = [];
+            foreach ($timezones as $tz) {
+                $formatted[] = "{$tz['utc_offset']} / {$tz['time_zone_names']}";
+            }
+
+            return $formatted; // Return array directly
+
+        } catch (Exception $e) {
+            return []; // Return empty array on error
+        }
+    }
     // select by id
     function get_by_id($id,$table)
     {

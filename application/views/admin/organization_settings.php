@@ -202,52 +202,15 @@
                                                     <!-- Timezone Dropdown -->
                         <div class="col-md-6 form-group">
                             <label class="form-label">Select Timezone:</label>
-                            <?php if ($is_edit_mode): ?>
-                                <select name="time_zone_selected" id="timezoneSelect" class="form-control">
-                                <option value="">Select Timezone</option>
-</select>
-             
-                            <?php else: ?>
-                                <input type="text" class="form-control" value="<?= isset($settings['timezone']) ? $settings['timezone'] : '' ?>" readonly>
-                            <?php endif; ?>
+                                <select name="time_zone" id="timezone" class="form-control single_select">
+                                    <option value="">-- Select Timezone --</option>
+                                    <?php foreach ($timezone as $tz): print_r($tz); ?>
+                                        <option value="<?= htmlspecialchars($tz) ?>"><?= htmlspecialchars($tz) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                         </div>
-          
-                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                        <script>
-$(document).ready(function () {
-    <?php if ($is_edit_mode): ?>
-    $.ajax({
-        url: "<?php echo base_url('/admin/Organization_settings/get_timezone_list') ?>",
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            console.log('Full response:', response); // Debug the full response
-            
-            if (response.status && response.data) {
-                const timezoneSelect = $('#timezoneSelect');
-                const currentTimezone = "<?= isset($settings['timezone']) ? $settings['timezone'] : '' ?>";
-                
-                // Clear any existing options except the first one
-                timezoneSelect.empty();
-                timezoneSelect.append('<option value="">Select Timezone</option>');
-                
-                $.each(response.data, function (index, value) {
-                    const selected = value === currentTimezone ? 'selected' : '';
-                    timezoneSelect.append(`<option value="${value}" ${selected}>${value}</option>`);
-                });
-            } else {
-                console.log('No data or error:', response.message);
-                alert(response.message);
-            }
-        },
-        error: function (xhr) {
-            console.error("Error fetching timezones:", xhr.responseText);
-            alert('Failed to load timezones.');
-        }
-    });
-    <?php endif; ?>
-});
-</script>
+
+               
                         <div class="row mt-5">
 
                             <!-- Screenshot Flag -->
@@ -392,40 +355,40 @@ $(document).ready(function () {
     }
 </style>
 <script>
-$(document).ready(function () {
-    <?php if ($is_edit_mode): ?>
-    $.ajax({
-        url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            console.log('Full response:', response); // Debug the full response
-            
-            if (response.status === 'success' && response.data && response.data.length > 0) {
-                const timezoneSelect = $('#timezone');
-                const currentTimezone = "<?= isset($settings['timezone']) ? $settings['timezone'] : '' ?>";
-                
-                // Clear any existing options except the first one
-                timezoneSelect.find('option:not(:first)').remove();
-                
-                response.data.forEach(function (item) {
-                    // Check the actual property names in your response
-                    const timezoneValue = item.time_zone || item.value || item.id || item;
-                    const timezoneLabel = item.time_zone || item.label || item.name || item;
-                    
-                    const selected = timezoneValue === currentTimezone ? 'selected' : '';
-                    timezoneSelect.append(`<option value="${timezoneValue}" ${selected}>${timezoneLabel}</option>`);
-                });
-            } else {
-                console.log('No data or error:', response.message);
-            }
-        },
-        error: function (xhr) {
-            console.error("Error fetching timezones:", xhr.responseText);
-        }
+    $(document).ready(function() {
+        <?php if ($is_edit_mode): ?>
+            $.ajax({
+                url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Full response:', response); // Debug the full response
+
+                    if (response.status === 'success' && response.data && response.data.length > 0) {
+                        const timezoneSelect = $('#timezone');
+                        const currentTimezone = "<?= isset($settings['timezone']) ? $settings['timezone'] : '' ?>";
+
+                        // Clear any existing options except the first one
+                        timezoneSelect.find('option:not(:first)').remove();
+
+                        response.data.forEach(function(item) {
+                            // Check the actual property names in your response
+                            const timezoneValue = item.time_zone || item.value || item.id || item;
+                            const timezoneLabel = item.time_zone || item.label || item.name || item;
+
+                            const selected = timezoneValue === currentTimezone ? 'selected' : '';
+                            timezoneSelect.append(`<option value="${timezoneValue}" ${selected}>${timezoneLabel}</option>`);
+                        });
+                    } else {
+                        console.log('No data or error:', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Error fetching timezones:", xhr.responseText);
+                }
+            });
+        <?php endif; ?>
     });
-    <?php endif; ?>
-});
 </script>
 
 

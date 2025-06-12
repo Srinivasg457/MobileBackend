@@ -22,7 +22,7 @@
             </div>
 
             <div class="box-body pl-0">
-              <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/users/add')?>" role="form" novalidate>
+              <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/users/add') ?>" role="form">
                 <div class="box-body">
                  
                     <div class="form-group">
@@ -32,7 +32,7 @@
 
                     <div class="form-group">
                       <label> <?php echo trans('email') ?> <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control" required name="email" value="<?php echo html_escape($user[0]['email']); ?>" >
+                      <input type="email" class="form-control" required name="email" value="<?php echo html_escape($user[0]['email']); ?>">
                     </div>
 
                     <div class="form-group">
@@ -43,9 +43,11 @@
                     <div class="form-group mb-4">
                         <label><?php echo trans('plan') ?> <span class="text-danger">*</span></label>
                         <select class="form-control" name="package" required>
-                            <option value=""><?php echo trans('select') ?></option>
-                            <?php foreach ($packages as $package): ?>
-                              <option <?php if($package->id == $payment->package_id){echo "selected";} ?> value="<?php echo html_escape($package->id) ?>"><?php echo html_escape($package->name) ?></option>
+                          <option value=""><?php echo trans('select') ?></option>
+                    <?php foreach ($packages as $package): ?>
+                      <option <?php if ($package->id == $payment->package_id) {
+                                echo "selected";
+                              } ?> value="<?php echo html_escape($package->id) ?>"><?php echo html_escape($package->name) ?></option>
                             <?php endforeach ?>
                         </select>
                     </div>
@@ -84,54 +86,19 @@
         </select>
     </div>
 
-    <div class="form-group">
-        
-            <label>Timezone:</label>
-            <select id="timezoneSelect" class="form-control selectfield textfield--grey single_select" name="timezone" style="width: 100%">
-                <option value="">Select Timezone</option>
-                <?php 
-                // Assuming $timezones is an array of timezone objects/arrays available in your context
-                if (isset($timezones)): 
-                    foreach ($timezones as $tz): ?>
-                        <option value="<?php echo html_escape($tz['value'] ?? $tz->value); ?>">
-                            <?php echo html_escape($tz['name'] ?? $tz->name); ?>
-                        </option>
-                    <?php endforeach; 
-                endif; ?>
-            </select>
-        
-    </div>
-<?php endif; ?>
+                  <div class="form-group">
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-    $.ajax({
-        url: "<?= base_url('/admin/Organization_settings/get_timezone_list') ?>",
+                    <label class="form-label">Select Timezone:</label>
+                    <select name="time_zone" id="timezone" class="form-control single_select">
+                      <option value="">-- Select Timezone --</option>
+                      <?php foreach ($timezone as $tz): print_r($tz); ?>
+                        <option value="<?= htmlspecialchars($tz) ?>"><?= htmlspecialchars($tz) ?></option>
+                      <?php endforeach; ?>
+                    </select>
 
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.status) {
-                var dropdown = $('#timezoneSelect');
-                dropdown.empty();
-                dropdown.append('<option value="">Select Timezone</option>');
+                  </div>
+                <?php endif; ?>
 
-                $.each(response.data, function(index, value) {
-                    // Use full string as both value and label
-                    dropdown.append('<option value="' + value + '">' + value + '</option>');
-                });
-            } else {
-                alert(response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error: ', error);
-            alert('Failed to load timezones.');
-        }
-    });
-});
-</script>
                     <div class="form-group clearfix">
                       <label><?php echo trans('status') ?></label><br>
 
@@ -176,7 +143,7 @@ $(document).ready(function() {
 
 
 
-      <?php if (isset($page_title) && $page_title != "Edit"): ?>
+    <?php if (isset($page_title) && $page_title != "Edit"): ?>
         <div class="list_area container">
 
           <form class="user_sort_form" role="search" autocomplete="off" action="<?php echo base_url('admin/users') ?>" method="get">
@@ -233,7 +200,7 @@ $(document).ready(function() {
                   <td><?php echo $i; ?></td>
                   <td>
                     <?php if ($user->thumb == ''): ?>
-                      <?php $avatar = 'assets/images/avatar.png'; ?> 
+                      <?php $avatar = 'assets/images/avatar.png'; ?>
                     <?php else: ?>
                       <?php $avatar = $user->thumb; ?>
                     <?php endif ?>
@@ -345,7 +312,7 @@ $(document).ready(function() {
 
                 </tr>
 
-                <?php $i++; endforeach; ?>
+              <?php $i++; endforeach; ?>
               </tbody>
             </table>
           </div>
