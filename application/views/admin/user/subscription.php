@@ -106,7 +106,7 @@
                                 </span>
                               <?php endif ?>
 
-                              <?php if ($package->dis_year != 0 && $package->price != 0): ?>
+                              <?php if ($package->dis_year != 0 && $package->yearly_price != 0): ?>
                                 <span class="yearly_show soft-blue price_year" style="display: <?php if ($user->billing_type == 'yearly') {
                                                                                                   echo "inline-block";
                                                                                                 } else {
@@ -119,28 +119,28 @@
                           <?php endif ?>
 
                           <h4 class="mb-15">
-                            <span class="price_year <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->price != 0) {
+                            <span class="price_year <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->yearly_price != 0) {
                                                       echo "price-off";
                                                     } ?>" style="display: <?php if ($user->billing_type == 'yearly') {
                                                                             echo "inline-block";
                                                                           } else {
                                                                             echo "none";
                                                                           } ?>">
-                              <?php echo price_formatted($package->price, 'site'); ?>
+                              <?php echo price_formatted($package->yearly_price, 'site'); ?>
                             </span>
 
-                            <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->price != 0): ?>
+                            <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->yearly_price != 0): ?>
                               <span class="price_year" style="display: <?php if ($user->billing_type == 'yearly') {
                                                                           echo "inline-block";
                                                                         } else {
                                                                           echo "none";
                                                                         } ?>">
-                                <?php $discount_price =  get_discount($package->price, $package->dis_year) ?>
+                                <?php $discount_price =  get_discount($package->yearly_price, $package->dis_year) ?>
                                 <?php echo price_formatted($discount_price, 'site'); ?>
                               </span>
                             <?php endif ?>
 
-                            <span class="price_month <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0) {
+                            <span class="price_month <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0) {
                                                         echo "price-off";
                                                       } ?>" style="display: <?php if ($user->billing_type == 'monthly') {
                                                                               echo "inline-block";
@@ -150,7 +150,7 @@
                               <?php echo price_formatted($package->monthly_price, 'site'); ?>
                             </span>
 
-                            <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0): ?>
+                            <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0): ?>
                               <span class="price_month" style="display: <?php if ($user->billing_type == 'monthly') {
                                                                           echo "inline-block";
                                                                         } else {

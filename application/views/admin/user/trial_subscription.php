@@ -2,7 +2,7 @@
   <!-- Main content -->
   <section class="content">
     <div class="row">
-      <div class="col-md-4">
+      <!-- <div class="col-md-4">
         <div class="box add_area">
           <div class="box-header">
             <h3 class="box-title"><?php echo trans('subscription') ?> </h3>
@@ -17,33 +17,32 @@
           </div>
 
         </div>
-      </div>
+      </div> -->
       <div class="col-12">
         <div class="row">
           <div class="col-4">
             <div class="box">
               <div class="box-header">
-                <h3 class="box-title"><?php echo 'Trial Features' ?> </h3>
+                <h3 class="box-title"><?php echo trans('subscription') ?> </h3>
               </div>
-              <div class="box-body p-0">
 
+              <div class="box-body p-0">
+                <div style="padding: 10px;">
+                  <p><?php echo trans('your-subscription') ?>: <strong><?php echo trans('free-trial-of') ?> <?php echo settings()->trial_days . ' ' . trans('days') ?></strong></p>
+                  <p><?php echo trans('billing-frequency') ?> : <strong><?php echo settings()->trial_days . ' ' . trans('days') ?></strong> </p>
+                  <p><?php echo trans('created') ?> : <strong><?php echo my_date_show(user()->created_at) ?></strong>
+                    <strong class="text-danger">(<?php echo date_dif(date('Y-m-d'), user()->trial_expire) ?> <?php echo trans('days-left') ?>)</strong></strong>
+                  </p>
+                </div>
                 <div class="table-responsive">
                   <table class="table table-hover mb-0">
                     <div class="pricing-switcher mb-5 mt-4 text-center">
-                      <p class="fieldset">
-                        <input type="radio" name="" value="week" class="" id="week" <?php if ($user->billing_type == 'week') {
-                                                                                                  echo "checked";
-                                                                                                } ?>>
 
-                        <label for="week"><?php echo 'week' ?></label> &emsp;&emsp;
-
-                      </p>
                     </div>
                     <tbody>
                       <tr>
                         <td class="" style="width:100%">
-                          <h2 class="mt-10">Trial
-                            <strong class="text-danger">(<?php echo date_dif(date('Y-m-d'), user()->trial_expire) ?> <?php echo trans('days-left') ?>)</strong></strong>
+                          <h2 class="mt-10">Trial Features
                           </h2>
                         </td>
                       </tr>
