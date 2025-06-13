@@ -85,7 +85,7 @@
                       </td>
                       <?php $i = 1;
                       foreach ($packages as $package):
-                        if ($package->name == "Free" ) {
+                        if ($package->name == "Trial" ) {
                           continue;
                         }  ?>
 
@@ -251,7 +251,7 @@
                       <td></td>
                       <?php $b = 1;
                       foreach ($packages as $package):
-                        if ($package->name == "Free") {
+                        if ($package->name == "Trial") {
                           continue;
                         } ?>
 
