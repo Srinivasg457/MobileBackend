@@ -286,59 +286,74 @@ class Hrm extends Home_Controller {
 //         exit; // Important to stop further execution
 //     }      
 // }
-    public function employee_add()
-    {
-        if ($_POST) {
-            check_status();
-            $this->load->database();
+public function employee_add()
+{
+    if ($_POST) {
+        check_status();
+        $this->load->database();
 
-            $id = $this->input->post('id', true);
-            $email = $this->input->post('email', true);
+        $id = $this->input->post('id', true);
+        $email = $this->input->post('email', true);
 
-            $data = array(
-                'user_id' => user()->id,
-                'business_id' => $this->business->uid,
-                'name' => $this->input->post('name', true),
-                'department_id' => $this->input->post('department', true),
-                // 'role_id' => $this->input->post('role', true), // ✅ Add this line
-                'email' => $email,
-                'phone' => $this->input->post('phone', true),
-                'address' => $this->input->post('address', true),
-                'city' => $this->input->post('city', true),
-                'country' => $this->input->post('country', true),
-                'status' => $this->input->post('status', true),
-                'created_at' => my_date_now()
-            );
+        $data = array(
+            'user_id' => user()->id,
+            'business_id' => $this->business->uid,
+            'name' => $this->input->post('name', true),
+            'department_id' => $this->input->post('department', true),
+            'email' => $email,
+            'phone' => $this->input->post('phone', true),
+            'address' => $this->input->post('address', true),
+            'city' => $this->input->post('city', true),
+            'country' => $this->input->post('country', true),
+            'status' => $this->input->post('status', true),
+            'created_at' => my_date_now()
+        );
 
+        $data = $this->security->xss_clean($data);
 
-            $data = $this->security->xss_clean($data);
+        if ($id != '') {
+            $this->db->where('id', $id)->update('employees', $data);
+            $this->session->set_flashdata('msg', trans('msg-updated'));
+        } else {
+            // ✅ Check if user is a trial user and already has 2 employees
+            $user_id = user()->id;
+            $this->db->where('id', $user_id);
+            $user = $this->db->get('users')->row();
 
-            if ($id != '') {
-                $this->db->where('id', $id)->update('employees', $data);
-                $this->session->set_flashdata('msg', trans('msg-updated'));
-            } else {
-                // Check if email exists
-                $this->db->where('LOWER(email)', strtolower($email));
-                $exists = $this->db->get('employees')->row();
+            if ($user && strtolower($user->user_type) === 'trial') {
+                $this->db->where('user_id', $user_id);
+                $this->db->from('employees');
+                $employee_count = $this->db->count_all_results();
 
-                if ($exists) {
-                    $this->session->set_flashdata('error', 'Email address already exists.');
+                if ($employee_count >= 2) {
+                    $this->session->set_flashdata('error', 'Trial users can add a maximum of 2 employees only.');
                     redirect(base_url('admin/hrm/employee'));
-                    exit; // Important
+                    exit; // Stop execution
                 }
+            }
 
-                // Insert new employee
-                $this->db->insert('employees', $data);
-                $id = $this->db->insert_id();
+            // Check if email exists
+            $this->db->where('LOWER(email)', strtolower($email));
+            $exists = $this->db->get('employees')->row();
 
-                // Generate and save invitation token
-                $token = uniqid();
-                $this->db->where('id', $id)->update('employees', ['invitation_token' => $token]);
+            if ($exists) {
+                $this->session->set_flashdata('error', 'Email address already exists.');
+                redirect(base_url('admin/hrm/employee'));
+                exit;
+            }
 
-                // Send invitation email
-    $subject = 'You are invited to join Workroom';
+            // Insert new employee
+            $this->db->insert('employees', $data);
+            $id = $this->db->insert_id();
 
-    $message = '
+            // Generate and save invitation token
+            $token = uniqid();
+            $this->db->where('id', $id)->update('employees', ['invitation_token' => $token]);
+
+            // Send invitation email
+            $subject = 'You are invited to join Workroom';
+
+            $message = '
 <!DOCTYPE html>
 <html>
 <head>
@@ -383,30 +398,31 @@ class Hrm extends Home_Controller {
 </body>
 </html>';
 
-                // ✅ Send email using email_model
-                if ($this->email_model->send_email($email, $subject, $message)) {
-                    $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
-                    $this->session->set_flashdata('msg', 'Employee added and invitation email sent.');
-                } else {
-                    log_message('error', 'Failed to send invitation email to: ' . $email);
-                    $this->session->set_flashdata('error', 'Employee added but failed to send email.');
-                }
+            // Send email
+            if ($this->email_model->send_email($email, $subject, $message)) {
+                $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
+                $this->session->set_flashdata('msg', 'Employee added and invitation email sent.');
+            } else {
+                log_message('error', 'Failed to send invitation email to: ' . $email);
+                $this->session->set_flashdata('error', 'Employee added but failed to send email.');
             }
-
-            //  Upload photo if available
-            if ($_FILES['photo']['name'] != '') {
-                $up_load = $this->admin_model->upload_image('1200');
-                $data_img = array(
-                    'image' => $up_load['images'],
-                    'thumb' => $up_load['thumb']
-                );
-                $this->admin_model->edit_option($data_img, $id, 'employees');
-            }
-
-            redirect(base_url('admin/hrm/employee'));
-            exit; // Important to stop further execution
         }
+
+        // Upload photo if available
+        if ($_FILES['photo']['name'] != '') {
+            $up_load = $this->admin_model->upload_image('1200');
+            $data_img = array(
+                'image' => $up_load['images'],
+                'thumb' => $up_load['thumb']
+            );
+            $this->admin_model->edit_option($data_img, $id, 'employees');
+        }
+
+        redirect(base_url('admin/hrm/employee'));
+        exit;
     }
+}
+
     public function employee_edit($id)
     {  
         $data = array();
