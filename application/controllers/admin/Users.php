@@ -96,8 +96,17 @@ class Users extends Home_Controller {
                     $this->session->set_flashdata('msg', trans('email-exist'));
                     redirect(base_url('admin/users'));
                 }
+                $package = $this->input->post('package', true);
 
-                $udata=array(
+                if ($package == 1 ) {
+                    $user_type = 'trial';
+                    $trial_expire = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
+                } else {
+                    $user_type = 'registered';
+                    $trial_expire = date('Y-m-d');
+                }
+
+                $udata = array(
                     'name' => $this->input->post('name', true),
                     'user_name' => str_slug($this->input->post('name', true)),
                     'slug' => str_slug($this->input->post('name', true)),
@@ -107,14 +116,15 @@ class Users extends Home_Controller {
                     'password' => $password,
                     'role' => 'user',
                     'account_type' => 'pro',
-                    'user_type' => 'registered',
-                    'trial_expire' => '',
+                    'user_type' => $user_type,
+                    'trial_expire' => $trial_expire,
                     'status' => 1,
                     'email_verified' => 1,
-                    'referral_id' => substr(random_string('alnum', 5).mt_rand(), 0, 10),
+                    'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
                     'created_at' => my_date_now(),
                     'timezone' => $this->input->post('time_zone', true),
                 );
+
 
 
                 if ($id != '') {
@@ -125,18 +135,18 @@ class Users extends Home_Controller {
                     $id = $this->admin_model->insert($udata, 'users');
                     $this->session->set_flashdata('msg', trans('inserted-successfully'));
 
-                    $screenshot_dir = FCPATH . 'uploads/screenshots/' . $id;
-                    if (!is_dir($screenshot_dir)) {
-                        $created = mkdir($screenshot_dir, 0777, true); // Create the directory
-                        if (!$created) {
-                            // Log the error or handle it appropriately.  Important!
-                            log_message('error', "Failed to create directory: " . $screenshot_dir);
-                            $this->session->set_flashdata('error', "Failed to create user directory.  Please check permissions.");
-                            //  Consider a rollback of the user creation if the folder is critical.
-                            //  redirect(base_url('admin/users')); //removed redirect
-                            //  return;
-                        }
-                    }       
+                    // $screenshot_dir = FCPATH . 'uploads/screenshots/' . $id;
+                    // if (!is_dir($screenshot_dir)) {
+                    //     $created = mkdir($screenshot_dir, 0777, true); // Create the directory
+                    //     if (!$created) {
+                    //         // Log the error or handle it appropriately.  Important!
+                    //         log_message('error', "Failed to create directory: " . $screenshot_dir);
+                    //         $this->session->set_flashdata('error', "Failed to create user directory.  Please check permissions.");
+                    //         //  Consider a rollback of the user creation if the folder is critical.
+                    //         //  redirect(base_url('admin/users')); //removed redirect
+                    //         //  return;
+                    //     }
+                    // }       
 
 
                     $rand_uid = substr(random_string('numeric', 5).mt_rand(), 0, 8);
@@ -159,19 +169,31 @@ class Users extends Home_Controller {
 
                 }
                
-                $payment = $this->admin_model->get_user_payment($id);
+                $payment = $this->admin_model->get_user_payment($id);   
 
                 $plan = $this->input->post('package', true);
                 $billing = $this->input->post('billing_type', true);
 
                 $package = $this->common_model->get_by_id($plan, 'package');
-                if ($billing == 'monthly') {
+                // if ($billing == 'monthly') {
+                //     $price = $package->monthly_price;
+                //     $expire_on = date('Y-m-d', strtotime('+1 month'));
+                // } else {
+                //     $price = $package->price;
+                //     $expire_on = date('Y-m-d', strtotime('+12 month'));
+                // }
+                if ($billing == 'week') {
+                    $price = $package->monthly_price;
+                    $expire_on = date('Y-m-d', strtotime('+1 week'));
+                } elseif ($billing == 'monthly') {
                     $price = $package->monthly_price;
                     $expire_on = date('Y-m-d', strtotime('+1 month'));
                 } else {
+                    // yearly
                     $price = $package->price;
                     $expire_on = date('Y-m-d', strtotime('+12 month'));
                 }
+
 
                 $pdata=array(
                     'puid' => random_string('numeric',5),

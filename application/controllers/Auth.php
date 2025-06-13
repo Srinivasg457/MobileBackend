@@ -441,22 +441,47 @@ class Auth extends Home_Controller
     {
         $package = $this->common_model->get_by_slug($slug, 'package');
         $uid = random_string('numeric',5);
-        
-        if($billing_type =='monthly'):
-            if (settings()->enable_discount == 1){
-                $amount = get_discount($package->monthly_price, $package->dis_month); 
-            }else{
-                $amount = round($package->monthly_price); 
+
+        // if($billing_type =='monthly'):
+        //     if (settings()->enable_discount == 1){
+        //         $amount = get_discount($package->monthly_price, $package->dis_month); 
+        //     }else{
+        //         $amount = round($package->monthly_price); 
+        //     }
+        //     $expire_on = date('Y-m-d', strtotime('+1 month'));
+        // else:
+        //     if (settings()->enable_discount == 1){
+        //         $amount = get_discount($package->price, $package->dis_year); 
+        //     }else{
+        //         $amount = round($package->price); 
+        //     }
+        //     $expire_on = date('Y-m-d', strtotime('+12 month'));
+        // endif;
+        if ($billing_type == 'week'):
+            if (settings()->enable_discount == 1) {
+                $amount = get_discount($package->weekly_price, $package->dis_week);
+            } else {
+                $amount = round($package->weekly_price);
+            }
+            $expire_on = date('Y-m-d', strtotime('+1 week'));
+
+        elseif ($billing_type == 'monthly'):
+            if (settings()->enable_discount == 1) {
+                $amount = get_discount($package->monthly_price, $package->dis_month);
+            } else {
+                $amount = round($package->monthly_price);
             }
             $expire_on = date('Y-m-d', strtotime('+1 month'));
-        else:
-            if (settings()->enable_discount == 1){
-                $amount = get_discount($package->price, $package->dis_year); 
-            }else{
-                $amount = round($package->price); 
+
+        else: // yearly
+            if (settings()->enable_discount == 1) {
+                $amount = get_discount($package->price, $package->dis_year);
+            } else {
+                $amount = round($package->price);
             }
             $expire_on = date('Y-m-d', strtotime('+12 month'));
         endif;
+
 
         if (number_format($amount, 0) == 0):
             $status = 'verified';
