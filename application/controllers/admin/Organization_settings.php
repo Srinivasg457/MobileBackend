@@ -94,7 +94,7 @@ class Organization_settings extends Home_Controller {
     $user_id = $this->session->userdata('id');
     
     // Validate required fields
-    if (empty($this->input->post('time_zone_selected'))) {
+    if (empty($this->input->post('time_zone'))) {
         $this->output
             ->set_content_type('application/json')
             ->set_status_header(400)
@@ -118,7 +118,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
             'timecards_time_interval'  => $this->input->post('timecards_time_interval', TRUE),
-            'time_zone'                => $this->input->post('time_zone_selected', TRUE)
+            'time_zone'                => $this->input->post('time_zone', TRUE)
             ];
 
         // Clean data for XSS prevention
@@ -233,7 +233,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
             'timecards_time_interval'  => 5,
-            'time_zone'                => $this->input->post('time_zone_selected', TRUE) // <-- Added this line for timezone
+            'time_zone'                => $this->input->post('time_zone', TRUE) // <-- Added this line for timezone
         ];
     
         // Clean data for XSS prevention
@@ -338,28 +338,6 @@ class Organization_settings extends Home_Controller {
 
         if ($query->num_rows() > 0) {
             $settings = $query->row_array();
-
-            // Fetch user's timezone and country code from users table
-            $user = $this->db
-                ->select('timezone, country')
-                ->get_where('users', ['id' => $user_id])
-                ->row_array();
-
-            // Add timezone to settings
-            $settings['timezone'] = $user['timezone'] ?? null;
-
-            // Fetch country name from country table using country_code
-            if (!empty($user['country'])) {
-                $country = $this->db
-                    ->select('name')
-                    ->get_where('country', ['id' => $user['country']])
-                    ->row_array();
-
-                $settings['country_name'] = $country['name'] ?? null;
-            } else {
-                $settings['country_name'] = null;
-            }
-
             return $settings;
         } else {
             return ['error' => 'No settings found for this user.'];
