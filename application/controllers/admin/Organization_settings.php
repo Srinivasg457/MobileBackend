@@ -15,6 +15,10 @@ class Organization_settings extends Home_Controller {
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
+        
         $data = array();
         $data['page_title'] = 'Organization settings';
         $data["settings"] = $this->PreLoading_get_org_settings();
@@ -120,7 +124,8 @@ class Organization_settings extends Home_Controller {
             'timecards_time_interval'  => $this->input->post('timecards_time_interval', TRUE),
             'time_zone'                => $this->input->post('time_zone', TRUE),
             'created_at'               => get_user_datetime_only(),
-            ];
+            'updated_at'               => get_user_datetime_only(),
+        ];
 
         // Clean data for XSS prevention
         $data = $this->security->xss_clean($data);
@@ -234,7 +239,9 @@ class Organization_settings extends Home_Controller {
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
             'timecards_time_interval'  => 5,
-            'time_zone'                => $this->input->post('time_zone', TRUE) // <-- Added this line for timezone
+            'time_zone'                => $this->input->post('time_zone', TRUE), // <-- Added this line for timezone
+            'created_at'               => get_user_datetime_only(),
+            'updated_at'               => get_user_datetime_only(),
         ];
     
         // Clean data for XSS prevention
