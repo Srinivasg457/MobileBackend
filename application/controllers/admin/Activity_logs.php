@@ -19,6 +19,9 @@ class Activity_logs extends Home_Controller
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/activityLog', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
     // public function check_activity_status()
     // {
@@ -347,5 +350,8 @@ public function get_index()
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/time_cards', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
 }

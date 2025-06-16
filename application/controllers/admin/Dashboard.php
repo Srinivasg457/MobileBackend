@@ -12,6 +12,7 @@ class Dashboard extends Home_Controller {
         if (!is_admin()) {
             redirect(base_url());
         }
+       
         $data = array();
         $data['currency'] = currency_to_symbol(settings()->currency);
         for ($i = 1; $i <= 13; $i++) {
@@ -77,6 +78,9 @@ class Dashboard extends Home_Controller {
         $data['expense_data'] = json_encode(array_column($expenses, 'total'),JSON_NUMERIC_CHECK);
         $data['main_content'] = $this->load->view('admin/dash', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
 
 
