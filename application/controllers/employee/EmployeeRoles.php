@@ -18,6 +18,9 @@ class EmployeeRoles extends Home_Controller {
         $data['departments'] = $this->admin_model->get_by_user('departments');
         $data['main_content'] = $this->load->view('admin/employee/hrm/role_permission', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
 
     public function create_role() {

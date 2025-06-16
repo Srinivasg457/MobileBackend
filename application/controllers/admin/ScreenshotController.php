@@ -20,6 +20,9 @@ class ScreenshotController extends Home_Controller
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/user_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
     public function webCam()
     {
@@ -28,6 +31,9 @@ class ScreenshotController extends Home_Controller
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/webcam_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
     public function EmployeewebCam()
     {
@@ -36,6 +42,9 @@ class ScreenshotController extends Home_Controller
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/employee/webcam_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
 
     //  public function store_screenshot() {
