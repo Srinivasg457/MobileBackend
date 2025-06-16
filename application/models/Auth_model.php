@@ -303,6 +303,129 @@ class Auth_model extends CI_Model {
         }
         return false;
     }
+    function has_verified_package($packageIds)
+    {
+        // $CI = &get_instance();          // CodeIgniter super‑object
+        $user = user();                 // Your helper that returns the logged‑in user
+
+        if (!$user) {
+            return false;               // not logged in
+        }
+
+         $CI= $this->db->select('*')
+            ->from('payment')
+            ->where('user_id', $user->id)
+            ->where('package', $packageIds)
+            ->order_by('id', 'DESC')   // newest first
+            ->limit(1);
+
+        if($CI->status == "pending"){
+            return false;
+        }  
+        return true;    // TRUE if a row exists
+    }
+
+    /* -------------------------------------------------
+ |  Thin wrappers for readability
+ |  (package IDs: Basic=2, Standard=3, Premium=4, Custom=5)
+ -------------------------------------------------*/
+    function is_pack_basic()
+    {
+        return $this->has_verified_package(1);
+    }
+    function is_pack_standard()
+    {
+        return $this->has_verified_package(3);
+    }
+    function is_pack_premium()
+    {
+        return $this-> has_verified_package(4);
+    }
+    function is_pack_customization()
+    {
+        return $this->has_verified_package(5);
+    }
 
 
+    public function is_payment_pending()
+    {
+        $user = user(); // Get the logged-in user
+
+        if (!$user) {
+            return false;
+        }
+
+        // Get the most recent payment record for the user
+        $payment = $this->db->select('*')
+            ->from('payment')
+            ->where('user_id', $user->id)
+            ->order_by('id', 'DESC')
+            ->limit(1)
+            ->get()
+            ->row();
+        // Check if the payment status is "pending"
+        if ($payment && $payment->status == 'pending') {
+            return true;
+        }
+
+        return false;
+    }
+
+
+
+
+    function get_user_time_value()
+    {
+
+            $user_id = $this->session->userdata('id');
+        
+
+        // Validate
+        if (empty($user_id) || !is_numeric($user_id)) {
+            return null;
+        }
+
+        // Fetch user record
+        $user = $this->db->get_where('users', ['id' => $user_id])->row();
+
+        if (! $user || empty($user->timezone)) {
+            return null;
+        }
+
+        try {
+            $tz  = new DateTimeZone($user->timezone);
+            $now = new DateTime('now', $tz);
+            return $now->format('H:i:s');   // HH:MM:SS
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+    function get_user_datetime_only()
+    {
+
+        $ci = &get_instance();
+
+        // If no user_id passed, get from session
+            $user_id = $ci->session->userdata('id');
+        
+        if (empty($user_id)) {
+            return null;
+        }
+
+        $user = $ci->db->get_where('users', ['id' => $user_id])->row();
+
+        if (!$user || empty($user->timezone)) {
+            return null;
+        }
+
+        try {
+            $tz = new DateTimeZone($user->timezone);
+            $now = new DateTime('now', $tz);
+            return $now->format('Y-m-d H:i:s');
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+ 
 }

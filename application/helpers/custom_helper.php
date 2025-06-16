@@ -20,14 +20,75 @@ if (!function_exists('is_employee')) {
 		return $ci->auth_model->is_employee();
 	}
 }
+//get date time
+if (!function_exists('get_user_datetime_only')) {
+	function get_user_datetime_only()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->get_user_datetime_only();
+	}
+}
 
-//check plan
+//get time
+if (!function_exists('get_user_time_value')) {
+	function get_user_time_value()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->get_user_time_value();
+	}
+}
+
+//check pack
 if (!function_exists('is_pack_trial')) {
 	function is_pack_trial()
 	{
 		// Get a reference to the controller object
 		$ci = &get_instance();
 		return $ci->auth_model->is_pack_trial();
+	}
+}
+
+if (!function_exists('is_pack_basic')) {
+	function is_pack_basic()
+	{
+		$ci = &get_instance();
+		return $ci->auth_model->is_pack_basic();
+	}
+}
+
+if (!function_exists('is_pack_standard')) {
+	function is_pack_standard()
+	{
+		$ci = &get_instance();
+		return $ci->auth_model->is_pack_standard();
+	}
+}
+
+if (!function_exists('is_pack_premium')) {
+	function is_pack_premium()
+	{
+		$ci = &get_instance();
+		return $ci->auth_model->is_pack_premium();
+	}
+}
+
+if (!function_exists('is_pack_customization')) {
+	function is_pack_customization()
+	{
+		$ci = &get_instance();
+		return $ci->auth_model->is_pack_customization();
+	}
+}
+
+//check payment pending
+if (!function_exists('is_payment_pending')) {
+	function is_payment_pending()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_payment_pending();
 	}
 }
 
