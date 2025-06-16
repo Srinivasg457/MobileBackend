@@ -306,7 +306,7 @@ public function employee_add()
             'city' => $this->input->post('city', true),
             'country' => $this->input->post('country', true),
             'status' => $this->input->post('status', true),
-            'created_at' => my_date_now()
+            'created_at' => get_user_datetime_only(user()->id)
         );
 
         $data = $this->security->xss_clean($data);
@@ -400,7 +400,7 @@ public function employee_add()
 
             // Send email
             if ($this->email_model->send_email($email, $subject, $message)) {
-                $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
+                $this->admin_model->edit_option(['invitation_sent_at' => get_user_datetime_only(user()->id)], $id, 'employees');
                 $this->session->set_flashdata('msg', 'Employee added and invitation email sent.');
             } else {
                 log_message('error', 'Failed to send invitation email to: ' . $email);
@@ -548,7 +548,7 @@ public function employee_add()
                         'city' => $employeeData['city'] ?? null,
                         'country' => $employeeData['country'] ?? null,
                         'status' => 1,
-                        'created_at' => my_date_now()
+                        'created_at' => get_user_datetime_only(user()->id)
                     ];
     
                     $data = $this->security->xss_clean($data);
@@ -588,7 +588,7 @@ public function employee_add()
                     $this->email->message($message);
     
                     if ($this->email->send()) {
-                        $this->admin_model->edit_option(['invitation_sent_at' => my_date_now()], $id, 'employees');
+                        $this->admin_model->edit_option(['invitation_sent_at' => get_user_datetime_only(user()->id)], $id, 'employees');
                     } else {
                         log_message('error', 'Email error (import): ' . $this->email->print_debugger());
                     }
@@ -687,7 +687,7 @@ private function _send_invitation_email($name, $email, $token)
     $this->email->message($message);
 
     if ($this->email->send()) {
-        $this->db->where('email', $email)->update('employees', ['invitation_sent_at' => my_date_now()]);
+        $this->db->where('email', $email)->update('employees', ['invitation_sent_at' => get_user_datetime_only()]);
     } else {
         log_message('error', 'Email failed: ' . $this->email->print_debugger());
     }

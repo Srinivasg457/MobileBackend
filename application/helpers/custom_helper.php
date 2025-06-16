@@ -31,21 +31,21 @@ if (!function_exists('is_subscribed')) {
 }
 //get date time
 if (!function_exists('get_user_datetime_only')) {
-	function get_user_datetime_only()
+	function get_user_datetime_only($user_id)
 	{
 		// Get a reference to the controller object
 		$ci = &get_instance();
-		return $ci->auth_model->get_user_datetime_only();
+		return $ci->auth_model->get_user_datetime_only($user_id);
 	}
 }
 
 //get time
 if (!function_exists('get_user_time_value')) {
-	function get_user_time_value()
+	function get_user_time_value($user_id)
 	{
 		// Get a reference to the controller object
 		$ci = &get_instance();
-		return $ci->auth_model->get_user_time_value();
+		return $ci->auth_model->get_user_time_value($user_id);
 	}
 }
 
