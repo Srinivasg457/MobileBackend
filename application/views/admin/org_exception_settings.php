@@ -231,7 +231,15 @@
 
 
                             <div class="col-12 mt-5 form-group">
-                                <button type="submit" class="btn btn-info">Save Settings</button>
+                                <?php if (is_pack_trial()): ?>
+                                    <span class="text-danger pull-left mt-2" title="Upgrade your plan to enable editing.">
+                                        <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
+                                    </span>
+                                <?php else: ?>
+                                    <button type="submit" class="btn btn-info">
+                                        Save Settings
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </form>
