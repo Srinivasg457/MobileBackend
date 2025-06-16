@@ -94,7 +94,7 @@ class Organization_settings extends Home_Controller {
     $user_id = $this->session->userdata('id');
     
     // Validate required fields
-    if (empty($this->input->post('time_zone'))) {
+    if (empty($this->input->post('time_zone_selected'))) {
         $this->output
             ->set_content_type('application/json')
             ->set_status_header(400)
@@ -118,8 +118,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
             'timecards_time_interval'  => $this->input->post('timecards_time_interval', TRUE),
-            'time_zone'                => $this->input->post('time_zone', TRUE),
-            'created_at'               => get_user_datetime_only(),
+            'time_zone'                => $this->input->post('time_zone_selected', TRUE)
             ];
 
         // Clean data for XSS prevention
@@ -234,7 +233,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
             'timecards_time_interval'  => 5,
-            'time_zone'                => $this->input->post('time_zone', TRUE) // <-- Added this line for timezone
+            'time_zone'                => $this->input->post('time_zone_selected', TRUE) // <-- Added this line for timezone
         ];
     
         // Clean data for XSS prevention
@@ -339,6 +338,28 @@ class Organization_settings extends Home_Controller {
 
         if ($query->num_rows() > 0) {
             $settings = $query->row_array();
+
+            // Fetch user's timezone and country code from users table
+            $user = $this->db
+                ->select('timezone, country')
+                ->get_where('users', ['id' => $user_id])
+                ->row_array();
+
+            // Add timezone to settings
+            $settings['timezone'] = $user['timezone'] ?? null;
+
+            // Fetch country name from country table using country_code
+            if (!empty($user['country'])) {
+                $country = $this->db
+                    ->select('name')
+                    ->get_where('country', ['id' => $user['country']])
+                    ->row_array();
+
+                $settings['country_name'] = $country['name'] ?? null;
+            } else {
+                $settings['country_name'] = null;
+            }
+
             return $settings;
         } else {
             return ['error' => 'No settings found for this user.'];
@@ -372,10 +393,10 @@ class Organization_settings extends Home_Controller {
 
 public function get_organization_settings()
 {
-    $user_id = $this->input->get('user_id') ?? $this->session->userdata('user_id');
+    $user_id = $this->input->get('user_id')?? $this->session->userdata('user_id');
+    
     $status = $this->input->get('status'); // Fetch status from the request
 
-    // Validate inputs
     if (!$user_id || !$status) {
         echo json_encode(['error' => 'Missing user_id or status parameter.']);
         return;
@@ -385,22 +406,21 @@ public function get_organization_settings()
     if ($status == 1) {
         $table = 'org_settings';
     } else if ($status == 2) {
-        $table = 'organization_exception_setting'; // Ensure this matches your DB table name
+        $table = 'organization_exception_setting';
     } else {
         echo json_encode(['error' => 'Invalid status value.']);
         return;
     }
 
-    // Execute query to fetch all matching rows
+    // Execute query
     $query = $this->db->get_where($table, ['user_id' => $user_id]);
 
     if ($query->num_rows() > 0) {
-        echo json_encode($query->result_array()); // Return all matching rows
+        echo json_encode($query->row_array());
     } else {
         echo json_encode(['error' => 'No settings found for this user.']);
     }
 }
-
 
 
 
@@ -660,45 +680,5 @@ public function get_user_timestamp()
         ]);
     }
 }
-// public function get_user_datetime_only()
-// {
-//     // Get user_id from session
-//     $user_id = $this->session->userdata('id');
-
-//     // Optional override for testing
-//     $param_user_id = $this->input->get_post('user_id');
-//     if (!empty($param_user_id)) {
-//         $user_id = $param_user_id;
-//     }
-
-//     // Validate
-//     if (empty($user_id) || !is_numeric($user_id)) {
-//         http_response_code(400);
-//         echo 'Invalid user ID';
-//         return;
-//     }
-
-//     // Load DB if not autoloaded
-//     $this->load->database();
-//     $user = $this->db->get_where('users', ['id' => $user_id])->row();
-
-//     if (!$user || empty($user->timezone)) {
-//         http_response_code(404);
-//         echo 'User not found or timezone not set';
-//         return;
-//     }
-
-//     try {
-//         $tz = new DateTimeZone($user->timezone);
-//         $now = new DateTime('now', $tz);
-
-//         // Return only the datetime string
-//         echo $now->format('Y-m-d H:i:s');
-//     } catch (Exception $e) {
-//         http_response_code(400);
-//         echo 'Invalid timezone: ' . $e->getMessage();
-//     }
-// }
-
 }
 ?>
