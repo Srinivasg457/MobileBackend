@@ -15,26 +15,39 @@
 
           </div>
 
-          <div class="box-body">
-            <p><?php echo trans('your-subscription') ?>: <strong><?php echo html_escape($user->package_name) ?> <?php echo trans('plan') ?></strong></p>
-            <p><?php echo trans('price') ?>: <strong><?php echo price_formatted($user->amount, 'site') ?> </strong></p>
-            <p><?php echo trans('billing-frequency') ?> : <strong><?php echo ucfirst(html_escape($user->billing_type)) ?></strong> </p>
-            <p><?php echo trans('last-billing') ?> : <strong><?php echo my_date_show($user->created_at) ?></strong> </p>
-            <p><?php echo trans('next-billing') ?> : <strong><?php echo my_date_show($user->expire_on); ?></strong>
-              <strong class="text-danger">(<?php echo date_dif(date('Y-m-d'), $user->expire_on) ?> <?php echo trans('days-left') ?>)</strong></strong>
-            </p>
-          </div>
-          <div class="box-footer text-center soft-<?php if ($user->status == 'verified') {
-                                                    echo "success";
-                                                  } else {
-                                                    echo "danger";
-                                                  } ?>">
-            <?php echo trans('payment-status') ?>: &emsp; <i class="fa fa-<?php if ($user->status == 'verified') {
-                                                                            echo "check";
-                                                                          } else {
-                                                                            echo "times";
-                                                                          } ?>"></i> <?php echo ucfirst(html_escape($user->status)) ?>
-          </div>
+
+
+          <?php if ($user->package_name != 'Trial'): ?>
+            <div class="box-body">
+              <p><?php echo trans('your-subscription') ?>: <strong><?php echo html_escape($user->package_name) ?> <?php echo trans('plan') ?></strong></p>
+              <p><?php echo trans('price') ?>: <strong><?php echo price_formatted($user->amount, 'site') ?> </strong></p>
+              <p><?php echo trans('billing-frequency') ?> : <strong><?php echo ucfirst(html_escape($user->billing_type)) ?></strong> </p>
+              <p><?php echo trans('last-billing') ?> : <strong><?php echo my_date_show($user->created_at) ?></strong> </p>
+              <p><?php echo trans('next-billing') ?> : <strong><?php echo my_date_show($user->expire_on); ?></strong>
+                <strong class="text-danger">(<?php echo date_dif(date('Y-m-d'), $user->expire_on) ?> <?php echo trans('days-left') ?>)</strong>
+              </p>
+            </div>
+
+            <div class="box-footer text-center soft-<?php if ($user->status == 'verified') {
+                                                      echo "success";
+                                                    } else {
+                                                      echo "danger";
+                                                    } ?>">
+              <?php echo trans('payment-status') ?>: &emsp; <i class="fa fa-<?php if ($user->status == 'verified') {
+                                                                              echo "check";
+                                                                            } else {
+                                                                              echo "times";
+                                                                            } ?>"></i> <?php echo ucfirst(html_escape($user->status)) ?>
+            </div>
+          <?php else: ?>
+            <div class="box-body">
+              <p><?php echo trans('your-subscription') ?>: <strong><?php echo trans('free-trial-of') ?> <?php echo settings()->trial_days . ' ' . trans('days') ?></strong></p>
+              <p><?php echo trans('billing-frequency') ?> : <strong><?php echo settings()->trial_days . ' ' . trans('days') ?></strong> </p>
+              <p><?php echo trans('created') ?> : <strong><?php echo my_date_show(user()->created_at) ?></strong>
+                <strong class="text-danger">(<?php echo date_dif(date('Y-m-d'), user()->trial_expire) ?> <?php echo trans('days-left') ?>)</strong>
+              </p>
+            </div>
+          <?php endif; ?>
         </div>
 
       </div>
@@ -71,7 +84,11 @@
                         <h2></h2>
                       </td>
                       <?php $i = 1;
-                      foreach ($packages as $package): ?>
+                      foreach ($packages as $package):
+                        if ($package->name == "Trial" ) {
+                          continue;
+                        }  ?>
+
                         <td class="text-center">
                           <h2 class="mt-10"><?php if ($user->package == $package->id) {
                                               echo '<i class="fa fa-check-circle text-success"></i>';
@@ -89,7 +106,7 @@
                                 </span>
                               <?php endif ?>
 
-                              <?php if ($package->dis_year != 0 && $package->price != 0): ?>
+                              <?php if ($package->dis_year != 0 && $package->yearly_price != 0): ?>
                                 <span class="yearly_show soft-blue price_year" style="display: <?php if ($user->billing_type == 'yearly') {
                                                                                                   echo "inline-block";
                                                                                                 } else {
@@ -102,28 +119,28 @@
                           <?php endif ?>
 
                           <h4 class="mb-15">
-                            <span class="price_year <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->price != 0) {
+                            <span class="price_year <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->yearly_price != 0) {
                                                       echo "price-off";
                                                     } ?>" style="display: <?php if ($user->billing_type == 'yearly') {
                                                                             echo "inline-block";
                                                                           } else {
                                                                             echo "none";
                                                                           } ?>">
-                              <?php echo price_formatted($package->price, 'site'); ?>
+                              <?php echo price_formatted($package->yearly_price, 'site'); ?>
                             </span>
 
-                            <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->price != 0): ?>
+                            <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->yearly_price != 0): ?>
                               <span class="price_year" style="display: <?php if ($user->billing_type == 'yearly') {
                                                                           echo "inline-block";
                                                                         } else {
                                                                           echo "none";
                                                                         } ?>">
-                                <?php $discount_price =  get_discount($package->price, $package->dis_year) ?>
+                                <?php $discount_price =  get_discount($package->yearly_price, $package->dis_year) ?>
                                 <?php echo price_formatted($discount_price, 'site'); ?>
                               </span>
                             <?php endif ?>
 
-                            <span class="price_month <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0) {
+                            <span class="price_month <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0) {
                                                         echo "price-off";
                                                       } ?>" style="display: <?php if ($user->billing_type == 'monthly') {
                                                                               echo "inline-block";
@@ -133,7 +150,7 @@
                               <?php echo price_formatted($package->monthly_price, 'site'); ?>
                             </span>
 
-                            <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0): ?>
+                            <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0): ?>
                               <span class="price_month" style="display: <?php if ($user->billing_type == 'monthly') {
                                                                           echo "inline-block";
                                                                         } else {
@@ -181,15 +198,15 @@
                                                       echo html_escape('(' . $feature->text . ')');
                                                     } ?></span>
                         </td>
-                        <td class="text-center">
+                        <!-- <td class="text-center">
                           <?php if ($feature->free == "none"): ?>
                             <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
                           <?php else: ?>
-                            <!-- <?php echo trans('monthly') ?> -->
+                            <?php echo trans('monthly') ?> 
                             <strong><?php echo html_escape($feature->free); ?></strong> <span class="vr"></span>
-                            <!-- <?php echo trans('yearly') ?><strong><?php echo html_escape($feature->year_basic); ?></strong> -->
+                           <?php echo trans('yearly') ?><strong><?php echo html_escape($feature->year_basic); ?></strong> 
                           <?php endif ?>
-                        </td>
+                        </td> -->
                         <td class="text-center">
                           <?php if ($feature->basic == "none"): ?>
                             <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
@@ -233,19 +250,30 @@
                     <tr>
                       <td></td>
                       <?php $b = 1;
-                      foreach ($packages as $package): ?>
+                      foreach ($packages as $package):
+                        if ($package->name == "Trial") {
+                          continue;
+                        } ?>
+
                         <td class="<?php if ($b == 2) {
                                       echo "active";
                                     } ?> text-center">
-                          <a href="<?php echo base_url('admin/subscription/upgrade/' . $package->slug) ?>" class="btn btn-<?php if ($b == 2) {
-                                                                                                                            echo "default";
-                                                                                                                          } else {
-                                                                                                                            echo "default";
-                                                                                                                          } ?> package_btn"><?php if ($b == 1) {
-                                                                                                                                              echo trans('upgrade');
-                                                                                                                                            } else {
-                                                                                                                                              echo trans('upgrade');
-                                                                                                                                            } ?></a>
+                          <?php if ($package->slug != 'trial'): ?>
+                            <a href="<?php echo base_url('admin/subscription/upgrade/' . $package->slug) ?>"
+                              class="btn btn-<?php if ($b == 2) {
+                                                echo "default";
+                                              } else {
+                                                echo "default";
+                                              } ?> package_btn">
+                              <?php if ($b == 1) {
+                                echo trans('upgrade');
+                              } else {
+                                echo trans('upgrade');
+                              } ?>
+                            </a>
+                          <?php else: ?>
+                            <!-- Optional: You can show something else for Trial package or leave empty -->
+                          <?php endif; ?>
                         </td>
                       <?php $b++;
                       endforeach; ?>

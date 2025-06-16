@@ -1,4 +1,17 @@
 <style>
+    .input-group-append {
+        border: 1px solid #ddd !important;
+        width: 40px;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        font-size: large;
+    }
+
+    .input-group-append:hover {
+        background-color: whitesmoke;
+    }
+
     [type=radio]:not(:checked),
     [type=radio]:checked {
         position: static;
@@ -171,12 +184,12 @@
         right: 10px;
         z-index: 9999;
     }
-          .content-wrapper{
-    height: unset !important;
-    min-height: unset !important;
-}
+
+    .content-wrapper {
+        height: unset !important;
+        min-height: unset !important;
+    }
 </style>
-<div id="toast-container" style="position: fixed;top: 0;"></div>
 <?php $is_edit_mode = (isset($page_title) && $page_title == "Edit"); ?>
 
 <div class="content-wrapper" style="min-height: 760.5px;">
@@ -201,34 +214,22 @@
                     <form id="orgSettingsForm" class="validate-form <?= $is_edit_mode ? '' : 'readonly-form' ?>" role="form">
 
                         <div class="row mt-5">
-                            <div class="col-12 p-0 form-group">
-                                <?php if ($is_edit_mode): ?>
-                                    <div class="form-group row mt-5">
-                                        <div class="col-md-6 form-group">
-                                            <label><?php echo trans('country') ?>:</label>
-                                            <select class="selectfield textfield--grey single_select col-sm-12" name="country" id="country_select" style="width: 100%">
-                                                <option value=""><?php echo trans('select') ?></option>
-                                                <?php foreach ($countries as $country): ?>
-                                                    <option value="<?php echo html_escape($country->id); ?>"
-                                                        <?php echo (isset($settings['country_name']) && $settings['country_name'] == $country->name) ? 'selected' : ''; ?>>
-                                                        <?php echo html_escape($country->name); ?>
-                                                    </option>
-                                                <?php endforeach ?>
-                                            </select>
+                            <div class="col-md-6 form-group">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Timezone:</label>
+                                <div class="input-group">
+                                    <input type="text" name="time_zone" value="<?= isset($settings['time_zone']) ? $settings['time_zone'] : '' ?>"
+                                        id="timezone_input" class="form-control" readonly>
+                                    <?php if ($is_edit_mode): ?>
+                                        <div class="input-group-append" id="editTimezoneBtn" style="cursor:pointer;">
+                                            <span class="input-group-text">
+                                                <i class="fa fa-edit"></i>
+                                            </span>
                                         </div>
-                                        <div class="col-md-6 form-group">
-                                            <label class="form-label">Timezone:</label>
-                                            <select name="time_zone" id="timezone" class="form-control single_select">
-                                                <option value="<?php echo html_escape($country->id); ?>"><?php echo $settings['timezone']; ?></option>
-                                            </select>
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="col-md-12">
-                                            <label class="form-label">Timezone:</label>
-                                            <input type="text" class="form-control" value="<?= isset($settings['timezone']) ? $settings['timezone'] : 'No Timezone selected' ?>" readonly>
-                                        <?php endif; ?>
-                                        </div>
-                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
                             <!-- Screenshot Flag -->
                             <div class="col-md-6 form-group">
@@ -360,7 +361,54 @@
         </div>
     </section>
 </div>
+<!-- Bootstrap Timezone Modal with Steps -->
+<div class="modal fade" id="timezoneModal" tabindex="-1" role="dialog" aria-labelledby="timezoneModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="margin-top: 10% !important">
+            <div class="modal-header">
+                <h5 class="modal-title" id="timezoneModalLabel">Edit Timezone</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
+            <div class="modal-body">
+                <!-- Step Instructions -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge badge-secondary mr-2">1</span>
+                        <strong>Select a Country</strong>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control single_select" name="country" id="country_select">
+                            <option value=""><?php echo trans('select') ?></option>
+                            <?php foreach ($countries as $country): ?>
+                                <option value="<?php echo html_escape($country->id); ?>">
+                                    <?php echo html_escape($country->name); ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3 mt-4">
+                        <span class="badge badge-secondary  mr-2">2</span>
+                        <strong>Select a Timezone</strong>
+                    </div>
+                    <div class="form-group">
+                        <select name="time_zone" id="timezone_select" class="form-control single_select" disabled>
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="saveTimezoneBtn" class="btn btn-info">Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Optional CSS for graying out form -->
 <style>
     .readonly-form input[readonly],
@@ -373,6 +421,21 @@
 </style>
 <script>
     $(document).ready(function() {
+        // Show modal
+        $('#editTimezoneBtn').on('click', function() {
+            $('#timezoneModal').modal('show');
+        });
+
+        // Save and close modal
+        $('#saveTimezoneBtn').on('click', function() {
+            const selectedTimezone = $('#timezone_select').val();
+            if (selectedTimezone != "")
+                $('#timezone_input').val(selectedTimezone);
+            $('#timezoneModal').modal('hide');
+        });
+
+
+
         $('#country_select').on('change', function() {
             var country_id = $(this).val();
             console.log(country_id);
@@ -395,17 +458,18 @@
                             $.each(response.data, function(index, value) {
                                 options += '<option value="' + value + '">' + value + '</option>';
                             });
-                            $('#timezone').html(options);
+                            $('#timezone_select').html(options);
                         } else {
-                            $('#timezone').html('<option value="">No timezones found</option>');
+                            $('#timezone_select').html('<option value="">No timezones found</option>');
                         }
+                        $('#timezone_select').prop('disabled', false);
                     },
                     error: function(xhr) {
-                        $('#timezone').html('<option value="">Error fetching timezones</option>');
+                        $('#timezone_select').html('<option value="">Error fetching timezones</option>');
                     }
                 });
             } else {
-                $('#timezone').html('<option value="">Select</option>');
+                $('#timezone_select').html(' < option value = "" > Select < /option>');
             }
         });
 
@@ -464,6 +528,7 @@
                     formData[this.name] = $(this).hasClass('toggle-flag') ? ($(this).is(':checked') ? 1 : 0) : $(this).val();
                 }
             });
+
 
             $.ajax({
                 url: "<?php echo base_url('admin/Organization_settings/save_org_settings') ?>",

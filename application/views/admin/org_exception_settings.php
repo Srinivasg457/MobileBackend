@@ -1,5 +1,18 @@
 <!-- Add to your <head> or <style> block -->
 <style>
+    .input-group-append {
+        border: 1px solid #ddd !important;
+        width: 40px;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        font-size: large;
+    }
+
+    .input-group-append:hover {
+        background-color: whitesmoke;
+    }
+
     .switch {
         position: relative;
         display: inline-block;
@@ -109,40 +122,33 @@
                             <select id="employeeSelect" class="form-control single_select"></select>
                         </div>
                     </div>
-                    <div class="form-group row mt-5">
-                        <div class="col-md-6">
-                            <label><?php echo trans('country') ?>:</label>
-                            <select class="selectfield textfield--grey single_select col-sm-12" name="country" id="country_select" style="width: 100%">
-                                <option value=""><?php echo trans('select') ?></option>
-                                <?php foreach ($countries as $country): ?>
-                                    <option value="<?php echo html_escape($country->id); ?>">
-                                        <?php echo html_escape($country->name); ?>
-                                    </option>
-                                <?php endforeach ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Timezone:</label>
-                            <select name="time_zone" id="timezone" class="form-control single_select">
-                                <option value="">Select</option>
-                                <?php foreach ($timezone as $tz): print_r($tz); ?>
-                                    <option value="<?= htmlspecialchars($tz) ?>"><?= htmlspecialchars($tz) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-
                     <form id="orgExceptionForm">
                         <div class="row" style="max-width: 1000px;padding:30px">
+                            <!-- timezone -->
+                            <div class="col-md-6 form-group">
+
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Timezone:</label>
+                                <div class="input-group">
+                                    <input type="text" name="time_zone" value="" id="timezone_input" class="form-control" readonly>
+                                    <div class="input-group-append" id="editTimezoneBtn" style="cursor:pointer;">
+                                        <span class="input-group-text">
+                                            <i class="fa fa-edit"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Screenshot -->
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Screenshot Flag:</label><br>
                                 <label class="switch">
                                     <input type="checkbox" name="screenshot_flag" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Screenshot Interval (mins):</label>
                                 <select name="screenshot_time_interval" class="form-control interval-field">
                                     <option value="1">1</option>
@@ -153,14 +159,14 @@
                             </div>
 
                             <!-- Webcam -->
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Webcam Flag:</label><br>
                                 <label class="switch">
                                     <input type="checkbox" name="webcam_flag" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Webcam Interval (mins):</label>
                                 <select name="webcam_time_interval" class="form-control interval-field">
                                     <option value="1">1</option>
@@ -171,40 +177,40 @@
                             </div>
 
                             <!-- Mouse Move -->
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Mouse Move Flag:</label><br>
                                 <label class="switch">
                                     <input type="checkbox" name="mouse_move_flag" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Mouse Move Threshold:</label>
                                 <input type="number" name="mouse_move_threshold" class="form-control" value="20" readonly />
                             </div>
 
                             <!-- Keystroke -->
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Keystroke Flag:</label><br>
                                 <label class="switch">
                                     <input type="checkbox" name="key_stroke_flag" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Keystroke Threshold:</label>
                                 <input type="number" name="key_stroke_threshold" class="form-control" value="40" readonly />
                             </div>
 
                             <!-- Idle Time -->
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Idle Time Flag:</label><br>
                                 <label class="switch">
                                     <input type="checkbox" name="idle_time_flag" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Timecards Interval (mins):</label>
                                 <!-- <select name="timecards_time_interval" class="form-control interval-field">
                             <option value="1">1</option>
@@ -215,7 +221,7 @@
                                 <input type="text" name="timecards_time_interval" class="form-control" value="1" readonly>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-6 form-group">
                                 <label>Self Login:</label><br>
                                 <label class="switch">
                                     <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
@@ -224,7 +230,7 @@
                             </div>
 
 
-                            <div class="col-12 mt-5">
+                            <div class="col-12 mt-5 form-group">
                                 <button type="submit" class="btn btn-info">Save Settings</button>
                             </div>
                         </div>
@@ -234,6 +240,60 @@
         </div>
     </section>
 </div>
+
+
+
+<!-- Bootstrap Timezone Modal with Steps -->
+<div class="modal fade" id="timezoneModal" tabindex="-1" role="dialog" aria-labelledby="timezoneModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="margin-top: 10% !important">
+            <div class="modal-header">
+                <h5 class="modal-title" id="timezoneModalLabel">Edit Timezone</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Step Instructions -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge badge-secondary mr-2">1</span>
+                        <strong>Select a Country</strong>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control single_select" name="country" id="country_select">
+                            <option value=""><?php echo trans('select') ?></option>
+                            <?php foreach ($countries as $country): ?>
+                                <option value="<?php echo html_escape($country->id); ?>">
+                                    <?php echo html_escape($country->name); ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3 mt-4">
+                        <span class="badge badge-secondary  mr-2">2</span>
+                        <strong>Select a Timezone</strong>
+                    </div>
+                    <div class="form-group">
+                        <select name="time_zone" id="timezone_select" class="form-control single_select" disabled>
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="saveTimezoneBtn" class="btn btn-info">Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
 
 <script>
@@ -286,6 +346,21 @@
     }
 
     $(document).ready(function() {
+        // Show modal
+        $('#editTimezoneBtn').on('click', function() {
+            $('#timezoneModal').modal('show');
+        });
+
+        // Save and close modal
+        $('#saveTimezoneBtn').on('click', function() {
+            const selectedTimezone = $('#timezone_select').val();
+            if (selectedTimezone != "")
+                $('#timezone_input').val(selectedTimezone);
+            $('#timezoneModal').modal('hide');
+        });
+
+
+
         $('#country_select').on('change', function() {
             var country_id = $(this).val();
             console.log(country_id);
@@ -308,17 +383,18 @@
                             $.each(response.data, function(index, value) {
                                 options += '<option value="' + value + '">' + value + '</option>';
                             });
-                            $('#timezone').html(options);
+                            $('#timezone_select').html(options);
                         } else {
-                            $('#timezone').html('<option value="">No timezones found</option>');
+                            $('#timezone_select').html('<option value="">No timezones found</option>');
                         }
+                        $('#timezone_select').prop('disabled', false);
                     },
                     error: function(xhr) {
-                        $('#timezone').html('<option value="">Error fetching timezones</option>');
+                        $('#timezone_select').html('<option value="">Error fetching timezones</option>');
                     }
                 });
             } else {
-                $('#timezone').html('<option value="">Select</option>');
+                $('#timezone_select').html(' < option value = "" > Select < /option>');
             }
         });
         // Load employees
@@ -397,6 +473,14 @@
                     $('[name="mouse_move_threshold"]').val(20).prop('disabled', false);
                     $('[name="key_stroke_threshold"]').val(40).prop('disabled', false);
 
+                    // Set the timezone input field if it's part of the employee data
+                    // if (settings['time_zone']) {
+                    //     $('#timezone').val(settings['time_zone']); // Show timezone as plain text
+                    // } else {
+                    //     $('#timezone').val('');
+                    // }
+
+
                     if (!settings.error) {
                         for (let key in settings) {
                             const field = $(`[name="${key}"]`);
@@ -464,9 +548,9 @@
             dataObj['webcam_time_interval'] = $('[name="webcam_time_interval"]').val();
             dataObj['mouse_move_threshold'] = $('[name="mouse_move_threshold"]').val();
             dataObj['key_stroke_threshold'] = $('[name="key_stroke_threshold"]').val();
-            dataObj['timecards_time_interval'] = $('[name="timecards_time_interval"]').val();      
+            dataObj['timecards_time_interval'] = $('[name="timecards_time_interval"]').val();
             // Add timezone value to the data object with the correct name
-            dataObj['time_zone_selected'] = $('#timezoneSelect').val();
+            dataObj['time_zone'] = $('#timezone_input').val();
 
             console.log(currentEmployeeId);
             console.log(dataObj);
@@ -488,65 +572,4 @@
 
 
     });
-</script>
-<!-- \<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
-
-<!-- <script>
-$(document).ready(function() {
-    // Get all timezones and sort them
-    const timezones = Intl.supportedValuesOf('timeZone').sort();
-    
-    // Add options to select
-    $.each(timezones, function(i, timezone) {
-        $('#timezoneDropdown').append($('<option>', {
-            value: timezone,
-            text: timezone
-        }));
-    });
-    
-    // Initialize select2
-    $('#timezoneDropdown').select2({
-        placeholder: "Select a timezone",
-        allowClear: true
-    });
-});
-</script> -->
-<script>
-    // $(document).ready(function() {
-    //     // Fetch timezones and populate dropdown
-    //     $.ajax({
-    //         url: "<?php echo base_url('admin/Organization_settings/get_all_timezones_list_for_dropdown') ?>",
-    //         type: 'GET',
-    //         dataType: 'json',
-    //         success: function(response) {
-    //             if (response.status === 'success') {
-    //                 const dropdown = $('#timezoneDropdown');
-    //                 dropdown.empty();
-
-    //                 // Add default option
-    //                 dropdown.append($('<option>', {
-    //                     value: '',
-    //                     text: 'Select a timezone'
-    //                 }));
-
-    //                 // Add timezone options
-    //                 $.each(response.data, function(index, timezone) {
-    //                     dropdown.append($('<option>', {
-    //                         value: timezone.id,
-    //                         text: timezone.name
-    //                     }));
-    //                 });
-
-    //                 // If you need to set a selected value (e.g., from saved settings)
-    //                 // dropdown.val(savedTimezoneId);
-    //             } else {
-    //                 console.error('Error fetching timezones:', response.message);
-    //             }
-    //         },
-    //         error: function(xhr, status, error) {
-    //             console.error('AJAX error:', error);
-    //         }
-    //     });
-    // });
 </script>
