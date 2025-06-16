@@ -98,7 +98,7 @@ class Organization_settings extends Home_Controller {
     $user_id = $this->session->userdata('id');
     
     // Validate required fields
-    if (empty($this->input->post('time_zone_selected'))) {
+    if (empty($this->input->post('time_zone'))) {
         $this->output
             ->set_content_type('application/json')
             ->set_status_header(400)
@@ -123,8 +123,8 @@ class Organization_settings extends Home_Controller {
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
             'timecards_time_interval'  => $this->input->post('timecards_time_interval', TRUE),
             'time_zone'                => $this->input->post('time_zone', TRUE),
-            'created_at'               => get_user_datetime_only(),
-            'updated_at'               => get_user_datetime_only(),
+            'created_at'               => get_user_datetime_only($user_id),
+            'updated_at'               => get_user_datetime_only($user_id)
         ];
 
 
@@ -241,8 +241,8 @@ class Organization_settings extends Home_Controller {
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
             'timecards_time_interval'  => 5,
             'time_zone'                => $this->input->post('time_zone', TRUE), // <-- Added this line for timezone
-            'created_at'               => get_user_datetime_only(),
-            'updated_at'               => get_user_datetime_only(),
+            'created_at'               => get_user_datetime_only($user_id),
+            'updated_at'               => get_user_datetime_only($user_id)
         ];
     
         // Clean data for XSS prevention

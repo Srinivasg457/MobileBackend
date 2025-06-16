@@ -404,11 +404,12 @@ class Auth_model extends CI_Model {
 
 
 
-    function get_user_time_value()
+    function get_user_time_value($user_id)
     {
 
-            $user_id = $this->session->userdata('id');
-        
+        if (!$user_id) {
+            $user_id = $ci->session->userdata('id');
+        }        
 
         // Validate
         if (empty($user_id) || !is_numeric($user_id)) {
@@ -430,13 +431,15 @@ class Auth_model extends CI_Model {
             return null;
         }
     }
-    function get_user_datetime_only()
+    function get_user_datetime_only($user_id)
     {
 
         $ci = &get_instance();
 
         // If no user_id passed, get from session
+        if(!$user_id){
             $user_id = $ci->session->userdata('id');
+        }
         
         if (empty($user_id)) {
             return null;
