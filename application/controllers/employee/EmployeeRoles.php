@@ -6,10 +6,10 @@ class EmployeeRoles extends Home_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->database();
+        $this->load->model('auth_model'); // Changed to auth_model
     }
 
-    public function index()
-    {
+    public function index() {
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
@@ -20,16 +20,10 @@ class EmployeeRoles extends Home_Controller {
         $this->load->view('admin/index', $data);
     }
 
-    /**
-     * Creates a new role for a specific organization and department.
-     */
     public function create_role() {
         $input = $this->get_input_data();
 
-        // 🔧 Set input data for validation
         $this->form_validation->set_data($input);
-    
-        // Validation rules
         $this->form_validation->set_rules('user_id', 'Organization ID', 'required|integer');
         $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
         $this->form_validation->set_rules('role_name', 'Role Name', 'required|max_length[100]');
@@ -46,7 +40,6 @@ class EmployeeRoles extends Home_Controller {
         $role_name = $input['role_name'];
         $description = $input['description'] ?? null;
 
-        // Check for existing role
         $existing = $this->db
             ->where([
                 'user_id' => $user_id,
@@ -64,7 +57,9 @@ class EmployeeRoles extends Home_Controller {
             'user_id' => $user_id,
             'department_id' => $department_id,
             'role_name' => $role_name,
-            'description' => $description
+            'description' => $description,
+            'created_at' => get_user_datetime_only(), // Using helper function
+            'updated_at' => get_user_datetime_only()  // Using helper function
         ];
 
         $this->db->trans_start();
@@ -83,9 +78,6 @@ class EmployeeRoles extends Home_Controller {
         ]);
     }
 
-    /**
-     * Common method to get input data regardless of content type.
-     */
     private function get_input_data() {
         $content_type = $this->input->server('CONTENT_TYPE');
         if (strpos($content_type, 'application/json') !== false) {
@@ -96,42 +88,34 @@ class EmployeeRoles extends Home_Controller {
 
     public function get_app_features() {
         try {
-            // Get the features from the app_features table
             $this->db->select('id, feature_name');
             $this->db->order_by('feature_name', 'asc');
             $query = $this->db->get('app_features');
             
-            // Check for database errors
             if ($query === FALSE) {
-                // Log the specific database error
                 log_message('error', 'Database error: ' . $this->db->error()['message']);
-                throw new Exception('Database query failed', 500); // Throwing exception for DB failure
+                throw new Exception('Database query failed', 500);
             }
     
             $features = $query->result();
             
-            // Check if no features were found
             if (empty($features)) {
                 log_message('error', 'No features found in the database');
                 return $this->json_response(404, 'No features found');
             }
     
-            // Return the features in JSON format
             return $this->json_response(200, 'Features fetched successfully', [
                 'features' => $features
             ]);
     
         } catch (Exception $e) {
-            // Handle exceptions thrown during database queries or logic
             log_message('error', 'Exception: ' . $e->getMessage());
             return $this->json_response($e->getCode(), $e->getMessage());
         }
     }
+
     public function get_roles_dropdown() {
         $input = $this->get_input_data();
-        $this->form_validation->set_data($input);
-
-        // Validate user_id and department_id
         $this->form_validation->set_data($input);
         $this->form_validation->set_rules('user_id', 'User ID', 'required|integer');
         $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
@@ -146,7 +130,6 @@ class EmployeeRoles extends Home_Controller {
         $department_id = $input['department_id'];
     
         try {
-            // Fetch roles filtered by user_id and department_id
             $this->db->select('id, role_name');
             $this->db->where([
                 'user_id' => $user_id,
@@ -175,15 +158,15 @@ class EmployeeRoles extends Home_Controller {
             return $this->json_response($e->getCode(), $e->getMessage());
         }
     }
-    public function get_roles_by_user()
-    {
+
+    public function get_roles_by_user() {
         $user_id = $this->session->userdata('id');
 
         if (empty($user_id) || !is_numeric($user_id)) {
             return $this->json_response(400, 'Invalid or missing user ID');
         }
 
-        $this->db->select('id, role_name, department_id'); // fixed comma issue
+        $this->db->select('id, role_name, department_id');
         $this->db->where('user_id', $user_id);
         $this->db->order_by('role_name', 'asc');
         $query = $this->db->get('employee_roles');
@@ -201,42 +184,33 @@ class EmployeeRoles extends Home_Controller {
 
         return $this->json_response(200, 'Roles fetched successfully', ['roles' => $roles]);
     }
-public function get_user_roles()
-{
-    $user_id = $this->session->userdata('user_id');
-    // Check if user ID is valid
-    if (empty($user_id) || !is_numeric($user_id)) {
-        echo json_encode(['status' => 400, 'message' => 'Invalid or missing user ID']);
-        return;
+
+    public function get_user_roles() {
+        $user_id = $this->session->userdata('user_id');
+        if (empty($user_id) || !is_numeric($user_id)) {
+            echo json_encode(['status' => 400, 'message' => 'Invalid or missing user ID']);
+            return;
+        }
+
+        $this->db->select('id, role_name');
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('role_name', 'asc');
+        $query = $this->db->get('employee_roles');
+
+        if ($query === FALSE) {
+            echo json_encode(['status' => 500, 'message' => 'Database query failed']);
+            return;
+        }
+
+        $roles = $query->result_array();
+
+        if (empty($roles)) {
+            echo json_encode(['status' => 404, 'message' => 'No roles found for this user']);
+            return;
+        }
+
+        echo json_encode(['status' => 200, 'message' => 'Roles found', 'data' => $roles]);
     }
-
-    // Fetch roles for the user from the database
-    $this->db->select('id, role_name');
-    $this->db->where('user_id', $user_id);
-    $this->db->order_by('role_name', 'asc');
-    $query = $this->db->get('employee_roles');
-
-    // Handle any database errors
-    
-    if ($query === FALSE) {
-        echo json_encode(['status' => 500, 'message' => 'Database query failed']);
-        return;
-    }
-
-    $roles = $query->result_array();
-
-    // If no roles found, return a JSON response
-    if (empty($roles)) {
-        echo json_encode(['status' => 404, 'message' => 'No roles found for this user']);
-        return;
-    }
-
-    // Return roles as a JSON response
-    echo json_encode(['status' => 200, 'message' => 'Roles found', 'data' => $roles]);
-}
-
-
-
 
     public function store_role_feature_access() {
         try {
@@ -248,7 +222,6 @@ public function get_user_roles()
                 return $this->json_response(400, 'Invalid JSON format. Please ensure the request body is correctly formatted.');
             }
     
-            // Validate role_id and user_id
             $this->form_validation->set_data([
                 'role_id' => $input['role_id'] ?? null,
                 'user_id' => $input['user_id'] ?? null
@@ -272,7 +245,6 @@ public function get_user_roles()
             $features = $input['features'];
             $errors = [];
     
-            // Validate existence of role and user
             if (!$this->db->where('id', $role_id)->get('employee_roles')->row()) {
                 return $this->json_response(404, 'Role does not exist. Please verify the Role ID.');
             }
@@ -282,10 +254,12 @@ public function get_user_roles()
             }
     
             $this->db->trans_start();
-            // Step: Set all existing features for this user-role combination to status 0 first
             $this->db->where('role_id', $role_id)
                 ->where('user_id', $user_id)
-                ->update('role_feature_access', ['status' => 0]);
+                ->update('role_feature_access', [
+                    'status' => 0,
+                    'updated_at' => get_user_datetime_only() // Using helper function
+                ]);
 
             foreach ($features as $key => $feature) {
                 $this->form_validation->set_data($feature);
@@ -320,9 +294,10 @@ public function get_user_roles()
                         $feature['is_write'] || 
                         $feature['is_action'] || 
                         $feature['is_delete']
-                    ) ? 1 : 0
+                    ) ? 1 : 0,
+                    'created_at' => get_user_datetime_only(), // Using helper function
+                    'updated_at' => get_user_datetime_only()  // Using helper function
                 ];
-                
     
                 $existing = $this->db->get_where('role_feature_access', [
                     'role_id' => $role_id,
@@ -331,7 +306,15 @@ public function get_user_roles()
                 ])->row();
     
                 if ($existing) {
-                    $this->db->where('id', $existing->id)->update('role_feature_access', $data);
+                    $this->db->where('id', $existing->id)
+                             ->update('role_feature_access', [
+                                 'is_read' => $feature['is_read'],
+                                 'is_write' => $feature['is_write'],
+                                 'is_action' => $feature['is_action'],
+                                 'is_delete' => $feature['is_delete'],
+                                 'status' => $data['status'],
+                                 'updated_at' => get_user_datetime_only() // Using helper function
+                             ]);
                 } else {
                     $this->db->insert('role_feature_access', $data);
                 }
@@ -361,32 +344,25 @@ public function get_user_roles()
             ]);
         }
     }
-    
-
 
     public function get_user_role_feature_permissions() {
-        // Retrieve user_id from the request
         $user_id = $this->input->get('user_id');
     
-        // Validate if user_id is provided
         if (!$user_id) {
             return $this->json_response(400, 'Missing user_id');
         }
     
-        // Check if the user exists
         $user_exists = $this->db->where('id', $user_id)->get('users')->row();
         if (!$user_exists) {
             return $this->json_response(404, 'User not found');
         }
     
-        // Get all roles associated with this user (including department_id)
         $roles = $this->db->select('id, role_name, department_id')
                           ->from('employee_roles')
                           ->where('user_id', $user_id)
                           ->get()
                           ->result();
     
-        // If no roles found for the user
         if (empty($roles)) {
             return $this->json_response(404, 'No roles found for the given user');
         }
@@ -394,18 +370,16 @@ public function get_user_roles()
         $result = [];
     
         foreach ($roles as $role) {
-            // Fetch feature access entries for each role, filtered by status = 1 (active)
             $access_entries = $this->db
                 ->select('rfa.feature_id, af.feature_name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
                 ->from('role_feature_access as rfa')
                 ->join('app_features as af', 'af.id = rfa.feature_id')
                 ->where('rfa.role_id', $role->id)
                 ->where('rfa.user_id', $user_id)
-                ->where('rfa.status', 1) // Only active entries
+                ->where('rfa.status', 1)
                 ->get()
                 ->result();
     
-            // Prepare features data for each role
             $features = [];
             foreach ($access_entries as $entry) {
                 $features[] = [
@@ -418,7 +392,6 @@ public function get_user_roles()
                 ];
             }
     
-            // Add role and its features to the result array
             $result[] = [
                 'role_id' => $role->id,
                 'role_name' => $role->role_name,
@@ -427,28 +400,22 @@ public function get_user_roles()
             ];
         }
     
-        // Return the structured response
         return $this->json_response(200, 'Data fetched successfully', $result);
     }
-    
 
-    public function get_feature_access_by_user_and_role()
-    {
+    public function get_feature_access_by_user_and_role() {
         $user_id = $this->input->get('user_id');
         $role_id = $this->input->get('role_id');
     
-        // Validate input
         if (!$user_id || !$role_id) {
             return $this->json_response(400, 'Missing user_id or role_id');
         }
     
-        // Check if the user exists
         $user_exists = $this->db->where('id', $user_id)->get('users')->row();
         if (!$user_exists) {
             return $this->json_response(404, 'User not found');
         }
     
-        // Check if the role exists for this user
         $role = $this->db->where('id', $role_id)
             ->where('user_id', $user_id)
             ->get('employee_roles')
@@ -457,14 +424,13 @@ public function get_user_roles()
             return $this->json_response(404, 'Role not found for the given user');
         }
     
-        // Get feature access data (only where status = 1)
         $access_entries = $this->db
             ->select('rfa.feature_id, af.feature_name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
             ->from('role_feature_access as rfa')
             ->join('app_features as af', 'af.id = rfa.feature_id')
             ->where('rfa.role_id', $role_id)
             ->where('rfa.user_id', $user_id)
-            ->where('rfa.status', 1) // Include only active entries
+            ->where('rfa.status', 1)
             ->get()
             ->result();
     
@@ -493,70 +459,66 @@ public function get_user_roles()
     
         return $this->json_response(200, 'Feature access data fetched successfully', $response);
     }
-    
 
-public function delete_role()
-{
-    header('Content-Type: application/json');
+    public function delete_role() {
+        header('Content-Type: application/json');
 
-    // Get parameters from POST
-    $employee_user_id = $this->input->post('user_id');
-    $department_id = $this->input->post('department_id');
-    $role_name = $this->input->post('role_name');
+        $employee_user_id = $this->input->post('user_id');
+        $department_id = $this->input->post('department_id');
+        $role_name = $this->input->post('role_name');
 
-    if (!$employee_user_id || !$department_id || !$role_name) {
-        http_response_code(400);
-        echo json_encode([
-            'status' => false,
-            'message' => 'Missing required parameters.'
-        ]);
-        return;
+        if (!$employee_user_id || !$department_id || !$role_name) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => false,
+                'message' => 'Missing required parameters.'
+            ]);
+            return;
+        }
+
+        $role = $this->db->where('user_id', $employee_user_id)
+                         ->where('department_id', $department_id)
+                         ->where('role_name', $role_name)
+                         ->get('employee_roles')
+                         ->row();
+
+        if (!$role) {
+            http_response_code(404);
+            echo json_encode([
+                'status' => false,
+                'message' => 'Role not found or access denied.'
+            ]);
+            return;
+        }
+
+        $assigned = $this->db->where('role_id', $role->id)->limit(1)->get('employees')->row();
+        if ($assigned) {
+            http_response_code(409);
+            echo json_encode([
+                'status' => false,
+                'message' => 'Cannot delete: Role is assigned to one or more employees.'
+            ]);
+            return;
+        }
+
+        $this->db->where('id', $role->id)
+                 ->update('employee_roles', [
+                     'deleted_at' => get_user_datetime_only() // Using helper function
+                 ]);
+
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode([
+                'status' => true,
+                'message' => 'Role deleted successfully.'
+            ]);
+        } else {
+            http_response_code(500);
+            $db_error = $this->db->error();
+            echo json_encode([
+                'status' => false,
+                'message' => 'Failed to delete role. Database error.',
+                'error' => $db_error['message'] ?? 'Unknown error'
+            ]);
+        }
     }
-
-    // Get the role to delete
-    $role = $this->db->where('user_id', $employee_user_id)
-                     ->where('department_id', $department_id)
-                     ->where('role_name', $role_name)
-                     ->get('employee_roles')
-                     ->row();
-
-    if (!$role) {
-        http_response_code(404);
-        echo json_encode([
-            'status' => false,
-            'message' => 'Role not found or access denied.'
-        ]);
-        return;
-    }
-
-    // Check if role is assigned to any employee (if needed)
-    $assigned = $this->db->where('role_id', $role->id)->limit(1)->get('employees')->row();
-    if ($assigned) {
-        http_response_code(409);
-        echo json_encode([
-            'status' => false,
-            'message' => 'Cannot delete: Role is assigned to one or more employees.'
-        ]);
-        return;
-    }
-
-    // Proceed to delete
-    if ($this->db->delete('employee_roles', ['id' => $role->id])) {
-        echo json_encode([
-            'status' => true,
-            'message' => 'Role deleted successfully.'
-        ]);
-    } else {
-        http_response_code(500);
-        $db_error = $this->db->error();
-        echo json_encode([
-            'status' => false,
-            'message' => 'Failed to delete role. Database error.',
-            'error' => $db_error['message'] ?? 'Unknown error'
-        ]);
-    }
-}
-
-    
-
 }
