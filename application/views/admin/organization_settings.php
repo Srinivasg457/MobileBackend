@@ -203,9 +203,17 @@
                 </h3>
             <?php else: ?>
                 <h3 class="box-title">Organization Settings
-                    <a href="<?= base_url('organization/edit') ?>" class="pull-right btn btn-info btn-sm rounded">
-                        <i class="fa fa-edit"></i> Edit Settings
-                    </a>
+                    <?php if (is_pack_trial()): ?>
+                        <span class="text-danger pull-right mt-2" title="Upgrade your plan to enable editing.">
+                            <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
+                        </span>
+                    <?php else: ?>
+                        <a href="<?= base_url('organization/edit') ?>" class="pull-right btn btn-info btn-sm rounded">
+                            <i class="fa fa-edit"></i> Edit Settings
+                        </a>
+                    <?php endif; ?>
+
+
                 </h3>
             <?php endif; ?>
 
@@ -352,7 +360,13 @@
 
                         <?php if ($is_edit_mode): ?>
                             <div class="mt-3">
-                                <button type="submit" class="btn btn-info">Save Settings</button>
+                                <?php if (is_pack_trial()): ?>
+                                    <span class="text-danger pull-left mt-2" title="Upgrade your plan to enable editing.">
+                                        <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
+                                    </span>
+                                <?php else: ?>
+                                    <button type="submit" class="btn btn-info">Save Settings</button>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
                     </form>
