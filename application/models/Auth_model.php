@@ -281,6 +281,36 @@ class Auth_model extends CI_Model {
 
         return $this->email->send();
     }
+    public function is_subscribed()
+    {
+            $user = user(); // assuming this helper exists and returns the logged-in user
+            if (!$user) return false;
+            $user_id = $user->id;
+
+        // Get user data
+        $user = $this->db->get_where('users', ['id' => $user_id])->row();
+        if (!$user) {
+            return false;
+        }
+
+        // Calculate days left in trial
+        $days_left = date_dif(date('Y-m-d'), $user->trial_expire);
+
+        // Check if payment is verified for monthly/yearly
+        $payment = $this->db->select('billing_type, status')
+            ->where('user_id', $user_id)
+            ->order_by('created_at', 'DESC')
+            ->get('payment')
+            ->row();
+
+        $isSubscribed = ($days_left >= 0) || (
+            $payment &&
+            in_array($payment->billing_type, ['monthly', 'yearly']) &&
+            $payment->status === 'verified'
+        );
+
+        return $isSubscribed;
+    }
 
     public function is_employee()
     {
