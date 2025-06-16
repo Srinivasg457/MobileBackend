@@ -1159,7 +1159,6 @@ public function store_Employee_Activity()
 
 
 
-
 public function store_Time_Log()
 {
     // Allow only POST
@@ -1181,8 +1180,7 @@ public function store_Time_Log()
         'start_time'         => 'start_time',
         'end_time'          => 'end_time',
         'total_active_time' => 'total_active_time',
-        'total_idle_time'   => 'total_idle_time',
-        'status'            => 'status'
+        'total_idle_time'   => 'total_idle_time'
     ];
 
     $headers = [];
@@ -1236,17 +1234,6 @@ public function store_Time_Log()
                     "message" => ucfirst(str_replace('_', ' ', $field)) . " must be between {$limits['min']} and {$limits['max']}"
                 ]));
         }
-    }
-
-    // Validate status is an integer (any value)
-    if (!is_numeric($headers['status'])) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Status must be an integer value"
-            ]));
     }
 
     // Validate date format
@@ -1313,7 +1300,6 @@ public function store_Time_Log()
         'end_time'           => $headers['end_time'],
         'total_active_time' => $headers['total_active_time'], // Stored as HH:MM:SS
         'total_idle_time'    => $headers['total_idle_time'], // Stored as HH:MM:SS
-        'status'             => (int)$headers['status'],
         'created_at'         => $current_time,
         'updated_at'        => $current_time
     ];
