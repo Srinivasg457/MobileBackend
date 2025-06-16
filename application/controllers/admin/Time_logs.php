@@ -414,13 +414,12 @@ return $this->output
             'log_date' => 'log_date',
             'end_time' => 'end_time',
             'total_active_time' => 'total_active_time',
-            'total_idle_time' => 'total_idle_time',
-            'status' => 'status'
+            'total_idle_time' => 'total_idle_time'
         ];
     
         $headers = [];
         $missing_fields = [];
-        
+    
         foreach ($required_headers as $field => $label) {
             $value = $this->input->get_request_header($field, TRUE);
             if (empty($value)) {
@@ -465,17 +464,14 @@ return $this->output
     
             // Function to convert various time formats to HH:MM:SS
             function convertToHHMMSS($time) {
-                // If already in HH:MM:SS format
                 if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
                     return $time;
                 }
-                
-                // If in HH-MM-SS format
+    
                 if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $time)) {
                     return str_replace('-', ':', $time);
                 }
-                
-                // If it's a decimal number (hours)
+    
                 if (is_numeric($time)) {
                     $hours = (float)$time;
                     $total_seconds = (int)($hours * 3600);
@@ -483,10 +479,10 @@ return $this->output
                     $hours = floor($total_seconds / 3600);
                     $minutes = floor(($total_seconds % 3600) / 60);
                     $seconds = $total_seconds % 60;
-                    
+    
                     return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
                 }
-                
+    
                 throw new Exception("Invalid time format");
             }
     
@@ -509,7 +505,6 @@ return $this->output
             'end_time' => $end_datetime,
             'total_active_time' => $active_time,
             'total_idle_time' => $idle_time,
-            'status' => $headers['status'],
             'updated_at' => $current_time
         ];
     
@@ -535,13 +530,13 @@ return $this->output
                 ]));
         }
     
-        // After the successful update, get the updated record
+        // Get the updated record
         $this->db->where('employee_id', $headers['employee_id']);
         $this->db->where('user_id', $headers['user_id']);
         $this->db->where('log_date', $headers['log_date']);
         $updated_record = $this->db->get('time_logs')->row();
     
-        // Log the successful operation
+        // Log success
         log_message('info', "Time log updated for employee {$headers['employee_id']} on date {$headers['log_date']}");
     
         return $this->output
@@ -557,7 +552,7 @@ return $this->output
                 ]
             ]));
     }
-
+    
 
 
     public function get_employee_by_email()
