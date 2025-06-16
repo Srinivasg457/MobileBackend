@@ -371,10 +371,10 @@ class Organization_settings extends Home_Controller {
 
 public function get_organization_settings()
 {
-    $user_id = $this->input->get('user_id')?? $this->session->userdata('user_id');
-    
+    $user_id = $this->input->get('user_id') ?? $this->session->userdata('user_id');
     $status = $this->input->get('status'); // Fetch status from the request
 
+    // Validate inputs
     if (!$user_id || !$status) {
         echo json_encode(['error' => 'Missing user_id or status parameter.']);
         return;
@@ -384,21 +384,22 @@ public function get_organization_settings()
     if ($status == 1) {
         $table = 'org_settings';
     } else if ($status == 2) {
-        $table = 'organization_exception_setting';
+        $table = 'organization_exception_setting'; // Ensure this matches your DB table name
     } else {
         echo json_encode(['error' => 'Invalid status value.']);
         return;
     }
 
-    // Execute query
+    // Execute query to fetch all matching rows
     $query = $this->db->get_where($table, ['user_id' => $user_id]);
 
     if ($query->num_rows() > 0) {
-        echo json_encode($query->row_array());
+        echo json_encode($query->result_array()); // Return all matching rows
     } else {
         echo json_encode(['error' => 'No settings found for this user.']);
     }
 }
+
 
 
 
