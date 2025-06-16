@@ -68,95 +68,87 @@ class Time_logs extends Home_Controller {
     }
 
     public function checkExistingTimelog() 
-{
-    // Get identifiers from multiple sources (header > session > get/post)
-    $employee_id = $this->input->get_request_header('employee_id', TRUE)
-                  ?? $this->session->userdata('employee_id')
-                  ?? $this->input->get_post('employee_id');
+    {
+        try {
+            // Strictly get identifiers from headers only
+            $employee_id = $this->input->get_request_header('employee_id', TRUE);
+            $user_id = $this->input->get_request_header('user_id', TRUE);
+            $date = $this->input->get_request_header('date', TRUE);
     
-    $user_id = $this->input->get_request_header('user_id', TRUE)
-               ?? $this->session->userdata('employee_org_id')
-               ?? $this->session->userdata('id')
-               ?? $this->input->get_post('user_id');
+            // Validate required headers
+            if (empty($employee_id) || empty($user_id)) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(400)
+                    ->set_output(json_encode([
+                        'status' => false,
+                        'message' => 'Missing required headers',
+                        'required_headers' => [
+                            'employee_id' => true,
+                            'user_id' => true
+                        ],
+                        'provided_headers' => [
+                            'employee_id' => $employee_id,
+                            'user_id' => $user_id,
+                            'date' => $date
+                        ]
+                    ]));
+            }
     
-    $date = $this->input->get_request_header('date', TRUE)
-            ?? $this->input->get_post('date');
-
-    // Use today's date if none provided
-    if (empty($date)) {
-        $date = date('Y-m-d');
-    }
-
-    // Validate required parameters
-    if (empty($employee_id) || empty($user_id)) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                'status' => false,
-                'message' => 'Missing required parameters',
-                'missing' => [
-                    'employee_id' => empty($employee_id),
-                    'user_id' => empty($user_id)
-                ],
-                'request_sources' => [
-                    'headers' => [
-                        'employee_id' => $this->input->get_request_header('employee_id', TRUE) !== null,
-                        'user_id' => $this->input->get_request_header('user_id', TRUE) !== null
-                    ],
-                    'session' => [
-                        'employee_id' => $this->session->userdata('employee_id') !== null,
-                        'user_id' => $this->session->userdata('employee_org_id') !== null
-                    ],
-                    'request' => [
-                        'employee_id' => $this->input->get_post('employee_id') !== null,
-                        'user_id' => $this->input->get_post('user_id') !== null
-                    ]
-                ]
-            ]));
-    }
-
-    // Query for existing timelog
-    $this->db->select('log_id, employee_id, user_id, log_date, start_time, 
-                      end_time, total_active_time, total_idle_time, status, 
-                      created_at, updated_at');
-    $this->db->from('time_logs');
-    $this->db->where('user_id', $user_id);
-    $this->db->where('employee_id', $employee_id);
-    $this->db->where('DATE(log_date)', $date);
+            // Set default date if not provided
+            $date = empty($date) ? date('Y-m-d') : $date;
     
-    $query = $this->db->get();
-    $result = $query->row_array();
-
-    if (empty($result)) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(404)
-            ->set_output(json_encode([
-                'status' => false,
-                'message' => 'No time log found',
-                'search_parameters' => [
-                    'employee_id' => $employee_id,
-                    'user_id' => $user_id,
-                    'date' => $date
-                ]
-            ]));
+            // Build query without status field
+            $this->db->select('log_id, employee_id, user_id, log_date, start_time, 
+                             end_time, total_active_time, total_idle_time, 
+                             created_at, updated_at');
+            $this->db->from('time_logs');
+            $this->db->where('user_id', $user_id);
+            $this->db->where('employee_id', $employee_id);
+            $this->db->where('DATE(log_date)', $date);
+            
+            $query = $this->db->get();
+            
+            if (!$query) {
+                throw new Exception('Database query failed: ' . $this->db->error()['message']);
+            }
+            
+            $result = $query->row_array();
+    
+            if (empty($result)) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(404)
+                    ->set_output(json_encode([
+                        'status' => false,
+                        'message' => 'No time log found',
+                        'search_parameters' => [
+                            'employee_id' => $employee_id,
+                            'user_id' => $user_id,
+                            'date' => $date
+                        ]
+                    ]));
+            }
+    
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode([
+                    'status' => true,
+                    'data' => $result
+                ]));
+    
+        } catch (Exception $e) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Internal Server Error',
+                    'error' => $e->getMessage()
+                ]));
+        }
     }
-
-    // Return successful response
-    return $this->output
-        ->set_content_type('application/json')
-        ->set_status_header(200)
-        ->set_output(json_encode([
-            'status' => true,
-            'data' => $result,
-            'request_source' => $this->getRequestSource([
-                'employee_id' => $employee_id,
-                'user_id' => $user_id,
-                'date' => $date
-            ])
-        ]));
-}
 
 /**
  * Helper method to determine request parameter sources
