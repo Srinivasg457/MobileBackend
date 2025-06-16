@@ -24,6 +24,9 @@ class Hrm extends Home_Controller {
         $data['departments'] = $this->admin_model->get_by_user('departments');
         $data['main_content'] = $this->load->view('admin/user/hrm/department',$data,TRUE);
         $this->load->view('admin/index',$data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
 
 
@@ -83,6 +86,9 @@ class Hrm extends Home_Controller {
         $data['employees'] = $this->hrm_model->get_employees();
         $data['main_content'] = $this->load->view('admin/user/hrm/employee',$data,TRUE);
         $this->load->view('admin/index',$data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
 
 
@@ -294,6 +300,9 @@ public function employee_add()
 
         $id = $this->input->post('id', true);
         $email = $this->input->post('email', true);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
 
         $data = array(
             'user_id' => user()->id,
