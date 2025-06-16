@@ -658,43 +658,43 @@ public function get_user_timestamp()
         ]);
     }
 }
-
-public function get_user_datetime($user_id = null)
+public function get_user_datetime_only()
 {
-    // Check for user ID from POST/GET or session
+    // Get user_id from session
+    $user_id = $this->session->userdata('id');
+
+    // Optional override for testing
     $param_user_id = $this->input->get_post('user_id');
     if (!empty($param_user_id)) {
         $user_id = $param_user_id;
-    } elseif (!$user_id) {
-        $user_id = $this->session->userdata('id');
     }
 
-    // Validate user ID
+    // Validate
     if (empty($user_id) || !is_numeric($user_id)) {
-        return 'User ID is missing or invalid.';
+        http_response_code(400);
+        echo 'Invalid user ID';
+        return;
     }
 
-    // Load database
+    // Load DB if not autoloaded
     $this->load->database();
-
-    // Fetch user from DB
     $user = $this->db->get_where('users', ['id' => $user_id])->row();
 
-    if (!$user) {
-        return 'User not found.';
+    if (!$user || empty($user->timezone)) {
+        http_response_code(404);
+        echo 'User not found or timezone not set';
+        return;
     }
 
-    if (empty($user->timezone)) {
-        return 'Please update your timezone in profile settings.';
-    }
-
-    // Get timestamp in user's timezone
     try {
         $tz = new DateTimeZone($user->timezone);
         $now = new DateTime('now', $tz);
-        return $now->format('Y-m-d H:i:s');
+
+        // Return only the datetime string
+        echo $now->format('Y-m-d H:i:s');
     } catch (Exception $e) {
-        return 'Invalid timezone: ' . $e->getMessage();
+        http_response_code(400);
+        echo 'Invalid timezone: ' . $e->getMessage();
     }
 }
 
