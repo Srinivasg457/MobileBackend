@@ -51,8 +51,8 @@ class Notification extends Home_Controller {
             $status = ($status === '1' || $status === 1) ? 1 : 0;
     
             // Set timezone to Indian Standard Time
-            date_default_timezone_set('Asia/Kolkata');
-            $created_at = date('Y-m-d H:i:s');
+            // date_default_timezone_set('Asia/Kolkata');
+            $created_at = get_user_datetime_only($user_id);
     
             // Prepare data
             $data = [
