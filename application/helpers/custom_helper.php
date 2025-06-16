@@ -20,6 +20,15 @@ if (!function_exists('is_employee')) {
 		return $ci->auth_model->is_employee();
 	}
 }
+
+if (!function_exists('is_subscribed')) {
+	function is_subscribed()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_subscribed();
+	}
+}
 //get date time
 if (!function_exists('get_user_datetime_only')) {
 	function get_user_datetime_only()
