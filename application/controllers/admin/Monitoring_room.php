@@ -16,6 +16,9 @@ class Monitoring_room extends Home_Controller {
         $data['page_title'] = 'Live Monitoring';
         $data['main_content'] = $this->load->view('admin/monitoring_room', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
     public function list_employees_by_user()
 {
