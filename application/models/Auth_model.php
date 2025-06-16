@@ -291,6 +291,18 @@ class Auth_model extends CI_Model {
             return FALSE;
         }
     }
+    public function is_pack_trial()
+    {
+
+        $user_id = user()->id;
+        $this->db->where('id', $user_id);
+        $user = $this->db->get('users')->row();
+
+        if ($user && strtolower($user->user_type) === 'trial') {
+            return true;
+        }
+        return false;
+    }
 
 
 }

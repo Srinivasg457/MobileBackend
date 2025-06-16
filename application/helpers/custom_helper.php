@@ -21,6 +21,16 @@ if (!function_exists('is_employee')) {
 	}
 }
 
+//check plan
+if (!function_exists('is_pack_trial')) {
+	function is_pack_trial()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_pack_trial();
+	}
+}
+
 	//check user
 	if (!function_exists('is_user')) 
 	{
