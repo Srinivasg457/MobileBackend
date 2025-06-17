@@ -27,6 +27,9 @@ class Organization_settings extends Home_Controller {
     }
     public function Organization_settings_edit()
     {
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
         $data = array();
         $data['page_title'] = 'Edit';
         $data["settings"] = $this->PreLoading_get_org_settings();
@@ -40,6 +43,9 @@ class Organization_settings extends Home_Controller {
     {
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
+        }
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
         }
         $data = array();
         $data['page_title'] = 'Ex Organization settings';

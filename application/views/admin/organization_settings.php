@@ -204,7 +204,7 @@
             <?php else: ?>
                 <h3 class="box-title">Organization Settings
                     <?php if (is_pack_trial()): ?>
-                        <span class="text-danger pull-right mt-2" title="Upgrade your plan to enable editing.">
+                        <span class="text-danger pull-right mt-2" data-toggle="tooltip" data-placement="top" title="Upgrade your plan to enable editing.">
                             <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
                         </span>
                     <?php else: ?>
@@ -361,7 +361,7 @@
                         <?php if ($is_edit_mode): ?>
                             <div class="mt-3">
                                 <?php if (is_pack_trial()): ?>
-                                    <span class="text-danger pull-left mt-2" title="Upgrade your plan to enable editing.">
+                                    <span class="text-danger pull-left mt-2" data-toggle="tooltip" data-placement="top" title="Upgrade your plan to enable editing.">
                                         <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
                                     </span>
                                 <?php else: ?>

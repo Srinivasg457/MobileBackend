@@ -1,292 +1,292 @@
 <?php if (isset($page_title) && $page_title != 'Online Payment'): ?>
 
-<aside class="main-sidebar">
+  <aside class="main-sidebar">
 
-  <section class="sidebar mt-10">
+    <section class="sidebar mt-10">
 
-    <ul class="sidebar-menu" data-widget="tree">
-      <?php if (get_user_info() == TRUE) {
-        $uval = 'd-block';
-      } else {
-        $uval = 'd-none';
-      } ?>
+      <ul class="sidebar-menu" data-widget="tree">
+        <?php if (get_user_info() == TRUE) {
+          $uval = 'd-block';
+        } else {
+          $uval = 'd-none';
+        } ?>
 
-      <?php if (is_employee()): ?>
-        <li class="<?php if (isset($page_title) && $page_title == "Employee Dashboard") {
-                      echo "active";
-                    } ?>">
-          <a href="<?php echo base_url('employeedashboard') ?>">
-            <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
-          </a>
-        </li>
-        <li class="<?php if (isset($page_title) && $page_title == "Screenshots") {
-                      echo "active";
-                    } ?>">
-          <a href="<?php echo base_url('employeedashboard/screenshot') ?>">
-            <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
-          </a>
-        </li>
-        <li class="<?php if (isset($page_title) && $page_title == "Employee Webcam screenshots") {
-                      echo "active";
-                    } ?>">
-          <a href="<?php echo base_url('admin/ScreenshotController/Employeewebcam') ?>">
-            <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
-          </a>
-        </li>
-        <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
-                      echo "active";
-                    } ?>">
-          <a href="<?php echo base_url('employee/Timecards_manual') ?>">
-            <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Activity Log" ?></span>
-          </a>
-        </li>
-        <li class="<?php if (isset($page_title) && $page_title == "Report") {
-                      echo "active";
-                    } ?>">
-          <a href="<?php echo base_url('employee/report') ?>">
-            <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Report" ?></span>
-          </a>
-        </li>
-
-      <?php else :  ?>
-        <?php if (is_admin()): ?>
-          <li class="<?php if (isset($page_title) && $page_title == "Dashboard") {
+        <?php if (is_employee()): ?>
+          <li class="<?php if (isset($page_title) && $page_title == "Employee Dashboard") {
                         echo "active";
                       } ?>">
-            <a href="<?php echo base_url('admin/dashboard') ?>">
-              <i class="bi bi-speedometer mr-5"></i> <span><?php echo trans('dashboard') ?></span>
-            </a>
-          </li>
-
-          <li class="treeview <?php if (isset($main_page) && $main_page == "Settings") {
-                                echo "active";
-                              } ?>">
-            <a href="#"><i class="bi bi-gear-fill mr-5"></i>
-              <span><?php echo trans('settings') ?></span>
-              <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
-            </a>
-
-            <ul class="treeview-menu">
-              <li class="<?php if (isset($page_title) && $page_title == "Settings") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/settings') ?>">
-                  <i class="bi bi-layout-text-window-reverse mr-5"></i> <span><?php echo trans('website-settings') ?></span>
-                </a>
-              </li>
-
-              <li class="<?php if (isset($page_title) && $page_title == "Appearance") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/settings/appearance') ?>">
-                  <i class="bi bi-brightness-high mr-5"></i> <span><?php echo trans('appearance') ?></span>
-                </a>
-              </li>
-
-              <li class="<?php if (isset($page_title) && $page_title == "Preferences") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/settings/preferences') ?>">
-                  <i class="bi bi-lightbulb mr-5"></i> <span><?php echo trans('preferences') ?></span>
-                </a>
-              </li>
-
-              <li class="<?php if (isset($page_title) && $page_title == "Payment Settings") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/payment') ?>">
-                  <i class="bi bi-credit-card mr-5"></i> <span><?php echo trans('payment-settings') ?></span>
-                </a>
-              </li>
-
-              <li class="<?php if (isset($page_title) && $page_title == "License") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/settings/license') ?>">
-                  <i class="bi bi-key mr-5"></i> <span><?php echo trans('license') ?></span>
-                </a>
-              </li>
-
-              <li class="<?php if (isset($page_title) && $page_title == "Discounts") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/discount') ?>">
-                  <i class="bi bi-percent mr-5"></i> <span><?php echo trans('discount') ?></span>
-                </a>
-              </li>
-
-              <li class="<?php if (isset($page_title) && $page_title == "Categories") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/business/categories') ?>">
-                  <i class="bi bi-menu-app mr-5"></i> <span><span><?php echo trans('business') . ' ' . trans('categories') ?></span>
-                </a>
-              </li>
-            </ul>
-          </li>
-
-
-          <li class="treeview <?php if (isset($page_title) && $page_title == "Affiliate " || isset($page) && $page == "Affiliate") {
-                                echo "active";
-                              } ?> <?= $uval; ?>">
-            <a href="#"><i class="bi bi-link-45deg mr-5"></i>
-              <span>Affiliate</span>
-              <span class="pull-right-container">
-                <i class="fa fa-angle-right pull-right mr-5"></i>
-              </span>
-            </a>
-            <ul class="treeview-menu">
-              <li class="<?php if (isset($page_title) && $page_title == "Referral_Settings") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/referral/settings') ?>">
-                  <i class="bi bi-gear mr-5"></i> <?php echo trans('affiliate') ?> <?php echo trans('settings') ?>
-                </a>
-              </li>
-              <?php if (affiliate_settings()->is_enable == 1): ?>
-                <li class="<?php if (isset($page_title) && $page_title == "Payout Request") {
-                              echo "active";
-                            } ?>">
-                  <a href="<?php echo base_url('admin/referral/payout_request') ?>">
-                    <i class="bi bi-credit-card mr-5"></i> <?php echo trans('payout-request') ?>
-                  </a>
-                </li>
-                <li class="<?php if (isset($page_title) && $page_title == "Completed Payout") {
-                              echo "active";
-                            } ?>">
-                  <a href="<?php echo base_url('admin/referral/completed_payout') ?>">
-                    <i class="bi bi-check-circle mr-5"></i> <?php echo trans('completed') ?>
-                  </a>
-                </li>
-              <?php endif; ?>
-            </ul>
-          </li>
-
-
-          <li class="<?php if (isset($page_title) && $page_title == "Language") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/language') ?>" class="waves-effect"><i class="bi bi-globe mr-5"></i> <span><?php echo trans('testimonials') ?> <?php echo trans('language') ?> </span> </a>
-          </li>
-
-          <li class="<?php if (isset($page_title) && $page_title == "Users") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/users') ?>">
-              <i class="bi bi-people mr-5"></i> <span><span><?php echo trans('users') ?></span>
-            </a>
-          </li>
-
-          <li class="<?php if (isset($page_title) && $page_title == "Package") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/package') ?>">
-              <i class="bi bi-box mr-5"></i> <span><?php echo trans('pricing-package') ?></span>
-            </a>
-          </li>
-
-          <li class="<?php if (isset($page_title) && $page_title == "Feature") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/feature') ?>">
-              <i class="bi bi-card-list mr-5"></i> <span><?php echo trans('features') ?></span>
-            </a>
-          </li>
-
-          <li class="<?php if (isset($page_title) && $page_title == "Pages") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/pages') ?>">
-              <i class="bi bi-file-earmark-text mr-5"></i> <span><?php echo trans('pages') ?></span>
-            </a>
-          </li>
-
-          <li class="<?php if (isset($page_title) && $page_title == "Faqs") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/faq') ?>">
-              <i class="bi bi-info-circle mr-5"></i> <span><?php echo trans('faqs') ?></span>
-            </a>
-          </li>
-
-          <li class="<?php if (isset($page_title) && $page_title == "Testimonial") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/testimonial') ?>">
-              <i class="bi bi-chat-left-quote mr-5"></i> <span><?php echo trans('testimonial') ?></span>
-            </a>
-          </li>
-
-          <li class="<?php if (isset($page_title) && $page_title == "Contact") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/contact') ?>">
-              <i class="bi bi-person-lines-fill mr-5"></i> <span><?php echo trans('contact') ?></span>
-            </a>
-          </li>
-
-
-          <li class="treeview <?php if (isset($page) && $page == "Blog") {
-                                echo "active";
-                              } ?>">
-            <a href="#"><i class="bi bi-file-image mr-5"></i>
-              <span><?php echo trans('blog') ?></span>
-              <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
-            </a>
-            <ul class="treeview-menu">
-              <li class="<?php if (isset($page_title) && $page_title == "Blog Category") {
-                            echo "active";
-                          } ?>"><a href="<?php echo base_url('admin/blog_category') ?>"><i class="bi bi-arrow-right mr-5"></i><?php echo trans('add-category') ?> </a></li>
-              <li class="<?php if (isset($page_title) && $page_title == "Blog Posts") {
-                            echo "active";
-                          } ?>"><a href="<?php echo base_url('admin/blog') ?>"><i class="bi bi-arrow-right mr-5"></i><?php echo trans('blog-posts') ?></a></li>
-            </ul>
-          </li>
-
-          <li class="<?php if (isset($page_title) && $page_title == "Workflow") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/workflow') ?>">
-              <i class="bi bi-1-circle mr-5"></i> <span><?php echo trans('workflow') ?></span>
-            </a>
-          </li>
-
-        <?php else: ?>
-          <li class="<?php if (isset($page_title) && $page_title == "User Dashboard") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/dashboard/business') ?>">
+            <a href="<?php echo base_url('employeedashboard') ?>">
               <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
             </a>
           </li>
+          <li class="<?php if (isset($page_title) && $page_title == "Screenshots") {
+                        echo "active";
+                      } ?>">
+            <a href="<?php echo base_url('employeedashboard/screenshot') ?>">
+              <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
+            </a>
+          </li>
+          <li class="<?php if (isset($page_title) && $page_title == "Employee Webcam screenshots") {
+                        echo "active";
+                      } ?>">
+            <a href="<?php echo base_url('admin/ScreenshotController/Employeewebcam') ?>">
+              <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
+            </a>
+          </li>
+          <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
+                        echo "active";
+                      } ?>">
+            <a href="<?php echo base_url('employee/Timecards_manual') ?>">
+              <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Activity Log" ?></span>
+            </a>
+          </li>
+          <li class="<?php if (isset($page_title) && $page_title == "Report") {
+                        echo "active";
+                      } ?>">
+            <a href="<?php echo base_url('employee/report') ?>">
+              <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Report" ?></span>
+            </a>
+          </li>
 
-          <?php if (check_payment_status() == TRUE || settings()->enable_paypal == 0 || user()->user_type == 'trial'): ?>
+        <?php else :  ?>
+          <?php if (is_admin()): ?>
+            <li class="<?php if (isset($page_title) && $page_title == "Dashboard") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/dashboard') ?>">
+                <i class="bi bi-speedometer mr-5"></i> <span><?php echo trans('dashboard') ?></span>
+              </a>
+            </li>
 
-            <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
-              <li class="<?php if (isset($page) && $page == "Settings") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/profile') ?>">
-                  <i class="bi bi-gear mr-5"></i> <span><?php echo trans('settings') ?></span>
-                </a>
-              </li>
+            <li class="treeview <?php if (isset($main_page) && $main_page == "Settings") {
+                                  echo "active";
+                                } ?>">
+              <a href="#"><i class="bi bi-gear-fill mr-5"></i>
+                <span><?php echo trans('settings') ?></span>
+                <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
+              </a>
 
-
-              <?php if (check_package_limit('invoice-payments') == -1): ?>
-                <li class="<?php if (isset($page_title) && $page_title == "Payment Settings") {
+              <ul class="treeview-menu">
+                <li class="<?php if (isset($page_title) && $page_title == "Settings") {
                               echo "active";
-                            } ?> <?= $uval; ?>">
-                  <a href="<?php echo base_url('admin/payment/user') ?>">
-                    <i class="bi bi-coin mr-5"></i> <span><?php echo trans('payment-settings') ?></span>
+                            } ?>">
+                  <a href="<?php echo base_url('admin/settings') ?>">
+                    <i class="bi bi-layout-text-window-reverse mr-5"></i> <span><?php echo trans('website-settings') ?></span>
                   </a>
                 </li>
+
+                <li class="<?php if (isset($page_title) && $page_title == "Appearance") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/settings/appearance') ?>">
+                    <i class="bi bi-brightness-high mr-5"></i> <span><?php echo trans('appearance') ?></span>
+                  </a>
+                </li>
+
+                <li class="<?php if (isset($page_title) && $page_title == "Preferences") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/settings/preferences') ?>">
+                    <i class="bi bi-lightbulb mr-5"></i> <span><?php echo trans('preferences') ?></span>
+                  </a>
+                </li>
+
+                <li class="<?php if (isset($page_title) && $page_title == "Payment Settings") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/payment') ?>">
+                    <i class="bi bi-credit-card mr-5"></i> <span><?php echo trans('payment-settings') ?></span>
+                  </a>
+                </li>
+
+                <li class="<?php if (isset($page_title) && $page_title == "License") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/settings/license') ?>">
+                    <i class="bi bi-key mr-5"></i> <span><?php echo trans('license') ?></span>
+                  </a>
+                </li>
+
+                <li class="<?php if (isset($page_title) && $page_title == "Discounts") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/discount') ?>">
+                    <i class="bi bi-percent mr-5"></i> <span><?php echo trans('discount') ?></span>
+                  </a>
+                </li>
+
+                <li class="<?php if (isset($page_title) && $page_title == "Categories") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/business/categories') ?>">
+                    <i class="bi bi-menu-app mr-5"></i> <span><span><?php echo trans('business') . ' ' . trans('categories') ?></span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+
+            <li class="treeview <?php if (isset($page_title) && $page_title == "Affiliate " || isset($page) && $page == "Affiliate") {
+                                  echo "active";
+                                } ?> <?= $uval; ?>">
+              <a href="#"><i class="bi bi-link-45deg mr-5"></i>
+                <span>Affiliate</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-right pull-right mr-5"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li class="<?php if (isset($page_title) && $page_title == "Referral_Settings") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/referral/settings') ?>">
+                    <i class="bi bi-gear mr-5"></i> <?php echo trans('affiliate') ?> <?php echo trans('settings') ?>
+                  </a>
+                </li>
+                <?php if (affiliate_settings()->is_enable == 1): ?>
+                  <li class="<?php if (isset($page_title) && $page_title == "Payout Request") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/referral/payout_request') ?>">
+                      <i class="bi bi-credit-card mr-5"></i> <?php echo trans('payout-request') ?>
+                    </a>
+                  </li>
+                  <li class="<?php if (isset($page_title) && $page_title == "Completed Payout") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/referral/completed_payout') ?>">
+                      <i class="bi bi-check-circle mr-5"></i> <?php echo trans('completed') ?>
+                    </a>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </li>
+
+
+            <li class="<?php if (isset($page_title) && $page_title == "Language") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/language') ?>" class="waves-effect"><i class="bi bi-globe mr-5"></i> <span><?php echo trans('testimonials') ?> <?php echo trans('language') ?> </span> </a>
+            </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Users") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/users') ?>">
+                <i class="bi bi-people mr-5"></i> <span><span><?php echo trans('users') ?></span>
+              </a>
+            </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Package") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/package') ?>">
+                <i class="bi bi-box mr-5"></i> <span><?php echo trans('pricing-package') ?></span>
+              </a>
+            </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Feature") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/feature') ?>">
+                <i class="bi bi-card-list mr-5"></i> <span><?php echo trans('features') ?></span>
+              </a>
+            </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Pages") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/pages') ?>">
+                <i class="bi bi-file-earmark-text mr-5"></i> <span><?php echo trans('pages') ?></span>
+              </a>
+            </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Faqs") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/faq') ?>">
+                <i class="bi bi-info-circle mr-5"></i> <span><?php echo trans('faqs') ?></span>
+              </a>
+            </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Testimonial") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/testimonial') ?>">
+                <i class="bi bi-chat-left-quote mr-5"></i> <span><?php echo trans('testimonial') ?></span>
+              </a>
+            </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Contact") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/contact') ?>">
+                <i class="bi bi-person-lines-fill mr-5"></i> <span><?php echo trans('contact') ?></span>
+              </a>
+            </li>
+
+
+            <li class="treeview <?php if (isset($page) && $page == "Blog") {
+                                  echo "active";
+                                } ?>">
+              <a href="#"><i class="bi bi-file-image mr-5"></i>
+                <span><?php echo trans('blog') ?></span>
+                <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
+              </a>
+              <ul class="treeview-menu">
+                <li class="<?php if (isset($page_title) && $page_title == "Blog Category") {
+                              echo "active";
+                            } ?>"><a href="<?php echo base_url('admin/blog_category') ?>"><i class="bi bi-arrow-right mr-5"></i><?php echo trans('add-category') ?> </a></li>
+                <li class="<?php if (isset($page_title) && $page_title == "Blog Posts") {
+                              echo "active";
+                            } ?>"><a href="<?php echo base_url('admin/blog') ?>"><i class="bi bi-arrow-right mr-5"></i><?php echo trans('blog-posts') ?></a></li>
+              </ul>
+            </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Workflow") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/workflow') ?>">
+                <i class="bi bi-1-circle mr-5"></i> <span><?php echo trans('workflow') ?></span>
+              </a>
+            </li>
+
+          <?php else: ?>
+            <li class="<?php if (isset($page_title) && $page_title == "User Dashboard") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('admin/dashboard/business') ?>">
+                <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
+              </a>
+            </li>
+
+            <?php if (check_payment_status() == TRUE || settings()->enable_paypal == 0 || user()->user_type == 'trial'): ?>
+
+              <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
+                <li class="<?php if (isset($page) && $page == "Settings") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/profile') ?>">
+                    <i class="bi bi-gear mr-5"></i> <span><?php echo trans('settings') ?></span>
+                  </a>
+                </li>
+
+
+                <?php if (check_package_limit('invoice-payments') == -1): ?>
+                  <li class="<?php if (isset($page_title) && $page_title == "Payment Settings") {
+                                echo "active";
+                              } ?> <?= $uval; ?>">
+                    <a href="<?php echo base_url('admin/payment/user') ?>">
+                      <i class="bi bi-coin mr-5"></i> <span><?php echo trans('payment-settings') ?></span>
+                    </a>
+                  </li>
+                <?php endif; ?>
               <?php endif; ?>
-            <?php endif; ?>
 
 
-            <!-- <li class="treeview <?php if (isset($main_page) && $main_page == "Sales") {
-                                        echo "active";
-                                      } ?>">
+              <!-- <li class="treeview <?php if (isset($main_page) && $main_page == "Sales") {
+                                          echo "active";
+                                        } ?>">
 
               <a href="#"><i class="bi bi-credit-card mr-5"></i>
                 <span><?php echo trans('sales') ?></span>
@@ -346,9 +346,9 @@
               </ul>
             </li> -->
 
-            <!-- <li class="treeview <?php if (isset($main_page) && $main_page == "Purchases") {
-                                        echo "active";
-                                      } ?>">
+              <!-- <li class="treeview <?php if (isset($main_page) && $main_page == "Purchases") {
+                                          echo "active";
+                                        } ?>">
 
               <a href="#"><i class="bi bi-cart mr-5"></i>
                 <span><?php echo trans('purchases') ?></span>
@@ -397,125 +397,125 @@
               </ul>
             </li> -->
 
-            <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
-              <!-- <li class="<?php if (isset($page_title) && $page_title == "Category") {
-                                echo "active";
-                              } ?>">
+              <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
+                <!-- <li class="<?php if (isset($page_title) && $page_title == "Category") {
+                                  echo "active";
+                                } ?>">
                 <a href="<?php echo base_url('admin/category') ?>">
                   <i class="bi bi-folder2-open mr-5"></i> <span><?php echo trans('categories') ?></span>
                 </a>
               </li> -->
 
-              <!-- <li class="<?php if (isset($page_title) && $page_title == "Tax") {
-                                echo "active";
-                              } ?>">
+                <!-- <li class="<?php if (isset($page_title) && $page_title == "Tax") {
+                                  echo "active";
+                                } ?>">
                 <a href="<?php echo base_url('admin/tax') ?>">
                   <i class="bi bi-receipt mr-5"></i> <span><?php echo trans('tax') ?></span>
                 </a>
               </li> -->
-              <li class="treeview <?php if (isset($main_page) && $main_page == "Analytics") {
-                                    echo "active";
-                                  } ?>">
+                <li class="treeview <?php if (isset($main_page) && $main_page == "Analytics") {
+                                      echo "active";
+                                    } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
 
-                <a href="#"><i class="bi bi-graph-up-arrow mr-5"></i>
-                  <span><?php echo "Analytics" ?></span>
-                  <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
-                </a>
-                <ul class="treeview-menu">
-                  <li class="<?php if (isset($page_title) && $page_title == "User Screenshots") {
-                                echo "active";
-                              } ?>">
-                    <a href="<?php echo base_url('admin/ScreenshotController') ?>">
-                      <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
-                    </a>
-                  </li>
-                  <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") {
-                                echo "active";
-                              } ?>">
-                    <a href="<?php echo base_url('admin/ScreenshotController/webcam') ?>">
-                      <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
-                    </a>
-                  </li>
-                  <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
-                                echo "active";
-                              } ?>">
-                    <a href="<?php echo base_url('admin/Activity_logs') ?>">
-                      <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Log" ?></span>
-                    </a>
-                  </li>
-                  <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
-                                echo "active";
-                              } ?>">
-                    <a href="<?php echo base_url('admin/Activity_logs/get_index') ?>">
-                      <i class="bi bi-clock mr-5"></i> <span><?php echo "Time Cards" ?></span>
-                    </a>
-                  </li>
+                  <a href="#"><i class="bi bi-graph-up-arrow mr-5"></i>
+                    <span><?php echo "Analytics" ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
+                  </a>
+                  <ul class="treeview-menu">
+                    <li class="<?php if (isset($page_title) && $page_title == "User Screenshots") {
+                                  echo "active";
+                                } ?>">
+                      <a href="<?php echo base_url('admin/ScreenshotController') ?>">
+                        <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
+                      </a>
+                    </li>
+                    <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") {
+                                  echo "active";
+                                } ?>">
+                      <a href="<?php echo base_url('admin/ScreenshotController/webcam') ?>">
+                        <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
+                      </a>
+                    </li>
+                    <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
+                                  echo "active";
+                                } ?>">
+                      <a href="<?php echo base_url('admin/Activity_logs') ?>">
+                        <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Log" ?></span>
+                      </a>
+                    </li>
+                    <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
+                                  echo "active";
+                                } ?>">
+                      <a href="<?php echo base_url('admin/Activity_logs/get_index') ?>">
+                        <i class="bi bi-clock mr-5"></i> <span><?php echo "Time Cards" ?></span>
+                      </a>
+                    </li>
 
-                </ul>
-              </li>
+                  </ul>
+                </li>
 
 
-              <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/Monitoring_room') ?>">
-                  <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
-                </a>
-              </li>
-              <li class="<?php if (isset($page_title) && $page_title == "Notification") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/Notification') ?>">
-                  <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
-                </a>
-              </li>
-              <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
-                  <i class="bi-clipboard-check mr-5"></i> <span><?php echo "Time Approval" ?></span>
-                </a>
-              </li>
+                <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/Monitoring_room') ?>">
+                    <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
+                  </a>
+                </li>
+                <li class="<?php if (isset($page_title) && $page_title == "Notification") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/Notification') ?>">
+                    <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
+                  </a>
+                </li>
+                <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
+                    <i class="bi-clipboard-check mr-5"></i> <span><?php echo "Time Approval" ?></span>
+                  </a>
+                </li>
 
-              <li class="<?php if (isset($page_title) && $page_title == "Organization settings") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('organization') ?>">
-                  <i class="bi bi-toggle-on mr-5"></i> <span><?php echo "Organization settings" ?></span>
-                </a>
-              </li>
-              <li class="<?php if (isset($page_title) && $page_title == "Ex Organization settings") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('organization/org_exception') ?>">
-                  <i class="bi bi-tools mr-5"></i> <span><?php echo "Employee settings" ?></span>
-                </a>
-              </li>
-              <li class="<?php if (isset($page_title) && $page_title == "Department") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/hrm/department') ?>">
-                  <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('department') ?></span>
-                </a>
-              </li>
-              <li class="<?php if (isset($page_title) && $page_title == "Employee") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/hrm/employee') ?>">
-                  <i class="bi bi-people mr-5"></i> <span><?php echo trans('employees') ?></span>
-                </a>
-              </li>
-              <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
-                  <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
-                </a>
-              </li>
+                <li class="<?php if (isset($page_title) && $page_title == "Organization settings") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('organization') ?>">
+                    <i class="bi bi-toggle-on mr-5"></i> <span><?php echo "Organization settings" ?></span>
+                  </a>
+                </li>
+                <li class="<?php if (isset($page_title) && $page_title == "Ex Organization settings") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('organization/org_exception') ?>">
+                    <i class="bi bi-tools mr-5"></i> <span><?php echo "Employee settings" ?></span>
+                  </a>
+                </li>
+                <li class="<?php if (isset($page_title) && $page_title == "Department") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/hrm/department') ?>">
+                    <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('department') ?></span>
+                  </a>
+                </li>
+                <li class="<?php if (isset($page_title) && $page_title == "Employee") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/hrm/employee') ?>">
+                    <i class="bi bi-people mr-5"></i> <span><?php echo trans('employees') ?></span>
+                  </a>
+                </li>
+                <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
+                    <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
+                  </a>
+                </li>
 
-            <?php endif; ?>
+              <?php endif; ?>
 
-            <!-- <?php if (check_permissions(auth('role'), 'reports') == TRUE): ?>
+              <!-- <?php if (check_permissions(auth('role'), 'reports') == TRUE): ?>
               <li class="treeview <?php if (isset($main_page) && $main_page == "Report") {
                                     echo "active";
                                   } ?>">
@@ -571,7 +571,7 @@
             <?php endif ?> -->
 
 
-            <!-- <?php if (check_package_limit('hrm') == -1): ?>
+              <!-- <?php if (check_package_limit('hrm') == -1): ?>
               <li class="treeview <?php if (isset($main_page) && $main_page == "Hrm") {
                                     echo "active";
                                   } ?>">
@@ -591,16 +591,16 @@
                   </li>
 
                   <li class="<?php if (isset($page_title) && $page_title == "Department") {
-                                    echo "active";
-                                  } ?>">
+                                echo "active";
+                              } ?>">
                     <a href="<?php echo base_url('admin/hrm/department') ?>">
                       <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('department') ?></span>
                     </a>
                   </li>
 
                   <li class="<?php if (isset($page_title) && $page_title == "Employee") {
-                                    echo "active";
-                                  } ?>">
+                                echo "active";
+                              } ?>">
                     <a href="<?php echo base_url('admin/hrm/employee') ?>">
                       <i class="bi bi-people mr-5"></i> <span><?php echo trans('employees') ?></span>
                     </a>
@@ -625,8 +625,8 @@
                   </li>
 
                   <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
-                                    echo "active";
-                                  } ?>">
+                                echo "active";
+                              } ?>">
                     <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
                       <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
                     </a>
@@ -637,7 +637,7 @@
             <?php endif; ?> -->
 
 
-            <!-- <?php if (affiliate_settings()->is_enable == 1): ?>
+              <!-- <?php if (affiliate_settings()->is_enable == 1): ?>
               <li class="treeview <?php if (isset($page_title) && $page_title == "Affiliate " || isset($page) && $page == "Affiliate") {
                                     echo "active";
                                   } ?> <?= $uval; ?>">
@@ -673,94 +673,94 @@
 
 
 
-          <?php endif ?>
+            <?php endif ?>
 
-          <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
-            <li class="<?php if (isset($page_title) && $page_title == "Subscription") {
+            <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
+              <li class="<?php if (isset($page_title) && $page_title == "Subscription") {
+                            echo "active";
+                          } ?>">
+                <a href="<?php echo base_url('admin/subscription') ?>">
+                  <i class="bi bi-clock mr-5"></i> <span><?php echo trans('subscription') ?></span>
+                </a>
+              </li>
+            <?php endif; ?>
+
+          <?php endif; ?>
+        <?php endif ?>
+
+
+        <!-- <li class="<?php if (isset($page_title) && $page_title == "Country") {
                           echo "active";
                         } ?>">
-              <a href="<?php echo base_url('admin/subscription') ?>">
-                <i class="bi bi-clock mr-5"></i> <span><?php echo trans('subscription') ?></span>
-              </a>
-            </li>
-          <?php endif; ?>
-
-        <?php endif; ?>
-      <?php endif ?>
-
-
-      <!-- <li class="<?php if (isset($page_title) && $page_title == "Country") {
-                        echo "active";
-                      } ?>">
         <a href="<?php echo base_url('admin/country') ?>">
           <i class="bi bi-flag mr-5"></i> <span><?php echo trans('country') ?></span>
         </a>
       </li> -->
 
 
-      <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
-                    echo "active";
-                  } ?>">
-        <a href="<?php echo base_url('change_password') ?>">
-          <i class="bi bi-lock mr-5"></i> <span><?php echo trans('change-password') ?></span>
-        </a>
-      </li>
+        <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
+                      echo "active";
+                    } ?>">
+          <a href="<?php echo base_url('change_password') ?>">
+            <i class="bi bi-lock mr-5"></i> <span><?php echo trans('change-password') ?></span>
+          </a>
+        </li>
 
-      <li class="">
-        <a href="<?php echo base_url('auth/logout') ?>">
-          <i class="bi bi-box-arrow-right mr-5"></i> <span><?php echo trans('logout') ?></span>
-        </a>
-      </li>
+        <li class="">
+          <a href="<?php echo base_url('auth/logout') ?>">
+            <i class="bi bi-box-arrow-right mr-5"></i> <span><?php echo trans('logout') ?></span>
+          </a>
+        </li>
+
+        <?php if (is_admin()): ?>
+          <?php if (file_exists(APPPATH . 'controllers/addons/Razorpay.php')): ?>
+            <li class="treeview <?php if (isset($main_page) && $main_page == "Addons") {
+                                  echo "active";
+                                } ?> d-none">
+              <a href="#" class=""><i class="flaticon-favorites mr-5"></i>
+                <span><?php echo trans('addons') ?></span>
+                <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
+              </a>
+              <ul class="treeview-menu">
+                <li class="<?php if (isset($page_title) && $page_title == "Razorpay") {
+                              echo "active";
+                            } ?>"><a href="<?php echo base_url('addons/razorpay') ?>">Razorpay </a></li>
+              </ul>
+            </li>
+          <?php endif ?>
+        <?php endif; ?>
+
+      </ul>
 
       <?php if (is_admin()): ?>
-        <?php if (file_exists(APPPATH . 'controllers/addons/Razorpay.php')): ?>
-          <li class="treeview <?php if (isset($main_page) && $main_page == "Addons") {
-                                echo "active";
-                              } ?> d-none">
-            <a href="#" class=""><i class="flaticon-favorites mr-5"></i>
-              <span><?php echo trans('addons') ?></span>
-              <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
+        <a href="#" class="btn btn-secondary upgrade_btn mt-20">
+          <i class="bi bi-info-circle-fill mr-5"></i> <span><?php echo trans('version') ?> <?php echo html_escape(settings()->version) ?></span>
+        </a>
+      <?php else: ?>
+        <div class="d-flex justify-content-start mt-20">
+          <div>
+            <a href="<?php echo base_url('admin/subscription') ?>" class="btn btn-secondary bg-dark upgrade_btn">
+              <i class="bi bi-rocket-takeoff mr-5"></i> <span><?php echo trans('upgrade') ?></span>
             </a>
-            <ul class="treeview-menu">
-              <li class="<?php if (isset($page_title) && $page_title == "Razorpay") {
-                            echo "active";
-                          } ?>"><a href="<?php echo base_url('addons/razorpay') ?>">Razorpay </a></li>
-            </ul>
-          </li>
-        <?php endif ?>
-      <?php endif; ?>
-
-    </ul>
-
-    <?php if (is_admin()): ?>
-      <a href="#" class="btn btn-secondary upgrade_btn mt-20">
-        <i class="bi bi-info-circle-fill mr-5"></i> <span><?php echo trans('version') ?> <?php echo html_escape(settings()->version) ?></span>
-      </a>
-    <?php else: ?>
-      <div class="d-flex justify-content-start mt-20">
-        <div>
-          <a href="<?php echo base_url('admin/subscription') ?>" class="btn btn-secondary bg-dark upgrade_btn">
-            <i class="bi bi-rocket-takeoff mr-5"></i> <span><?php echo trans('upgrade') ?></span>
-          </a>
-        </div>
-
-        <?php if (settings()->enable_multilingual == 1): ?>
-          <div class="dropdown show">
-            <a class="btn btn-secondary upgrade_btn bg-dark dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="bi bi-translate mr-5"></i> <i class="bi bi-chevron-down mr-5"></i>
-            </a>
-
-            <div class="dropdown-menu lang" aria-labelledby="dropdownMenuLink">
-              <?php foreach (get_language() as $lang): ?>
-                <a class="dropdown-item mhover" href="<?php echo base_url('home/switch_lang/' . $lang->slug) ?>"><?php echo html_escape($lang->name) ?></a>
-              <?php endforeach; ?>
-            </div>
           </div>
-      </div>
-    <?php endif; ?>
-  <?php endif; ?>
 
-  </section>
-</aside>
+          <?php if (settings()->enable_multilingual == 1): ?>
+            <div class="dropdown show">
+              <a class="btn btn-secondary upgrade_btn bg-dark dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="bi bi-translate mr-5"></i> <i class="bi bi-chevron-down mr-5"></i>
+              </a>
+
+              <div class="dropdown-menu lang" aria-labelledby="dropdownMenuLink">
+                <?php foreach (get_language() as $lang): ?>
+                  <a class="dropdown-item mhover" href="<?php echo base_url('home/switch_lang/' . $lang->slug) ?>"><?php echo html_escape($lang->name) ?></a>
+                <?php endforeach; ?>
+              </div>
+            </div>
+        </div>
+      <?php endif; ?>
+    <?php endif; ?>
+
+    </section>
+  </aside>
 
 <?php endif ?>
