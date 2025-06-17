@@ -39,6 +39,11 @@
                       <strong class="text-danger">(<?php echo 'expired' ?>)</strong>
       <?php endif; ?>
     </p>
+                  <?php if ($days_left == -1): ?>
+                    <p class="text-danger" style="font-weight: bold; margin-top: 10px; padding: 8px; background-color: #ffeeee; border-left: 3px solid red;">
+                      You've reached the end of your free trial. Select a plan to keep your experience going.
+                    </p>
+                  <?php endif; ?>
 </div>
   
 
