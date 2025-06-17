@@ -281,35 +281,75 @@ class Auth_model extends CI_Model {
 
         return $this->email->send();
     }
+    // public function is_subscribed()
+    // {
+    //         $user = user(); // assuming this helper exists and returns the logged-in user
+    //         if (!$user) return false;
+    //         $user_id = $user->id;
+
+    //     // Get user data
+    //     $user = $this->db->get_where('users', ['id' => $user_id])->row();
+    //     if (!$user) {
+    //         return false;
+    //     }
+
+    //     // Calculate days left in trial
+    //     $days_left = date_dif(date('Y-m-d'), $user->trial_expire);
+
+    //     // Check if payment is verified for monthly/yearly
+    //     $payment = $this->db->select('billing_type, status')
+    //         ->where('user_id', $user_id)
+    //         ->order_by('created_at', 'DESC')
+    //         ->get('payment')
+    //         ->row();
+
+    //     $isSubscribed = ($days_left >= 0) || (
+    //         $payment &&
+    //         in_array($payment->billing_type, ['monthly', 'yearly']) &&
+    //         $payment->status === 'verified'
+    //     );
+
+    //     return $isSubscribed;
+    // }
+
+
     public function is_subscribed()
     {
-            $user = user(); // assuming this helper exists and returns the logged-in user
-            if (!$user) return false;
-            $user_id = $user->id;
+        $user = user(); // assuming this helper returns the logged-in user
+        if (!$user) return false;
 
-        // Get user data
+        $user_id = $user->id;
+
+        // Fetch full user data from DB
         $user = $this->db->get_where('users', ['id' => $user_id])->row();
-        if (!$user) {
-            return false;
+        if (!$user) return false;
+
+        // Case 1: Trial user - check trial expiry
+        if ($user->user_type === 'trial' && !empty($user->trial_expire)) {
+            $today  = new DateTime('today');
+            $expire = new DateTime($user->trial_expire);
+
+            if ($expire <= $today) {
+                return false; // trial is still valid
+            }
         }
 
-        // Calculate days left in trial
-        $days_left = date_dif(date('Y-m-d'), $user->trial_expire);
+        // Case 2: Registered user - check payment
+        if ($user->user_type === 'registered') {
+            $payment = $this->db->select('billing_type, status')
+                ->where('user_id', $user_id)
+                ->order_by('created_at', 'DESC')
+                ->limit(1)
+                ->get('payment')
+                ->row();
 
-        // Check if payment is verified for monthly/yearly
-        $payment = $this->db->select('billing_type, status')
-            ->where('user_id', $user_id)
-            ->order_by('created_at', 'DESC')
-            ->get('payment')
-            ->row();
+            if ($payment->status != 'verified') {
+                return false; // no valid subscription
+            }
+        }
 
-        $isSubscribed = ($days_left >= 0) || (
-            $payment &&
-            in_array($payment->billing_type, ['monthly', 'yearly']) &&
-            $payment->status === 'verified'
-        );
-
-        return $isSubscribed;
+        // Default fallback
+        return true;
     }
 
     public function is_employee()
