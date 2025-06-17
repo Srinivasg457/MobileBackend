@@ -61,8 +61,8 @@ class EmployeeRoles extends Home_Controller {
             'department_id' => $department_id,
             'role_name' => $role_name,
             'description' => $description,
-            'created_at' => get_user_datetime_only(), // Using helper function
-            'updated_at' => get_user_datetime_only()  // Using helper function
+            'created_at' => get_user_datetime_only($user_id), // Using helper function
+            'updated_at' => get_user_datetime_only($user_id)  // Using helper function
         ];
 
         $this->db->trans_start();
@@ -261,7 +261,7 @@ class EmployeeRoles extends Home_Controller {
                 ->where('user_id', $user_id)
                 ->update('role_feature_access', [
                     'status' => 0,
-                    'updated_at' => get_user_datetime_only() // Using helper function
+                    'updated_at' => get_user_datetime_only($user_id) // Using helper function
                 ]);
 
             foreach ($features as $key => $feature) {
@@ -298,8 +298,8 @@ class EmployeeRoles extends Home_Controller {
                         $feature['is_action'] || 
                         $feature['is_delete']
                     ) ? 1 : 0,
-                    'created_at' => get_user_datetime_only(), // Using helper function
-                    'updated_at' => get_user_datetime_only()  // Using helper function
+                    'created_at' => get_user_datetime_only($user_id), // Using helper function
+                    'updated_at' => get_user_datetime_only($user_id)  // Using helper function
                 ];
     
                 $existing = $this->db->get_where('role_feature_access', [
@@ -316,7 +316,7 @@ class EmployeeRoles extends Home_Controller {
                                  'is_action' => $feature['is_action'],
                                  'is_delete' => $feature['is_delete'],
                                  'status' => $data['status'],
-                                 'updated_at' => get_user_datetime_only() // Using helper function
+                                 'updated_at' => get_user_datetime_only($user_id) // Using helper function
                              ]);
                 } else {
                     $this->db->insert('role_feature_access', $data);
@@ -506,7 +506,7 @@ class EmployeeRoles extends Home_Controller {
 
         $this->db->where('id', $role->id)
                  ->update('employee_roles', [
-                     'deleted_at' => get_user_datetime_only() // Using helper function
+                     'deleted_at' => get_user_datetime_only($employee_user_id) // Using helper function
                  ]);
 
         if ($this->db->affected_rows() > 0) {

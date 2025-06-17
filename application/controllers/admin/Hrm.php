@@ -696,7 +696,7 @@ private function _send_invitation_email($name, $email, $token)
     $this->email->message($message);
 
     if ($this->email->send()) {
-        $this->db->where('email', $email)->update('employees', ['invitation_sent_at' => get_user_datetime_only()]);
+        $this->db->where('email', $email)->update('employees', ['invitation_sent_at' => get_user_datetime_only(user()->id)]);
     } else {
         log_message('error', 'Email failed: ' . $this->email->print_debugger());
     }
