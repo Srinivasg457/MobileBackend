@@ -35,19 +35,10 @@
     <p><?php echo trans('created') ?> : <strong><?php echo my_date_show(user()->created_at) ?></strong>
       <?php if (($days_left = date_dif(date('Y-m-d'), user()->trial_expire)) != -1): ?>
           <strong class="text-danger">(<?php echo $days_left ?> <?php echo trans('days-left') ?>)</strong>
+            <?php else: ?>
+                      <strong class="text-danger">(<?php echo 'expired' ?>)</strong>
       <?php endif; ?>
     </p>
-    
-    <?php if ($days_left == -1): ?>
-        <p class="text-danger" style="font-weight: bold; margin-top: 10px; padding: 8px; background-color: #ffeeee; border-left: 3px solid red;">
-            You've reached the end of your free trial. Select a plan to keep your experience going.
-        </p>
-        <script>
-            alert("You've reached the end of your free trial. Select a plan to keep your experience going");
-            // Or for a nicer popup you could use something like:
-            // Swal.fire("You've reached the end of your free trial", "Select a plan to keep your experience going", "warning");
-        </script>
-    <?php endif; ?>
 </div>
   
 

@@ -232,7 +232,7 @@
 
                             <div class="col-12 mt-5 form-group">
                                 <?php if (is_pack_trial()): ?>
-                                    <span class="text-danger pull-left mt-2" title="Upgrade your plan to enable editing.">
+                                    <span class="text-danger pull-left " data-toggle="tooltip" data-placement="right" title="Upgrade your plan to enable editing.">
                                         <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
                                     </span>
                                 <?php else: ?>
