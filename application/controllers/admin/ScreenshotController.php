@@ -42,9 +42,9 @@ class ScreenshotController extends Home_Controller
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/employee/webcam_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);
-        // if (!is_subscribed()) {
-        //     redirect('/admin/subscription');
-        // }
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
 
     //  public function store_screenshot() {
@@ -216,12 +216,15 @@ class ScreenshotController extends Home_Controller
     
         // Create the directories if they don't exist
       // Ensure original upload path exists and has 0777 permission
-      if (!is_dir($original_upload_path)) {
-        mkdir($original_upload_path, 0755, true);
-    }
-    if (!is_dir($compressed_upload_path)) {
-        mkdir($compressed_upload_path, 0755, true);
-    }
+ // Ensure original upload path exists and has 0777 permission
+if (!is_dir($original_upload_path)) {
+    mkdir($original_upload_path, 0777, true);
+    chmod($original_upload_path, 0777); // Explicitly set permissions
+}
+if (!is_dir($compressed_upload_path)) {
+    mkdir($compressed_upload_path, 0777, true);
+    chmod($compressed_upload_path, 0777); // Explicitly set permissions
+}
 
         // Get file extension and construct file names
         $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
