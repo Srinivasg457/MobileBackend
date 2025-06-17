@@ -748,7 +748,7 @@ public function store_Employee_Activity()
     $data = [
         'user_id'             => $headers['user_id'],
         'employee_id'         => $headers['employee_id'],
-        'created_at'          => date('Y-m-d H:i:s'),
+        'created_at'          => get_user_datetime_only($headers['user_id']),
         'total_mouse_movement'=> $mouse_movement,
         'total_keystrokes'    => $keystrokes
     ];
