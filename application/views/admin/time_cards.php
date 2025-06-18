@@ -153,10 +153,30 @@
             <!-- Date and Time Filters -->
             <!-- <div style="display: flex; gap: 20px; flex: 2; flex-wrap: wrap; justify-content: space-between; min-width: 300px;"> -->
                 <!-- Date Picker -->
-                <div class="col-lg-3 mb-5">
+                <!-- <div class="col-lg-3 mb-5">
                     <label for="datePicker" class="control-label">Date</label>
                     <input type="date" id="datePicker" class="form-control">
-                </div>
+                </div> -->
+
+                <div class="col-lg-3 mb-5">
+    <label class="control-label">Date</label>
+    <?php if (is_pack_trial()): ?>
+        <?php
+            $today = date('Y-m-d');
+            $yesterday = date('Y-m-d', strtotime('-1 day'));
+            $min_date = $yesterday;
+            $max_date = $today;
+        ?>
+        <input type="date" id="datePicker" class="form-control" 
+               value="<?php echo $today; ?>"
+               min="<?php echo $min_date; ?>"
+               max="<?php echo $max_date; ?>"
+               onfocus="this.showPicker()">
+        <small class="text-muted">Trial plan only allows selecting today or yesterday's date.</small>
+    <?php else: ?>
+        <input type="date" id="datePicker" class="form-control" value="">
+    <?php endif; ?>
+</div>
 
                 <!-- From Time -->
                 <div class="col-lg-3 mb-5">
