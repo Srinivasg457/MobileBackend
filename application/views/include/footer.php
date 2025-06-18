@@ -1,4 +1,3 @@
-
 <?php if (isset($page_title) && $page_title != 'Register' && $page_title != 'Login'): ?>
 <footer class="site-footer section block bg-light <?php if(isset($page) && $page == 'Auth'){echo "d-none";} ?>">
     <div class="container py-5 bt-1">
@@ -53,7 +52,7 @@
 <?php $success = $this->session->flashdata('msg'); ?>
 <?php $error = $this->session->flashdata('error'); ?>
 <input type="hidden" id="success" value="<?php echo html_escape($success); ?>">
-<input type="hidden" id="error" value="<?php echo html_escape($error);?>">
+<input type="hidden" id="error" value="<?php echo html_escape($error); ?>">
 
 <input type="hidden" class="accept_cookies" value="<?php echo trans('accept-cookies') ?>">
 <input type="hidden" class="accept" value="<?php echo trans('accept') ?>">
@@ -148,6 +147,10 @@
                 setTimeout(function() {
                   window.location.href = base_url+"auth/verify_email";
                 }, 2000);
+                } else if (json.st == 5) {
+                    $(".signin_btn").prop('disabled', false);
+                    $(".signin_btn").html(msg_signin);
+                    $(".error").show().html('<i class="far fa-arrow-alt-circle-up"></i> ' + "Plan expired. Contact admin to upgrade.");
             }
 
         },'json');
@@ -166,6 +169,13 @@
                     showConfirmButton: true
                   }, function(){
                     window.location = json.url;
+                  });
+                } else if (json.st == 2) {
+                    swal({
+                        title: "Notice",
+                        text: "Plan expired. Contact admin to upgrade.",
+                        type: "error",
+                        confirmButtonText: msg_try
                   });
               } else {
                 swal({
