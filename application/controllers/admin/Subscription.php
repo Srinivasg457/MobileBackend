@@ -17,6 +17,7 @@ class Subscription extends Home_Controller
         $data = array();
         $this->upgrade_plans();
         $data['page_title'] = 'Subscription';
+        $data['main_page'] = 'plan&pack';
         $data['user'] = $this->common_model->get_my_package();
         $data['packages'] = $this->admin_model->get_active_packages('package');
         $data['features'] = $this->admin_model->select_asc('package_features');
@@ -26,6 +27,18 @@ class Subscription extends Home_Controller
             $page_load = 'subscription';
         }
         $data['main_content'] = $this->load->view('admin/user/' . $page_load, $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
+    public function currentPlan()
+    {
+        $data = array();
+        $this->upgrade_plans();
+        $data['page_title'] = 'CurrentPlan';
+        $data['main_page'] = 'plan&pack';
+        $data['user'] = $this->common_model->get_my_package();
+        $data['packages'] = $this->admin_model->get_active_packages('package');
+        $data['features'] = $this->admin_model->select_asc('package_features');
+        $data['main_content'] = $this->load->view('admin/user/current_plan', $data, true);
         $this->load->view('admin/index', $data);
     }
 

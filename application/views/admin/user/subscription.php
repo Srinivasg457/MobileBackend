@@ -2,7 +2,7 @@
   <!-- Main content -->
   <section class="content">
     <div class="row">
-      <div class="col-6">
+      <!-- <div class="col-6">
         <div class="box add_area">
           <div class="box-header flex-between">
             <div>
@@ -50,7 +50,7 @@
           <?php endif; ?>
         </div>
 
-      </div>
+      </div> -->
 
       <div class="col-12">
         <div class="box add_area">
