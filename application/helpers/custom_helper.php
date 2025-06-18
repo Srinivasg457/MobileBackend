@@ -59,19 +59,22 @@ if (!function_exists('is_pack_trial')) {
 	}
 }
 
-if (!function_exists('is_pack_basic')) {
-	function is_pack_basic()
+if (!function_exists('is_plan_basic')) {
+	function is_plan_basic()
 	{
+		// Get a reference to the controller object
 		$ci = &get_instance();
-		return $ci->auth_model->is_pack_basic();
+		return $ci->auth_model->is_plan_basic();
 	}
 }
 
-if (!function_exists('is_pack_standard')) {
-	function is_pack_standard()
+
+
+if (!function_exists('is_plan_standard')) {
+	function is_plan_standard()
 	{
 		$ci = &get_instance();
-		return $ci->auth_model->is_pack_standard();
+		return $ci->auth_model->is_plan_standard();
 	}
 }
 
