@@ -1,4 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Auth extends Home_Controller 
 {
@@ -255,7 +255,10 @@ class Auth extends Home_Controller
          
             // 2. If 'users' authentication fails, check 'employees' table
             $employee = $this->auth_model->validate_employee(); // We need to create this model function
-
+            if (!$this->auth_model->is_organization_subscribed($employee->user_id)) { 
+                echo json_encode(array('st' => 5));
+                exit();
+            }
             if (!empty($employee) && $employee->is_registered == 1 && password_verify($password, $employee->password)) {
                 $session_data_employee = array(
                     'employee_id' => $employee->id,
@@ -793,7 +796,10 @@ class Auth extends Home_Controller
                 $data['name'] = $row->name;
                 $data['password'] = $random_number;
                 $user_id = $row->id;
-
+                if (!$this->auth_model->is_organization_subscribed($row->user_id)) {
+                    echo json_encode(array('st' => 2));
+                    exit();
+                }
                 $this->send_recovery_mail($data);
 
                 $user_data = array('password' => $random_pass);
@@ -827,7 +833,7 @@ class Auth extends Home_Controller
         }
 
         // Step 3: If email not found in either table
-        echo json_encode(array('st' => 2));
+        echo json_encode(array('st' => 3));
     }
 
 

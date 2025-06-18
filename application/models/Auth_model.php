@@ -312,7 +312,42 @@ class Auth_model extends CI_Model {
     //     return $isSubscribed;
     // }
 
+    public function is_organization_subscribed($user_id)
+    {
+        if (!$user_id) return false;
 
+
+        // Fetch full user data from DB
+        $user = $this->db->get_where('users', ['id' => $user_id])->row();
+        if (!$user) return false;
+
+        // Case 1: Trial user - check trial expiry
+        if ($user->user_type === 'trial' && !empty($user->trial_expire)) {
+            $today  = new DateTime('today');
+            $expire = new DateTime($user->trial_expire);
+
+            if ($expire <= $today) {
+                return false; // trial is still valid
+            }
+        }
+
+        // Case 2: Registered user - check payment
+        if ($user->user_type === 'registered') {
+            $payment = $this->db->select('billing_type, status')
+                ->where('user_id', $user_id)
+                ->order_by('created_at', 'DESC')
+                ->limit(1)
+                ->get('payment')
+                ->row();
+
+            if ($payment->status != 'verified') {
+                return false; // no valid subscription
+            }
+        }
+
+        // Default fallback
+        return true;
+    }
     public function is_subscribed()
     {
         $user = user(); // assuming this helper returns the logged-in user
