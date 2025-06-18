@@ -19,6 +19,9 @@ class Monitoring_room extends Home_Controller {
         if (!is_subscribed()) {
             redirect('/admin/subscription');
         }
+        if(is_plan_basic()){
+            redirect('/admin/subscription'); 
+        }
     }
     public function list_employees_by_user()
 {
