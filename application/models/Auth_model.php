@@ -453,14 +453,52 @@ class Auth_model extends CI_Model {
  |  Thin wrappers for readability
  |  (package IDs: Basic=2, Standard=3, Premium=4, Custom=5)
  -------------------------------------------------*/
-    function is_pack_basic()
-    {
-        return $this->has_verified_package(1);
+ public function is_plan_basic()
+{
+    $user_id = user()->id;
+    
+    $this->db->where('user_id', $user_id);
+    $this->db->where('package', 2);
+    $payment = $this->db->get('payment')->row();
+
+    if ($payment) {
+        // Check if package hasn't expired (assuming there's an expire_date column)
+        if (isset($payment->expire_date)) {
+            $today = date('Y-m-d');
+            if ($payment->expire_date >= $today) {
+                return true; // Package 2 is active
+            }
+        } else {
+            // If no expiration date, assume it's active
+            return true;
+        }
     }
-    function is_pack_standard()
-    {
-        return $this->has_verified_package(3);
+    
+    return false;
+}
+public function is_plan_standard()
+{
+    $user_id = user()->id;
+    
+    $this->db->where('user_id', $user_id);
+    $this->db->where('package', 3);
+    $payment = $this->db->get('payment')->row();
+
+    if ($payment) {
+        // Check if package hasn't expired (assuming there's an expire_date column)
+        if (isset($payment->expire_date)) {
+            $today = date('Y-m-d');
+            if ($payment->expire_date >= $today) {
+                return true; // Package 3 is active
+            }
+        } else {
+            // If no expiration date, assume it's active
+            return true;
+        }
     }
+    
+    return false;
+}
     function is_pack_premium()
     {
         return $this-> has_verified_package(4);

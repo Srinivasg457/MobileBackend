@@ -490,21 +490,30 @@
             <div class="col-lg-4"></div>
             <div class="col-lg-4 mb-5"> 
     <label class="control-label">Date</label>
-    <?php if (is_pack_trial()): ?>
-        <?php
-            $today = date('Y-m-d');
-            $yesterday = date('Y-m-d', strtotime('-1 day'));
-            $min_date = $yesterday;
-            $max_date = $today;
-        ?>
-        <input type="date" id="datePicker" class="form-control" 
-               value="<?php echo $today; ?>"
-               min="<?php echo $min_date; ?>"
-               max="<?php echo $max_date; ?>"
-               onfocus="this.showPicker()">
-        <small class="text-muted">Trial plan only allows selecting today or yesterday's date.</small>
-    <?php else: ?>
-        <input type="date" id="datePicker" class="form-control" value="">
+    <?php
+    $today = date('Y-m-d');
+    $min_date = '';
+    $help_text = '';
+    
+    if (is_pack_trial()) {
+        $min_date = date('Y-m-d', strtotime('-1 day'));
+        $help_text = 'Trial plan only allows selecting today or yesterday\'s date.';
+    } elseif (is_plan_basic()) {
+        $min_date = date('Y-m-d', strtotime('-7 days'));
+        $help_text = 'Basic Package allows selecting dates from the last 7 days only.';
+    } elseif (is_plan_standard()) {
+        $min_date = date('Y-m-d', strtotime('-1 month'));
+        $help_text = 'Standard plan allows selecting dates from the last one month only.';
+    }
+    ?>
+    
+    <input type="date" id="datePicker" class="form-control" 
+           value="<?= !empty($min_date) ? $today : '' ?>"
+           <?= !empty($min_date) ? "min='$min_date' max='$today'" : '' ?>
+           onfocus="this.showPicker()">
+           
+    <?php if (!empty($help_text)): ?>
+        <small class="text-muted"><?= $help_text ?></small>
     <?php endif; ?>
 </div>
         </div>

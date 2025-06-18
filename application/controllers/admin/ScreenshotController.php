@@ -34,6 +34,9 @@ class ScreenshotController extends Home_Controller
         if (!is_subscribed()) {
             redirect('/admin/subscription');
         }
+        if(is_plan_basic()){
+            redirect('/admin/subscription'); 
+        }
     }
     public function EmployeewebCam()
     {

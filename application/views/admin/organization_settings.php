@@ -253,22 +253,32 @@
 
 
 
-                            <!-- Screenshot Interval -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Screenshot Interval (mins):</label>
+<!-- Screenshot Interval -->
+<div class="col-md-6 form-group">
+    <label class="form-label">Screenshot Interval (mins):</label>
 
-                                <?php if ($is_edit_mode): ?>
-                                    <select name="screenshot_time_interval" class="form-control" id="screenshot_time_interval">
-                                        <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <option value="<?= $val ?>" <?= (isset($settings['screenshot_time_interval']) && $settings['screenshot_time_interval'] == $val) ? 'selected' : '' ?>>
-                                                <?= $val ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else: ?>
-                                    <input type="text" class="form-control" value="<?= isset($settings['screenshot_time_interval']) ? $settings['screenshot_time_interval'] : '' ?>" readonly>
-                                <?php endif; ?>
-                            </div>
+    <?php if ($is_edit_mode): ?>
+        <select name="screenshot_time_interval" class="form-control" id="screenshot_time_interval">
+            <?php if (is_plan_basic()): ?>
+                <option value="10" selected>10</option>
+            <?php elseif (is_plan_standard()): ?>
+                <?php foreach ([5, 10] as $val): ?>
+                    <option value="<?= $val ?>" <?= (isset($settings['screenshot_time_interval']) && $settings['screenshot_time_interval'] == $val) ? 'selected' : '' ?>>
+                        <?= $val ?>
+                    </option>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <?php foreach ([1, 2, 5, 10] as $val): ?>
+                    <option value="<?= $val ?>" <?= (isset($settings['screenshot_time_interval']) && $settings['screenshot_time_interval'] == $val) ? 'selected' : '' ?>>
+                        <?= $val ?>
+                    </option>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </select>
+    <?php else: ?>
+        <input type="text" class="form-control" value="<?= isset($settings['screenshot_time_interval']) ? $settings['screenshot_time_interval'] : '' ?>" readonly>
+    <?php endif; ?>
+</div>
 
 
                             <!-- Webcam Flag -->
