@@ -477,10 +477,10 @@
                   </a>
                 </li>
 
-                <li class="<?php if (isset($page_title) && $page_title == "Organization settings") {
+                <li class="<?php if (isset($page_title) && $page_title == "Edit") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('organization') ?>">
+                  <a href="<?php echo base_url('organization/edit') ?>">
                     <i class="bi bi-toggle-on mr-5"></i> <span><?php echo "Organization settings" ?></span>
                   </a>
                 </li>

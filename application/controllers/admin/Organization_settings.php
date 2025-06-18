@@ -408,34 +408,47 @@ class Organization_settings extends Home_Controller {
 
 public function get_organization_settings()
 {
-    $user_id = $this->input->get('user_id')?? $this->session->userdata('user_id');
-    
-    $status = $this->input->get('status'); // Fetch status from the request
+    $status = $this->input->get('status');
 
-    if (!$user_id || !$status) {
-        echo json_encode(['error' => 'Missing user_id or status parameter.']);
+    if (!$status) {
+        echo json_encode(['error' => 'Missing status parameter.']);
         return;
     }
 
-    // Determine the table to query based on status
+    // Determine input parameter and table based on status
     if ($status == 1) {
+        $user_id = $this->input->get('user_id') ?? $this->session->userdata('user_id');
+        if (!$user_id) {
+            echo json_encode(['error' => 'Missing user_id parameter.']);
+            return;
+        }
         $table = 'org_settings';
+        $column = 'user_id';
+        $value = $user_id;
     } else if ($status == 2) {
+        $employee_id = $this->input->get('employee_id');
+        if (!$employee_id) {
+            echo json_encode(['error' => 'Missing employee_id parameter.']);
+            return;
+        }
         $table = 'organization_exception_setting';
+        $column = 'employee_id';
+        $value = $employee_id;
     } else {
         echo json_encode(['error' => 'Invalid status value.']);
         return;
     }
 
-    // Execute query
-    $query = $this->db->get_where($table, ['user_id' => $user_id]);
+    // Query the database
+    $query = $this->db->get_where($table, [$column => $value]);
 
     if ($query->num_rows() > 0) {
         echo json_encode($query->row_array());
     } else {
-        echo json_encode(['error' => 'No settings found for this user.']);
+        echo json_encode(['error' => 'No settings found.']);
     }
 }
+
 
 
 

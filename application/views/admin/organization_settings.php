@@ -196,10 +196,10 @@
     <section class="content">
         <div class="container mt-4">
             <?php if ($is_edit_mode): ?>
-                <h3 class="box-title">Edit Organization Settings
-                    <a href="<?= base_url('organization') ?>" class="pull-right btn btn-default  rounded btn-sm">
+                <h3 class="box-title"> Organization Settings
+                    <!-- <a href="<?= base_url('organization') ?>" class="pull-right btn btn-default  rounded btn-sm">
                         <i class="fa fa-angle-left"></i> <?= trans('back') ?>
-                    </a>
+                    </a> -->
                 </h3>
             <?php else: ?>
                 <h3 class="box-title">Organization Settings
@@ -258,7 +258,7 @@
                                 <label class="form-label">Screenshot Interval (mins):</label>
 
                                 <?php if ($is_edit_mode): ?>
-                                    <select name="screenshot_time_interval" class="form-control target-input" id="screenshot_time_interval">
+                                    <select name="screenshot_time_interval" class="form-control" id="screenshot_time_interval">
                                         <?php foreach ([1, 2, 5, 10] as $val): ?>
                                             <option value="<?= $val ?>" <?= (isset($settings['screenshot_time_interval']) && $settings['screenshot_time_interval'] == $val) ? 'selected' : '' ?>>
                                                 <?= $val ?>
@@ -550,7 +550,7 @@
                 data: formData,
                 success: function(response) {
                     swal("Success!", response, "success");
-                    window.location.href = "<?= base_url('organization') ?>";
+                    window.location.href = "<?= base_url('organization/edit') ?>";
                 },
                 error: function(res) {
                     const errorMsg = res.responseJSON?.message || "Something went wrong.";
