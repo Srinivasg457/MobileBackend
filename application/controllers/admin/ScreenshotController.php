@@ -42,9 +42,9 @@ class ScreenshotController extends Home_Controller
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/employee/webcam_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription');
-        }
+        // if (!is_subscribed()) {
+        //     redirect('/admin/subscription');
+        // }
     }
 
     //  public function store_screenshot() {
@@ -1066,4 +1066,6 @@ public function get_last_screenshot()
                 'employees' => $employees
             ]));
     }
+
+    
 }

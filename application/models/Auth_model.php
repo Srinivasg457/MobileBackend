@@ -396,18 +396,37 @@ class Auth_model extends CI_Model {
             return FALSE;
         }
     }
+    // public function is_pack_trial()
+    // {
+
+    //     $user_id = user()->id;
+    //     $this->db->where('id', $user_id);
+    //     $user = $this->db->get('users')->row();
+
+    //     if ($user && strtolower($user->user_type) === 'trial') {
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
     public function is_pack_trial()
-    {
+{
+    $user_id = user()->id;
+    $this->db->where('id', $user_id);
+    $user = $this->db->get('users')->row();
 
-        $user_id = user()->id;
-        $this->db->where('id', $user_id);
-        $user = $this->db->get('users')->row();
-
-        if ($user && strtolower($user->user_type) === 'trial') {
-            return true;
+    if ($user && strtolower($user->user_type) === 'trial') {
+        // Check if trial has expired
+        if (isset($user->trial_expire)) {
+            $today = date('Y-m-d');
+            if ($user->trial_expire >= $today) {
+                return true; // Still in trial period
+            }
         }
-        return false;
+        return false; // Either no expiration date set or trial has expired
     }
+    return false;
+}
     function has_verified_package($packageIds)
     {
         // $CI = &get_instance();          // CodeIgniter super‑object
