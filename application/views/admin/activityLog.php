@@ -488,10 +488,25 @@
                 <select id="employeeSelect" class="form-control single_select"></select>
             </div>
             <div class="col-lg-4"></div>
-            <div class="col-lg-4 mb-5"> <label class="control-label">Date </label>
-                <input type="date" id="datePicker" class="form-control" value="">
-            </div>
-
+            <div class="col-lg-4 mb-5"> 
+    <label class="control-label">Date</label>
+    <?php if (is_pack_trial()): ?>
+        <?php
+            $today = date('Y-m-d');
+            $yesterday = date('Y-m-d', strtotime('-1 day'));
+            $min_date = $yesterday;
+            $max_date = $today;
+        ?>
+        <input type="date" id="datePicker" class="form-control" 
+               value="<?php echo $today; ?>"
+               min="<?php echo $min_date; ?>"
+               max="<?php echo $max_date; ?>"
+               onfocus="this.showPicker()">
+        <small class="text-muted">Trial plan only allows selecting today or yesterday's date.</small>
+    <?php else: ?>
+        <input type="date" id="datePicker" class="form-control" value="">
+    <?php endif; ?>
+</div>
         </div>
 
         <div class="status-boxes">
@@ -551,6 +566,146 @@
 
     </div>
 
+    <!-- <script>
+        $(document).ready(function() {
+    // Fetch user's payment details
+    $.ajax({
+        url: "<?= base_url('/admin/ScreenshotController/getPaymentDetails'); ?>",
+        method: 'GET',
+        success: function(response) {
+            if (response.billing_type === 'week') {
+                restrictDatePicker();
+            }
+        },
+        error: function() {
+            console.log('Error fetching payment details');
+        }
+    });
+
+    function restrictDatePicker() {
+        const datePicker = $('#datePicker');
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        // Format dates as YYYY-MM-DD
+        const todayStr = formatDate(today);
+        const yesterdayStr = formatDate(yesterday);
+        
+        // Set min and max dates
+        datePicker.attr('min', yesterdayStr);
+        datePicker.attr('max', todayStr);
+        datePicker.val(todayStr);
+        
+        // Disable all other dates
+        datePicker.on('input', function() {
+            const selectedDate = $(this).val();
+            if (selectedDate !== todayStr && selectedDate !== yesterdayStr) {
+                $(this).val(todayStr);
+            }
+        });
+        
+        // Disable manual input
+        datePicker.on('keydown', function(e) {
+            e.preventDefault();
+        });
+    }
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+});
+    </script> -->
+
+<style>
+    .weekly-date-options {
+    display: flex;
+    gap: 10px;
+}
+.date-option {
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.date-option.active {
+    background-color: #007bff;
+    color: white;
+}
+</style>
+    <script>
+        $(document).ready(function() {
+    // First, immediately disable the date picker while we check payment status
+    const datePicker = $('#datePicker');
+    datePicker.prop('disabled', true);
+    
+    // Fetch user's payment details
+    $.ajax({
+        url: "<?= base_url('/admin/ScreenshotController/getPaymentDetails'); ?>",
+        method: 'GET',
+        success: function(response) {
+            if (response.billing_type === 'week') {
+                setupWeeklyBillingRestrictions();
+            } else {
+                // Enable normally for other billing types
+                datePicker.prop('disabled', false);
+            }
+        },
+        error: function() {
+            console.log('Error fetching payment details');
+            datePicker.prop('disabled', false);
+        }
+    });
+
+    function setupWeeklyBillingRestrictions() {
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        // Format dates as YYYY-MM-DD
+        const todayStr = formatDate(today);
+        const yesterdayStr = formatDate(yesterday);
+        
+        // Set the value to today
+        datePicker.val(todayStr);
+        
+        // Create a custom dropdown with only two options
+        datePicker.after(`
+            <div class="weekly-date-options" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-outline-primary date-option ${datePicker.val() === todayStr ? 'active' : ''}" 
+                        data-date="${todayStr}">Today (${formatDisplayDate(today)})</button>
+                <button class="btn btn-sm btn-outline-primary date-option ${datePicker.val() === yesterdayStr ? 'active' : ''}" 
+                        data-date="${yesterdayStr}">Yesterday (${formatDisplayDate(yesterday)})</button>
+            </div>
+        `);
+        
+        // Hide the original date picker
+        datePicker.hide();
+        
+        // Handle custom button clicks
+        $('.date-option').click(function() {
+            const selectedDate = $(this).data('date');
+            datePicker.val(selectedDate);
+            $('.date-option').removeClass('active');
+            $(this).addClass('active');
+            // Trigger any date change events you might have
+            datePicker.trigger('change');
+        });
+    }
+
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+    
+    function formatDisplayDate(date) {
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        return `${day}/${month}/${date.getFullYear()}`;
+    }
+});
+    </script>
 
     <script>
         function fetchActivity(currentEmployeeId, date) {
