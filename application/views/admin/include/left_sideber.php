@@ -676,13 +676,37 @@
             <?php endif ?>
 
             <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
-              <li class="<?php if (isset($page_title) && $page_title == "Subscription") {
-                            echo "active";
-                          } ?>">
-                <a href="<?php echo base_url('admin/subscription') ?>">
-                  <i class="bi bi-clock mr-5"></i> <span><?php echo trans('subscription') ?></span>
+              <li class="treeview <?php if (isset($main_page) && $main_page == "plan&pack") {
+                                    echo "active";
+                                  } ?>">
+
+                <a href="#">
+                  <i class="bi bi-bar-chart-fill mr-5"></i>
+                  <span><?php echo "Subscription" ?></span>
+                  <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
                 </a>
+
+                <ul class="treeview-menu">
+                  <li class="<?php if (isset($page_title) && $page_title == "CurrentPlan") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/subscription/currentPlan') ?>">
+                      <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Current plan" ?></span>
+                    </a>
+                  </li>
+
+                  <li class="<?php if (isset($page_title) && $page_title == "Subscription") {
+                                echo "active";
+                              } ?>">
+                    <a href="<?php echo base_url('admin/subscription') ?>">
+                      <i class="bi bi-gem mr-5"></i> <span><?php echo trans('upgrade-plan') ?></span>
+                    </a>
+                  </li>
+                </ul>
+
               </li>
+
+
             <?php endif; ?>
 
           <?php endif; ?>

@@ -25,11 +25,11 @@
             <div class="box-header">
     <h3 class="box-title" style="font-size:x-large; display: inline-block;">
      
-        <span style="font-size:x-large;">Trial Features</span>
+        <span style="font-size:x-large;">Trial Plan</span>
     </h3>
 </div>
               <div class="box-body p-0">
-              <div style="padding: 10px;">
+              <!-- <div style="padding: 10px;">
     <p><?php echo trans('your-subscription') ?>: <strong><?php echo trans('free-trial-of') ?> <?php echo settings()->trial_days . ' ' . trans('days') ?></strong></p>
     <p><?php echo trans('billing-frequency') ?> : <strong><?php echo settings()->trial_days . ' ' . trans('days') ?></strong></p>
     <p><?php echo trans('created') ?> : <strong><?php echo my_date_show(user()->created_at) ?></strong>
@@ -45,7 +45,7 @@
                     </p>
                   <?php endif; ?>
 </div>
-  
+   -->
 
   <div class="table-responsive">
     <table class="table table-hover mb-0">
