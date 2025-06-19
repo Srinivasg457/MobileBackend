@@ -664,11 +664,11 @@ endforeach ?>
         $('select[name="billing_type"] option[value="monthly"]').hide();
         $('select[name="billing_type"] option[value="yearly"]').hide();
 
-        // $('select[name="billing_type"]').val('week');
+        $('select[name="billing_type"]').val('week');
 
         // Show only 'verified' in payment status
         $('select[name="payment_status"] option[value="pending"]').hide();
-        // $('select[name="payment_status"]').val('verified');
+        $('select[name="payment_status"]').val('verified');
 
       } else {
         $('select[name="billing_type"] option[value="week"]').hide();
@@ -677,11 +677,11 @@ endforeach ?>
         $('select[name="payment_status"] option[value="pending"]').show();
         $('select[name="billing_type"]').val('');
 
-
-
       }
     }
+    <?php if (isset($page_title) && $page_title == "Edit"){ ?>
     toggleFieldsBasedOnPlanName();
+   <?php } ?>
     // Change event
     $('select[name="package"]').on('change', function() {
       toggleFieldsBasedOnPlanName();
