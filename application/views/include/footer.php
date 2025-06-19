@@ -243,7 +243,47 @@
         }
     });
 
-      
+    $('#country').on('change', function() {
+        const country_id = $(this).val();
+        console.log(country_id);
+
+        // show a loading placeholder
+        $('#timezone_select')
+            .html('<option value="">Loading…</option>')
+            .prop('disabled', true);
+
+        if (country_id) {
+            $.ajax({
+                url: '<?= base_url('admin/organization_settings/get_timezones_by_country_id') ?>',
+                type: 'GET',
+                data: {
+                    country_id
+                },
+                dataType: 'json',
+                success(res) {
+                    if (res.status && Array.isArray(res.data)) {
+                        let opts = '<option value="">Select</option>';
+                        res.data.forEach(tz => {
+                            opts += `<option value="${tz}">${tz}</option>`;
+                        });
+                        $('#timezone_select').html(opts);
+                    } else {
+                        $('#timezone_select').html('<option value="">No timezones found</option>');
+                    }
+                    $('#timezone_select').prop('disabled', false);
+                },
+                error() {
+                    $('#timezone_select')
+                        .html('<option value="">Error fetching timezones</option>')
+                        .prop('disabled', false);
+                }
+            });
+        } else {
+            $('#timezone_select')
+                .html('<option value="">Select</option>')
+                .prop('disabled', true);
+        }
+    });
   </script>
 
 

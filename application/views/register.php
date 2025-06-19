@@ -110,6 +110,12 @@
                                     <?php endforeach ?>
                                 </select>
                             </div>
+                            <div class="input-wrp">
+                              <select name="time_zone" id="timezone_select"
+                                 class="selectfield textfield--grey single_select col-sm-12 wd-100" disabled>
+                                  <option value="">Select</option>
+                              </select>
+                            </div>
 
                             <div class="input-wrp">
                                 <select class="selectfield textfield--grey single_select col-sm-12 wd-100" name="category" style="width: 100%">
