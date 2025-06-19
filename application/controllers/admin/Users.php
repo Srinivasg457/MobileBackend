@@ -121,6 +121,7 @@ class Users extends Home_Controller {
                     'email_verified' => 1,
                     'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
                     'created_at' => my_date_now(),
+                    'country'  => $this->input->post('country', true),
                     'timezone' => $this->input->post('time_zone', true),
                 );
     
@@ -207,68 +208,81 @@ class Users extends Home_Controller {
                 } else {
                     $this->admin_model->update_payment($pdata, $id, 'payment');
                 }
-                
-                // Add org_settings if package is 2
-                if ($this->input->post('package', true) == 2) {
-                    $org_settings = array(
-                        'user_id' => $id,
-                        'screenshot_flag' => 1, // Enable screenshot by default
-                        'screenshot_time_interval' => 10, // Default 5 minutes interval
-                        'webcam_flag' => 0, // Enable webcam by default
-                        'webcam_time_interval' => 5, // Default 5 minutes interval
-                        'mouse_move_flag' => 1, // Enable mouse tracking
-                        'mouse_move_threshold' => 20, // Default threshold
-                        'key_stroke_flag' => 1, // Enable keystroke tracking
-                        'key_stroke_threshold' => 40, // Changed to 40 (previously 100)
-                        'idle_time_flag' => 5, // Enable idle time tracking
-                        'timecards_time_interval' => 5, // Default 5 minutes interval
-                        'created_at' => my_date_now(),
-                        'updated_at' => my_date_now(),
-                        'time_zone' => $this->input->post('time_zone', true)
-                    );
-                    $this->common_model->insert($org_settings, 'org_settings');
+                $pkg  = (int) $this->input->post('package', true);
+                $tz   = $this->security->xss_clean($this->input->post('time_zone', true)) ?: 'UTC';
+
+                if (in_array($pkg, [2, 3, 4], true)) {
+
+                    // Define full flags for each package
+                    $flagSets = [
+                        2 => [
+                            'user_id'                  => $id,
+                            'screenshot_flag'          => 1,
+                            'screenshot_time_interval' => 10,
+                            'webcam_flag'              => 0,
+                            'webcam_time_interval'     => 5,
+                            'mouse_move_flag'          => 1,
+                            'mouse_move_threshold'     => 20,
+                            'key_stroke_flag'          => 1,
+                            'key_stroke_threshold'     => 40,
+                            'idle_time_flag'           => 1,
+                            'timecards_time_interval'  => 5,
+                            'time_zone'                => $tz,
+                        ],
+                        3 => [
+                            'user_id'                  => $id,
+                            'screenshot_flag'          => 1,
+                            'screenshot_time_interval' => 10,
+                            'webcam_flag'              => 1,
+                            'webcam_time_interval'     => 5,
+                            'mouse_move_flag'          => 1,
+                            'mouse_move_threshold'     => 20,
+                            'key_stroke_flag'          => 1,
+                            'key_stroke_threshold'     => 40,
+                            'idle_time_flag'           => 1,
+                            'timecards_time_interval'  => 5,
+                            'time_zone'                => $tz,
+                        ],
+                        4 => [
+                            'user_id'                  => $id,
+                            'screenshot_flag'          => 1,
+                            'screenshot_time_interval' => 10,
+                            'webcam_flag'              => 1,
+                            'webcam_time_interval'     => 5,
+                            'mouse_move_flag'          => 1,
+                            'mouse_move_threshold'     => 20,
+                            'key_stroke_flag'          => 1,
+                            'key_stroke_threshold'     => 40,
+                            'idle_time_flag'           => 1,
+                            'timecards_time_interval'  => 5,
+                            'time_zone'                => $tz,
+                        ],
+                    ];
+
+                    // Clean for security
+                    $flags = $this->security->xss_clean($flagSets[$pkg]);
+
+                    $this->db->trans_start();
+
+                    $exists = $this->db->get_where('org_settings', ['user_id' => $id])->row();
+
+                    if ($exists) {
+                        $flags['updated_at'] = my_date_now();
+                        $this->db->where('user_id', $id)->update('org_settings', $flags);
+                    } else {
+                        $flags['created_at'] = my_date_now();
+                        $flags['updated_at'] = my_date_now();
+                        $this->db->insert('org_settings', $flags);
+                    }
+
+                    $this->db->trans_complete();
+
+                    if (!$this->db->trans_status()) {
+                        log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
+                    }
                 }
 
-                if ($this->input->post('package', true) == 3) {
-                    $org_settings = array(
-                        'user_id' => $id,
-                        'screenshot_flag' => 1, // Enable screenshot by default
-                        'screenshot_time_interval' => 5, // Default 5 minutes interval
-                        'webcam_flag' => 1, // Enable webcam by default
-                        'webcam_time_interval' => 5, // Default 5 minutes interval
-                        'mouse_move_flag' => 1, // Enable mouse tracking
-                        'mouse_move_threshold' => 20, // Default threshold
-                        'key_stroke_flag' => 1, // Enable keystroke tracking
-                        'key_stroke_threshold' => 40, // Changed to 40 (previously 100)
-                        'idle_time_flag' => 5, // Enable idle time tracking
-                        'timecards_time_interval' => 5, // Default 5 minutes interval
-                        'created_at' => my_date_now(),
-                        'updated_at' => my_date_now(),
-                        'time_zone' => $this->input->post('time_zone', true)
-                    );
-                    $this->common_model->insert($org_settings, 'org_settings');
-                }
 
-                if ($this->input->post('package', true) == 4) {
-                    $org_settings = array(
-                        'user_id' => $id,
-                        'screenshot_flag' => 1, // Enable screenshot by default
-                        'screenshot_time_interval' => 2, // Default 5 minutes interval
-                        'webcam_flag' => 1, // Enable webcam by default
-                        'webcam_time_interval' => 2, // Default 5 minutes interval
-                        'mouse_move_flag' => 1, // Enable mouse tracking
-                        'mouse_move_threshold' => 20, // Default threshold
-                        'key_stroke_flag' => 1, // Enable keystroke tracking
-                        'key_stroke_threshold' => 40, // Changed to 40 (previously 100)
-                        'idle_time_flag' => 5, // Enable idle time tracking
-                        'timecards_time_interval' => 5, // Default 5 minutes interval
-                        'created_at' => my_date_now(),
-                        'updated_at' => my_date_now(),
-                        'time_zone' => $this->input->post('time_zone', true)
-                    );
-                    $this->common_model->insert($org_settings, 'org_settings');
-                }
-                
                 redirect(base_url('admin/users'));
             }
         }      
