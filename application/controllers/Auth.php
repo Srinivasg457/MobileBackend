@@ -393,50 +393,109 @@ class Auth extends Home_Controller
     }
 
     //register business
+    // public function register_business()
+    // {
+    //     if($_POST){
+
+    //         $this->load->library('form_validation');
+    //         $this->form_validation->set_rules('name', "Business Name", 'required');
+    //         $this->form_validation->set_rules('country', "Country", 'required');
+
+    //         if (settings()->enable_email_verify == 1) {
+    //             $status = 4;
+    //         }else{
+    //             $status = 3;
+    //         }
+
+    //         // If validation false show error message using ajax
+    //         if($this->form_validation->run() == FALSE){
+    //             $data = array();
+    //             $data['errors'] = validation_errors();
+    //             $str = $data['errors'];
+    //             echo json_encode(array('st'=>0,'msg'=>$str));
+    //             exit();
+    //         }else{
+    //             $rand_uid = substr(random_string('numeric', 5).mt_rand(), 0, 8);
+    //             $uid = ltrim($rand_uid, '0');
+
+    //             $data=array(
+    //                 'user_id' => user()->id,
+    //                 'uid' => $uid,
+    //                 'is_autoload_amount' => 0,
+    //                 'enable_stock' => 0,
+    //                 'name' => $this->input->post('name', true),
+    //                 'slug' => str_slug($this->input->post('name', true)),
+    //                 'country' => $this->input->post('country', true),
+    //                 'category' => $this->input->post('category', true),
+    //                 'is_primary' => 1
+    //             );
+    //             $data = $this->security->xss_clean($data);
+    //             $this->common_model->insert($data, 'business');
+    //             $this->add_trial_user_settings(user()->id, $this->input->post('time_zone', true));
+    //             echo json_encode(array('st'=> $status));
+    //             exit();
+    //         }
+    //     }
+    // }
     public function register_business()
     {
-        if($_POST){
+        if ($_POST) {
 
             $this->load->library('form_validation');
             $this->form_validation->set_rules('name', "Business Name", 'required');
             $this->form_validation->set_rules('country', "Country", 'required');
-            
+
             if (settings()->enable_email_verify == 1) {
                 $status = 4;
-            }else{
+            } else {
                 $status = 3;
             }
 
             // If validation false show error message using ajax
-            if($this->form_validation->run() == FALSE){
+            if ($this->form_validation->run() == FALSE) {
                 $data = array();
                 $data['errors'] = validation_errors();
                 $str = $data['errors'];
-                echo json_encode(array('st'=>0,'msg'=>$str));
+                echo json_encode(array('st' => 0, 'msg' => $str));
                 exit();
-            }else{
-                $rand_uid = substr(random_string('numeric', 5).mt_rand(), 0, 8);
+            } else {
+                $rand_uid = substr(random_string('numeric', 5) . mt_rand(), 0, 8);
                 $uid = ltrim($rand_uid, '0');
 
-                $data=array(
+                $country = $this->input->post('country', true);
+                $time_zone = $this->input->post('time_zone', true);
+
+                $data = array(
                     'user_id' => user()->id,
                     'uid' => $uid,
                     'is_autoload_amount' => 0,
                     'enable_stock' => 0,
                     'name' => $this->input->post('name', true),
                     'slug' => str_slug($this->input->post('name', true)),
-                    'country' => $this->input->post('country', true),
+                    'country' => $country,
                     'category' => $this->input->post('category', true),
                     'is_primary' => 1
                 );
                 $data = $this->security->xss_clean($data);
                 $this->common_model->insert($data, 'business');
-                $this->add_trial_user_settings(user()->id, $this->input->post('time_zone', true));
-                echo json_encode(array('st'=> $status));
+
+                // ✅ Update the user's country and timezone
+                $update_user = array(
+                    'country' => $country,
+                    'timezone' => $time_zone
+                );
+                $update_user = $this->security->xss_clean($update_user);
+                $this->common_model->update($update_user, user()->id, 'users');
+
+                // ✅ Add trial user settings if needed
+                $this->add_trial_user_settings(user()->id, $time_zone);
+
+                echo json_encode(array('st' => $status));
                 exit();
             }
         }
     }
+
 
     public function add_trial_user_settings($user_id, $time_zone)
     {
@@ -452,14 +511,14 @@ class Auth extends Home_Controller
                 'webcam_flag' => 1,
                 'webcam_time_interval' => 5,
                 'mouse_move_flag' => 1,
-                'mouse_move_threshold' => 30,
+                'mouse_move_threshold' => 20,
                 'key_stroke_flag' => 1,
-                'key_stroke_threshold' => 10,
+                'key_stroke_threshold' => 40,
                 'idle_time_flag' => 1,
                 'timecards_time_interval' => 5,
-                'time_zone' => $time_zone ?? 'UTC',
-                'created_at' => get_user_datetime_only($user_id),
-                'updated_at' => get_user_datetime_only($user_id)
+                'time_zone' => 'UTC',
+                'created_at' => my_date_now(),
+                'updated_at' => my_date_now()
             ];
 
             $this->db->insert('org_settings', $data);
