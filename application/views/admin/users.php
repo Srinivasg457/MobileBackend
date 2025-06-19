@@ -91,31 +91,35 @@
                   </select>
                 </div>
 
-                <?php if (isset($page_title) && $page_title != "Edit"): ?>
-                  <div class="form-group">
-                    <label><?php echo trans('country') ?></label>
-                    <select class="selectfield textfield--grey single_select col-sm-12" name="country" style="width: 100%">
-                      <option value=""><?php echo trans('select') ?></option>
-                      <?php foreach ($countries as $country): ?>
-                        <option value="<?php echo html_escape($country->id); ?>">
-                          <?php echo html_escape($country->name); ?> (<?php echo html_escape($country->currency_code); ?>)
-                        </option>
-                      <?php endforeach ?>
-                    </select>
-                  </div>
+                <div class="form-group">
+                  <label><?php echo trans('country') ?></label>
+                  <select class="selectfield textfield--grey single_select col-sm-12" required name="country" id="country" style="width: 100%">
+                    <option value=""><?php echo trans('select') ?></option>
+                    <?php foreach ($countries as $country): ?>
+                      <option value="<?php echo html_escape($country->id); ?>"
+                        <?php if (isset($user[0]['country']) && $user[0]['country'] == $country->id) echo "selected"; ?>>
+                        <?php echo html_escape($country->name); ?>
+                      </option>
+                    <?php endforeach ?>
+                  </select>
+                </div>
 
-                  <div class="form-group">
 
-                    <label class="form-label">Select Timezone:</label>
-                    <select name="time_zone" id="timezone" class="form-control single_select">
-                      <option value="">-- Select Timezone --</option>
-                      <?php foreach ($timezone as $tz): print_r($tz); ?>
-                        <option value="<?= htmlspecialchars($tz) ?>"><?= htmlspecialchars($tz) ?></option>
-                      <?php endforeach; ?>
-                    </select>
+                <div class="form-group">
 
-                  </div>
-                <?php endif; ?>
+                  <label class="form-label">Select Timezone:</label>
+                  <select name="time_zone" id="timezone_select" required
+                    class="selectfield textfield--grey single_select col-sm-12 wd-100">
+                    <?php if (isset($page_title) && $page_title == "Edit") : ?>
+                      <option value="<?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>"> <?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>
+                      </option>
+                    <?php else: ?>
+                      <option value="">Select</option>
+                    <?php endif; ?>
+
+                  </select>
+
+                </div>
 
                 <div class="form-group clearfix">
                   <label><?php echo trans('status') ?></label><br>
