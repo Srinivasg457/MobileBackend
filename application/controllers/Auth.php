@@ -368,7 +368,7 @@ class Auth extends Home_Controller
                         $billing = $this->input->post('billing', true);
                         $this->add_package($plan, $billing);
 
-
+                        $this->add_trial_user_settings($user->id, "");
                         //send email verify link
                         if ($this->settings->enable_email_verify == 1) {
                             $link = base_url('verify?code='.$hash.'&user='.md5($id));
@@ -431,12 +431,48 @@ class Auth extends Home_Controller
                 );
                 $data = $this->security->xss_clean($data);
                 $this->common_model->insert($data, 'business');
+                $this->add_trial_user_settings(user()->id, $this->input->post('time_zone', true));
                 echo json_encode(array('st'=> $status));
                 exit();
             }
         }
     }
 
+    public function add_trial_user_settings($user_id, $time_zone)
+    {
+        // Check if the user already has settings
+        $existing_settings = $this->db->get_where('org_settings', ['user_id' => $user_id])->row();
+
+        if (empty($existing_settings)) {
+            // Insert default trial settings
+            $data = [
+                'user_id' => $user_id,
+                'screenshot_flag' => 1,
+                'screenshot_time_interval' => 5,
+                'webcam_flag' => 1,
+                'webcam_time_interval' => 5,
+                'mouse_move_flag' => 1,
+                'mouse_move_threshold' => 30,
+                'key_stroke_flag' => 1,
+                'key_stroke_threshold' => 10,
+                'idle_time_flag' => 1,
+                'timecards_time_interval' => 5,
+                'time_zone' => $time_zone ?? 'UTC',
+                'created_at' => get_user_datetime_only($user_id),
+                'updated_at' => get_user_datetime_only($user_id)
+            ];
+
+            $this->db->insert('org_settings', $data);
+            return $this->db->insert_id();
+        } else {
+            // Update only the timezone and updated_at
+            $this->db->where('user_id', $user_id)->update('org_settings', [
+                'time_zone' => $time_zone ?? 'UTC'
+            ]);
+
+            return true;
+        }
+    }
 
 
     //add package
