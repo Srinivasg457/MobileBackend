@@ -115,6 +115,8 @@ class Subscription extends Home_Controller
                     );
                     $this->common_model->edit_option($user_data, user()->id, 'users');
                 }
+                // ✅ APPLY ORG SETTINGS FLAGS HERE
+                $this->apply_org_settings_flags(user()->id, $package->id);
             }
 
             if (number_format($amount, 0) == 0) {
@@ -251,5 +253,71 @@ class Subscription extends Home_Controller
         $data['error_msg'] = 'Error';
         $data['main_content'] = $this->load->view('admin/user/payment_msg', $data, TRUE);
         $this->load->view('admin/index', $data);
+    }
+
+
+    protected function apply_org_settings_flags(int $id, int $pkg): void
+    {
+        // --- original content begins ---
+        if (in_array($pkg, [2, 3, 4], true)) {
+
+            // Define full flags for each package
+            $flagSets = [
+                2 => [
+                    'user_id'                  => $id,
+                    'screenshot_flag'          => 1,
+                    'screenshot_time_interval' => 10,
+                    'webcam_flag'              => 0,
+                    'webcam_time_interval'     => 5,
+                    'mouse_move_flag'          => 1,
+                    'mouse_move_threshold'     => 20,
+                    'key_stroke_flag'          => 1,
+                    'key_stroke_threshold'     => 40,
+                    'idle_time_flag'           => 1,
+                    'timecards_time_interval'  => 5
+                ],
+                3 => [
+                    'user_id'                  => $id,
+                    'screenshot_flag'          => 1,
+                    'screenshot_time_interval' => 10,
+                    'webcam_flag'              => 1,
+                    'webcam_time_interval'     => 5,
+                    'mouse_move_flag'          => 1,
+                    'mouse_move_threshold'     => 20,
+                    'key_stroke_flag'          => 1,
+                    'key_stroke_threshold'     => 40,
+                    'idle_time_flag'           => 1,
+                    'timecards_time_interval'  => 5
+                ],
+                4 => [
+                    'user_id'                  => $id,
+                    'screenshot_flag'          => 1,
+                    'screenshot_time_interval' => 10,
+                    'webcam_flag'              => 1,
+                    'webcam_time_interval'     => 5,
+                    'mouse_move_flag'          => 1,
+                    'mouse_move_threshold'     => 20,
+                    'key_stroke_flag'          => 1,
+                    'key_stroke_threshold'     => 40,
+                    'idle_time_flag'           => 1,
+                    'timecards_time_interval'  => 5
+                ],
+            ];
+
+            // Clean for security
+            $flags = $this->security->xss_clean($flagSets[$pkg]);
+
+            $this->db->trans_start();
+
+            $flags['updated_at'] = my_date_now();
+            $this->db->where('user_id', $id)->update('org_settings', $flags);
+
+            $this->db->trans_complete();
+
+            if (!$this->db->trans_status()) {
+                log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
+            }
+        }
+        // --- original content ends ---
     }
 }
