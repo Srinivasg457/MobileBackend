@@ -67,13 +67,12 @@ class Users extends Home_Controller {
     {  
         if($_POST)
         {   
-
             $id = $this->input->post('id', true);
-
+    
             //validate inputs
             $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
             $this->form_validation->set_rules('email', trans('email'), 'required|max_length[100]');
-
+    
             if ($this->form_validation->run() === false) {
                 $this->session->set_flashdata('error', validation_errors());
                 redirect(base_url('admin/users'));
@@ -90,7 +89,7 @@ class Users extends Home_Controller {
                     $new_password = $this->input->post('password');
                     $password = hash_password($this->input->post('password'));
                 }
-
+    
                 $email = $this->auth_model->check_email($mail);
                 if ($email){
                     $this->session->set_flashdata('msg', trans('email-exist'));
@@ -98,14 +97,14 @@ class Users extends Home_Controller {
                 }
                 $package = $this->input->post('package', true);
 
-                if ($package == 1 ) {
+                if ($package == 1) {
                     $user_type = 'trial';
                     $trial_expire = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
                 } else {
                     $user_type = 'registered';
                     $trial_expire = date('Y-m-d');
                 }
-
+                
                 $udata = array(
                     'name' => $this->input->post('name', true),
                     'user_name' => str_slug($this->input->post('name', true)),
@@ -124,36 +123,19 @@ class Users extends Home_Controller {
                     'created_at' => my_date_now(),
                     'timezone' => $this->input->post('time_zone', true),
                 );
-
-
-
+    
                 if ($id != '') {
                     $this->admin_model->edit_option($udata, $id, 'users');
                     $this->session->set_flashdata('msg', trans('updated-successfully')); 
                 } else {
-
                     $id = $this->admin_model->insert($udata, 'users');
                     $this->session->set_flashdata('msg', trans('inserted-successfully'));
-
-                    // $screenshot_dir = FCPATH . 'uploads/screenshots/' . $id;
-                    // if (!is_dir($screenshot_dir)) {
-                    //     $created = mkdir($screenshot_dir, 0777, true); // Create the directory
-                    //     if (!$created) {
-                    //         // Log the error or handle it appropriately.  Important!
-                    //         log_message('error', "Failed to create directory: " . $screenshot_dir);
-                    //         $this->session->set_flashdata('error', "Failed to create user directory.  Please check permissions.");
-                    //         //  Consider a rollback of the user creation if the folder is critical.
-                    //         //  redirect(base_url('admin/users')); //removed redirect
-                    //         //  return;
-                    //     }
-                    // }       
-
-
+    
                     $rand_uid = substr(random_string('numeric', 5).mt_rand(), 0, 8);
                     $uid = ltrim($rand_uid, '0');
-
+    
                     $company_name = 'Company '.$uid;
-
+    
                     $data=array(
                         'user_id' => $id,
                         'uid' => $uid,
@@ -166,22 +148,36 @@ class Users extends Home_Controller {
                         'is_primary' => 1
                     );
                     $this->common_model->insert($data, 'business');
-
+    
+                    // Add org_settings for trial users
+                    if ($user_type == 'trial') {
+                        $org_settings = array(
+                            'user_id' => $id,
+                            'screenshot_flag' => 1, // Enable screenshot by default for trial
+                            'screenshot_time_interval' => 5, // Default 5 minutes interval
+                            'webcam_flag' => 1, // Enable webcam by default for trial
+                            'webcam_time_interval' => 5, // Default 5 minutes interval
+                            'mouse_move_flag' => 1, // Enable mouse tracking
+                            'mouse_move_threshold' => 20, // Default threshold
+                            'key_stroke_flag' => 1, // Enable keystroke tracking
+                            'key_stroke_threshold' => 40, // Default threshold
+                            'idle_time_flag' => 1, // Enable idle time tracking
+                            'timecards_time_interval' => 5, // Default 5 minutes interval
+                            'created_at' => my_date_now(),
+                            'updated_at' => my_date_now(),
+                            'time_zone' => $this->input->post('time_zone', true)
+                        );
+                        $this->common_model->insert($org_settings, 'org_settings');
+                    }
+                    
                 }
                
                 $payment = $this->admin_model->get_user_payment($id);   
-
+    
                 $plan = $this->input->post('package', true);
                 $billing = $this->input->post('billing_type', true);
-
+    
                 $package = $this->common_model->get_by_id($plan, 'package');
-                // if ($billing == 'monthly') {
-                //     $price = $package->monthly_price;
-                //     $expire_on = date('Y-m-d', strtotime('+1 month'));
-                // } else {
-                //     $price = $package->price;
-                //     $expire_on = date('Y-m-d', strtotime('+12 month'));
-                // }
                 if ($billing == 'week') {
                     $price = $package->monthly_price;
                     $expire_on = date('Y-m-d', strtotime('+1 week'));
@@ -193,10 +189,9 @@ class Users extends Home_Controller {
                     $price = $package->price;
                     $expire_on = date('Y-m-d', strtotime('+12 month'));
                 }
-
-
-                $pdata=array(
-                    'puid' => random_string('numeric',5),
+    
+                $pdata = array(
+                    'puid' => random_string('numeric', 5),
                     'user_id' => $id,
                     'package' => $this->input->post('package', true),
                     'billing_type' => $this->input->post('billing_type', true),
@@ -205,19 +200,79 @@ class Users extends Home_Controller {
                     'created_at' => my_date_now(),
                     'expire_on' => $expire_on
                 );
+                
+                // Insert or update payment
                 if (empty($payment)) {
                     $this->admin_model->insert($pdata, 'payment');
-                }else {
+                } else {
                     $this->admin_model->update_payment($pdata, $id, 'payment');
                 }
+                
+                // Add org_settings if package is 2
+                if ($this->input->post('package', true) == 2) {
+                    $org_settings = array(
+                        'user_id' => $id,
+                        'screenshot_flag' => 1, // Enable screenshot by default
+                        'screenshot_time_interval' => 10, // Default 5 minutes interval
+                        'webcam_flag' => 0, // Enable webcam by default
+                        'webcam_time_interval' => 5, // Default 5 minutes interval
+                        'mouse_move_flag' => 1, // Enable mouse tracking
+                        'mouse_move_threshold' => 20, // Default threshold
+                        'key_stroke_flag' => 1, // Enable keystroke tracking
+                        'key_stroke_threshold' => 40, // Changed to 40 (previously 100)
+                        'idle_time_flag' => 5, // Enable idle time tracking
+                        'timecards_time_interval' => 5, // Default 5 minutes interval
+                        'created_at' => my_date_now(),
+                        'updated_at' => my_date_now(),
+                        'time_zone' => $this->input->post('time_zone', true)
+                    );
+                    $this->common_model->insert($org_settings, 'org_settings');
+                }
 
+                if ($this->input->post('package', true) == 3) {
+                    $org_settings = array(
+                        'user_id' => $id,
+                        'screenshot_flag' => 1, // Enable screenshot by default
+                        'screenshot_time_interval' => 5, // Default 5 minutes interval
+                        'webcam_flag' => 1, // Enable webcam by default
+                        'webcam_time_interval' => 5, // Default 5 minutes interval
+                        'mouse_move_flag' => 1, // Enable mouse tracking
+                        'mouse_move_threshold' => 20, // Default threshold
+                        'key_stroke_flag' => 1, // Enable keystroke tracking
+                        'key_stroke_threshold' => 40, // Changed to 40 (previously 100)
+                        'idle_time_flag' => 5, // Enable idle time tracking
+                        'timecards_time_interval' => 5, // Default 5 minutes interval
+                        'created_at' => my_date_now(),
+                        'updated_at' => my_date_now(),
+                        'time_zone' => $this->input->post('time_zone', true)
+                    );
+                    $this->common_model->insert($org_settings, 'org_settings');
+                }
+
+                if ($this->input->post('package', true) == 4) {
+                    $org_settings = array(
+                        'user_id' => $id,
+                        'screenshot_flag' => 1, // Enable screenshot by default
+                        'screenshot_time_interval' => 2, // Default 5 minutes interval
+                        'webcam_flag' => 1, // Enable webcam by default
+                        'webcam_time_interval' => 2, // Default 5 minutes interval
+                        'mouse_move_flag' => 1, // Enable mouse tracking
+                        'mouse_move_threshold' => 20, // Default threshold
+                        'key_stroke_flag' => 1, // Enable keystroke tracking
+                        'key_stroke_threshold' => 40, // Changed to 40 (previously 100)
+                        'idle_time_flag' => 5, // Enable idle time tracking
+                        'timecards_time_interval' => 5, // Default 5 minutes interval
+                        'created_at' => my_date_now(),
+                        'updated_at' => my_date_now(),
+                        'time_zone' => $this->input->post('time_zone', true)
+                    );
+                    $this->common_model->insert($org_settings, 'org_settings');
+                }
+                
                 redirect(base_url('admin/users'));
-
             }
         }      
-        
     }
-
 
 
 
