@@ -281,34 +281,51 @@
 </div>
 
 
-                            <!-- Webcam Flag -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Webcam Flag:</label>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" name="webcam_flag" value="1" class="toggle-flag" data-target="webcam_time_interval"
-                                        <?= isset($settings['webcam_flag']) && $settings['webcam_flag'] ? 'checked' : '' ?>
-                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
+                          <!-- Webcam Flag -->
+<div class="col-md-6 form-group">
+    <label class="form-label">Webcam Flag:</label>
+    <label class="toggle-switch">
+        <input type="checkbox" name="webcam_flag" value="1" class="toggle-flag" data-target="webcam_time_interval"
+            <?= isset($settings['webcam_flag']) && $settings['webcam_flag'] ? 'checked' : '' ?>
+            <?= ($is_edit_mode && !is_plan_basic()) ? '' : 'disabled' ?>
+            <?= is_plan_basic() ? 'data-tooltip="Webcam feature not available in Basic plan"' : '' ?>>
+        <span class="slider"></span>
+    </label>
+    <?php if (is_plan_basic()): ?>
+        <small class="text-muted">Webcam feature not available in Basic plan</small>
+    <?php endif; ?>
+</div>
 
-                            <!-- Webcam Interval -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Webcam Interval (mins):</label>
+                      <!-- Webcam Interval -->
+<div class="col-md-6 form-group">
+    <label class="form-label">Webcam Interval (mins):</label>
 
-                                <?php if ($is_edit_mode): ?>
-                                    <select name="webcam_time_interval" class="form-control" id="webcam_time_interval">
-                                        <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <option value="<?= $val ?>" <?= (isset($settings['webcam_time_interval']) && $settings['webcam_time_interval'] == $val) ? 'selected' : '' ?>>
-                                                <?= $val ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else: ?>
-                                    <input type="text" class="form-control" value="<?= isset($settings['webcam_time_interval']) ? $settings['webcam_time_interval'] : '' ?>" readonly>
-                                <?php endif; ?>
-                            </div>
-
+    <?php if ($is_edit_mode): ?>
+        <?php if (is_plan_basic()): ?>
+            <input type="text" class="form-control" value="Disabled for Basic plan" readonly disabled>
+        <?php elseif (is_plan_standard()): ?>
+            <select name="webcam_time_interval" class="form-control" id="webcam_time_interval">
+                <?php foreach ([5, 10] as $val): ?>
+                    <option value="<?= $val ?>" <?= (isset($settings['webcam_time_interval']) && $settings['webcam_time_interval'] == $val) ? 'selected' : '' ?>>
+                        <?= $val ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        <?php else: ?>
+            <select name="webcam_time_interval" class="form-control" id="webcam_time_interval">
+                <?php foreach ([1, 2, 5, 10] as $val): ?>
+                    <option value="<?= $val ?>" <?= (isset($settings['webcam_time_interval']) && $settings['webcam_time_interval'] == $val) ? 'selected' : '' ?>>
+                        <?= $val ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        <?php endif; ?>
+    <?php else: ?>
+        <input type="text" class="form-control" 
+               value="<?= is_plan_basic() ? 'Disabled' : (isset($settings['webcam_time_interval']) ? $settings['webcam_time_interval'] : '' )?>" 
+               readonly>
+    <?php endif; ?>
+</div>
 
                             <!-- Mouse Movement Flag -->
                             <div class="col-md-6 form-group">
