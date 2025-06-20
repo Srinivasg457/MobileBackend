@@ -679,9 +679,12 @@ endforeach ?>
 
       }
     }
-    <?php if (isset($page_title) && $page_title == "Edit"){ ?>
-    toggleFieldsBasedOnPlanName();
-   <?php } ?>
+    <?php if (isset($page_title) && $page_title == "Edit") { ?>
+      var selectedPlanText = $('select[name="package"] option:selected').text().trim();
+      if (!selectedPlanText === 'TrialAll Packages' || !selectedPlanText === 'Trial') {
+        toggleFieldsBasedOnPlanName();
+      }
+    <?php } ?>
     // Change event
     $('select[name="package"]').on('change', function() {
       toggleFieldsBasedOnPlanName();
