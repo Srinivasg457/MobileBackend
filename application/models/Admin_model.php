@@ -1151,6 +1151,45 @@ class Admin_model extends CI_Model {
         $query = $query->result();
         return $query;
     }
+    function get_active_packages_for_subscription()
+    {
+        // Get current user's package ID
+        $currentPackage = $this->common_model->get_my_package();;
+        $minPackageId = isset($currentPackage->package) ? (int) $currentPackage->package : 0;
+
+        // Fetch all active packages with id >= current package id
+        return $this->db->select('*')
+            ->from('package p')
+            ->where('p.is_active', 1)
+            ->where('p.id >=', $minPackageId)
+            ->order_by('p.id', 'ASC')
+            ->get()
+            ->result();
+    }
+    function get_features_for_subscription()
+    {
+        // 1️⃣  All active packages ≥ current tier
+        $packages = $this->get_active_packages_for_subscription();
+
+        // 2️⃣  Pull their slugs (these map 1‑to‑1 with feature columns)
+        $slugs = array_column($packages, 'slug');          // e.g. ['basic', 'standard', 'premium']
+        if (empty($slugs)) {
+            return [];                                    // nothing to show
+        }
+
+        // 3️⃣  Build the SELECT list: id, name + every slug column
+        $selectCols = array_merge(['id', 'name'], $slugs);
+        $select     = implode(',', array_map(function ($c) {
+            return $this->db->protect_identifiers($c);    // safe back‑ticks
+        }, $selectCols));
+
+        // 4️⃣  Return CI result() in the same format as your package query
+        return $this->db->select($select)
+            ->from('package_features')
+            ->get()
+            ->result();                       // ← identical style
+    }
+
 
 
 
