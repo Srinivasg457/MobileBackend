@@ -116,7 +116,7 @@ class Subscription extends Home_Controller
                     $this->common_model->edit_option($user_data, user()->id, 'users');
                 }
                 // ✅ APPLY ORG SETTINGS FLAGS HERE
-                $this->apply_org_settings_flags(user()->id, $package->id);
+                $this->apply_org_settings_flags(user()->id, $package->id, $payment, $package->id);
             }
 
             if (number_format($amount, 0) == 0) {
@@ -256,7 +256,7 @@ class Subscription extends Home_Controller
     }
 
 
-    protected function apply_org_settings_flags(int $id, int $pkg): void
+    protected function apply_org_settings_flags(int $id, int $pkg, $payment, $plan): void
     {
         // --- original content begins ---
         if (in_array($pkg, [2, 3, 4], true)) {
@@ -305,6 +305,10 @@ class Subscription extends Home_Controller
             ];
 
             // Clean for security
+            $current_pkg = !empty($payment) ?  $payment->package : null;
+            $new_pkg     = $plan;
+            $skipOrgSave = ($current_pkg == 3 && $new_pkg == 4);
+            if (!$skipOrgSave) {
             $flags = $this->security->xss_clean($flagSets[$pkg]);
 
             $this->db->trans_start();
@@ -317,6 +321,7 @@ class Subscription extends Home_Controller
             if (!$this->db->trans_status()) {
                 log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
             }
+        }
         }
         // --- original content ends ---
     }

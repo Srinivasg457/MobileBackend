@@ -267,8 +267,13 @@ class Users extends Home_Controller {
                     $exists = $this->db->get_where('org_settings', ['user_id' => $id])->row();
 
                     if ($exists) {
+                        $current_pkg = !empty($payment) ?  $payment->package_id : null;
+                        $new_pkg     = $plan;
+                        $skipOrgSave = ($current_pkg == 3 && $new_pkg == 4);
+                         if(!$skipOrgSave){
                         $flags['updated_at'] = my_date_now();
                         $this->db->where('user_id', $id)->update('org_settings', $flags);
+                         }
                     } else {
                         $flags['created_at'] = my_date_now();
                         $flags['updated_at'] = my_date_now();
