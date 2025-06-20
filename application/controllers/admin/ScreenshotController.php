@@ -984,9 +984,14 @@ public function get_last_screenshot()
     //list of employees based on user ID
     public function list_employees_by_user()
     {
-
+        // Get user_id from session first
         $user_id = $this->session->userdata('id');
-
+        
+        // If not found in session, try to get from header
+        if (empty($user_id)) {
+            $user_id = $this->input->get_request_header('user_id', TRUE);
+        }
+    
         // 1. Validate user ID
         if (empty($user_id) || !is_numeric($user_id)) {
             return $this->output
@@ -997,14 +1002,14 @@ public function get_last_screenshot()
                     'message' => 'Valid user ID required'
                 ]));
         }
-        // $data['user'] = $this->User_model->get_user_by_id($user_id, "users");
+    
         // 2. Get employees from the employees table matching the provided user_id
         $employees = $this->db
             ->select('id, name, email, country') // Select the employee details you need
             ->where('user_id', $user_id)
             ->get('employees')
             ->result_array();
-
+    
         // 3. Return response
         if ($employees) {
             return $this->output
@@ -1025,8 +1030,6 @@ public function get_last_screenshot()
                 ]));
         }
     }
-
-
     //search employees by name based on user ID
     public function search_employees_by_name_by_user()
     {
