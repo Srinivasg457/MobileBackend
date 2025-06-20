@@ -148,33 +148,63 @@
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="col-md-6 form-group">
+                            <!-- <div class="col-md-6 form-group">
                                 <label>Screenshot Interval (mins):</label>
                                 <select name="screenshot_time_interval" class="form-control interval-field">
-                                    <option value="1">1</option>
+
+                                    <option value="1" disabled>1</option>
                                     <option value="2">2</option>
                                     <option value="5">5</option>
                                     <option value="10">10</option>
+                                </select>
+                            </div> -->
+                            <div class="col-md-6 form-group">
+                                <label>Screenshot Interval (mins):</label>
+                                <select name="screenshot_time_interval" class="form-control interval-field">
+                                    <?php if (is_plan_basic()): ?>
+                                        <option value="10">10</option>
+                                    <?php elseif (is_plan_standard()): ?>
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                    <?php else: ?>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                    <?php endif; ?>
                                 </select>
                             </div>
 
                             <!-- Webcam -->
                             <div class="col-md-6 form-group">
                                 <label>Webcam Flag:</label><br>
-                                <label class="switch">
-                                    <input type="checkbox" name="webcam_flag" checked>
+                                <label class="switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
+                                    <input type="checkbox" name="webcam_flag"
+                                        <?= (!is_plan_basic()) ? 'checked' : 'disabled' ?>>
                                     <span class="slider"></span>
                                 </label>
+
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>Webcam Interval (mins):</label>
-                                <select name="webcam_time_interval" class="form-control interval-field">
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="5">5</option>
-                                    <option value="10">10</option>
+                                <select name="webcam_time_interval" class="form-control interval-field"
+                                    <?php echo is_plan_basic() ? 'disabled' : ''; ?>>
+                                    <?php if (is_plan_standard()): ?>
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                    <?php else: ?>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                    <?php endif; ?>
                                 </select>
+
+                                <?php if (is_plan_basic()): ?>
+                                    <small class="text-danger">Webcam feature not available in Basic plan</small>
+                                <?php endif; ?>
                             </div>
+
 
                             <!-- Mouse Move -->
                             <div class="col-md-6 form-group">
@@ -470,16 +500,15 @@
                 url: `<?= base_url('admin/organization_settings/get_org_exception_settings/') ?>${employeeId}`,
                 method: 'GET',
                 success: function(data) {
+                    console.log(data);
+
                     const settings = JSON.parse(data);
 
                     // Reset form
                     $('#orgExceptionForm')[0].reset();
 
                     // Set all checkboxes to true and enable all dependent fields
-                    $('#orgExceptionForm input[type="checkbox"]').prop('checked', true).trigger('change');
-                    $('#orgExceptionForm select.interval-field').val('1').prop('disabled', false);
-                    $('[name="mouse_move_threshold"]').val(20).prop('disabled', false);
-                    $('[name="key_stroke_threshold"]').val(40).prop('disabled', false);
+
 
                     // Set the timezone input field if it's part of the employee data
                     // if (settings['time_zone']) {
@@ -518,9 +547,14 @@
                             } else {
                                 if (!field.prop('disabled')) {
                                     field.val(value);
+                                } else {
+                                    field.val(value);
                                 }
                             }
                         }
+                        showToast('Data fetched successfully.', 'success');
+                    } else {
+                        showToast('No settings found for this employee. Please insert the data.', 'success');
                     }
                 },
                 error: function() {

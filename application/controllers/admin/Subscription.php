@@ -19,11 +19,14 @@ class Subscription extends Home_Controller
         $data['page_title'] = 'Subscription';
         $data['main_page'] = 'plan&pack';
         $data['user'] = $this->common_model->get_my_package();
-        $data['packages'] = $this->admin_model->get_active_packages('package');
-        $data['features'] = $this->admin_model->select_asc('package_features');
+
         if (user()->user_type == 'trial') {
+            $data['packages'] = $this->admin_model->get_active_packages('package');
+            $data['features'] = $this->admin_model->select_asc('package_features');
             $page_load = 'trial_subscription';
         } else {
+            $data['packages'] = $this->admin_model->get_active_packages_for_subscription('package');
+            $data['features'] = $this->admin_model->get_features_for_subscription('package_features');
             $page_load = 'subscription';
         }
         $data['main_content'] = $this->load->view('admin/user/' . $page_load, $data, TRUE);
@@ -116,7 +119,7 @@ class Subscription extends Home_Controller
                     $this->common_model->edit_option($user_data, user()->id, 'users');
                 }
                 // ✅ APPLY ORG SETTINGS FLAGS HERE
-                $this->apply_org_settings_flags(user()->id, $package->id, $payment, $package->id);
+                $this->apply_org_settings_flags(user()->id, $package->id);
             }
 
             if (number_format($amount, 0) == 0) {
@@ -256,7 +259,7 @@ class Subscription extends Home_Controller
     }
 
 
-    protected function apply_org_settings_flags(int $id, int $pkg, $payment, $plan): void
+    protected function apply_org_settings_flags(int $id, int $pkg): void
     {
         // --- original content begins ---
         if (in_array($pkg, [2, 3, 4], true)) {
@@ -305,10 +308,6 @@ class Subscription extends Home_Controller
             ];
 
             // Clean for security
-            $current_pkg = !empty($payment) ?  $payment->package : null;
-            $new_pkg     = $plan;
-            $skipOrgSave = ($current_pkg == 3 && $new_pkg == 4);
-            if (!$skipOrgSave) {
             $flags = $this->security->xss_clean($flagSets[$pkg]);
 
             $this->db->trans_start();
@@ -320,7 +319,6 @@ class Subscription extends Home_Controller
 
             if (!$this->db->trans_status()) {
                 log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
-            }
         }
         }
         // --- original content ends ---
