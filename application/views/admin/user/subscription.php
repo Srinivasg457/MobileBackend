@@ -207,6 +207,7 @@
                            <?php echo trans('yearly') ?><strong><?php echo html_escape($feature->year_basic); ?></strong> 
                           <?php endif ?>
                         </td> -->
+                        <?php if ($feature->basic): ?>
                         <td class="text-center">
                           <?php if ($feature->basic == "none"): ?>
                             <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
@@ -216,6 +217,8 @@
                             <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_basic); ?></strong> -->
                           <?php endif ?>
                         </td>
+                      <?php endif ?>
+                      <?php if ($feature->standard): ?>
                         <td class="text-center">
                           <?php if ($feature->standard == "none"): ?>
                             <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
@@ -225,6 +228,8 @@
                             <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_standared); ?></strong> -->
                           <?php endif ?>
                         </td>
+                      <?php endif ?>
+                      <?php if ($feature->premium): ?>
                         <td class="text-center">
                           <?php if ($feature->premium == "none"): ?>
                             <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
@@ -234,6 +239,8 @@
                             <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_premium); ?></strong> -->
                           <?php endif ?>
                         </td>
+                      <?php endif ?>
+                      <?php if ($feature->customization): ?>
                         <td class="text-center">
                           <?php if ($feature->customization == "none"): ?>
                             <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
@@ -243,6 +250,7 @@
                             <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_basic); ?></strong> -->
                           <?php endif ?>
                         </td>
+                        <?php endif ?>
                         <!-- <td width="5%"><a href="#featureModal_<?php echo html_escape($feature->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-features') ?></a></td> -->
                       </tr>
                     <?php endforeach ?>
