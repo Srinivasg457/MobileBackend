@@ -91,10 +91,10 @@ class EmployeeRoles extends Home_Controller {
 
     public function get_app_features() {
         try {
-            $this->db->select('id, feature_name');
-            $this->db->order_by('feature_name', 'asc');
-            $query = $this->db->get('app_features');
-            
+            $this->db->select('id, name');
+            $this->db->order_by('name', 'asc');
+            $query = $this->db->get('package_features');
+
             if ($query === FALSE) {
                 log_message('error', 'Database error: ' . $this->db->error()['message']);
                 throw new Exception('Database query failed', 500);
@@ -279,8 +279,8 @@ class EmployeeRoles extends Home_Controller {
                 }
     
                 $feature_id = $feature['feature_id'];
-    
-                if (!$this->db->where('id', $feature_id)->get('app_features')->row()) {
+
+                if (!$this->db->where('id', $feature_id)->get('package_features')->row()) {
                     $errors['features'][$key]['feature_id'] = 'Feature ID ' . $feature_id . ' does not exist';
                     continue;
                 }
@@ -376,9 +376,9 @@ class EmployeeRoles extends Home_Controller {
     
         foreach ($roles as $role) {
             $access_entries = $this->db
-                ->select('rfa.feature_id, af.feature_name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
+                ->select('rfa.feature_id, af.name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
                 ->from('role_feature_access as rfa')
-                ->join('app_features as af', 'af.id = rfa.feature_id')
+                ->join('package_features as af', 'af.id = rfa.feature_id')
                 ->where('rfa.role_id', $role->id)
                 ->where('rfa.user_id', $user_id)
                 ->where('rfa.status', 1)
@@ -389,7 +389,7 @@ class EmployeeRoles extends Home_Controller {
             foreach ($access_entries as $entry) {
                 $features[] = [
                     'feature_id' => $entry->feature_id,
-                    'feature_name' => $entry->feature_name,
+                    'feature_name' => $entry->name,
                     'is_read' => $entry->is_read,
                     'is_write' => $entry->is_write,
                     'is_action' => $entry->is_action,
@@ -428,11 +428,11 @@ class EmployeeRoles extends Home_Controller {
         if (!$role) {
             return $this->json_response(404, 'Role not found for the given user');
         }
-    
+
         $access_entries = $this->db
-            ->select('rfa.feature_id, af.feature_name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
+            ->select('rfa.feature_id, af.name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
             ->from('role_feature_access as rfa')
-            ->join('app_features as af', 'af.id = rfa.feature_id')
+            ->join('package_features as af', 'af.id = rfa.feature_id')
             ->where('rfa.role_id', $role_id)
             ->where('rfa.user_id', $user_id)
             ->where('rfa.status', 1)
@@ -447,7 +447,7 @@ class EmployeeRoles extends Home_Controller {
         foreach ($access_entries as $entry) {
             $features[] = [
                 'feature_id' => $entry->feature_id,
-                'feature_name' => $entry->feature_name,
+                'feature_name' => $entry->name,
                 'is_read' => $entry->is_read,
                 'is_write' => $entry->is_write,
                 'is_action' => $entry->is_action,
