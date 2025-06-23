@@ -257,11 +257,12 @@ class EmployeeRoles extends Home_Controller {
             }
     
             $this->db->trans_start();
+            $date = get_user_datetime_only($user_id);
             $this->db->where('role_id', $role_id)
                 ->where('user_id', $user_id)
                 ->update('role_feature_access', [
                     'status' => 0,
-                    'updated_at' => get_user_datetime_only($user_id) // Using helper function
+                    'updated_at' => $date // Using helper function
                 ]);
 
             foreach ($features as $key => $feature) {
@@ -309,6 +310,7 @@ class EmployeeRoles extends Home_Controller {
                 ])->row();
     
                 if ($existing) {
+                    $date = get_user_datetime_only($user_id);
                     $this->db->where('id', $existing->id)
                              ->update('role_feature_access', [
                                  'is_read' => $feature['is_read'],
@@ -316,7 +318,7 @@ class EmployeeRoles extends Home_Controller {
                                  'is_action' => $feature['is_action'],
                                  'is_delete' => $feature['is_delete'],
                                  'status' => $data['status'],
-                                 'updated_at' => get_user_datetime_only($user_id) // Using helper function
+                                  'updated_at' => $date 
                              ]);
                 } else {
                     $this->db->insert('role_feature_access', $data);
@@ -504,10 +506,11 @@ class EmployeeRoles extends Home_Controller {
             return;
         }
 
-        $this->db->where('id', $role->id)
-                 ->update('employee_roles', [
-                     'deleted_at' => get_user_datetime_only($employee_user_id) // Using helper function
-                 ]);
+        // $this->db->where('id', $role->id)
+        //          ->update('employee_roles', [
+        //              'deleted_at' => get_user_datetime_only($employee_user_id) // Using helper function
+        //          ]);
+        $this->db->delete('employee_roles', ['id' => $role->id]);
 
         if ($this->db->affected_rows() > 0) {
             echo json_encode([
