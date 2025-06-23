@@ -566,7 +566,7 @@
                             <input type="checkbox" class="feature-selector" data-feature-id="${feature.id}">
                         </td>
                         <td>
-                            ${feature.feature_name}
+                            ${feature.name}
                             <input type="hidden" name="feature_id[]" value="${feature.id}" />
                         </td>
                         <td class="text-center">
@@ -703,6 +703,8 @@
                 dataType: "json",
                 success: function(response) {
                     if (response.status === "success") {
+                        console.log("page data:" + response.data.features);
+
                         allFeatures = response.data.features;
                         initializeFeatureTable(allFeatures, tableName, roleId);
                     } else {
@@ -810,6 +812,7 @@
                 features: features,
                 permission_description: permissionDescription
             };
+            console.log(payload);
 
             $.ajax({
                 url: "<?= base_url('employee/EmployeeRoles/store_role_feature_access'); ?>",
