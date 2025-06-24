@@ -15,25 +15,50 @@
   
           <form id="cat-form" method="post" enctype="multipart/form-data" class="validate-form mt-20 p-30" action="<?php echo base_url('admin/hrm/department_add')?>" role="form" novalidate>
 
-            <div class="form-group">
-              <label><?php echo trans('department-name') ?> <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" required name="name" value="<?php echo html_escape($department[0]['name']); ?>" >
+        <?php
+        $sampledepartments = [
+          'Human Resources',
+          'Marketing',
+          'Sales',
+          'Customer Support',
+          'Executive',
+          'UI-UX',
+          'Development',
+          'Product Management'
+        ];
+
+        // Convert DB departments (from $department) to lowercase name => status
+        $dept_status_map = [];
+        foreach ($departments as $dept) {
+          $dept_name_key = trim($dept->name);
+          $dept_status_map[$dept_name_key] = $dept->status;
+        }
+        ?>
+
+        <?php foreach ($sampledepartments as $index => $dept): ?>
+          <?php
+          $dept_key = trim($dept);
+          $status = isset($dept_status_map[$dept_key]) ? 1 : 0;
+          ?>
+          <div class="form-group row align-items-center my-4">
+            <div class="col-sm-7 ps-5">
+              <label class="mb-1 font-weight-bold"><?= $dept ?></label>
+              <input type="hidden" name="name[]" value="<?= $dept ?>">
+              <input type="hidden" name="status[]" id="dept-status-<?= $index ?>" value="<?= $status ?>">
             </div>
 
-            <div class="form-group">
-              <div class="icheck-primary radio radio-inline d-inline mr-4 mt-2">
-                <input type="radio" id="radioPrimary1" value="1" name="status" <?php if(!empty($department) && $department[0]['status'] == 1){echo "checked";} ?> >
-                <label for="radioPrimary1"> <?php echo trans('show') ?>
-                </label>
+            <div class="col-sm-5 d-flex align-items-center justify-content-between">
+              <div class="icheck-primary radio radio-inline mr-3">
+                <input type="radio" name="status_<?= $index ?>" id="show_<?= $index ?>" value="1" <?= ($status == 1) ? 'checked' : '' ?>>
+                <label for="show_<?= $index ?>">Active</label>
               </div>
-
-              <div class="icheck-primary radio radio-inline d-inline">
-                <input type="radio" id="radioPrimary2" value="0" name="status" <?php if(!empty($department) && $department[0]['status'] == 0){echo "checked";} ?>>
-                <label for="radioPrimary2"> <?php echo trans('hide') ?>
-                </label>
+              <div class="icheck-danger radio radio-inline">
+                <input type="radio" name="status_<?= $index ?>" id="hide_<?= $index ?>" value="0" <?= ($status == 0) ? 'checked' : '' ?>>
+                <label for="hide_<?= $index ?>">Dective</label>
               </div>
             </div>
-            
+          </div>
+        <?php endforeach; ?>
 
             <input type="hidden" name="id" value="<?php echo html_escape($department['0']['id']); ?>">
             <!-- csrf token -->
@@ -90,7 +115,7 @@
                           </td>
 
                           <td class="actions" width="15%">
-                            <a href="<?php echo base_url('admin/hrm/department_edit/'.html_escape($department->id));?>" class="on-default edit-row" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a> &nbsp; 
+                            <a href="<?php echo base_url('admin/hrm/department_edit/'.html_escape($department->id));?>" class="on-default edit-row hide" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a> &nbsp; 
 
                             <a data-val="department" data-id="<?php echo html_escape($department->id); ?>" href="<?php echo base_url('admin/hrm/department_delete/'.html_escape($department->id));?>" class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></a>
                           </td>
@@ -106,3 +131,14 @@
 
   </section>
 </div>
+
+
+<script>
+  $(document).ready(function() {
+    $('input[type=radio]').on('change', function() {
+      var index = $(this).attr('name').split('_')[1];
+      var value = $(this).val();
+      $('#dept-status-' + index).val(value);
+    });
+  });
+</script>

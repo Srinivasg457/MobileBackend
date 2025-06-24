@@ -21,7 +21,7 @@ class Hrm extends Home_Controller {
         $data['page'] = 'Hrm';   
         $data['main_page'] = 'Hrm';   
         $data['department'] = FALSE;
-        $data['departments'] = $this->admin_model->get_by_user('departments');
+        $data['departments'] = $this->admin_model->get_by_user_status('departments');
         $data['main_content'] = $this->load->view('admin/user/hrm/department',$data,TRUE);
         $this->load->view('admin/index',$data);
         if (!is_subscribed()) {
@@ -30,40 +30,93 @@ class Hrm extends Home_Controller {
     }
 
 
-    public function department_add()
-    {   
-        if($_POST)
-        {   
-            $id = $this->input->post('id', true);
-               
-                $data=array(
-                    'user_id' => user()->id,
-                    'business_id' => $this->business->uid,
-                    'name' => $this->input->post('name', true),
-                    'status' => $this->input->post('status', true),
-                    'created_at' => my_date_now()
-                );
-                $data = $this->security->xss_clean($data);
-                
-                //if id available info will be edited
-                if ($id != '') {
-                    $this->admin_model->edit_option($data, $id, 'departments');
-                    $this->session->set_flashdata('msg', trans('msg-updated')); 
-                } else {
-                    $id = $this->admin_model->insert($data, 'departments');
-                    $this->session->set_flashdata('msg', trans('msg-inserted')); 
-                }
-                redirect(base_url('admin/hrm/department'));
+    // public function department_add()
+    // {   
+    //     if($_POST)
+    //     {   
+    //         $id = $this->input->post('id', true);
 
+    //             $data=array(
+    //                 'user_id' => user()->id,
+    //                 'business_id' => $this->business->uid,
+    //                 'name' => $this->input->post('name', true),
+    //                 'status' => $this->input->post('status', true),
+    //                 'created_at' => my_date_now()
+    //             );
+    //             $data = $this->security->xss_clean($data);
+
+    //             //if id available info will be edited
+    //             if ($id != '') {
+    //                 $this->admin_model->edit_option($data, $id, 'departments');
+    //                 $this->session->set_flashdata('msg', trans('msg-updated')); 
+    //             } else {
+    //                 $id = $this->admin_model->insert($data, 'departments');
+    //                 $this->session->set_flashdata('msg', trans('msg-inserted')); 
+    //             }
+    //             redirect(base_url('admin/hrm/department'));
+    //     }
+
+    // }
+
+    public function department_add()
+    {
+        if ($_POST) {
+            $names    = $this->input->post('name', true);     // array of department names
+            $statuses = $this->input->post('status', true);   // array of statuses
+
+            if (!empty($names) && is_array($names)) {
+                $user_id     = user()->id;
+                $business_id = $this->business->uid;
+
+                foreach ($names as $key => $name) {
+                    $status = isset($statuses[$key]) ? $statuses[$key] : 1;
+
+                    // Sanitize name
+                    $name = trim($name);
+                    if ($name == '') continue;
+
+                    // Check if department with same name, business_id, and user_id exists
+                    $this->db->where('business_id', $business_id);
+                    $this->db->where('user_id', $user_id);
+                    $this->db->where('name', $name);
+                    $existing = $this->db->get('departments')->row();
+
+                    $data = array(
+                        'user_id'     => $user_id,
+                        'business_id' => $business_id,
+                        'name'        => $name,
+                        'status'      => $status,
+                        'created_at'  => my_date_now()
+                    );
+
+                    $data = $this->security->xss_clean($data);
+
+                    if ($existing) {
+                        // Update only the status
+                        $this->db->where('id', $existing->id);
+                        $this->db->update('departments', ['status' => $status]);
+                    } else {
+                        // Insert new department
+                        $this->admin_model->insert($data, 'departments');
+                    }
+                }
+
+                $this->session->set_flashdata('msg', trans('msg-saved'));
+            }
+
+            redirect(base_url('admin/hrm/department'));
         }
-        
     }
+
+
+
+
 
     public function department_edit($id)
     {  
         $data = array();
         $data['page_title'] = 'Edit';   
-        $data['department'] = $this->admin_model->select_option($id, 'departments');
+        $data['department'] = $this->admin_model->get_by_user_status($id, 'departments');
         $data['main_content'] = $this->load->view('admin/user/hrm/department',$data,TRUE);
         $this->load->view('admin/index',$data);
     }
@@ -436,7 +489,7 @@ public function employee_add()
     {  
         $data = array();
         $data['page_title'] = 'Edit';
-        $data['departments'] = $this->admin_model->get_by_user('departments');
+        $data['departments'] = $this->admin_model->get_by_user_status('departments');
         $data['employee'] = $this->admin_model->select_option($id, 'employees');
         $data['countries'] = $this->hrm_model->get_countries();
         //echo "<pre>"; print_r($data['employee']); exit();
@@ -819,7 +872,29 @@ private function _send_invitation_email($name, $email, $token)
         }
         
     }
-
+    public function get_roles() {
+        // Get all roles from employee_roles table
+        $this->db->select('id, role_name as name');
+        $this->db->order_by('role_name', 'ASC');
+        $query = $this->db->get('employee_roles');
+        
+        // Prepare response data
+        $data = [
+            'roles' => $query->result() ?: [],
+            'status' => $query->num_rows() > 0 ? 'success' : 'error',
+            'message' => $query->num_rows() > 0 ? '' : 'No roles found'
+        ];
+        
+        // Handle AJAX response
+        if ($this->input->is_ajax_request()) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode($data));
+        }
+        
+        // Load normal view
+        $this->load->view('admin/user/hrm/employee', $data);
+    }
 
 }
 	
