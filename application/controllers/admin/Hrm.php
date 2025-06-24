@@ -872,7 +872,29 @@ private function _send_invitation_email($name, $email, $token)
         }
         
     }
-
+    public function get_roles() {
+        // Get all roles from employee_roles table
+        $this->db->select('id, role_name as name');
+        $this->db->order_by('role_name', 'ASC');
+        $query = $this->db->get('employee_roles');
+        
+        // Prepare response data
+        $data = [
+            'roles' => $query->result() ?: [],
+            'status' => $query->num_rows() > 0 ? 'success' : 'error',
+            'message' => $query->num_rows() > 0 ? '' : 'No roles found'
+        ];
+        
+        // Handle AJAX response
+        if ($this->input->is_ajax_request()) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode($data));
+        }
+        
+        // Load normal view
+        $this->load->view('admin/user/hrm/employee', $data);
+    }
 
 }
 	

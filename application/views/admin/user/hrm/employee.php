@@ -46,17 +46,19 @@
             </div>
 
             <!-- Role Field -->
-            <div class="hide" style="flex: 1;">
-              <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
-              <select class="form-control single_select" name="role">
-                <option value=""><?php echo trans('select'); ?></option>
-                <?php foreach ($roles as $role): ?>
-                  <option value="<?php echo html_escape($role->id); ?>"
-                    <?php if (!empty($employee) && $employee[0]['role_id'] == $role->id) echo 'selected'; ?>>
-                    <?php echo html_escape($role->name); ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
+            <div style="flex: 1;">
+              <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo 'Role'?> </label>
+                <select class="form-control single_select" name="role" id="role">
+                    <option value=""><?php echo trans('select'); ?></option>
+                    <?php if (!empty($roles)): ?>
+                        <?php foreach ($roles as $role): ?>
+                            <option value="<?php echo html_escape($role->id); ?>"
+                                <?php if (!empty($employee) && $employee[0]['role_id'] == $role->id) echo 'selected'; ?>>
+                                <?php echo html_escape($role->name); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
             </div>
           </div>
           <label><?php echo trans('employee-name') ?> <span class="text-danger">*</span></label>
@@ -311,3 +313,27 @@ $(document).ready(function() {
 });
 
 </script>
+
+<script>
+          $.ajax({
+            url: "<?= base_url('admin/Hrm/get_roles'); ?>",
+
+    type: 'GET',
+    dataType: 'json',
+    success: function(response) {
+        if (response.status === 'success') {
+            // Populate your select dropdown
+            var options = '<option value="">Select</option>';
+            $.each(response.roles, function(index, role) {
+                options += '<option value="'+role.id+'">'+role.name+'</option>';
+            });
+            $('#role').html(options);
+        } else {
+            alert(response.message || 'Error loading roles');
+        }
+    },
+    error: function() {
+        alert('Error connecting to server');
+    }
+});
+        </script>
