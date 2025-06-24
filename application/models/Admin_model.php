@@ -148,8 +148,20 @@ class Admin_model extends CI_Model {
         return $query;
     }
 
+    function get_department_id_by_role($role_id)
+    {
+        $this->db->select('department_id');
+        $this->db->from('employee_roles');
+        $this->db->where('id', $role_id);
+        $query = $this->db->get();
 
-        
+        if ($query->num_rows() > 0) {
+            return $query->row()->department_id;
+        }
+        return null; // or 0 if preferred
+    }
+
+
     // select by function
     function select_by_user($table)
     {
