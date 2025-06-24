@@ -485,9 +485,9 @@
                                         <tr>
                                             <th>Feature</th>
                                             <th>Read</th>
-                                            <th>Write</th>
+                                            <th class="hide">Write</th>
                                             <th>Action</th>
-                                            <th>Delete</th>
+                                            <th class="hide">Delete</th>
                                         </tr>
                                     </thead>
                                     <tbody>`;
@@ -497,9 +497,9 @@
                                 <tr>
                                     <td>${feature.name}</td>
                                     <td>${feature.read == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
-                                    <td>${feature.write == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td class="hide">${feature.write == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
                                     <td>${feature.action == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
-                                    <td>${feature.delete == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
+                                    <td class="hide">${feature.delete == 1 ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>'}</td>
                                 </tr>`;
                                 });
 
@@ -546,13 +546,13 @@
                             <th class="text-center">
                                 <input type="checkbox" id="selectAllRead"> Read
                             </th>
-                            <th class="text-center">
+                            <th class="text-center hide">
                                 <input type="checkbox" id="selectAllWrite"> Write
                             </th>
                             <th class="text-center">
                                 <input type="checkbox" id="selectAllAction"> Action
                             </th>
-                            <th class="text-center">
+                            <th class="text-center hide">
                                 <input type="checkbox" id="selectAllDelete"> Delete
                             </th>
                         </tr>
@@ -573,7 +573,7 @@
                             <input class="form-check-input read-checkbox" type="checkbox" 
                                    name="access[${feature.id}][is_read]" value="1" disabled>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center hide">
                             <input class="form-check-input write-checkbox" type="checkbox" 
                                    name="access[${feature.id}][is_write]" value="1" disabled>
                         </td>
@@ -581,7 +581,7 @@
                             <input class="form-check-input action-checkbox" type="checkbox" 
                                    name="access[${feature.id}][is_action]" value="1" disabled>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center hide">
                             <input class="form-check-input delete-checkbox" type="checkbox" 
                                    name="access[${feature.id}][is_delete]" value="1" disabled>
                         </td>
