@@ -1,18 +1,33 @@
 <?php
 class Hrm_model extends CI_Model {
-    
-    function get_employees()
+
+    // function get_employees()
+    // {
+    //     $this->db->select('e.*,d.name as department_name , c.name as country_name');
+    //     $this->db->from('employees as e');
+    //     $this->db->where('e.business_id', $this->business->uid);
+    //     $this->db->where('e.user_id', $this->session->userdata('id'));
+    //     $this->db->order_by('e.id','DESC');
+    //     $this->db->join('departments as d','e.department_id=d.id','LEFT');
+    //     $this->db->join('country as c','e.country=c.id','LEFT');
+    //     $query = $this->db->get();
+    //     $query = $query->result();  
+    //     return $query;
+    // }
+    public function get_employees()
     {
-        $this->db->select('e.*,d.name as department_name , c.name as country_name');
+        $this->db->select('e.*, d.name as department_name, c.name as country_name, r.role_name as role_name');
         $this->db->from('employees as e');
         $this->db->where('e.business_id', $this->business->uid);
         $this->db->where('e.user_id', $this->session->userdata('id'));
-        $this->db->order_by('e.id','DESC');
-        $this->db->join('departments as d','e.department_id=d.id','LEFT');
-        $this->db->join('country as c','e.country=c.id','LEFT');
+        $this->db->order_by('e.id', 'DESC');
+
+        $this->db->join('departments as d', 'e.department_id = d.id', 'LEFT');
+        $this->db->join('country as c', 'e.country = c.id', 'LEFT');
+        $this->db->join('employee_roles as r', 'e.role_id = r.id', 'LEFT'); // ✅ join for role name
+
         $query = $this->db->get();
-        $query = $query->result();  
-        return $query;
+        return $query->result();
     }
     
     function get_attendances()

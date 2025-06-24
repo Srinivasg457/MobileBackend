@@ -134,7 +134,7 @@ class Hrm extends Home_Controller {
         $data['page'] = 'Hrm';   
         $data['main_page'] = 'Hrm';   
         $data['employee'] = FALSE;
-        $data['departments'] = $this->admin_model->get_by_user_status('departments');
+        $data['roles'] = $this->get_roles();
         $data['countries'] = $this->hrm_model->get_countries();
         $data['employees'] = $this->hrm_model->get_employees();
         $data['main_content'] = $this->load->view('admin/user/hrm/employee',$data,TRUE);
@@ -357,11 +357,17 @@ public function employee_add()
             redirect('/admin/subscription');
         }
 
+            $role_id = $this->input->post('role', true);
+
+            // ✅ Get department_id from role_id
+            $department_id = $this->admin_model->get_department_id_by_role($role_id);
+
         $data = array(
             'user_id' => user()->id,
             'business_id' => $this->business->uid,
             'name' => $this->input->post('name', true),
-            'department_id' => $this->input->post('department', true),
+            'role_id'       => $role_id,
+            'department_id' => $department_id,
             'email' => $email,
             'phone' => $this->input->post('phone', true),
             'address' => $this->input->post('address', true),
@@ -489,7 +495,7 @@ public function employee_add()
     {  
         $data = array();
         $data['page_title'] = 'Edit';
-        $data['departments'] = $this->admin_model->get_by_user_status('departments');
+        $data['roles'] = $this->get_roles();
         $data['employee'] = $this->admin_model->select_option($id, 'employees');
         $data['countries'] = $this->hrm_model->get_countries();
         //echo "<pre>"; print_r($data['employee']); exit();
@@ -603,7 +609,7 @@ public function employee_add()
                         'user_id' => user()->id,
                         'business_id' => $this->business->uid,
                         'name' => $name,
-                        'department_id' => $employeeData['department_id'] ?? null,
+                        'department_id' => null,
                         'email' => $email,
                         'phone' => $employeeData['phone'] ?? null,
                         'address' => $employeeData['address'] ?? null,
@@ -872,30 +878,47 @@ private function _send_invitation_email($name, $email, $token)
         }
         
     }
-    public function get_roles() {
-        // Get all roles from employee_roles table
-        $this->db->select('id, role_name as name');
-        $this->db->order_by('role_name', 'ASC');
-        $query = $this->db->get('employee_roles');
-        
-        // Prepare response data
-        $data = [
-            'roles' => $query->result() ?: [],
-            'status' => $query->num_rows() > 0 ? 'success' : 'error',
-            'message' => $query->num_rows() > 0 ? '' : 'No roles found'
-        ];
-        
-        // Handle AJAX response
-        if ($this->input->is_ajax_request()) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode($data));
-        }
-        
-        // Load normal view
-        $this->load->view('admin/user/hrm/employee', $data);
-    }
+    // public function get_roles()
+    // {
+    //     $user_id = user()->id; // or use $this->session->userdata('user_id')
 
+    //     // Get roles created by this user
+    //     $this->db->select('id, role_name as name');
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->order_by('role_name', 'ASC');
+    //     $query = $this->db->get('employee_roles');
+
+    //     // Prepare response
+    //     $data = [
+    //         'roles' => $query->result() ?: [],
+    //         'status' => $query->num_rows() > 0 ? 'success' : 'error',
+    //         'message' => $query->num_rows() > 0 ? '' : 'No roles found for this user'
+    //     ];
+
+    //     // If it's an AJAX call, return JSON
+    //     if ($this->input->is_ajax_request()) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode($data));
+    //     }
+
+    //     // Otherwise load a view (optional fallback)
+    //     $this->load->view('admin/user/hrm/employee', $data);
+    // }
+    public function get_roles()
+    {
+        $user_id = user()->id;
+
+        // Fetch roles by user_id
+        $this->db->select('id, role_name as name');
+        $this->db->from('employee_roles');
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('role_name', 'ASC');
+        $query = $this->db->get();
+
+        // Return result as array (or empty array if none)
+        return $query->result_array(); // use result() if you want object format
+    }
 }
 	
 
