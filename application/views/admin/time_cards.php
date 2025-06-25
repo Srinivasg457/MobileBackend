@@ -455,8 +455,8 @@
                 // Create a map of existing data points for quick lookup
                 const dataMap = {};
                 response.data.forEach(item => {
-                    if (item.get_user_datetime_only($user_id)) {
-                        const dateObj = new Date(item.get_user_datetime_only($user_id));
+                    if (item.created_at) {
+                        const dateObj = new Date(item.created_at);
                         const timeKey = dateObj.toLocaleTimeString([], {
                             hour: '2-digit', 
                             minute: '2-digit',
