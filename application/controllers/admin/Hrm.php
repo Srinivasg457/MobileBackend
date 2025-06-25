@@ -145,11 +145,20 @@ class Hrm extends Home_Controller {
                     $data = $this->security->xss_clean($data);
 
                     if ($existing) {
-                        $this->db->where('id', $existing->id);
-                        $this->db->update('departments', ['status' => $status]);
+                        if ($status == 0) {
+                            // Delete the department if marked inactive
+                            $this->db->where('id', $existing->id);
+                            $this->db->delete('departments');
+                        } else {
+                            // Otherwise, just update the status
+                            $this->db->where('id', $existing->id);
+                            $this->db->update('departments', ['status' => $status]);
+                        }
                     } else {
-                        $this->admin_model->insert($data, 'departments');
-                    }
+                        if ($status == 1) {
+                            // Only insert if status is active
+                            $this->admin_model->insert($data, 'departments');
+                        }                    }
                 }
 
                 $this->session->set_flashdata('msg', trans('msg-saved'));
