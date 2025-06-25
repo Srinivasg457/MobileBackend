@@ -265,7 +265,7 @@ if (!is_dir($compressed_upload_path)) {
             'file_path' => $original_relative_path,
             'compressed_path' => $compressed_relative_path,
             'file_type' => $file_extension,
-            'created_at' => date('Y-m-d H:i:s', $timestamp),
+            'created_at' => get_user_datetime_only($user_id),
             'overall_activity_percent' => $overall_activity_percent,
             'is_active' => $is_active
         ];
