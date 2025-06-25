@@ -105,6 +105,7 @@ class EmployeeRoles extends Home_Controller {
             $statuses         = $this->input->post('status', true);
 
             $user_id = user()->id;
+            $errors = [];
 
             if (is_array($role_names) && count($role_names) > 0) {
                 foreach ($role_names as $index => $role_name) {
@@ -116,7 +117,7 @@ class EmployeeRoles extends Home_Controller {
                         continue;
                     }
 
-                    // Check if already exists
+                    // Check if the role already exists
                     $this->db->where([
                         'user_id'       => $user_id,
                         'department_id' => $department_id,
@@ -126,17 +127,28 @@ class EmployeeRoles extends Home_Controller {
 
                     if ($exists) {
                         if ($status == 0) {
-                            // Delete role if marked inactive
+                            // 🔍 Check if role is assigned to any employees
+                            $assigned = $this->db
+                                ->where('role_id', $exists->id)
+                                ->get('employees')  // <-- Replace with your actual assignment table
+                                ->num_rows();
+
+                            if ($assigned > 0) {
+                                $errors[] = "Cannot deactivate role: <strong>{$role_name}</strong> is assigned to one or more employees.";
+                                continue;
+                            }
+
+                            // ✅ Safe to delete
                             $this->db->where('id', $exists->id)->delete('employee_roles');
                         } else {
-                            // Update status if active
+                            // ✅ Update status if active
                             $this->db->where('id', $exists->id)->update('employee_roles', [
                                 'status'     => $status,
                                 'updated_at' => get_user_datetime_only($user_id),
                             ]);
                         }
                     } else {
-                        // Only insert if status is active
+                        // ✅ Only insert if status is active
                         if ($status == 1) {
                             $this->db->insert('employee_roles', [
                                 'user_id'       => $user_id,
@@ -151,12 +163,17 @@ class EmployeeRoles extends Home_Controller {
                     }
                 }
 
-                $this->session->set_flashdata('msg', 'Roles updated successfully.');
+                if (!empty($errors)) {
+                    $this->session->set_flashdata('error', implode('<br><br>', $errors));
+                } else {
+                    $this->session->set_flashdata('msg', 'Roles updated successfully.');
+                }
             }
 
             redirect(base_url('employee/EmployeeRoles/role'));
         }
     }
+
 
 
     private function get_input_data() {
