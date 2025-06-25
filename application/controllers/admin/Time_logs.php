@@ -337,18 +337,18 @@ private function getRequestSource($params)
         }
     
         // Prepare data with additional validation
-        $current_time = get_user_datetime_only($user_id);
+        $current_time = date('Y-m-d H:i:s');
         $data = [
             'employee_id'       => $headers['employee_id'],
             'user_id'           => $headers['user_id'],
             'log_date'          => $headers['log_date'],
-            'start_time'        => $start_datetime,
-            'end_time'          => $end_datetime,
+            'start_time'        => get_user_datetime_only($headers['user_id']),
+            'end_time'          => get_user_datetime_only($headers['user_id']),
             'total_active_time' => (float)$headers['total_active_time'],
             'total_idle_time'   => (float)$headers['total_idle_time'],
             'status'            => $headers['status'],
-            'created_at'        => $current_time,
-            'updated_at'        => $current_time,
+            'created_at'        => get_user_datetime_only($headers['user_id']),
+            'updated_at'        => get_user_datetime_only($headers['user_id']),
         ];
     
         // Start database transaction
