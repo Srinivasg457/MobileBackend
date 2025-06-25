@@ -32,7 +32,7 @@
           <div class="form-group d-flex" style="gap: 20px;">
 
             <!-- Department Field -->
-            <div style="flex: 1;">
+            <div style="flex: 1; display:none;">
               <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('department') ?> </label>
               <select class="form-control single_select" name="department">
                 <option value=""><?php echo trans('select') ?></option>
@@ -47,18 +47,18 @@
 
             <!-- Role Field -->
             <div style="flex: 1;">
-              <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo 'Role'?> </label>
-                <select class="form-control single_select" name="role" id="role">
-                    <option value=""><?php echo trans('select'); ?></option>
-                    <?php if (!empty($roles)): ?>
-                        <?php foreach ($roles as $role): ?>
-                            <option value="<?php echo html_escape($role->id); ?>"
-                                <?php if (!empty($employee) && $employee[0]['role_id'] == $role->id) echo 'selected'; ?>>
-                                <?php echo html_escape($role->name); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
+              <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('role'); ?></label>
+              <select class="form-control single_select" name="role" id="role">
+                <option value=""><?php echo trans('select'); ?></option>
+                <?php if (!empty($roles)): ?>
+                  <?php foreach ($roles as $role): ?>
+                    <option value="<?php echo html_escape($role['id']); ?>"
+                      <?php if (!empty($employee) && $employee[0]['role_id'] == $role['id']) echo 'selected'; ?>>
+                      <?php echo html_escape($role['name']); ?>
+                    </option>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </select>
             </div>
           </div>
           <label><?php echo trans('employee-name') ?> <span class="text-danger">*</span></label>
@@ -211,6 +211,7 @@
                 <th><?php echo trans('image') ?></th>
                 <th><?php echo trans('name') ?></th>
                 <th><?php echo trans('department') ?></th>
+                <th><?php echo 'role' ?></th>
                 <th><?php echo trans('address') ?></th>
                 <th><?php echo trans('status') ?></th>
                 <th><?php echo trans('action') ?></th>
@@ -235,6 +236,7 @@
                     <p class="mb-0"><?php echo html_escape($employee->phone); ?></p>
                   </td>
                   <td><?php echo html_escape($employee->department_name) ?></td>
+                  <td><?php echo html_escape($employee->role_name) ?></td>
                   <td>
                     <p class="mb-0"><?php echo html_escape($employee->address); ?></p>
                     <p class="mb-0"><?php echo html_escape($employee->city); ?></p>
@@ -249,7 +251,7 @@
                   </td>
 
                   <td class="actions" width="15%">
-                    <a href="<?php echo base_url('admin/hrm/employee_edit/' . html_escape($employee->id)); ?>" class="on-default edit-row" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a>
+                    <a href="<?php echo base_url('admin/hrm/employee_edit/' . html_escape($employee->id)); ?>" class="on-default edit-row" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a>
 
                     <a data-val="employee" data-id="<?php echo html_escape($employee->id); ?>" href="<?php echo base_url('admin/hrm/employee_delete/' . html_escape($employee->id)); ?>" class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></a>
                   </td>
@@ -281,59 +283,3 @@
     });
   });
 </script>
-<!-- Include jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-    // Make AJAX request to get user roles
-    $.ajax({
-        url: "<?= base_url('/employee/EmployeeRoles/get_user_roles'); ?>",
-        method: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.status === 200) {
-                // If roles are fetched successfully, populate the dropdown
-                var roles = response.data;
-                var $roleSelect = $('select[name="role"]');
-                $roleSelect.empty(); // Clear any existing options
-                $roleSelect.append('<option value=""><?php echo trans('select'); ?></option>'); // Default select option
-
-                // Loop through roles and append them to the dropdown
-                $.each(roles, function(index, role) {
-                    $roleSelect.append('<option value="' + role.id + '">' + role.role_name + '</option>');
-                });
-            } else {
-                console.log('Error: ' + response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error: ' + error);
-        }
-    });
-});
-
-</script>
-
-<script>
-          $.ajax({
-            url: "<?= base_url('admin/Hrm/get_roles'); ?>",
-
-    type: 'GET',
-    dataType: 'json',
-    success: function(response) {
-        if (response.status === 'success') {
-            // Populate your select dropdown
-            var options = '<option value="">Select</option>';
-            $.each(response.roles, function(index, role) {
-                options += '<option value="'+role.id+'">'+role.name+'</option>';
-            });
-            $('#role').html(options);
-        } else {
-            alert(response.message || 'Error loading roles');
-        }
-    },
-    error: function() {
-        alert('Error connecting to server');
-    }
-});
-        </script>
