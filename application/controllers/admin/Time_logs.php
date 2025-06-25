@@ -337,7 +337,7 @@ private function getRequestSource($params)
         }
     
         // Prepare data with additional validation
-        $current_time = date('Y-m-d H:i:s');
+        $current_time = get_user_datetime_only($user_id);
         $data = [
             'employee_id'       => $headers['employee_id'],
             'user_id'           => $headers['user_id'],
