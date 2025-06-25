@@ -480,7 +480,7 @@ if (!is_dir($compressed_upload_path)) {
         'compressed_path' => $compressed_relative_path, // compressed path
         'file_type' => $file_extension,
         'status' => 1,
-        'created_at' => date('Y-m-d H:i:s', $timestamp),
+        'created_at' => get_user_datetime_only($user_id),
         'is_active' => 1
     ];
 
