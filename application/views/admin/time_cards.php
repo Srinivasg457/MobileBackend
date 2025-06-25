@@ -403,7 +403,7 @@
         $('#hourButtons').show();
         if (!fromTime || !toTime) {
             const now = new Date();
-            const defaultFrom = new Date(now.getTime() - (60 * 60 * 1000));
+            const defaultFrom = new Date( get_user_datetime_only($user_id) - (60 * 60 * 1000));
             fromTime = formatTime(defaultFrom);
             toTime = formatTime(now);
         }
@@ -455,8 +455,8 @@
                 // Create a map of existing data points for quick lookup
                 const dataMap = {};
                 response.data.forEach(item => {
-                    if (item.created_at) {
-                        const dateObj = new Date(item.created_at);
+                    if (item.get_user_datetime_only($user_id)) {
+                        const dateObj = new Date(item.get_user_datetime_only($user_id));
                         const timeKey = dateObj.toLocaleTimeString([], {
                             hour: '2-digit', 
                             minute: '2-digit',
