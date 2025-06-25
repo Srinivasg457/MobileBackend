@@ -108,65 +108,82 @@ class Hrm extends Home_Controller {
     //         redirect(base_url('admin/hrm/department'));
     //     }
     // }
-
     public function department_add()
     {
         if ($_POST) {
-            $names         = $this->input->post('name', true);           // department names
-            $statuses      = $this->input->post('status', true);         // statuses
-            $department_ids = $this->input->post('department_id', true); // from default_departments
+            $names         = $this->input->post('name', true);
+            $statuses      = $this->input->post('status', true);
+            $department_ids = $this->input->post('department_id', true);
+
+            $errors = [];
 
             if (!empty($names) && is_array($names)) {
                 $user_id     = user()->id;
                 $business_id = $this->business->uid;
 
                 foreach ($names as $key => $name) {
-                    $status        = isset($statuses[$key]) ? $statuses[$key] : 1;
-                    $default_dept_id = isset($department_ids[$key]) ? $department_ids[$key] : null;
+                    $status           = isset($statuses[$key]) ? $statuses[$key] : 1;
+                    $default_dept_id  = isset($department_ids[$key]) ? $department_ids[$key] : null;
 
                     $name = trim($name);
                     if ($name == '') continue;
 
                     // Check if department exists
-                    $this->db->where('business_id', $business_id);
-                    $this->db->where('user_id', $user_id);
-                    $this->db->where('name', $name);
+                    $this->db->where([
+                        'business_id' => $business_id,
+                        'user_id'     => $user_id,
+                        'name'        => $name
+                    ]);
                     $existing = $this->db->get('departments')->row();
 
-                    $data = array(
+                    $data = [
                         'user_id'       => $user_id,
                         'business_id'   => $business_id,
                         'name'          => $name,
                         'status'        => $status,
                         'department_id' => $default_dept_id,
                         'created_at'    => my_date_now()
-                    );
+                    ];
 
                     $data = $this->security->xss_clean($data);
 
                     if ($existing) {
                         if ($status == 0) {
-                            // Delete the department if marked inactive
-                            $this->db->where('id', $existing->id);
-                            $this->db->delete('departments');
+                            $assigned = $this->db
+                                ->where('department_id', $existing->id)
+                                ->get('employees') // make sure this is the correct table
+                                ->num_rows();
+
+                            if ($assigned > 0) {
+                                $errors[] = "Cannot deactivate department: <strong>{$name}</strong> is assigned to one or more employees.";
+                                continue;
+                            }
+
+                            // Safe to delete
+                            $this->db->where('id', $existing->id)->delete('departments');
                         } else {
-                            // Otherwise, just update the status
-                            $this->db->where('id', $existing->id);
-                            $this->db->update('departments', ['status' => $status]);
+                            // Just update status
+                            $this->db->where('id', $existing->id)->update('departments', ['status' => $status]);
                         }
                     } else {
                         if ($status == 1) {
-                            // Only insert if status is active
                             $this->admin_model->insert($data, 'departments');
-                        }                    }
+                        }
+                    }
                 }
 
-                $this->session->set_flashdata('msg', trans('msg-saved'));
+                // Flash success or error
+                if (!empty($errors)) {
+                    $this->session->set_flashdata('error', implode('<br><br>', $errors));
+                } else {
+                    $this->session->set_flashdata('msg', trans('msg-saved'));
+                }
             }
 
             redirect(base_url('admin/hrm/department'));
         }
     }
+
 
 
 
@@ -180,11 +197,34 @@ class Hrm extends Home_Controller {
         $this->load->view('admin/index',$data);
     }
 
+    // public function department_delete($id)
+    // {
+
+    //     $this->admin_model->delete($id,'departments'); 
+    //     echo json_encode(array('st' => 1));
+    // }
     public function department_delete($id)
     {
-        $this->admin_model->delete($id,'departments'); 
-        echo json_encode(array('st' => 1));
+        // Check if any employee roles are assigned to this department
+        $assigned = $this->db
+            ->where('department_id', $id)
+            ->get('employees') // Replace with your actual role assignment table if different
+            ->num_rows();
+
+        if ($assigned > 0) {
+            // Cannot delete department
+            echo json_encode([
+                'st' => 0,
+                'msg' => 'Cannot delete: This department is assigned to one or more employee.'
+            ]);
+            return;
+        }
+
+        // Safe to delete
+        $this->admin_model->delete($id, 'departments');
+        echo json_encode(['st' => 1, 'msg' => 'Department deleted successfully.']);
     }
+
 
 
     public function employee(){

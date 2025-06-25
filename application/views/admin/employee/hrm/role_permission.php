@@ -750,8 +750,8 @@
                             swal("Failed!", response.message || "Could not delete role.", "error");
                         }
                     },
-                    error: function() {
-                        swal("Error!", "Something went wrong.", "error");
+                    error: function(error) {
+                        swal("Cannot delete!", "Role is assigned to one or more employees..", "error");
                     }
                 });
             });
