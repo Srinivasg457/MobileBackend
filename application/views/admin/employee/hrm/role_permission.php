@@ -117,7 +117,7 @@
         <div class="box-header">
             <h3 class="box-title"><i class="bi bi-shield-plus"></i><?php echo "Assign Permission to Role" ?>
                 <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_bulk"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
-                <a href="#" class="pull-right btn btn-info btn-sm rounded create_role mx-5">
+                <a href="<?php echo base_url('employee/EmployeeRoles/role') ?>" class="pull-right btn btn-info btn-sm rounded  mx-5">
                     <i class="fa fa-plus"></i> Create Role</a>
             </h3>
         </div>

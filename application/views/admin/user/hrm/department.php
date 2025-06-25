@@ -16,34 +16,24 @@
           <form id="cat-form" method="post" enctype="multipart/form-data" class="validate-form mt-20 p-30" action="<?php echo base_url('admin/hrm/department_add')?>" role="form" novalidate>
 
         <?php
-        $sampledepartments = [
-          'Human Resources',
-          'Marketing',
-          'Sales',
-          'Customer Support',
-          'Executive',
-          'UI-UX',
-          'Development',
-          'Product Management'
-        ];
-
-        // Convert DB departments (from $department) to lowercase name => status
+        // Map existing department names and their status (e.g., from 'departments' table)
         $dept_status_map = [];
         foreach ($departments as $dept) {
-          $dept_name_key = trim($dept->name);
-          $dept_status_map[$dept_name_key] = $dept->status;
+          $dept_status_map[trim($dept->department_id)] = $dept->status;
         }
         ?>
 
-        <?php foreach ($sampledepartments as $index => $dept): ?>
+        <?php foreach ($default_departments as $index => $default_dept): ?>
           <?php
-          $dept_key = trim($dept);
-          $status = isset($dept_status_map[$dept_key]) ? 1 : 0;
+          $dept_id   = $default_dept->id;
+          $dept_name = trim($default_dept->name);
+          $status    = isset($dept_status_map[$dept_id]) ? 1 : 0;
           ?>
           <div class="form-group row align-items-center my-4">
             <div class="col-sm-7 ps-5">
-              <label class="mb-1 font-weight-bold"><?= $dept ?></label>
-              <input type="hidden" name="name[]" value="<?= $dept ?>">
+              <label class="mb-1 font-weight-bold"><?= $dept_name ?></label>
+              <input type="hidden" name="name[]" value="<?= $dept_name ?>">
+              <input type="hidden" name="department_id[]" value="<?= $dept_id ?>">
               <input type="hidden" name="status[]" id="dept-status-<?= $index ?>" value="<?= $status ?>">
             </div>
 
@@ -54,7 +44,7 @@
               </div>
               <div class="icheck-danger radio radio-inline">
                 <input type="radio" name="status_<?= $index ?>" id="hide_<?= $index ?>" value="0" <?= ($status == 0) ? 'checked' : '' ?>>
-                <label for="hide_<?= $index ?>">Dective</label>
+                <label for="hide_<?= $index ?>">Inactive</label>
               </div>
             </div>
           </div>
@@ -62,7 +52,7 @@
 
             <input type="hidden" name="id" value="<?php echo html_escape($department['0']['id']); ?>">
             <!-- csrf token -->
-            <input type="hidden" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
+            <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
 
             <hr>
 
