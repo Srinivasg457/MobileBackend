@@ -403,7 +403,7 @@
         $('#hourButtons').show();
         if (!fromTime || !toTime) {
             const now = new Date();
-            const defaultFrom = new Date( get_user_datetime_only($user_id).getTime() - (60 * 60 * 1000));
+            const defaultFrom = new Date(now.getTime() - (60 * 60 * 1000));
             fromTime = formatTime(defaultFrom);
             toTime = formatTime(now);
         }
