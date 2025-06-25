@@ -95,9 +95,12 @@
     <div class="box-header">
         <h3>
             Add new role
-            <a href="<?php echo base_url('employee/EmployeeRoles') ?>" class="pull-right btn btn-default btn-sm rounded"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
+            <a href="<?php echo base_url('employee/EmployeeRoles') ?>" class="pull-right btn btn-default btn-sm rounded">
+                <i class="fa fa-angle-left"></i> <?php echo trans('back') ?>
+            </a>
         </h3>
     </div>
+
     <?php
     // Step 1: Create a map of role_id => status from organization roles
     $role_status_map = [];
@@ -106,59 +109,73 @@
     }
     ?>
 
-    <!-- Loop through active departments -->
-    <?php foreach ($departments as $dept): ?>
-        <div class=" col-md-6 m-auto card my-5">
+    <?php if (empty($departments)): ?>
+        <!-- No department message -->
+        <div class="col-md-6 m-auto card my-5">
             <div class="card-header">
-                <h5>Department: <?= html_escape($dept->name); ?></h5>
+                <h5 class="text-danger text-center">No active departments found!</h5>
             </div>
-            <div class="card-body">
-                <!-- Default Roles -->
-                <h6 class="mx-5"><i class="fa fa-user"></i> Roles</h6>
-
-
-
-                <!-- Role Form -->
-                <form action="<?= base_url('/employee/EmployeeRoles/create_role') ?>" method="post">
-                    <?php foreach ($default_roles as $index => $drole): ?>
-                        <?php if ($drole->department_id == $dept->department_id): ?>
-                            <?php
-                            $role_id = $drole->id;
-                            $role_name = trim($drole->role_name);
-                            $dept_id = $dept->id;
-                            $status = isset($role_status_map[$role_id]) ? 1 : 0;
-                            ?>
-                            <div class="form-group row align-items-center my-4">
-                                <div class="col-sm-7">
-                                    <label class="font-weight-bold"><?= html_escape($role_name) ?></label>
-                                    <input type="hidden" name="role_name[]" value="<?= html_escape($role_name) ?>">
-                                    <input type="hidden" name="department_id[]" value="<?= $dept_id ?>">
-                                    <input type="hidden" name="default_role_id[]" value="<?= $role_id ?>">
-                                    <input type="hidden" name="status[]" id="role-status-<?= $index ?>" value="<?= $status ?>">
-                                </div>
-                                <div class="col-sm-5 d-flex justify-content-start gap-5">
-                                    <div class="icheck-primary radio radio-inline mx-5">
-                                        <input type="radio" name="status_<?= $index ?>" id="role_active_<?= $index ?>" value="1" <?= $status == 1 ? 'checked' : '' ?>>
-                                        <label for="role_active_<?= $index ?>">Active</label>
-                                    </div>
-                                    <div class="icheck-danger radio radio-inline ">
-                                        <input type="radio" name="status_<?= $index ?>" id="role_inactive_<?= $index ?>" value="0" <?= $status == 0 ? 'checked' : '' ?>>
-                                        <label for="role_inactive_<?= $index ?>">Inactive</label>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-
-                    <!-- Submit -->
-                    <button type="submit" class="btn btn-success pull-right btn-sm mt-3">Save Roles</button>
-                </form>
-
-                <hr>
+            <div class="card-body text-center">
+                <p>Please add a department to manage roles.</p>
+                <a href="<?= base_url('admin/hrm/department') ?>" class="btn btn-info">
+                    <i class="fa fa-plus"></i> Add Department
+                </a>
             </div>
         </div>
-    <?php endforeach; ?>
+    <?php else: ?>
+        <!-- Loop through active departments -->
+        <?php foreach ($departments as $dept): ?>
+            <div class="col-md-6 m-auto card my-5">
+                <div class="card-header">
+                    <h5>Department: <?= html_escape($dept->name); ?></h5>
+                </div>
+                <div class="card-body">
+                    <!-- Default Roles -->
+                    <h6 class="mx-5"><i class="fa fa-user"></i> Roles</h6>
+
+                    <!-- Role Form -->
+                    <form action="<?= base_url('/employee/EmployeeRoles/create_role') ?>" method="post">
+                        <?php foreach ($default_roles as $index => $drole): ?>
+                            <?php if ($drole->department_id == $dept->department_id): ?>
+                                <?php
+                                $role_id   = $drole->id;
+                                $role_name = trim($drole->role_name);
+                                $dept_id   = $dept->id;
+                                $status    = isset($role_status_map[$role_id]) ? 1 : 0;
+                                ?>
+                                <div class="form-group row align-items-center my-4">
+                                    <div class="col-sm-7">
+                                        <label class="font-weight-bold"><?= html_escape($role_name) ?></label>
+                                        <input type="hidden" name="role_name[]" value="<?= html_escape($role_name) ?>">
+                                        <input type="hidden" name="department_id[]" value="<?= $dept_id ?>">
+                                        <input type="hidden" name="default_role_id[]" value="<?= $role_id ?>">
+                                        <input type="hidden" name="status[]" id="role-status-<?= $index ?>" value="<?= $status ?>">
+                                    </div>
+                                    <div class="col-sm-5 d-flex justify-content-start gap-5">
+                                        <div class="icheck-primary radio radio-inline mx-5">
+                                            <input type="radio" name="status_<?= $index ?>" id="role_active_<?= $index ?>" value="1" <?= $status == 1 ? 'checked' : '' ?>>
+                                            <label for="role_active_<?= $index ?>">Active</label>
+                                        </div>
+                                        <div class="icheck-danger radio radio-inline">
+                                            <input type="radio" name="status_<?= $index ?>" id="role_inactive_<?= $index ?>" value="0" <?= $status == 0 ? 'checked' : '' ?>>
+                                            <label for="role_inactive_<?= $index ?>">Inactive</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-success pull-right btn-sm mt-3">Save Roles</button>
+                    </form>
+
+                    <hr>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </div>
+
 <script>
     $(document).ready(function() {
         $('input[type=radio][name^=status_]').on('change', function() {
