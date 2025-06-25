@@ -236,6 +236,7 @@ private function getRequestSource($params)
 
     public function store_timelog()
     {
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id') ;
         // Validate request method
         if ($this->input->server('REQUEST_METHOD') !== 'POST') {
             return $this->output
@@ -249,13 +250,13 @@ private function getRequestSource($params)
     
         // Get and validate headers
         $required_headers = [
-            'user_id' => 'user_id',
-            'employee_id' => 'employee_id',
-            'log_date' => 'log_date',
-            'start_time' => 'start_time',
-            'end_time' => 'end_time',
-            'total_active_time' => 'total_active_time',
-            'total_idle_time' => 'total_idle_time',
+            'user_id' => 'User ID',
+            'employee_id' => 'Employee ID',
+            'log_date' => 'Log Date',
+            'start_time' => 'Start Time',
+            'end_time' => 'End Time',
+            'total_active_time' => 'Total Active Time',
+            'total_idle_time' => 'Total Idle Time',
             'status' => 'Status'
         ];
     
@@ -335,7 +336,6 @@ private function getRequestSource($params)
                     "existing_log_id" => $existing->id
                 ]));
         }
-        $user_id=$headers['user_id'];
     
         // Prepare data with additional validation
         $current_time = get_user_datetime_only($user_id);
