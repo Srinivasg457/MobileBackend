@@ -104,42 +104,50 @@ class EmployeeRoles extends Home_Controller {
             $default_role_ids = $this->input->post('default_role_id', true);
             $statuses         = $this->input->post('status', true);
 
-            $user_id     = user()->id;
+            $user_id = user()->id;
 
             if (is_array($role_names) && count($role_names) > 0) {
                 foreach ($role_names as $index => $role_name) {
-                    $department_id = $department_ids[$index] ?? null;
-                    $default_role_id = $default_role_ids[$index] ?? null;
-                    $status = isset($statuses[$index]) ? $statuses[$index] : 0;
+                    $department_id    = $department_ids[$index] ?? null;
+                    $default_role_id  = $default_role_ids[$index] ?? null;
+                    $status           = isset($statuses[$index]) ? $statuses[$index] : 0;
 
                     if (empty($role_name) || empty($department_id)) {
-                        continue; // Skip invalid
+                        continue;
                     }
 
                     // Check if already exists
-                    $exists = $this->db->get_where('employee_roles', [
+                    $this->db->where([
                         'user_id'       => $user_id,
                         'department_id' => $department_id,
                         'role_id'       => $default_role_id,
-                    ])->row();
+                    ]);
+                    $exists = $this->db->get('employee_roles')->row();
 
                     if ($exists) {
-                        // Update status
-                        $this->db->where('id', $exists->id)->update('employee_roles', [
-                            'status'     => $status,
-                            'updated_at' => get_user_datetime_only($user_id),
-                        ]);
+                        if ($status == 0) {
+                            // Delete role if marked inactive
+                            $this->db->where('id', $exists->id)->delete('employee_roles');
+                        } else {
+                            // Update status if active
+                            $this->db->where('id', $exists->id)->update('employee_roles', [
+                                'status'     => $status,
+                                'updated_at' => get_user_datetime_only($user_id),
+                            ]);
+                        }
                     } else {
-                        // Insert new role
-                        $this->db->insert('employee_roles', [
-                            'user_id'       => $user_id,
-                            'department_id' => $department_id,
-                            'role_id'       => $default_role_id,
-                            'role_name'     => $role_name,
-                            'status'        => $status,
-                            'created_at'    => get_user_datetime_only($user_id),
-                            'updated_at'    => get_user_datetime_only($user_id),
-                        ]);
+                        // Only insert if status is active
+                        if ($status == 1) {
+                            $this->db->insert('employee_roles', [
+                                'user_id'       => $user_id,
+                                'department_id' => $department_id,
+                                'role_id'       => $default_role_id,
+                                'role_name'     => $role_name,
+                                'status'        => $status,
+                                'created_at'    => get_user_datetime_only($user_id),
+                                'updated_at'    => get_user_datetime_only($user_id),
+                            ]);
+                        }
                     }
                 }
 
@@ -149,6 +157,7 @@ class EmployeeRoles extends Home_Controller {
             redirect(base_url('employee/EmployeeRoles/role'));
         }
     }
+
 
     private function get_input_data() {
         $content_type = $this->input->server('CONTENT_TYPE');
@@ -419,30 +428,90 @@ class EmployeeRoles extends Home_Controller {
         }
     }
 
-    public function get_user_role_feature_permissions() {
+    // public function get_user_role_feature_permissions() {
+    //     $user_id = $this->input->get('user_id');
+
+    //     if (!$user_id) {
+    //         return $this->json_response(400, 'Missing user_id');
+    //     }
+
+    //     $user_exists = $this->db->where('id', $user_id)->get('users')->row();
+    //     if (!$user_exists) {
+    //         return $this->json_response(404, 'User not found');
+    //     }
+
+    //     $roles = $this->db->select('id, role_name, department_id')
+    //                       ->from('employee_roles')
+    //                       ->where('user_id', $user_id)
+    //                       ->get()
+    //                       ->result();
+
+    //     if (empty($roles)) {
+    //         return $this->json_response(404, 'No roles found for the given user');
+    //     }
+
+    //     $result = [];
+
+    //     foreach ($roles as $role) {
+    //         $access_entries = $this->db
+    //             ->select('rfa.feature_id, af.name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
+    //             ->from('role_feature_access as rfa')
+    //             ->join('package_features as af', 'af.id = rfa.feature_id')
+    //             ->where('rfa.role_id', $role->id)
+    //             ->where('rfa.user_id', $user_id)
+    //             ->where('rfa.status', 1)
+    //             ->get()
+    //             ->result();
+
+    //         $features = [];
+    //         foreach ($access_entries as $entry) {
+    //             $features[] = [
+    //                 'feature_id' => $entry->feature_id,
+    //                 'feature_name' => $entry->name,
+    //                 'is_read' => $entry->is_read,
+    //                 'is_write' => $entry->is_write,
+    //                 'is_action' => $entry->is_action,
+    //                 'is_delete' => $entry->is_delete
+    //             ];
+    //         }
+
+    //         $result[] = [
+    //             'role_id' => $role->id,
+    //             'role_name' => $role->role_name,
+    //             'department_id' => $role->department_id,
+    //             'features' => $features
+    //         ];
+    //     }
+
+    //     return $this->json_response(200, 'Data fetched successfully', $result);
+    // }
+    public function get_user_role_feature_permissions()
+    {
         $user_id = $this->input->get('user_id');
-    
+
         if (!$user_id) {
             return $this->json_response(400, 'Missing user_id');
         }
-    
+
         $user_exists = $this->db->where('id', $user_id)->get('users')->row();
         if (!$user_exists) {
             return $this->json_response(404, 'User not found');
         }
-    
-        $roles = $this->db->select('id, role_name, department_id')
-                          ->from('employee_roles')
-                          ->where('user_id', $user_id)
-                          ->get()
-                          ->result();
-    
+
+        // Join departments to get department name
+        $roles = $this->db->select('er.id, er.role_name, er.department_id, d.name as department_name')
+            ->from('employee_roles as er')
+            ->join('departments as d', 'er.department_id = d.id', 'left')
+            ->where('er.user_id', $user_id)
+            ->get()
+            ->result();
+
         if (empty($roles)) {
             return $this->json_response(404, 'No roles found for the given user');
         }
-    
+
         $result = [];
-    
+
         foreach ($roles as $role) {
             $access_entries = $this->db
                 ->select('rfa.feature_id, af.name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
@@ -453,29 +522,31 @@ class EmployeeRoles extends Home_Controller {
                 ->where('rfa.status', 1)
                 ->get()
                 ->result();
-    
+
             $features = [];
             foreach ($access_entries as $entry) {
                 $features[] = [
-                    'feature_id' => $entry->feature_id,
+                    'feature_id'   => $entry->feature_id,
                     'feature_name' => $entry->name,
-                    'is_read' => $entry->is_read,
-                    'is_write' => $entry->is_write,
-                    'is_action' => $entry->is_action,
-                    'is_delete' => $entry->is_delete
+                    'is_read'      => $entry->is_read,
+                    'is_write'     => $entry->is_write,
+                    'is_action'    => $entry->is_action,
+                    'is_delete'    => $entry->is_delete
                 ];
             }
-    
+
             $result[] = [
-                'role_id' => $role->id,
-                'role_name' => $role->role_name,
-                'department_id' => $role->department_id,
-                'features' => $features
+                'role_id'         => $role->id,
+                'role_name'       => $role->role_name,
+                'department_id'   => $role->department_id,
+                'department_name' => $role->department_name,  // Added
+                'features'        => $features
             ];
         }
-    
+
         return $this->json_response(200, 'Data fetched successfully', $result);
     }
+
 
     public function get_feature_access_by_user_and_role() {
         $user_id = $this->input->get('user_id');

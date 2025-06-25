@@ -309,6 +309,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Department</th>
                         <th>Role</th>
                         <th>Features</th>
                         <th>View</th>
@@ -411,8 +412,9 @@
                                 const row = `
                         <tr>
                             <td>${index++}</td>
+                            <td>${role.department_name}</td>
                             <td>${role.role_name}</td>
-                            <td>
+                            <td style="width:45%">
                                 <div>${featureNames.join(', ')}</div>
                             </td>
                             <td>
@@ -430,7 +432,7 @@
                                     data-id="${userId}" 
                                     data-department-id="${role.department_id}" 
                                     data-role="${role.role_name}" 
-                                    title="Delete">
+                                    title="Delete Role">
                                     <i class="fa fa-trash-o"></i>
                                     </a>
 
@@ -441,6 +443,7 @@
                                 const row = `
                         <tr>
                             <td>${index++}</td>
+                            <td>${role.department_name}</td>
                             <td>${role.role_name}</td>
                             <td><i class="bi bi-pencil-square text-muted" title="No features to update" style="cursor: not-allowed;">No feature to update</i></td>
                             <td>
@@ -458,7 +461,7 @@
                                     data-id="${userId}" 
                                     data-department-id="${role.department_id}" 
                                     data-role="${role.role_name}" 
-                                    title="Delete">
+                                    title="Delete Role">
                                     <i class="fa fa-trash-o"></i>
                                     </a>
 
