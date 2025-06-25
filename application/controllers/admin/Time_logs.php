@@ -249,13 +249,13 @@ private function getRequestSource($params)
     
         // Get and validate headers
         $required_headers = [
-            'user_id' => 'User ID',
-            'employee_id' => 'Employee ID',
-            'log_date' => 'Log Date',
-            'start_time' => 'Start Time',
-            'end_time' => 'End Time',
-            'total_active_time' => 'Total Active Time',
-            'total_idle_time' => 'Total Idle Time',
+            'user_id' => 'user_id',
+            'employee_id' => 'employee_id',
+            'log_date' => 'log_date',
+            'start_time' => 'start_time',
+            'end_time' => 'end_time',
+            'total_active_time' => 'total_active_time',
+            'total_idle_time' => 'total_idle_time',
             'status' => 'Status'
         ];
     
@@ -335,20 +335,21 @@ private function getRequestSource($params)
                     "existing_log_id" => $existing->id
                 ]));
         }
+        $user_id=$headers['user_id'];
     
         // Prepare data with additional validation
-        $current_time = date('Y-m-d H:i:s');
+        $current_time = get_user_datetime_only($user_id);
         $data = [
             'employee_id'       => $headers['employee_id'],
             'user_id'           => $headers['user_id'],
             'log_date'          => $headers['log_date'],
-            'start_time'        => get_user_datetime_only($headers['user_id']),
-            'end_time'          => get_user_datetime_only($headers['user_id']),
+            'start_time'        => $start_datetime,
+            'end_time'          => $end_datetime,
             'total_active_time' => (float)$headers['total_active_time'],
             'total_idle_time'   => (float)$headers['total_idle_time'],
             'status'            => $headers['status'],
-            'created_at'        => get_user_datetime_only($headers['user_id']),
-            'updated_at'        => get_user_datetime_only($headers['user_id']),
+            'created_at'        => $current_time,
+            'updated_at'        => $current_time,
         ];
     
         // Start database transaction
