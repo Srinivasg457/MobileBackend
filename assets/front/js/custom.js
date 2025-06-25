@@ -334,6 +334,13 @@
                           showCancelButton: false
                         }),                
                         $("#row_"+itemId).slideUp();
+                    } else {
+                        swal({
+                            title: "Cannot delete!",
+                            text: "This department is assigned to one or more employee.",
+                            type: "error",
+                            showCancelButton: false
+                        })
                     }
                 },'json');
 
