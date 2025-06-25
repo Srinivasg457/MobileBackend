@@ -147,6 +147,17 @@ class Admin_model extends CI_Model {
         $query = $query->result();  
         return $query;
     }
+    function get_role_by_user_status($table)
+    {
+        $this->db->select();
+        $this->db->from($table);
+        $this->db->where('user_id', $this->session->userdata('id'));
+        $this->db->where('status', 1);
+        $this->db->order_by('id', 'DESC');
+        $query = $this->db->get();
+        $query = $query->result();
+        return $query;
+    }
 
     function get_department_id_by_role($role_id)
     {

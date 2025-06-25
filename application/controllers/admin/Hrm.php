@@ -22,6 +22,7 @@ class Hrm extends Home_Controller {
         $data['main_page'] = 'Hrm';   
         $data['department'] = FALSE;
         $data['departments'] = $this->admin_model->get_by_user_status('departments');
+        $data['default_departments'] = $this->admin_model->select_asc('default_departments');
         $data['main_content'] = $this->load->view('admin/user/hrm/department',$data,TRUE);
         $this->load->view('admin/index',$data);
         if (!is_subscribed()) {
@@ -58,45 +59,95 @@ class Hrm extends Home_Controller {
 
     // }
 
+    // public function department_add()
+    // {
+    //     if ($_POST) {
+    //         $names    = $this->input->post('name', true);     // array of department names
+    //         $statuses = $this->input->post('status', true);   // array of statuses
+
+    //         if (!empty($names) && is_array($names)) {
+    //             $user_id     = user()->id;
+    //             $business_id = $this->business->uid;
+
+    //             foreach ($names as $key => $name) {
+    //                 $status = isset($statuses[$key]) ? $statuses[$key] : 1;
+
+    //                 // Sanitize name
+    //                 $name = trim($name);
+    //                 if ($name == '') continue;
+
+    //                 // Check if department with same name, business_id, and user_id exists
+    //                 $this->db->where('business_id', $business_id);
+    //                 $this->db->where('user_id', $user_id);
+    //                 $this->db->where('name', $name);
+    //                 $existing = $this->db->get('departments')->row();
+
+    //                 $data = array(
+    //                     'user_id'     => $user_id,
+    //                     'business_id' => $business_id,
+    //                     'name'        => $name,
+    //                     'status'      => $status,
+    //                     'created_at'  => my_date_now()
+    //                 );
+
+    //                 $data = $this->security->xss_clean($data);
+
+    //                 if ($existing) {
+    //                     // Update only the status
+    //                     $this->db->where('id', $existing->id);
+    //                     $this->db->update('departments', ['status' => $status]);
+    //                 } else {
+    //                     // Insert new department
+    //                     $this->admin_model->insert($data, 'departments');
+    //                 }
+    //             }
+
+    //             $this->session->set_flashdata('msg', trans('msg-saved'));
+    //         }
+
+    //         redirect(base_url('admin/hrm/department'));
+    //     }
+    // }
+
     public function department_add()
     {
         if ($_POST) {
-            $names    = $this->input->post('name', true);     // array of department names
-            $statuses = $this->input->post('status', true);   // array of statuses
+            $names         = $this->input->post('name', true);           // department names
+            $statuses      = $this->input->post('status', true);         // statuses
+            $department_ids = $this->input->post('department_id', true); // from default_departments
 
             if (!empty($names) && is_array($names)) {
                 $user_id     = user()->id;
                 $business_id = $this->business->uid;
 
                 foreach ($names as $key => $name) {
-                    $status = isset($statuses[$key]) ? $statuses[$key] : 1;
+                    $status        = isset($statuses[$key]) ? $statuses[$key] : 1;
+                    $default_dept_id = isset($department_ids[$key]) ? $department_ids[$key] : null;
 
-                    // Sanitize name
                     $name = trim($name);
                     if ($name == '') continue;
 
-                    // Check if department with same name, business_id, and user_id exists
+                    // Check if department exists
                     $this->db->where('business_id', $business_id);
                     $this->db->where('user_id', $user_id);
                     $this->db->where('name', $name);
                     $existing = $this->db->get('departments')->row();
 
                     $data = array(
-                        'user_id'     => $user_id,
-                        'business_id' => $business_id,
-                        'name'        => $name,
-                        'status'      => $status,
-                        'created_at'  => my_date_now()
+                        'user_id'       => $user_id,
+                        'business_id'   => $business_id,
+                        'name'          => $name,
+                        'status'        => $status,
+                        'department_id' => $default_dept_id,
+                        'created_at'    => my_date_now()
                     );
 
                     $data = $this->security->xss_clean($data);
 
                     if ($existing) {
-                        // Update only the status
                         $this->db->where('id', $existing->id);
                         $this->db->update('departments', ['status' => $status]);
                     } else {
-                        // Insert new department
                         $this->admin_model->insert($data, 'departments');
                     }
                 }
@@ -107,7 +158,6 @@ class Hrm extends Home_Controller {
             redirect(base_url('admin/hrm/department'));
         }
     }
-
 
 
 

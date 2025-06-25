@@ -22,63 +22,132 @@ class EmployeeRoles extends Home_Controller {
             redirect('/admin/subscription');
         }
     }
-
-    public function create_role() {
-        $input = $this->get_input_data();
-
-        $this->form_validation->set_data($input);
-        $this->form_validation->set_rules('user_id', 'Organization ID', 'required|integer');
-        $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
-        $this->form_validation->set_rules('role_name', 'Role Name', 'required|max_length[100]');
-        $this->form_validation->set_rules('description', 'Description', 'trim|max_length[500]');
-    
-        if ($this->form_validation->run() === FALSE) {
-            return $this->json_response(400, 'Validation failed', [
-                'errors' => $this->form_validation->error_array()
-            ]);
+    public function role()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
         }
-
-        $user_id = $input['user_id'];
-        $department_id = $input['department_id'];
-        $role_name = $input['role_name'];
-        $description = $input['description'] ?? null;
-
-        $existing = $this->db
-            ->where([
-                'user_id' => $user_id,
-                'department_id' => $department_id,
-                'role_name' => $role_name
-            ])
-            ->get('employee_roles')
-            ->row();
-
-        if ($existing) {
-            return $this->json_response(409, 'Role already exists in this organization and department');
+        $data = array();
+        $data['page_title'] = 'Roles & Permission';
+        $data['departments'] = $this->admin_model->get_by_user_status('departments');
+        $data['default_roles'] = $this->admin_model->select_asc('default_roles');
+        $data['roles'] = $this->admin_model->get_role_by_user_status('employee_roles');
+        $data['main_content'] = $this->load->view('admin/user/hrm/role', $data, TRUE);
+        $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
         }
+    }
+    // public function create_role() {
+    //     $input = $this->get_input_data();
 
-        $data = [
-            'user_id' => $user_id,
-            'department_id' => $department_id,
-            'role_name' => $role_name,
-            'description' => $description,
-            'created_at' => get_user_datetime_only($user_id), // Using helper function
-            'updated_at' => get_user_datetime_only($user_id)  // Using helper function
-        ];
+    //     $this->form_validation->set_data($input);
+    //     $this->form_validation->set_rules('user_id', 'Organization ID', 'required|integer');
+    //     $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
+    //     $this->form_validation->set_rules('role_name', 'Role Name', 'required|max_length[100]');
+    //     $this->form_validation->set_rules('description', 'Description', 'trim|max_length[500]');
 
-        $this->db->trans_start();
-        $this->db->insert('employee_roles', $data);
-        $role_id = $this->db->insert_id();
-        $this->db->trans_complete();
+    //     if ($this->form_validation->run() === FALSE) {
+    //         return $this->json_response(400, 'Validation failed', [
+    //             'errors' => $this->form_validation->error_array()
+    //         ]);
+    //     }
 
-        if ($this->db->trans_status() === FALSE) {
-            log_message('error', 'Database error: ' . $this->db->error()['message']);
-            return $this->json_response(500, 'Database operation failed');
+    //     $user_id = $input['user_id'];
+    //     $department_id = $input['department_id'];
+    //     $role_name = $input['role_name'];
+    //     $description = $input['description'] ?? null;
+
+    //     $existing = $this->db
+    //         ->where([
+    //             'user_id' => $user_id,
+    //             'department_id' => $department_id,
+    //             'role_name' => $role_name
+    //         ])
+    //         ->get('employee_roles')
+    //         ->row();
+
+    //     if ($existing) {
+    //         return $this->json_response(409, 'Role already exists in this organization and department');
+    //     }
+
+    //     $data = [
+    //         'user_id' => $user_id,
+    //         'department_id' => $department_id,
+    //         'role_name' => $role_name,
+    //         'description' => $description,
+    //         'created_at' => get_user_datetime_only($user_id), // Using helper function
+    //         'updated_at' => get_user_datetime_only($user_id)  // Using helper function
+    //     ];
+
+    //     $this->db->trans_start();
+    //     $this->db->insert('employee_roles', $data);
+    //     $role_id = $this->db->insert_id();
+    //     $this->db->trans_complete();
+
+    //     if ($this->db->trans_status() === FALSE) {
+    //         log_message('error', 'Database error: ' . $this->db->error()['message']);
+    //         return $this->json_response(500, 'Database operation failed');
+    //     }
+
+    //     return $this->json_response(201, 'Role created successfully', [
+    //         'role_id' => $role_id,
+    //         'role_name' => $role_name
+    //     ]);
+    // }
+
+    public function create_role()
+    {
+        if ($_POST) {
+            $role_names       = $this->input->post('role_name', true);
+            $department_ids   = $this->input->post('department_id', true);
+            $default_role_ids = $this->input->post('default_role_id', true);
+            $statuses         = $this->input->post('status', true);
+
+            $user_id     = user()->id;
+
+            if (is_array($role_names) && count($role_names) > 0) {
+                foreach ($role_names as $index => $role_name) {
+                    $department_id = $department_ids[$index] ?? null;
+                    $default_role_id = $default_role_ids[$index] ?? null;
+                    $status = isset($statuses[$index]) ? $statuses[$index] : 0;
+
+                    if (empty($role_name) || empty($department_id)) {
+                        continue; // Skip invalid
+                    }
+
+                    // Check if already exists
+                    $exists = $this->db->get_where('employee_roles', [
+                        'user_id'       => $user_id,
+                        'department_id' => $department_id,
+                        'role_id'       => $default_role_id,
+                    ])->row();
+
+                    if ($exists) {
+                        // Update status
+                        $this->db->where('id', $exists->id)->update('employee_roles', [
+                            'status'     => $status,
+                            'updated_at' => get_user_datetime_only($user_id),
+                        ]);
+                    } else {
+                        // Insert new role
+                        $this->db->insert('employee_roles', [
+                            'user_id'       => $user_id,
+                            'department_id' => $department_id,
+                            'role_id'       => $default_role_id,
+                            'role_name'     => $role_name,
+                            'status'        => $status,
+                            'created_at'    => get_user_datetime_only($user_id),
+                            'updated_at'    => get_user_datetime_only($user_id),
+                        ]);
+                    }
+                }
+
+                $this->session->set_flashdata('msg', 'Roles updated successfully.');
+            }
+
+            redirect(base_url('employee/EmployeeRoles/role'));
         }
-
-        return $this->json_response(201, 'Role created successfully', [
-            'role_id' => $role_id,
-            'role_name' => $role_name
-        ]);
     }
 
     private function get_input_data() {
