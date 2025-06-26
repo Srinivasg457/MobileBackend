@@ -19,7 +19,7 @@ class Hrm_model extends CI_Model {
         $this->db->select('e.*, d.name as department_name, c.name as country_name, r.role_name as role_name');
         $this->db->from('employees as e');
         $this->db->where('e.business_id', $this->business->uid);
-        $this->db->where('e.user_id', $this->session->userdata('id'));
+        $this->db->where('e.user_id', $this->session->userdata('id')? $this->session->userdata('id'): $this->session->userdata('employee_org_id') );
         $this->db->order_by('e.id', 'DESC');
 
         $this->db->join('departments as d', 'e.department_id = d.id', 'LEFT');

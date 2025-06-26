@@ -229,7 +229,8 @@ class Hrm extends Home_Controller {
 
     public function employee(){
         $data = array();
-        $data['page_title'] = 'Employee';      
+        $data['page_title'] = 'Employee';
+        $data['is_employee_admin'] = true;
         $data['page'] = 'Hrm';   
         $data['main_page'] = 'Hrm';   
         $data['employee'] = FALSE;
@@ -1007,6 +1008,9 @@ private function _send_invitation_email($name, $email, $token)
     public function get_roles()
     {
         $user_id = user()->id;
+         if (!$user_id) {
+                $user_id = $this->session->userdata('employee_org_id');
+            }  
 
         // Fetch roles by user_id
         $this->db->select('id, role_name as name');
