@@ -351,10 +351,15 @@ class Auth_model extends CI_Model {
     public function is_subscribed()
     {
         $user = user(); // assuming this helper returns the logged-in user
-        if (!$user) return false;
-
         $user_id = $user->id;
 
+        if (!$user_id) {
+            $user_id = $this->session->userdata('employee_org_id');
+        }
+
+        if (!$user_id) {
+            return false;
+        }
         // Fetch full user data from DB
         $user = $this->db->get_where('users', ['id' => $user_id])->row();
         if (!$user) return false;
@@ -396,6 +401,11 @@ class Auth_model extends CI_Model {
             return FALSE;
         }
     }
+
+    public function check_role_department(){
+
+    }
+    
     // public function is_pack_trial()
     // {
 

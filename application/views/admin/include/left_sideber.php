@@ -12,41 +12,150 @@
         } ?>
 
         <?php if (is_employee()): ?>
-          <li class="<?php if (isset($page_title) && $page_title == "Employee Dashboard") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('employeedashboard') ?>">
-              <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
-            </a>
-          </li>
-          <li class="<?php if (isset($page_title) && $page_title == "Screenshots") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('employeedashboard/screenshot') ?>">
-              <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
-            </a>
-          </li>
-          <li class="<?php if (isset($page_title) && $page_title == "Employee Webcam screenshots") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('admin/ScreenshotController/Employeewebcam') ?>">
-              <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
-            </a>
-          </li>
-          <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('employee/Timecards_manual') ?>">
-              <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Activity Log" ?></span>
-            </a>
-          </li>
-          <li class="<?php if (isset($page_title) && $page_title == "Report") {
-                        echo "active";
-                      } ?>">
-            <a href="<?php echo base_url('employee/report') ?>">
-              <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Report" ?></span>
-            </a>
-          </li>
+          <?php if (!$is_employee_admin): ?>
+            <li class="<?php if (isset($page_title) && $page_title == "Employee Dashboard") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('employeedashboard') ?>">
+                <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
+              </a>
+            </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Screenshots") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('employeedashboard/screenshot') ?>">
+                <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
+              </a>
+            </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Employee Webcam screenshots") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('admin/ScreenshotController/Employeewebcam') ?>">
+                <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
+              </a>
+            </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('employee/Timecards_manual') ?>">
+                <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Activity Log" ?></span>
+              </a>
+            </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Report") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('employee/report') ?>">
+                <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Report" ?></span>
+              </a>
+            </li>
+          <?php else :  ?>
+            <!-- <li class=" <?php if (isset($page_title) && $page_title == "User Dashboard") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('admin/dashboard/business') ?>">
+                <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
+              </a>
+            </li> -->
+            <li class="treeview <?php if (isset($main_page) && $main_page == "Analytics") {
+                                  echo "active";
+                                } ?>">
+
+              <a href="#"><i class="bi bi-graph-up-arrow mr-5"></i>
+                <span><?php echo "Analytics" ?></span>
+                <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
+              </a>
+              <ul class="treeview-menu">
+                <li class="<?php if (isset($page_title) && $page_title == "User Screenshots") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/ScreenshotController') ?>">
+                    <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
+                  </a>
+                </li>
+                <!-- <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/ScreenshotController/webcam') ?>">
+                    <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
+                  </a>
+                </li> -->
+                <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/Activity_logs') ?>">
+                    <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Log" ?></span>
+                  </a>
+                </li>
+                <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/Activity_logs/get_index') ?>">
+                    <i class="bi bi-clock mr-5"></i> <span><?php echo "Time Cards" ?></span>
+                  </a>
+                </li>
+
+              </ul>
+            </li>
+
+
+            <!-- <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('admin/Monitoring_room') ?>">
+                <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
+              </a>
+            </li> -->
+            <li class="<?php if (isset($page_title) && $page_title == "Notification") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('admin/Notification') ?>">
+                <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
+              </a>
+            </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
+                <i class="bi-clipboard-check mr-5"></i> <span><?php echo "Time Approval" ?></span>
+              </a>
+            </li>
+
+            <!-- <li class="<?php if (isset($page_title) && $page_title == "Edit") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('organization/edit') ?>">
+                <i class="bi bi-toggle-on mr-5"></i> <span><?php echo "Organization settings" ?></span>
+              </a>
+            </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Ex Organization settings") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('organization/org_exception') ?>">
+                <i class="bi bi-tools mr-5"></i> <span><?php echo "Employee settings" ?></span>
+              </a>
+            </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Department") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('admin/hrm/department') ?>">
+                <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('department') ?></span>
+              </a>
+            </li> -->
+            <li class="<?php if (isset($page_title) && $page_title == "Employee") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('admin/hrm/employee') ?>">
+                <i class="bi bi-people mr-5"></i> <span><?php echo trans('employees') ?></span>
+              </a>
+            </li>
+            <!-- <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
+                          echo "active";
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+              <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
+                <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
+              </a>
+            </li> -->
+          <?php endif; ?>
 
         <?php else :  ?>
           <?php if (is_admin()): ?>
@@ -755,34 +864,48 @@
         <?php endif; ?>
 
       </ul>
-
-      <?php if (is_admin()): ?>
-        <a href="#" class="btn btn-secondary upgrade_btn mt-20">
-          <i class="bi bi-info-circle-fill mr-5"></i> <span><?php echo trans('version') ?> <?php echo html_escape(settings()->version) ?></span>
-        </a>
-      <?php else: ?>
+      <?php if (is_employee()): ?>
         <div class="d-flex justify-content-start mt-20">
           <div>
-            <a href="<?php echo base_url('admin/subscription') ?>" class="btn btn-secondary bg-dark upgrade_btn">
-              <i class="bi bi-rocket-takeoff mr-5"></i> <span><?php echo trans('upgrade') ?></span>
-            </a>
-          </div>
-
-          <?php if (settings()->enable_multilingual == 1): ?>
-            <div class="dropdown show">
-              <a class="btn btn-secondary upgrade_btn bg-dark dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="bi bi-translate mr-5"></i> <i class="bi bi-chevron-down mr-5"></i>
+            <?php if (!$is_employee_admin): ?>
+              <a href="<?php echo base_url('admin/Navbar_Redirection') ?>" class="btn btn-secondary bg-dark upgrade_btn">
+                <i class="bi bi-arrow-right-square mr-5"></i> <span><?php echo "nav to admin" ?></span>
               </a>
-
-              <div class="dropdown-menu lang" aria-labelledby="dropdownMenuLink">
-                <?php foreach (get_language() as $lang): ?>
-                  <a class="dropdown-item mhover" href="<?php echo base_url('home/switch_lang/' . $lang->slug) ?>"><?php echo html_escape($lang->name) ?></a>
-                <?php endforeach; ?>
+            <?php else: ?>
+              <a href="<?php echo base_url('admin/Navbar_Redirection/employee_nav') ?>" class="btn btn-secondary bg-dark upgrade_btn">
+                <i class="bi bi-arrow-left-square mr-5"></i> <span><?php echo "nav to your account" ?></span>
+              </a>
+            <?php endif; ?>
+          </div>
+        <?php else: ?>
+          <?php if (is_admin()): ?>
+            <a href="#" class="btn btn-secondary upgrade_btn mt-20">
+              <i class="bi bi-info-circle-fill mr-5"></i> <span><?php echo trans('version') ?> <?php echo html_escape(settings()->version) ?></span>
+            </a>
+          <?php else: ?>
+            <div class="d-flex justify-content-start mt-20">
+              <div>
+                <a href="<?php echo base_url('admin/subscription') ?>" class="btn btn-secondary bg-dark upgrade_btn">
+                  <i class="bi bi-rocket-takeoff mr-5"></i> <span><?php echo trans('upgrade') ?></span>
+                </a>
               </div>
+
+              <?php if (settings()->enable_multilingual == 1): ?>
+                <div class="dropdown show">
+                  <a class="btn btn-secondary upgrade_btn bg-dark dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="bi bi-translate mr-5"></i> <i class="bi bi-chevron-down mr-5"></i>
+                  </a>
+
+                  <div class="dropdown-menu lang" aria-labelledby="dropdownMenuLink">
+                    <?php foreach (get_language() as $lang): ?>
+                      <a class="dropdown-item mhover" href="<?php echo base_url('home/switch_lang/' . $lang->slug) ?>"><?php echo html_escape($lang->name) ?></a>
+                    <?php endforeach; ?>
+                  </div>
+                </div>
             </div>
-        </div>
+          <?php endif; ?>
+        <?php endif; ?>
       <?php endif; ?>
-    <?php endif; ?>
 
     </section>
   </aside>

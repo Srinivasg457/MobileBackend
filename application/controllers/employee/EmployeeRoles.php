@@ -10,9 +10,6 @@ class EmployeeRoles extends Home_Controller {
     }
 
     public function index() {
-        if (!$this->session->userdata('logged_in')) {
-            redirect('login');
-        }
         $data = array();
         $data['page_title'] = 'Create Roles & Permission';
         $data['departments'] = $this->admin_model->get_by_user('departments');
@@ -24,9 +21,6 @@ class EmployeeRoles extends Home_Controller {
     }
     public function role()
     {
-        if (!$this->session->userdata('logged_in')) {
-            redirect('login');
-        }
         $data = array();
         $data['page_title'] = 'Roles & Permission';
         $data['departments'] = $this->admin_model->get_by_user_status('departments');
