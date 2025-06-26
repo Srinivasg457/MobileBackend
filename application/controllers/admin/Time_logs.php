@@ -9,63 +9,55 @@ class Time_logs extends Home_Controller {
     }
 
     public function get_time_logs() {
-        // Get inputs from GET request (query parameters)
-    $employee_id = $this->session->userdata('employee_id')??$this->input->get('employee_id');
-    $user_id = $this->session->userdata('employee_org_id')??$this->session->userdata('id'); // fallback for Postman or URL query params
-        $date = $this->input->get('date');
-
-        // If no date is provided, use today's date
-        if (empty($date)) {
-            $date = date('Y-m-d');
-        }
-
+        // Get inputs from session or GET request
+        $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
+        $user_id = $this->input->get('employee_org_id') ?? $this->input->get('id') ?? $this->session->userdata('user_id');
+        $date = $this->input->get('date') ?: date('Y-m-d'); // Default to today if not provided
+    
         // Validate inputs
         if (empty($employee_id) || empty($user_id)) {
-            $this->output
+            return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => false,
                     'message' => 'Missing employee_id or user_id'
                 ]));
-            return; // Important: Exit the function after sending the error response
         }
-
-        // Check if the combination of user_id and employee_id exists in the time_logs table for the given date
-        $this->db->select('log_id'); // Select a primary key to efficiently check existence
+    
+        // Check if logs exist for the given date
+        $this->db->select('log_id');
         $this->db->from('time_logs');
         $this->db->where('user_id', $user_id);
         $this->db->where('employee_id', $employee_id);
-        $this->db->where('DATE(log_date)', $date); // Filter by date
+        $this->db->where('DATE(log_date)', $date);
 
-        $query = $this->db->get();
-
-        if ($query->num_rows() == 0) {
-            $this->output
+        $exists = $this->db->get();
+    
+        if ($exists->num_rows() == 0) {
+            return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => false,
                     'message' => 'No time logs found for the specified user_id, employee_id, and date.'
                 ]));
-            return; // Important: Exit the function
         }
-
-        // Query the time_logs table
-        $this->db->select('log_id, employee_id, user_id, log_date, start_time, end_time, total_active_time, total_idle_time, status, created_at, updated_at'); // Select the columns you need
+    
+        // Fetch time log details
+        $this->db->select('log_id, employee_id, user_id, log_date, start_time, end_time, total_active_time, total_idle_time, created_at, updated_at');
         $this->db->from('time_logs');
         $this->db->where('user_id', $user_id);
         $this->db->where('employee_id', $employee_id);
         $this->db->where('DATE(log_date)', $date);
         $query = $this->db->get();
-        $result = $query->result_array();
-
-        // Return response
-        $this->output
+    
+        return $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
                 'status' => true,
-                'data' => $result
+                'data' => $query->result_array()
             ]));
     }
+    
 
     public function checkExistingTimelog() 
     {
@@ -506,132 +498,61 @@ private function getRequestSource($params)
 }
 
 
-public function store_Employee_Activity()
+public function save_activity()
 {
-    // Allow only POST
-    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+    $user_id = $this->input->get_request_header('user_id', TRUE);
+    $employee_id = $this->input->get_request_header('employee_id', TRUE);
+    $mouse = $this->input->get_request_header('total_mouse_movement', TRUE);
+    $keys = $this->input->get_request_header('total_keystrokes', TRUE);
+
+    // Basic validation
+    if(empty($user_id) || empty($employee_id) || !is_numeric($mouse) || !is_numeric($keys)) {
         return $this->output
             ->set_content_type('application/json')
-            ->set_status_header(405)
             ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Only POST requests are allowed"
+                'status' => 'error',
+                'message' => 'Missing or invalid data',
+                'required_fields' => [
+                    'user_id (got: '.$user_id.')',
+                    'employee_id (got: '.$employee_id.')',
+                    'total_mouse_movement (numeric, got: '.$mouse.')',
+                    'total_keystrokes (numeric, got: '.$keys.')'
+                ]
             ]));
     }
 
-    // Required headers
-    $required_headers = [
-        'user_id'             => 'user_id',
-        'employee_id'         => 'employee_id',
-        'total_mouse_movement'=> 'total_mouse_movement',
-        'total_keystrokes'    => 'total_keystrokes'
-    ];
-
-    $headers = [];
-    $missing_fields = [];
-
-    // Validate headers (allow 0 as valid)
-    foreach ($required_headers as $field => $label) {
-        $value = $this->input->get_request_header($field, TRUE);
-
-        if ($value === null) { // allows 0
-            $missing_fields[] = $label;
-        }
-
-        $headers[$field] = $value;
-    }
-
-    if (!empty($missing_fields)) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Missing required headers: " . implode(', ', $missing_fields)
-            ]));
-    }
-
-    // Validate numeric values
-    if (!is_numeric($headers['total_mouse_movement'])) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Total mouse movement must be a number"
-            ]));
-    }
-
-    $mouse_movement = (int)$headers['total_mouse_movement'];
-    if ($mouse_movement < 0 || $mouse_movement > 20) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Total mouse movement must be between 0 and 20"
-            ]));
-    }
-
-    if (!is_numeric($headers['total_keystrokes'])) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Total keystrokes must be a number"
-            ]));
-    }
-
-    $keystrokes = (int)$headers['total_keystrokes'];
-    if ($keystrokes < 0 || $keystrokes > 40) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Total keystrokes must be between 0 and 40"
-            ]));
-    }
-
+    // Prepare data
     $data = [
-        'user_id'             => $headers['user_id'],
-        'employee_id'         => $headers['employee_id'],
-        'created_at'          => get_user_datetime_only($headers['user_id']),
-        'total_mouse_movement'=> $mouse_movement,
-        'total_keystrokes'    => $keystrokes
+        'user_id' => $user_id,
+        'employee_id' => $employee_id,
+        'total_mouse_movement' => $mouse,
+        'total_keystrokes' => $keys,
+        'created_at' => date('Y-m-d H:i:s')
     ];
 
-    // Start database transaction
-    $this->db->trans_start();
+    // Insert to database
+    $this->db->insert('Employee_Activity', $data);
 
-    $inserted = $this->db->insert('Employee_Activity', $data);
-    $activity_id = $this->db->insert_id();
-
-    $this->db->trans_complete();
-
-    if (!$this->db->trans_status() || !$inserted) {
-        $error = $this->db->error();
+    // Check if inserted
+    if($this->db->affected_rows() > 0) {
+        $activity_id = $this->db->insert_id();
         return $this->output
             ->set_content_type('application/json')
-            ->set_status_header(500)
             ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Failed to store activity log",
-                "error" => $error['message'] ?? 'Unknown database error'
+                'status' => 'success',
+                'message' => 'Activity saved successfully',
+                'activity_id' => $activity_id,
+                'data' => $data
+            ]));
+    } else {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'Failed to save activity',
+                'database_error' => $this->db->error()
             ]));
     }
-
-    log_message('info', "Employee activity created for employee {$headers['employee_id']} with ID $activity_id");
-
-    return $this->output
-        ->set_content_type('application/json')
-        ->set_status_header(201)
-        ->set_output(json_encode([
-            "status" => "success",
-            "message" => "Employee activity stored successfully",
-            "data" => $data
-        ]));
 }
 
 
