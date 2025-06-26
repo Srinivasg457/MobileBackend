@@ -16,6 +16,7 @@ class ScreenshotController extends Home_Controller
         //     redirect('login');
         // }
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Screenshots';
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/user_screenshot', $data, TRUE);
@@ -27,6 +28,7 @@ class ScreenshotController extends Home_Controller
     public function webCam()
     {
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Webcam screenshots';
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/webcam_screenshot', $data, TRUE);

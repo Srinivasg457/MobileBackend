@@ -14,6 +14,7 @@ class Notification extends Home_Controller {
     public function index()
     {
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Notification';
         $data['main_content'] = $this->load->view('admin/notification', $data, TRUE);
         $this->load->view('admin/index', $data);
