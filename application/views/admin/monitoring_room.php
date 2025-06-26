@@ -664,11 +664,21 @@
         const container = thumbnail.parent();
 
         if (response.status === 'success' && response.screenshot.image_url) {
-          thumbnail.attr('src', response.screenshot.image_url)
-            .on('error', function() {
-              container.addClass('blank-screen').html('<span>No Screen Available</span>');
-            });
-          container.removeClass('blank-screen');
+          // Get current time and screenshot time
+          const now = get_user_datetime_only($user_id);
+          const screenshotTime = new Date(response.screenshot.created_at);
+          const minutesDiff = (now - screenshotTime) / (1000 * 60); // difference in minutes
+          
+          // If screenshot is older than 10 minutes, show blank screen
+          if (minutesDiff > 5) {
+            container.addClass('blank-screen').html('<span>No Screen Available</span>');
+          } else {
+            thumbnail.attr('src', response.screenshot.image_url + '?' + new Date().getTime()) // Add cache buster
+              .on('error', function() {
+                container.addClass('blank-screen').html('<span>No Screen Available</span>');
+              });
+            container.removeClass('blank-screen');
+          }
         } else {
           container.addClass('blank-screen').html('<span>No Screen Available</span>');
         }
@@ -680,7 +690,6 @@
       }
     });
   }
-
   // WebSocket functionality remains unchanged
   const ws = new WebSocket('wss://work-room.io:8090');
   const video = document.getElementById('modalScreen');
