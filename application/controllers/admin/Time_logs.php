@@ -728,16 +728,16 @@ public function store_Time_Log()
             ]));
     }
 
-    // Validate time formats (start_time, end_time)
+    // Validate time formats (start_time, end_time) - now expecting YYYY-MM-DD HH:MM:SS
     $time_fields = ['start_time', 'end_time'];
     foreach ($time_fields as $field) {
-        if (!DateTime::createFromFormat('H:i:s', $headers[$field])) {
+        if (!DateTime::createFromFormat('Y-m-d H:i:s', $headers[$field])) {
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(400)
                 ->set_output(json_encode([
                     "status" => "error",
-                    "message" => "Invalid $field format. Expected HH:MM:SS"
+                    "message" => "Invalid $field format. Expected YYYY-MM-DD HH:MM:SS"
                 ]));
         }
     }
@@ -777,8 +777,8 @@ public function store_Time_Log()
         'employee_id'        => $headers['employee_id'],
         'user_id'            => $headers['user_id'],
         'log_date'           => $headers['log_date'],
-        'start_time'         => $headers['start_time'],
-        'end_time'           => $headers['end_time'],
+        'start_time'         => $headers['start_time'], // Now includes date portion
+        'end_time'           => $headers['end_time'],   // Now includes date portion
         'total_active_time' => $headers['total_active_time'], // Stored as HH:MM:SS
         'total_idle_time'    => $headers['total_idle_time'], // Stored as HH:MM:SS
         'created_at'         => $current_time,
