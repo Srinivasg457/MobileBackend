@@ -117,8 +117,6 @@
         <div class="box-header">
             <h3 class="box-title"><i class="bi bi-shield-plus"></i><?php echo "Assign Permission to Role" ?>
                 <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_bulk"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
-                <a href="<?php echo base_url('employee/EmployeeRoles/role') ?>" class="pull-right btn btn-info btn-sm rounded  mx-5">
-                    <i class="fa fa-plus"></i> Create Role</a>
             </h3>
         </div>
         <form id="createPermissionForm">
@@ -300,8 +298,11 @@
     </div>
 
     <div class="list_area container">
-        <h3 class="box-title"><?php echo "Roles & Permissions" ?> <a href="#" class="pull-right btn btn-info btn-sm rounded create_role_permssion mx-5">
-                <i class="fa fa-plus"></i> Assign Permission to Role</a>
+        <h3 class="box-title"><?php echo "Roles & Permissions" ?>
+            <!-- <a href="#" class="pull-right btn btn-info btn-sm rounded create_role_permssion mx-5">
+                <i class="fa fa-plus"></i> Assign Permission to Role</a> -->
+            <a href="<?php echo base_url('employee/EmployeeRoles/role') ?>" class="pull-right btn btn-info btn-sm rounded  mx-5">
+                <i class="fa fa-plus"></i> Select Role</a>
         </h3>
 
         <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
@@ -312,7 +313,7 @@
                         <th>Department</th>
                         <th>Role</th>
                         <th>Features</th>
-                        <th>View</th>
+                        <th>Assign Permission</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -414,17 +415,16 @@
                             <td>${index++}</td>
                             <td>${role.department_name}</td>
                             <td>${role.role_name}</td>
-                            <td style="width:45%">
+                            <td style="width:48%">
                                 <div>${featureNames.join(', ')}</div>
                             </td>
-                            <td>
-                                <a href="#" class="view-permissions" data-role="${role.role_name}" data-features='${JSON.stringify(featureDetails)}' title="View Permissions">
-                                    <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
-                                </a>
+                             <td>
+                                    <a href="#" class="edit-row  edit_row_button  btn btn-default btn-sm rounded create_role_permssion mx-5" data-role-name ="${role.role_name}" data-role-id="${role.role_id}" data-placement="top" title="Assign permission to Role">
+                             <i class="fa fa-plus"></i> Assign</a>
                             </td>
                              <td class="actions" width="15%">
-                                 <a href="#" data-role-name ="${role.role_name}" data-role-id="${role.role_id}"  class="edit-row  edit_row_button" data-placement="top" title="Edit">
-                                    <i class="fa fa-pencil-square-o"></i>
+                               <a href="#" class="view-permissions mx-5" data-role="${role.role_name}" data-features='${JSON.stringify(featureDetails)}' title="View Permissions">
+                                    <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
                                 </a>
                                <a href="#" 
                                     class="remove-row  delete-role-btn" 
@@ -446,14 +446,13 @@
                             <td>${role.department_name}</td>
                             <td>${role.role_name}</td>
                             <td><i class="bi bi-pencil-square text-muted" title="No features to update" style="cursor: not-allowed;">No feature to update</i></td>
-                            <td>
-                                <a href="#" class="view-permissions  text-muted" title="No Permissions">
-                                    <i class="bi bi-eye-slash" style="font-size: 1.5rem;"></i>
-                                </a>
+                              <td>
+                                    <a href="#" class="edit-row  edit_row_button  btn btn-default btn-sm rounded create_role_permssion mx-5" data-role-name ="${role.role_name}" data-role-id="${role.role_id}" data-placement="top" title="Assign permission to Role">
+                             <i class="fa fa-plus"></i> Assign</a>
                             </td>
                            <td class="actions" width="15%">
-                                <a href="#" data-role-name ="${role.role_name}" data-role-id="${role.role_id}"  class="edit_row_button" data-placement="top" title="Edit">
-                                    <i class="fa fa-pencil-square-o"></i>
+                            <a href="#" class="view-permissions mx-5 text-muted" title="No Permissions">
+                                    <i class="bi bi-eye-slash" style="font-size: 1.5rem;"></i>
                                 </a>
                                 <a href="#" 
                                     class="remove-row delete-role-btn" 

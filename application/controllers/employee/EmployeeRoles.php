@@ -170,7 +170,7 @@ class EmployeeRoles extends Home_Controller {
                 }
             }
 
-            redirect(base_url('employee/EmployeeRoles/role'));
+            redirect(base_url('employee/EmployeeRoles'));
         }
     }
 

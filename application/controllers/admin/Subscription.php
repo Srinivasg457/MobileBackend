@@ -119,7 +119,7 @@ class Subscription extends Home_Controller
                     $this->common_model->edit_option($user_data, user()->id, 'users');
                 }
                 // ✅ APPLY ORG SETTINGS FLAGS HERE
-                $this->apply_org_settings_flags(user()->id, $package->id);
+                // $this->apply_org_settings_flags(user()->id, $package->id);
             }
 
             if (number_format($amount, 0) == 0) {
