@@ -965,7 +965,28 @@ class Admin_model extends CI_Model {
         return $query->row();
     }
 
+    public function intial_department_storing($user_id, $business_id)
+    {
+        // Fetch default departments
+        $default_departments = $this->admin_model->select_asc('default_departments');
 
+        // Loop through each default department and insert into departments table
+        if (!empty($default_departments)) {
+            foreach ($default_departments as $default) {
+                $data = [
+                    'department_id' => $default->id, // FK from default_departments
+                    'name' => $default->name, // Assuming default_departments has 'name' column
+                    'user_id' => $user_id,
+                    'business_id' => $business_id,
+                    'status' => 1,
+                    'created_at' => get_user_datetime_only($user_id)
+                ];
+
+                $this->admin_model->insert($data, 'departments');
+            }
+        }
+        return true;
+    }
     //get product
     public function search_product($value, $type)
     {

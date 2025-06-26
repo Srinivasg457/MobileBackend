@@ -169,6 +169,7 @@ class Users extends Home_Controller {
                             'time_zone' => $this->input->post('time_zone', true)
                         );
                         $this->common_model->insert($org_settings, 'org_settings');
+                        $this->admin_model->intial_department_storing($id, $uid);   // (user_id, business_uid)
                     }
                     
                 }
@@ -278,6 +279,12 @@ class Users extends Home_Controller {
                         $flags['created_at'] = my_date_now();
                         $flags['updated_at'] = my_date_now();
                         $this->db->insert('org_settings', $flags);
+                        // ensure default departments exist for non-trial sign-ups
+                        $business_uid = $this->db
+                            ->select('uid')
+                            ->get_where('business', ['user_id' => $id])
+                            ->row('uid');
+                        $this->admin_model->intial_department_storing($id, $business_uid);
                     }
 
                     $this->db->trans_complete();
@@ -291,7 +298,7 @@ class Users extends Home_Controller {
                 redirect(base_url('admin/users'));
             }
         }      
-    }
+    }   
 
 
 

@@ -489,7 +489,7 @@ class Auth extends Home_Controller
 
                 // ✅ Add trial user settings if needed
                 $this->add_trial_user_settings(user()->id, $time_zone);
-
+                $this->admin_model->intial_department_storing(user()->id, $uid);
                 echo json_encode(array('st' => $status));
                 exit();
             }
