@@ -901,7 +901,9 @@ $.ajax({
         }
 
         $(document).ready(function() {
-            const today = new Date().toISOString().split('T')[0];
+            // Get the user's date from the helper function
+            const userDate = "<?= get_user_datetime_only($this->session->userdata('id')) ?>";
+            const today = userDate.split(' ')[0]; // This splits date and time and takes the date part
             $('#datePicker').val(today);
             $.ajax({
                 url: "<?= base_url('/admin/ScreenshotController/list_employees_by_user') ?>",
