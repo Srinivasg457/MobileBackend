@@ -47,18 +47,22 @@
 
             <!-- Role Field -->
             <div style="flex: 1;">
-              <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo trans('role'); ?></label>
-              <select class="form-control single_select" name="role" id="role">
-                <option value=""><?php echo trans('select'); ?></option>
-                <?php if (!empty($roles)): ?>
-                  <?php foreach ($roles as $role): ?>
-                    <option value="<?php echo html_escape($role['id']); ?>"
-                      <?php if (!empty($employee) && $employee[0]['role_id'] == $role['id']) echo 'selected'; ?>>
-                      <?php echo html_escape($role['name']); ?>
-                    </option>
-                  <?php endforeach; ?>
-                <?php endif; ?>
-              </select>
+              <label class="col-sm-12 control-label p-0" for="example-input-normal" ><?php echo 'Role <span style="color:red">*</span>'; ?></label>
+             
+            <select class="form-control single_select"name="role" id="role" required 
+                    oninvalid="this.setCustomValidity('Select a Role or create role in Roles and Permission')"
+                    oninput="this.setCustomValidity('')">
+              <option value=""><?php echo trans('select'); ?></option>
+              <?php if (!empty($roles)): ?>
+                <?php foreach ($roles as $role): ?>
+                  <option value="<?php echo html_escape($role['id']); ?>"
+                    <?php if (!empty($employee) && $employee[0]['role_id'] == $role['id']) echo 'selected'; ?>>
+                    <?php echo html_escape($role['name']); ?>
+                  </option>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </select>
+    
             </div>
           </div>
           <label><?php echo trans('employee-name') ?> <span class="text-danger">*</span></label>
