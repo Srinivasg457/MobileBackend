@@ -719,90 +719,140 @@
     <script>
         function fetchActivity(currentEmployeeId, date) {
             const timelineTrack = $('#timeline-track');
-            timelineTrack.find('.activity-block').remove(); // 🧹 Clear existing activity blocks
+timelineTrack.find('.activity-block, .time-marker').remove(); // Clear existing blocks and markers
 
-            $.ajax({
-                url: "<?= base_url('/admin/Activity_logs/get_activity'); ?>",
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    employee_id: currentEmployeeId,
-                    date
-                },
-                success: function(response) {
-                    if (response.status && response.data.length > 0) {
-                        const startHour = 8; // 08:00 AM
-                        const endHour = 20; // 08:00 PM
-                        const totalMinutes = (endHour - startHour) * 60;
+$.ajax({
+    url: "<?= base_url('/admin/Activity_logs/get_activity'); ?>",
+    type: 'GET',
+    dataType: 'json',
+    data: {
+        employee_id: currentEmployeeId,
+        date
+    },
+    success: function(response) {
+        // Default time range (8AM to 8PM)
+        let startHour = 8;
+        let endHour = 20;
+        let hasActivities = false;
 
-                        response.data.forEach(function(item) {
-                            const createdAt = new Date(item.created_at);
-                            const hour = createdAt.getHours();
-                            const minutes = createdAt.getMinutes();
-                            const totalTimeInMinutes = (hour * 60 + minutes) - (startHour * 60);
+        if (response.status && response.data.length > 0) {
+            // Sort activities by time to find first and last
+            const sortedActivities = [...response.data].sort((a, b) => 
+                new Date(a.created_at) - new Date(b.created_at)
+            );
+            
+            const firstActivityTime = new Date(sortedActivities[0].created_at);
+            const lastActivityTime = new Date(sortedActivities[sortedActivities.length - 1].created_at);
+            
+            // Calculate dynamic start and end times (with 1 hour buffer before first and 2 hours after last)
+            startHour = Math.max(0, Math.min(23, firstActivityTime.getHours() - 1));
+            endHour = Math.max(0, Math.min(23, lastActivityTime.getHours() + 2));
+            
+            hasActivities = true;
+        }
 
-                            // Skip if the time is outside 08:00 - 20:00
-                            if (totalTimeInMinutes < 0 || totalTimeInMinutes > totalMinutes) return;
+        const totalHours = endHour - startHour;
+        const totalMinutes = totalHours * 60;
+        
+        // Generate time markers
+        for (let i = 0; i <= totalHours; i++) {
+            const hour = startHour + i;
+            const timeString = `${hour.toString().padStart(2, '0')}:00`;
+            const positionPercent = (i / totalHours) * 100;
+            
+            $('<div></div>')
+                .addClass('time-marker')
+                .attr('data-time', timeString)
+                .css('left', positionPercent + '%')
+                .appendTo(timelineTrack);
+        }
+        
+        if (hasActivities) {
+            // Process each activity
+            response.data.forEach(function(item) {
+                const createdAt = new Date(item.created_at);
+                const hour = createdAt.getHours();
+                const minutes = createdAt.getMinutes();
+                const totalTimeInMinutes = (hour * 60 + minutes) - (startHour * 60);
 
-                            let blockColorClass = '';
-                            if (item.is_active == '1') {
-                                blockColorClass = 'timeline-yellow';
-                            } else if (item.is_active == '2') {
-                                blockColorClass = 'timeline-lightgreen';
-                            } else if (item.is_active == '3') {
-                                blockColorClass = 'timeline-darkgreen';
-                            } else {
-                                blockColorClass = 'timeline-red';
-                            }
+                // Skip if outside our dynamic range
+                if (totalTimeInMinutes < 0 || totalTimeInMinutes > totalMinutes) return;
 
-                            const blockWidthPercent = (5 / totalMinutes) * 100;
-                            const leftPositionPercent = (totalTimeInMinutes / totalMinutes) * 100;
-
-                            // Calculate end time by adding 5 minutes
-                            const endAt = new Date(createdAt.getTime() + 5 * 60000);
-
-                            // Format time as HH:MM AM/PM
-                            const formatTime = date =>
-                                date.toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
-
-                            const timeLabel = `${formatTime(createdAt)} to ${formatTime(endAt)}`;
-                            const tooltip = $('<div></div>')
-                                .addClass('custom-tooltip')
-                                .text(timeLabel)
-                                .hide(); // Initially hidden
-
-                            const block = $('<div></div>')
-                                .addClass('activity-block')
-                                .addClass(blockColorClass)
-                                .css({
-                                    'position': 'absolute',
-                                    'left': leftPositionPercent + '%',
-                                    'width': blockWidthPercent + '%',
-                                    'height': '100%'
-                                }).append(tooltip).hover(
-                                    function() {
-                                        tooltip.show();
-                                    },
-                                    function() {
-                                        tooltip.hide();
-                                    }
-                                );
-
-                            timelineTrack.append(block);
-                        });
-                    } else {
-                        showToast('No activity data found.', "error")
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX Error:', status, error);
-                    alert('Failed to fetch activity data.');
+                let blockColorClass = '';
+                if (item.is_active == '1') {
+                    blockColorClass = 'timeline-yellow';
+                } else if (item.is_active == '2') {
+                    blockColorClass = 'timeline-lightgreen';
+                } else if (item.is_active == '3') {
+                    blockColorClass = 'timeline-darkgreen';
+                } else {
+                    blockColorClass = 'timeline-red';
                 }
-            });
 
+                const blockWidthPercent = (5 / totalMinutes) * 100;
+                const leftPositionPercent = (totalTimeInMinutes / totalMinutes) * 100;
+
+                // Calculate end time by adding 5 minutes
+                const endAt = new Date(createdAt.getTime() + 5 * 60000);
+
+                // Format time as HH:MM AM/PM
+                const formatTime = date =>
+                    date.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                const timeLabel = `${formatTime(createdAt)} to ${formatTime(endAt)}`;
+                const tooltip = $('<div></div>')
+                    .addClass('custom-tooltip')
+                    .text(timeLabel)
+                    .hide();
+
+                const block = $('<div></div>')
+                    .addClass('activity-block')
+                    .addClass(blockColorClass)
+                    .css({
+                        'position': 'absolute',
+                        'left': leftPositionPercent + '%',
+                        'width': blockWidthPercent + '%',
+                        'height': '100%'
+                    }).append(tooltip).hover(
+                        function() {
+                            tooltip.show();
+                        },
+                        function() {
+                            tooltip.hide();
+                        }
+                    );
+
+                timelineTrack.append(block);
+            });
+        } else {
+            showToast('No activity data found. Showing default time range.', "info");
+        }
+    },
+    error: function(xhr, status, error) {
+        console.error('AJAX Error:', status, error);
+        showToast('Failed to fetch activity data. Showing default time range.', "error");
+        
+        // Show default time range on error too
+        const startHour = 8;
+        const endHour = 20;
+        const totalHours = endHour - startHour;
+        
+        for (let i = 0; i <= totalHours; i++) {
+            const hour = startHour + i;
+            const timeString = `${hour.toString().padStart(2, '0')}:00`;
+            const positionPercent = (i / totalHours) * 100;
+            
+            $('<div></div>')
+                .addClass('time-marker')
+                .attr('data-time', timeString)
+                .css('left', positionPercent + '%')
+                .appendTo(timelineTrack);
+        }
+    }
+});
             $.ajax({
                 url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
                 type: 'GET',
