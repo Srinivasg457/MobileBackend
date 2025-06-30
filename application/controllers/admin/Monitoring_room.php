@@ -13,6 +13,7 @@ class Monitoring_room extends Home_Controller {
     public function index()
     {
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Live Monitoring';
         $data['main_content'] = $this->load->view('admin/monitoring_room', $data, TRUE);
         $this->load->view('admin/index', $data);

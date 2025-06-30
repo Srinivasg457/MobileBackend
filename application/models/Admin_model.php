@@ -135,23 +135,58 @@ class Admin_model extends CI_Model {
     }
 
     // select by function
-    function get_by_user_status($table)
+    // function get_by_user_status($table)
+    // {
+    //     $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
+    //     $this->db->select();
+    //     $this->db->from($table);
+    //     $this->db->where('business_id', $this->business->uid);
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where('status', 1);
+    //     $this->db->order_by('id','DESC');
+    //     $query = $this->db->get();
+    //     $query = $query->result();  
+    //     return $query;
+    // }
+    public function get_by_user_status($table)
     {
-        $this->db->select();
-        $this->db->from($table);
-        $this->db->where('business_id', $this->business->uid);
-        $this->db->where('user_id', $this->session->userdata('id'));
-        $this->db->where('status', 1);
-        $this->db->order_by('id','DESC');
-        $query = $this->db->get();
-        $query = $query->result();  
-        return $query;
+        // 1️⃣  Determine who is logged in
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
+        if (!$user_id) {
+            return [];                       // nothing to do
+        }
+
+        // 2️⃣  Find the business UID for that user
+        $business = $this->db->select('uid')
+            ->from('business')        // adjust table name if different
+            ->where('user_id', $user_id)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if (!$business) {
+            return [];                       // user owns no business
+        }
+
+        $business_uid = $business->uid;
+
+        // 3️⃣  Pull active rows for that business & user
+        $query = $this->db->select('*')
+            ->from($table)
+            ->where('business_id', $business_uid)
+            ->where('user_id',     $user_id)
+            ->where('status',      1)
+            ->order_by('id', 'DESC')
+            ->get();
+
+        return $query->result();
     }
     function get_role_by_user_status($table)
     {
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
         $this->db->select();
         $this->db->from($table);
-        $this->db->where('user_id', $this->session->userdata('id'));
+        $this->db->where('user_id', $user_id);
         $this->db->where('status', 1);
         $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
@@ -189,10 +224,11 @@ class Admin_model extends CI_Model {
     // select by function
     function get_by_user_and_type($table, $type)
     {
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
         $this->db->select();
         $this->db->from($table);
         $this->db->where('business_id', $this->business->uid);
-        $this->db->where('user_id', $this->session->userdata('id'));
+        $this->db->where('user_id', $user_id);
         if ($type == 'is_sell') {
             $this->db->where('is_sell', 1);
         } else {

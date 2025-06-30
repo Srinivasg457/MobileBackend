@@ -330,7 +330,7 @@
     // let allFeatures = [];
 
     $(document).ready(function() {
-        const userId = <?= json_encode($this->session->userdata('id')); ?>;
+        const userId = <?= json_encode($this->session->userdata('id') ?: $this->session->userdata('employee_org_id')) ?>;
         //  for loading the roles
         function loadRolesForCurrentUser() {
             $.ajax({
@@ -776,7 +776,7 @@
             const form = $('#createPermissionForm'); // form context
 
             const roleId = form.find('#roleDropdown').val(); // scoped to the form
-            const userId = <?= $this->session->userdata('id') ?>;
+            const userId = <?= json_encode($this->session->userdata('id') ?: $this->session->userdata('employee_org_id')) ?>;
             const permissionDescription = form.find('#permission_description').val();
 
             const features = [];
@@ -845,7 +845,7 @@
 
             const form1 = $('#editPermissionForm'); // Always reference within the form
             const roleId1 = form1.find('#editroleId').val();
-            const userId1 = <?= $this->session->userdata('id') ?>;
+            const userId1 = <?= json_encode($this->session->userdata('id') ?: $this->session->userdata('employee_org_id')) ?>;
             const permissionDescription1 = form1.find('#permission_description').val();
 
             const selectedFeatures1 = form1.find('.feature-selector:checked');
@@ -960,7 +960,7 @@
             const role_name = $('#role_name1').val().trim();
             const department_id = $('select[name="department1"]').val();
             const role_description = $('#role_description').val().trim();
-            const userId = "<?= $this->session->userdata('id'); ?>"; // or however you're retrieving user ID
+            const userId = <?= json_encode($this->session->userdata('id') ?: $this->session->userdata('employee_org_id')) ?>;
             console.log(role_name);
             console.log(department_id);
 
