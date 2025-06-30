@@ -182,7 +182,7 @@ class EmployeeRoles extends Home_Controller {
         try {
             $this->db->select('id, name');
             $this->db->order_by('name', 'asc');
-            $query = $this->db->get('package_features');
+            $query = $this->db->get('app_features');
 
             if ($query === FALSE) {
                 log_message('error', 'Database error: ' . $this->db->error()['message']);
@@ -369,7 +369,7 @@ class EmployeeRoles extends Home_Controller {
     
                 $feature_id = $feature['feature_id'];
 
-                if (!$this->db->where('id', $feature_id)->get('package_features')->row()) {
+                if (!$this->db->where('id', $feature_id)->get('app_features')->row()) {
                     $errors['features'][$key]['feature_id'] = 'Feature ID ' . $feature_id . ' does not exist';
                     continue;
                 }
@@ -467,7 +467,7 @@ class EmployeeRoles extends Home_Controller {
     //         $access_entries = $this->db
     //             ->select('rfa.feature_id, af.name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
     //             ->from('role_feature_access as rfa')
-    //             ->join('package_features as af', 'af.id = rfa.feature_id')
+    //             ->join('app_features as af', 'af.id = rfa.feature_id')
     //             ->where('rfa.role_id', $role->id)
     //             ->where('rfa.user_id', $user_id)
     //             ->where('rfa.status', 1)
@@ -527,7 +527,7 @@ class EmployeeRoles extends Home_Controller {
             $access_entries = $this->db
                 ->select('rfa.feature_id, af.name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
                 ->from('role_feature_access as rfa')
-                ->join('package_features as af', 'af.id = rfa.feature_id')
+                ->join('app_features as af', 'af.id = rfa.feature_id')
                 ->where('rfa.role_id', $role->id)
                 ->where('rfa.user_id', $user_id)
                 ->where('rfa.status', 1)
@@ -583,7 +583,7 @@ class EmployeeRoles extends Home_Controller {
         $access_entries = $this->db
             ->select('rfa.feature_id, af.name, rfa.is_read, rfa.is_write, rfa.is_action, rfa.is_delete')
             ->from('role_feature_access as rfa')
-            ->join('package_features as af', 'af.id = rfa.feature_id')
+            ->join('app_features as af', 'af.id = rfa.feature_id')
             ->where('rfa.role_id', $role_id)
             ->where('rfa.user_id', $user_id)
             ->where('rfa.status', 1)

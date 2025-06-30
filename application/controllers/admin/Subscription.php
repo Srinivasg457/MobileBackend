@@ -16,6 +16,7 @@ class Subscription extends Home_Controller
     {
         $data = array();
         $this->upgrade_plans();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Subscription';
         $data['main_page'] = 'plan&pack';
         $data['user'] = $this->common_model->get_my_package();
@@ -36,6 +37,7 @@ class Subscription extends Home_Controller
     {
         $data = array();
         $this->upgrade_plans();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'CurrentPlan';
         $data['main_page'] = 'plan&pack';
         $data['user'] = $this->common_model->get_my_package();
