@@ -9,14 +9,15 @@ class Hrm extends Home_Controller {
     {
         parent::__construct();
         //check auth
-        if (!is_user()) {
-            redirect(base_url());
-        }
+        // if (!is_user()) {
+        //     redirect(base_url());
+        // }
         $this->load->model('hrm_model');
     }
 
     public function department(){
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Department';      
         $data['page'] = 'Hrm';   
         $data['main_page'] = 'Hrm';   
@@ -228,6 +229,9 @@ class Hrm extends Home_Controller {
 
 
     public function employee(){
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
         $data = array();
         $data['page_title'] = 'Employee';
         $data['is_employee_admin'] = true;
@@ -239,9 +243,6 @@ class Hrm extends Home_Controller {
         $data['employees'] = $this->hrm_model->get_employees();
         $data['main_content'] = $this->load->view('admin/user/hrm/employee',$data,TRUE);
         $this->load->view('admin/index',$data);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription');
-        }
     }
 
 

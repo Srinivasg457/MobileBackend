@@ -614,8 +614,29 @@ public function is_plan_standard()
         }
 
         // Compare their primary‑key IDs
-        return $dept_from_session->id === $dept_from_role->id;
+        $dept_id = $dept_from_session->department_id;
+
+        if (
+            ($dept_id == $dept_from_role->department_id) &&
+            in_array($dept_id, ['1', '2', '3', '4'])
+        ) {
+            $role_id = (int) $this->session->userdata('role_id');
+            if (!$role_id) {
+                return false;                                      // no role in session
+            }
+
+            $has_feature_access = $this->db
+                ->where('role_id', $role_id)
+                ->limit(1)
+                ->count_all_results('role_feature_access') > 0;
+
+            return $has_feature_access;
+        }
+
+        return false;
     }
+
+
     public function get_department()
     {
         // Get department_id from session
@@ -628,6 +649,7 @@ public function is_plan_standard()
 
         // Fetch department row from the departments table
         $query = $this->db->get_where('departments', ['id' => $department_id], 1);
+        
 
         // Return the result (as object)
         return $query->row();  // Use ->row_array() if you prefer an array
@@ -657,5 +679,42 @@ public function is_plan_standard()
             ['id' => $dept->department_id],
             1
         )->row();
+    }
+
+    public function is_CEO()
+    {
+        // 1️⃣  Get role_id from session
+        $role_id = (int) $this->session->userdata('role_id');
+        if (!$role_id) {
+            return false;                       // no role in session
+        }
+
+        // 2️⃣  Fetch that role from employee_roles
+        $role = $this->db->select('role_id')       // or 'slug' if that’s your column
+            ->from('employee_roles')
+            ->where('id', $role_id)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if (!$role) {
+            return false;                       // role not found
+        }
+
+        // 3️⃣  Compare name to “CEO” (case‑insensitive)
+        return $role->role_id == 1;
+    }
+
+    public function get_allowed_feature_ids()
+    {
+        $role_id = (int) $this->session->userdata('role_id');
+        $rows = $this->db->select('feature_id')
+            ->from('role_feature_access')
+            ->where('role_id', $role_id)
+            ->get()
+            ->result_array();          // [['feature_id' => 1], …]
+
+        // Flatten to a simple int array
+        return array_map('intval', array_column($rows, 'feature_id'));
     }
 }

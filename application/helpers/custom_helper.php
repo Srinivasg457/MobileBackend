@@ -47,6 +47,23 @@ if (!function_exists('check_department')) {
 		return $ci->auth_model->check_department();
 	}
 }
+if (!function_exists('is_CEO')) {
+	function is_CEO()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_CEO();
+	}
+}
+
+if (!function_exists('get_allowed_feature_ids')) {
+	function get_allowed_feature_ids()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->get_allowed_feature_ids();
+	}
+}
 //get time
 if (!function_exists('get_user_time_value')) {
 	function get_user_time_value($user_id)

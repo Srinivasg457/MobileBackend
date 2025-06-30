@@ -11,6 +11,7 @@ class EmployeeRoles extends Home_Controller {
 
     public function index() {
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Create Roles & Permission';
         $data['departments'] = $this->admin_model->get_by_user('departments');
         $data['main_content'] = $this->load->view('admin/employee/hrm/role_permission', $data, TRUE);
@@ -22,6 +23,7 @@ class EmployeeRoles extends Home_Controller {
     public function role()
     {
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Roles & Permission';
         $data['departments'] = $this->admin_model->get_by_user_status('departments');
         $data['default_roles'] = $this->admin_model->select_asc('default_roles');
@@ -501,9 +503,11 @@ class EmployeeRoles extends Home_Controller {
         $user_id = $this->input->get('user_id');
 
         if (!$user_id) {
+            $user_id =  $this->session->userdata('employee_org_id');
+        }
+        if (!$user_id) {
             return $this->json_response(400, 'Missing user_id');
         }
-
         $user_exists = $this->db->where('id', $user_id)->get('users')->row();
         if (!$user_exists) {
             return $this->json_response(404, 'User not found');
