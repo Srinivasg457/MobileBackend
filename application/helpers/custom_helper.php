@@ -39,6 +39,14 @@ if (!function_exists('get_user_datetime_only')) {
 	}
 }
 
+if (!function_exists('check_department')) {
+	function check_department()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->check_department();
+	}
+}
 //get time
 if (!function_exists('get_user_time_value')) {
 	function get_user_time_value($user_id)

@@ -48,14 +48,22 @@
                 <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Report" ?></span>
               </a>
             </li>
+
+            <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('change_password') ?>">
+                <i class="bi bi-lock mr-5"></i> <span><?php echo trans('change-password') ?></span>
+              </a>
+            </li>
           <?php else :  ?>
-            <!-- <li class=" <?php if (isset($page_title) && $page_title == "User Dashboard") {
+            <li class=" <?php if (isset($page_title) && $page_title == "User Dashboard") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('admin/dashboard/business') ?>">
                 <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
               </a>
-            </li> -->
+            </li>
             <li class="treeview <?php if (isset($main_page) && $main_page == "Analytics") {
                                   echo "active";
                                 } ?>">
@@ -72,13 +80,13 @@
                     <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
                   </a>
                 </li>
-                <!-- <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") {
+                <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
                   <a href="<?php echo base_url('admin/ScreenshotController/webcam') ?>">
                     <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
                   </a>
-                </li> -->
+                </li>
                 <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -96,15 +104,13 @@
 
               </ul>
             </li>
-
-
-            <!-- <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
+            <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('admin/Monitoring_room') ?>">
                 <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
               </a>
-            </li> -->
+            </li>
             <li class="<?php if (isset($page_title) && $page_title == "Notification") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -120,7 +126,7 @@
               </a>
             </li>
 
-            <!-- <li class="<?php if (isset($page_title) && $page_title == "Edit") {
+            <li class="<?php if (isset($page_title) && $page_title == "Edit") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('organization/edit') ?>">
@@ -140,7 +146,7 @@
               <a href="<?php echo base_url('admin/hrm/department') ?>">
                 <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('department') ?></span>
               </a>
-            </li> -->
+            </li>
             <li class="<?php if (isset($page_title) && $page_title == "Employee") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -148,13 +154,49 @@
                 <i class="bi bi-people mr-5"></i> <span><?php echo trans('employees') ?></span>
               </a>
             </li>
-            <!-- <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
+            <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
                 <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
               </a>
-            </li> -->
+            </li>
+            <li class="treeview <?php if (isset($main_page) && $main_page == "plan&pack") {
+                                  echo "active";
+                                } ?>">
+
+              <a href="#">
+                <i class="bi bi-bar-chart-fill mr-5"></i>
+                <span><?php echo "Subscription" ?></span>
+                <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
+              </a>
+
+              <ul class="treeview-menu">
+                <li class="<?php if (isset($page_title) && $page_title == "CurrentPlan") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/subscription/currentPlan') ?>">
+                    <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Current plan" ?></span>
+                  </a>
+                </li>
+
+                <li class="<?php if (isset($page_title) && $page_title == "Subscription") {
+                              echo "active";
+                            } ?>">
+                  <a href="<?php echo base_url('admin/subscription') ?>">
+                    <i class="bi bi-gem mr-5"></i> <span><?php echo trans('upgrade-plan') ?></span>
+                  </a>
+                </li>
+              </ul>
+
+            </li>
+            <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('change_password') ?>">
+                <i class="bi bi-lock mr-5"></i> <span><?php echo trans('change-password') ?></span>
+              </a>
+            </li>
           <?php endif; ?>
 
         <?php else :  ?>
@@ -360,6 +402,13 @@
               </a>
             </li>
 
+            <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('change_password') ?>">
+                <i class="bi bi-lock mr-5"></i> <span><?php echo trans('change-password') ?></span>
+              </a>
+            </li>
           <?php else: ?>
             <li class="<?php if (isset($page_title) && $page_title == "User Dashboard") {
                           echo "active";
@@ -562,8 +611,6 @@
 
                   </ul>
                 </li>
-
-
                 <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -585,7 +632,6 @@
                     <i class="bi-clipboard-check mr-5"></i> <span><?php echo "Time Approval" ?></span>
                   </a>
                 </li>
-
                 <li class="<?php if (isset($page_title) && $page_title == "Edit") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -818,6 +864,13 @@
 
             <?php endif; ?>
 
+            <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('change_password') ?>">
+                <i class="bi bi-lock mr-5"></i> <span><?php echo trans('change-password') ?></span>
+              </a>
+            </li>
           <?php endif; ?>
         <?php endif ?>
 
@@ -831,13 +884,6 @@
       </li> -->
 
 
-        <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
-                      echo "active";
-                    } ?>">
-          <a href="<?php echo base_url('change_password') ?>">
-            <i class="bi bi-lock mr-5"></i> <span><?php echo trans('change-password') ?></span>
-          </a>
-        </li>
 
         <li class="">
           <a href="<?php echo base_url('auth/logout') ?>">
@@ -868,6 +914,7 @@
         <div class="d-flex justify-content-start mt-20">
           <div>
             <?php if (!$is_employee_admin): ?>
+              
               <a href="<?php echo base_url('admin/Navbar_Redirection') ?>" class="btn btn-secondary bg-dark upgrade_btn">
                 <i class="bi bi-arrow-right-square mr-5"></i> <span><?php echo "nav to admin" ?></span>
               </a>

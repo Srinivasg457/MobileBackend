@@ -50,6 +50,7 @@ class Dashboard extends Home_Controller {
         
         //cron_recurring_payments();
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Dashboard';
         $data['currency'] = html_escape($this->business->currency_symbol);
         $data['settings'] = $this->admin_model->get('settings');
