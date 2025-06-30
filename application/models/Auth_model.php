@@ -602,5 +602,60 @@ public function is_plan_standard()
         }
     }
 
- 
+    public function check_department()
+    {
+        // Grab department rows (objects) from the two helpers
+        $dept_from_session = $this->get_department();          // may be null
+        $dept_from_role    = $this->get_department_by_role();  // may be null
+
+        // If either lookup failed, treat it as a mismatch
+        if (!$dept_from_session || !$dept_from_role) {
+            return false;
+        }
+
+        // Compare their primary‑key IDs
+        return $dept_from_session->id === $dept_from_role->id;
+    }
+    public function get_department()
+    {
+        // Get department_id from session
+        $department_id = $this->session->userdata('department_id');
+
+        // Check if it's available
+        if (!$department_id) {
+            return null;
+        }
+
+        // Fetch department row from the departments table
+        $query = $this->db->get_where('departments', ['id' => $department_id], 1);
+
+        // Return the result (as object)
+        return $query->row();  // Use ->row_array() if you prefer an array
+    }
+    public function get_department_by_role()
+    {
+        $role_id = $this->session->userdata('role_id');
+        if (!$role_id) {
+            return null;
+        }
+
+        // first query – find the department_id
+        $dept = $this->db->select('department_id')
+            ->from('employee_roles')
+            ->where('id', $role_id)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if (!$dept) {
+            return null;
+        }
+
+        // second query – fetch the actual department record
+        return $this->db->get_where(
+            'departments',
+            ['id' => $dept->department_id],
+            1
+        )->row();
+    }
 }
