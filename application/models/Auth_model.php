@@ -681,10 +681,12 @@ public function is_plan_standard()
         )->row();
     }
 
-    public function is_CEO()
+    public function is_CEO($role_id)
     {
-        // 1️⃣  Get role_id from session
-        $role_id = (int) $this->session->userdata('role_id');
+        if (!$role_id) {
+            // 1️⃣  Get role_id from session
+            $role_id = (int) $this->session->userdata('role_id');        }
+    
         if (!$role_id) {
             return false;                       // no role in session
         }
@@ -711,6 +713,7 @@ public function is_plan_standard()
         $rows = $this->db->select('feature_id')
             ->from('role_feature_access')
             ->where('role_id', $role_id)
+            ->where('status', 1)
             ->get()
             ->result_array();          // [['feature_id' => 1], …]
 

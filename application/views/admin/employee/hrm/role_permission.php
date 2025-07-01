@@ -398,6 +398,63 @@
                             let featureNames = [];
                             let featureDetails = [];
 
+                            /* ──────────────────────────────────────────────────────────────
+                             * CEO → show all features, but Assign button is disabled
+                             * ────────────────────────────────────────────────────────────── */
+                            if (role.role_name.toLowerCase() === 'ceo') {
+
+                                // Build feature arrays exactly like a normal role
+                                if (role.features.length > 0) {
+                                    role.features.forEach(function(feature) {
+                                        featureNames.push(feature.feature_name);
+                                        featureDetails.push({
+                                            name: feature.feature_name,
+                                            read: feature.is_read,
+                                            write: feature.is_write,
+                                            action: feature.is_action,
+                                            delete: feature.is_delete
+                                        });
+                                    });
+                                }
+
+                                const row = `
+        <tr>
+            <td>${index++}</td>
+            <td>${role.department_name}</td>
+            <td>${role.role_name}</td>
+            <td style="width:48%">
+                <div>${featureNames.length ? featureNames.join(', ') : 'All features accessible'}</div>
+            </td>
+            <td>
+                <button class="btn btn-default btn-sm rounded mx-5 disabled" disabled
+                        title="CEO already has full access">
+                    <i class="fa fa-plus"></i> Assign
+                </button>
+            </td>
+            <td class="actions" width="15%">
+                <a href="#" class="view-permissions mx-5"
+                   data-role="${role.role_name}"
+                   data-features='${JSON.stringify(featureDetails)}'
+                   title="View Permissions">
+                   <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
+                </a>
+                <a href="#"
+                   class="remove-row delete-role-btn"
+                   data-val="employee"
+                   data-id="${userId}"
+                   data-department-id="${role.department_id}"
+                   data-role="${role.role_name}"
+                   title="Delete Role">
+                   <i class="fa fa-trash-o"></i>
+                </a>
+            </td>
+        </tr>`;
+                                tbody.append(row);
+                                return; // CEO row done – go to next role
+                            }
+                            /* ------------------------------------------------------------------
+                             * 2.  Normal roles (your original logic)
+                             * ------------------------------------------------------------------ */
                             if (role.features.length > 0) {
                                 role.features.forEach(function(feature) {
                                     featureNames.push(feature.feature_name);
@@ -406,69 +463,80 @@
                                         read: feature.is_read,
                                         write: feature.is_write,
                                         action: feature.is_action,
-                                        delete: feature.is_delete
+                                        delete: feature.is_delete,
                                     });
                                 });
 
                                 const row = `
-                        <tr>
-                            <td>${index++}</td>
-                            <td>${role.department_name}</td>
-                            <td>${role.role_name}</td>
-                            <td style="width:48%">
-                                <div>${featureNames.join(', ')}</div>
-                            </td>
-                             <td>
-                                    <a href="#" class="edit-row  edit_row_button  btn btn-default btn-sm rounded create_role_permssion mx-5" data-role-name ="${role.role_name}" data-role-id="${role.role_id}" data-placement="top" title="Assign permission to Role">
-                             <i class="fa fa-plus"></i> Assign</a>
-                            </td>
-                             <td class="actions" width="15%">
-                               <a href="#" class="view-permissions mx-5" data-role="${role.role_name}" data-features='${JSON.stringify(featureDetails)}' title="View Permissions">
-                                    <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
-                                </a>
-                               <a href="#" 
-                                    class="remove-row  delete-role-btn" 
-                                    data-val="employee" 
-                                    data-id="${userId}" 
-                                    data-department-id="${role.department_id}" 
-                                    data-role="${role.role_name}" 
-                                    title="Delete Role">
-                                    <i class="fa fa-trash-o"></i>
-                                    </a>
-
-                            </td>
-                        </tr>`;
+            <tr>
+                <td>${index++}</td>
+                <td>${role.department_name}</td>
+                <td>${role.role_name}</td>
+                <td style="width:48%">
+                    <div>${featureNames.join(', ')}</div>
+                </td>
+                <td>
+                    <a href="#" class="edit-row edit_row_button btn btn-default btn-sm rounded create_role_permssion mx-5"
+                       data-role-name ="${role.role_name}"
+                       data-role-id   ="${role.role_id}"
+                       title="Assign permission to Role">
+                       <i class="fa fa-plus"></i> Assign
+                    </a>
+                </td>
+                <td class="actions" width="15%">
+                    <a href="#" class="view-permissions mx-5"
+                       data-role="${role.role_name}"
+                       data-features='${JSON.stringify(featureDetails)}'
+                       title="View Permissions">
+                       <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
+                    </a>
+                    <a href="#"
+                       class="remove-row delete-role-btn"
+                       data-val="employee"
+                       data-id="${userId}"
+                       data-department-id="${role.department_id}"
+                       data-role="${role.role_name}"
+                       title="Delete Role">
+                       <i class="fa fa-trash-o"></i>
+                    </a>
+                </td>
+            </tr>`;
                                 tbody.append(row);
                             } else {
                                 const row = `
-                        <tr>
-                            <td>${index++}</td>
-                            <td>${role.department_name}</td>
-                            <td>${role.role_name}</td>
-                            <td><i class="bi bi-pencil-square text-muted" title="No features to update" style="cursor: not-allowed;">No feature to update</i></td>
-                              <td>
-                                    <a href="#" class="edit-row  edit_row_button  btn btn-default btn-sm rounded create_role_permssion mx-5" data-role-name ="${role.role_name}" data-role-id="${role.role_id}" data-placement="top" title="Assign permission to Role">
-                             <i class="fa fa-plus"></i> Assign</a>
-                            </td>
-                           <td class="actions" width="15%">
-                            <a href="#" class="view-permissions mx-5 text-muted" title="No Permissions">
-                                    <i class="bi bi-eye-slash" style="font-size: 1.5rem;"></i>
-                                </a>
-                                <a href="#" 
-                                    class="remove-row delete-role-btn" 
-                                    data-val="employee" 
-                                    data-id="${userId}" 
-                                    data-department-id="${role.department_id}" 
-                                    data-role="${role.role_name}" 
-                                    title="Delete Role">
-                                    <i class="fa fa-trash-o"></i>
-                                    </a>
-
-                            </td>
-                        </tr>`;
+            <tr>
+                <td>${index++}</td>
+                <td>${role.department_name}</td>
+                <td>${role.role_name}</td>
+                <td><i class="bi bi-pencil-square text-muted" title="No features to update"
+                       style="cursor: not-allowed;">No feature to update</i></td>
+                <td>
+                    <a href="#" class="edit-row edit_row_button btn btn-default btn-sm rounded create_role_permssion mx-5"
+                       data-role-name ="${role.role_name}"
+                       data-role-id   ="${role.role_id}"
+                       title="Assign permission to Role">
+                       <i class="fa fa-plus"></i> Assign
+                    </a>
+                </td>
+                <td class="actions" width="15%">
+                    <a href="#" class="view-permissions mx-5 text-muted" title="No Permissions">
+                        <i class="bi bi-eye-slash" style="font-size: 1.5rem;"></i>
+                    </a>
+                    <a href="#"
+                       class="remove-row delete-role-btn"
+                       data-val="employee"
+                       data-id="${userId}"
+                       data-department-id="${role.department_id}"
+                       data-role="${role.role_name}"
+                       title="Delete Role">
+                       <i class="fa fa-trash-o"></i>
+                    </a>
+                </td>
+            </tr>`;
                                 tbody.append(row);
                             }
                         });
+
 
                         // Add click event for view icons
                         $(document).off('click', '.view-permissions').on('click', '.view-permissions', function(e) {

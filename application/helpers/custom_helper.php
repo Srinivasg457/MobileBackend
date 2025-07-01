@@ -48,11 +48,11 @@ if (!function_exists('check_department')) {
 	}
 }
 if (!function_exists('is_CEO')) {
-	function is_CEO()
+	function is_CEO($role_id)
 	{
 		// Get a reference to the controller object
 		$ci = &get_instance();
-		return $ci->auth_model->is_CEO();
+		return $ci->auth_model->is_CEO($role_id);
 	}
 }
 

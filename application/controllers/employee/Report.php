@@ -15,6 +15,9 @@ class Report extends Home_Controller
         // if (!$this->session->userdata('employee_logged_in')) {
         //     redirect('login');
         // }
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
         $data = array();
         $data['page_title'] = 'Report';
         $data['main_content'] = $this->load->view('admin/employee/report', $data, TRUE);
