@@ -176,7 +176,7 @@ class Admin_model extends CI_Model {
             ->where('business_id', $business_uid)
             ->where('user_id',     $user_id)
             ->where('status',      1)
-            ->order_by('id', 'DESC')
+            ->order_by('id', 'ASC')
             ->get();
 
         return $query->result();

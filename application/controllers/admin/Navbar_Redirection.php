@@ -26,9 +26,6 @@ class Navbar_Redirection extends Home_Controller
     // }
     public function index()
     {
-        if(is_CEO("")){
-            redirect('admin/dashboard/business');  
-        }
         $allowed = get_allowed_feature_ids();
 
         // Check features in navbar order

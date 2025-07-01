@@ -112,167 +112,187 @@ class EmployeeRoles extends Home_Controller {
      *
      * @param int $user_id  The user we just assigned the role to
      */
+    /**
+     * Give every NEW “super” role (role_id 1‑5) its default permissions.
+     * A role is “new” if it has no rows yet in role_feature_access.
+     * Nothing is updated; existing roles are ignored.
+     */
     public function grant_super_role_access(int $user_id): void
     {
-        /* -----------------------------------------------------------------
-     * 1.  Find the latest employee_roles row with role_id ∈ {1‑5}
-     * ----------------------------------------------------------------- */
-        $empRole = $this->db->select('id, role_id')
-            ->from('employee_roles')
-            ->where('user_id', $user_id)
-            ->where_in('role_id', [1, 2, 3, 4, 5])
-            ->order_by('id', 'DESC')
-            ->limit(1)
-            ->get()
-            ->row();
+        /* ------------------------------------------------------------
+     * 1.  Find *new* employee_roles rows that need permissions
+     * ------------------------------------------------------------ */
+        $empRoles = $this->db->query(
+            "SELECT er.id, er.role_id
+           FROM employee_roles er
+          WHERE er.user_id = ?
+            AND er.role_id IN (1,2,3,4,5)
+            AND er.status  = 1
+            AND NOT EXISTS (
+                  SELECT 1
+                    FROM role_feature_access r
+                   WHERE r.role_id = er.id
+                     AND r.user_id = er.user_id
+                 )",
+            [$user_id]
+        )->result();
 
-        if (!$empRole) {                        // user hasn’t one of those roles yet
-            return;
+        if (empty($empRoles)) {
+            return;                                // nothing new to insert
         }
 
-        $employee_role_pk = (int) $empRole->id; // PK for role_feature_access.role_id
-        $role_def         = (int) $empRole->role_id;
-
-        /* -----------------------------------------------------------------
-     * 2.  Work out which feature IDs to grant
-     * ----------------------------------------------------------------- */
-        switch ($role_def) {
-            case 1:        // fall‑through
-            case 2:
-                // Full access
-                $rows = $this->db->select('id')->from('app_features')->get()->result_array();
-                if (!$rows) {
-                    log_message('warning', 'grant_super_role_access(): app_features empty');
-                    return;
-                }
-                $featureIds = array_column($rows, 'id');
-                break;
-
-            case 3:
-                $featureIds = [6, 3, 9, 8, 1];
-                break;
-
-            case 4:        // fall‑through
-            case 5:
-                $featureIds = [3, 5, 10, 11, 12];
-                break;
-
-            default:       // should not hit because of where_in() above
-                return;
-        }
-
-        /* -----------------------------------------------------------------
-     * 3.  Build the insert batch
-     * ----------------------------------------------------------------- */
+        /* ------------------------------------------------------------
+     * 2.  Prepare one big insert batch
+     * ------------------------------------------------------------ */
         $now   = get_user_datetime_only($user_id);
         $batch = [];
 
-        foreach ($featureIds as $fid) {
-            $batch[] = [
-                'role_id'    => $employee_role_pk,
-                'user_id'    => $user_id,
-                'feature_id' => $fid,
-                'is_read'    => 1,
-                'is_write'   => 1,
-                'is_action'  => 1,
-                'is_delete'  => 1,
-                'status'     => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+        foreach ($empRoles as $er) {
+            switch ((int) $er->role_id) {
+                case 1:  // fall‑through
+                case 2:  // full access
+                    $ids = $this->db->select('id')->from('app_features')
+                        ->get()->result_array();
+                    $featureIds = array_column($ids, 'id');
+                    break;
+
+                case 3:
+                    $featureIds = [6, 3, 9, 8, 1];
+                    break;
+
+                case 4:  // fall‑through
+                case 5:
+                    $featureIds = [3, 5, 10, 11, 12];
+                    break;
+
+                default:
+                    continue 2;                    // skip unknown role
+            }
+
+            foreach ($featureIds as $fid) {
+                $batch[] = [
+                    'role_id'    => $er->id,       // PK in employee_roles
+                    'user_id'    => $user_id,
+                    'feature_id' => $fid,
+                    'is_read'    => 1,
+                    'is_write'   => 1,
+                    'is_action'  => 1,
+                    'is_delete'  => 1,
+                    'status'     => 1,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
         }
 
-        /* -----------------------------------------------------------------
-     * 4.  Insert them in one query
-     * ----------------------------------------------------------------- */
-        $this->db->insert_batch('role_feature_access', $batch);
+        /* ------------------------------------------------------------
+     * 3.  Insert (duplicates impossible by design)
+     * ------------------------------------------------------------ */
+        if (!empty($batch)) {
+            $this->db->insert_batch('role_feature_access', $batch);
 
-        /* Optional logging */
-        if ($this->db->error()['code']) {
-            log_message('error', 'grant_super_role_access(): ' . json_encode($this->db->error()));
+            if ($this->db->error()['code']) {
+                log_message(
+                    'error',
+                    'grant_super_role_access(): ' . json_encode($this->db->error())
+                );
+            }
         }
     }
-
-
 
     public function create_role()
     {
-        if ($_POST) {
-            $role_names       = $this->input->post('role_name', true);
-            $department_ids   = $this->input->post('department_id', true);
-            $default_role_ids = $this->input->post('default_role_id', true);
-            $statuses         = $this->input->post('status', true);
-
-            $user_id = user()->id;
-            $errors = [];
-
-            if (is_array($role_names) && count($role_names) > 0) {
-                foreach ($role_names as $index => $role_name) {
-                    $department_id    = $department_ids[$index] ?? null;
-                    $default_role_id  = $default_role_ids[$index] ?? null;
-                    $status           = isset($statuses[$index]) ? $statuses[$index] : 0;
-
-                    if (empty($role_name) || empty($department_id)) {
-                        continue;
-                    }
-
-                    // Check if the role already exists
-                    $this->db->where([
-                        'user_id'       => $user_id,
-                        'department_id' => $department_id,
-                        'role_id'       => $default_role_id,
-                    ]);
-                    $exists = $this->db->get('employee_roles')->row();
-
-                    if ($exists) {
-                        if ($status == 0) {
-                            // 🔍 Check if role is assigned to any employees
-                            $assigned = $this->db
-                                ->where('role_id', $exists->id)
-                                ->get('employees')  // <-- Replace with your actual assignment table
-                                ->num_rows();
-
-                            if ($assigned > 0) {
-                                $errors[] = "Cannot deactivate role: <strong>{$role_name}</strong> is assigned to one or more employees.";
-                                continue;
-                            }
-
-                            // ✅ Safe to delete
-                            $this->db->where('id', $exists->id)->delete('employee_roles');
-                        } else {
-                            // ✅ Update status if active
-                            $this->db->where('id', $exists->id)->update('employee_roles', [
-                                'status'     => $status,
-                                'updated_at' => get_user_datetime_only($user_id),
-                            ]);
-                        }
-                    } else {
-                        // ✅ Only insert if status is active
-                        if ($status == 1) {
-                            $this->db->insert('employee_roles', [
-                                'user_id'       => $user_id,
-                                'department_id' => $department_id,
-                                'role_id'       => $default_role_id,
-                                'role_name'     => $role_name,
-                                'status'        => $status,
-                                'created_at'    => get_user_datetime_only($user_id),
-                                'updated_at'    => get_user_datetime_only($user_id),
-                            ]);
-                            $this->grant_super_role_access($user_id, $default_role_id);
-                        }
-                    }
-                }
-
-                if (!empty($errors)) {
-                    $this->session->set_flashdata('error', implode('<br><br>', $errors));
-                } else {
-                    $this->session->set_flashdata('msg', 'Roles updated successfully.');
-                }
-            }
-
+        if (!$this->input->post()) {
             redirect(base_url('employee/EmployeeRoles'));
         }
+
+        $role_names       = $this->input->post('role_name', true);
+        $department_ids   = $this->input->post('department_id', true);
+        $default_role_ids = $this->input->post('default_role_id', true);
+        $statuses         = $this->input->post('status', true);
+
+        $user_id = user()->id;
+        $errors  = [];
+
+        /* ------------------------------------------------------------
+     * Start one DB transaction for the whole operation
+     * ------------------------------------------------------------ */
+        $this->db->trans_start();
+
+        if (is_array($role_names) && count($role_names) > 0) {
+            foreach ($role_names as $index => $role_name) {
+
+                $department_id   = $department_ids[$index]   ?? null;
+                $default_role_id = $default_role_ids[$index] ?? null;
+                $status          = $statuses[$index]         ?? 0;
+
+                if (!$role_name || !$department_id) {
+                    continue;
+                }
+
+                /* -------- Check if the role already exists -------- */
+                $exists = $this->db->get_where('employee_roles', [
+                    'user_id'       => $user_id,
+                    'department_id' => $department_id,
+                    'role_id'       => $default_role_id,
+                ])->row();
+
+                if ($exists) {
+                    if ($status == 0) {
+                        // ensure role not assigned before delete
+                        $assigned = $this->db->where('role_id', $exists->id)
+                            ->count_all_results('employees');
+                        if ($assigned > 0) {
+                            $errors[] = "Cannot deactivate role: <strong>{$role_name}</strong> is assigned.";
+                            continue;
+                        }
+                        $this->db->delete('employee_roles', ['id' => $exists->id]);
+                    } else {
+                        $this->db->update(
+                            'employee_roles',
+                            ['status' => 1, 'updated_at' => get_user_datetime_only($user_id)],
+                            ['id' => $exists->id]
+                        );
+                    }
+                } else {
+                    if ($status == 1) {   // insert only active roles
+                        $this->db->insert('employee_roles', [
+                            'user_id'       => $user_id,
+                            'department_id' => $department_id,
+                            'role_id'       => $default_role_id,
+                            'role_name'     => $role_name,
+                            'status'        => 1,
+                            'created_at'    => get_user_datetime_only($user_id),
+                            'updated_at'    => get_user_datetime_only($user_id),
+                        ]);
+                    }
+                }
+            }
+        }
+
+        $this->db->trans_complete();
+
+        /* ------------------------------------------------------------
+     * Give default permissions to any brand‑new super roles
+     * ------------------------------------------------------------ */
+        $this->grant_super_role_access($user_id);
+
+        /* ------------------------------------------------------------
+     * Flash messages & redirect
+     * ------------------------------------------------------------ */
+        if ($this->db->trans_status() === FALSE) {
+            $errors[] = 'Database error. Please try again.';
+        }
+
+        if (!empty($errors)) {
+            $this->session->set_flashdata('error', implode('<br><br>', $errors));
+        } else {
+            $this->session->set_flashdata('msg', 'Roles updated successfully.');
+        }
+
+        redirect(base_url('employee/EmployeeRoles'));
     }
+
 
 
 

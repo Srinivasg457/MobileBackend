@@ -41,6 +41,12 @@ class Auth_model extends CI_Model {
         $query = $this->db->get('users');
         return $query->row();
     }
+    public function get_user_by_id($id)
+    {
+        $this->db->where('id', $id);
+        $query = $this->db->get('employees');
+        return $query->row();
+    }
 
     //is admin
     public function is_admin()
