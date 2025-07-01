@@ -7,9 +7,9 @@ class Subscription extends Home_Controller
     {
         parent::__construct();
 
-        if (!is_user()) {
-            redirect(base_url());
-        }
+        // if (!is_user()) {
+        //     redirect(base_url());
+        // }
     }
 
     public function index()

@@ -91,6 +91,109 @@ class EmployeeRoles extends Home_Controller {
     //         'role_name' => $role_name
     //     ]);
     // }
+    /**
+     * Give freshly‑created roles their default permissions.
+     *
+     * • If the role definition is 1  → insert ALL features
+     * • If the role definition is 4 or 5 → insert features 3,5,10,11,12
+     *
+     * Call this immediately after inserting into employee_roles.
+     *
+     * @param int $user_id  The user we just assigned the role to
+     */
+    /**
+     * Give newly‑created roles their default permissions.
+     *
+     * • role_id 1 or 2 → all features
+     * • role_id 3      → features 6,3,9,8,1
+     * • role_id 4 or 5 → features 3,5,10,11,12
+     *
+     * Call right after inserting into employee_roles.
+     *
+     * @param int $user_id  The user we just assigned the role to
+     */
+    public function grant_super_role_access(int $user_id): void
+    {
+        /* -----------------------------------------------------------------
+     * 1.  Find the latest employee_roles row with role_id ∈ {1‑5}
+     * ----------------------------------------------------------------- */
+        $empRole = $this->db->select('id, role_id')
+            ->from('employee_roles')
+            ->where('user_id', $user_id)
+            ->where_in('role_id', [1, 2, 3, 4, 5])
+            ->order_by('id', 'DESC')
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if (!$empRole) {                        // user hasn’t one of those roles yet
+            return;
+        }
+
+        $employee_role_pk = (int) $empRole->id; // PK for role_feature_access.role_id
+        $role_def         = (int) $empRole->role_id;
+
+        /* -----------------------------------------------------------------
+     * 2.  Work out which feature IDs to grant
+     * ----------------------------------------------------------------- */
+        switch ($role_def) {
+            case 1:        // fall‑through
+            case 2:
+                // Full access
+                $rows = $this->db->select('id')->from('app_features')->get()->result_array();
+                if (!$rows) {
+                    log_message('warning', 'grant_super_role_access(): app_features empty');
+                    return;
+                }
+                $featureIds = array_column($rows, 'id');
+                break;
+
+            case 3:
+                $featureIds = [6, 3, 9, 8, 1];
+                break;
+
+            case 4:        // fall‑through
+            case 5:
+                $featureIds = [3, 5, 10, 11, 12];
+                break;
+
+            default:       // should not hit because of where_in() above
+                return;
+        }
+
+        /* -----------------------------------------------------------------
+     * 3.  Build the insert batch
+     * ----------------------------------------------------------------- */
+        $now   = get_user_datetime_only($user_id);
+        $batch = [];
+
+        foreach ($featureIds as $fid) {
+            $batch[] = [
+                'role_id'    => $employee_role_pk,
+                'user_id'    => $user_id,
+                'feature_id' => $fid,
+                'is_read'    => 1,
+                'is_write'   => 1,
+                'is_action'  => 1,
+                'is_delete'  => 1,
+                'status'     => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        /* -----------------------------------------------------------------
+     * 4.  Insert them in one query
+     * ----------------------------------------------------------------- */
+        $this->db->insert_batch('role_feature_access', $batch);
+
+        /* Optional logging */
+        if ($this->db->error()['code']) {
+            log_message('error', 'grant_super_role_access(): ' . json_encode($this->db->error()));
+        }
+    }
+
+
 
     public function create_role()
     {
@@ -155,6 +258,7 @@ class EmployeeRoles extends Home_Controller {
                                 'created_at'    => get_user_datetime_only($user_id),
                                 'updated_at'    => get_user_datetime_only($user_id),
                             ]);
+                            $this->grant_super_role_access($user_id, $default_role_id);
                         }
                     }
                 }

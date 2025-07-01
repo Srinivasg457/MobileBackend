@@ -254,34 +254,49 @@ class Auth extends Home_Controller
 
          
             // 2. If 'users' authentication fails, check 'employees' table
-            $employee = $this->auth_model->validate_employee(); // We need to create this model function
-            if (!$this->auth_model->is_organization_subscribed($employee->user_id)) { 
-                echo json_encode(array('st' => 5));
-                exit();
-            }
-            if (!empty($employee) && $employee->is_registered == 1 && password_verify($password, $employee->password)) {
-                $session_data_employee = array(
-                    'employee_id' => $employee->id,
-                    'user_type'=>'employee_user',
-                    'employee_name' => $employee->name,
-                    'employee_email' => $employee->email,
-                    'business_id' => $employee->business_id,
-                    'department_id' => $employee->department_id,
-                    'role_id' => $employee->role_id,
-                    'employee_org_id' => $employee->user_id,
+            $employee = $this->auth_model->validate_employee();   // returns row or null
+
+            /* ----------  Verify employee exists and password matches  ---------- */
+            if (
+                !empty($employee) &&
+                $employee->is_registered == 1 &&
+                password_verify($password, $employee->password)
+            ) {
+                /* ----------  CEO bypasses subscription check  ---------- */
+                $is_ceo = $this->auth_model->is_CEO($employee->role_id);   // true if role is CEO
+
+                /* ----------  Non‑CEO + unsubscribed org → upgrade message  ---------- */
+                if (! $is_ceo && ! $this->auth_model->is_organization_subscribed($employee->user_id)) {
+                    echo json_encode(['st' => 5]);     // “upgrade your plan”
+                    exit();
+                }
+
+                /* ----------  Successful login  ---------- */
+                $session_data_employee = [
+                    'employee_id'        => $employee->id,
+                    'user_type'          => 'employee_user',
+                    'employee_name'      => $employee->name,
+                    'employee_email'     => $employee->email,
+                    'business_id'        => $employee->business_id,
+                    'department_id'      => $employee->department_id,
+                    'role_id'            => $employee->role_id,
+                    'employee_org_id'    => $employee->user_id,
                     'employee_logged_in' => TRUE,
-                    'is_employee' => TRUE // Flag to identify as employee in session
-                );
-                $session_data_employee = $this->security->xss_clean($session_data_employee);
-                $this->session->set_userdata($session_data_employee);
+                    'is_employee'        => TRUE
+                ];
+                $this->session->set_userdata($this->security->xss_clean($session_data_employee));
 
-                $url_employee = base_url('employeedashboard');
-                echo json_encode(array('st'=>1,'url'=> $url_employee));
+                echo json_encode([
+                    'st'  => 1,
+                    'url' => base_url('employeedashboard')
+                ]);
                 exit();
             }
 
-            // 3. If both authentications fail
-            echo json_encode(array('st'=>0)); // Invalid credentials
+            /* ---------------------------------------------------------------
+ * 3.  Unknown user or bad password
+ * --------------------------------------------------------------- */
+            echo json_encode(['st' => 0]);    // Invalid credentials
             exit();
 
         } else {

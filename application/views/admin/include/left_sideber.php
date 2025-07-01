@@ -15,35 +15,35 @@
           <?php if (!$is_employee_admin): ?>
             <li class="<?php if (isset($page_title) && $page_title == "Employee Dashboard") {
                           echo "active";
-                        } ?>">
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('employeedashboard') ?>">
                 <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
               </a>
             </li>
             <li class="<?php if (isset($page_title) && $page_title == "Screenshots") {
                           echo "active";
-                        } ?>">
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('employeedashboard/screenshot') ?>">
                 <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
               </a>
             </li>
             <li class="<?php if (isset($page_title) && $page_title == "Employee Webcam screenshots") {
                           echo "active";
-                        } ?>">
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('admin/ScreenshotController/Employeewebcam') ?>">
                 <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
               </a>
             </li>
             <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
                           echo "active";
-                        } ?>">
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('employee/Timecards_manual') ?>">
                 <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Activity Log" ?></span>
               </a>
             </li>
             <li class="<?php if (isset($page_title) && $page_title == "Report") {
                           echo "active";
-                        } ?>">
+                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('employee/report') ?>">
                 <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Report" ?></span>
               </a>
@@ -57,7 +57,7 @@
               </a>
             </li>
           <?php else :  ?>
-            <?php if (is_CEO()): ?>
+            <?php if (is_CEO($role_id)): ?>
               <li class=" <?php if (isset($page_title) && $page_title == "User Dashboard") {
                             echo "active";
                           } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -190,13 +190,13 @@
                 </ul>
 
               </li>
-              <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
+              <!-- <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
                             echo "active";
                           } ?>">
                 <a href="<?php echo base_url('change_password') ?>">
                   <i class="bi bi-lock mr-5"></i> <span><?php echo trans('change-password') ?></span>
                 </a>
-              </li>
+              </li> -->
             <?php else :  ?>
               <!-- // rest of the employess -->
               <?php $allowed = get_allowed_feature_ids();

@@ -18,8 +18,9 @@ class Timecards_manual extends Home_Controller {
         $data['page_title'] = 'Activity Log';
         $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
         $this->load->view('admin/index', $data);
-     
-        
+        if (!is_subscribed()) {
+            redirect('/admin/subscription');
+        }
     }
 
     /*
