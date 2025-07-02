@@ -12,14 +12,12 @@ class Organization_settings extends Home_Controller {
 
     public function index(): void
     {
-        if (!$this->session->userdata('logged_in')) {
-            redirect('login');
-        }
         if (!is_subscribed()) {
             redirect('/admin/subscription');
         }
         
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Organization settings';
         $data["settings"] = $this->PreLoading_get_org_settings();
         $data['main_content'] = $this->load->view('admin/organization_settings', $data, TRUE);
@@ -31,6 +29,7 @@ class Organization_settings extends Home_Controller {
             redirect('/admin/subscription');
         }
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Edit';
         $data["settings"] = $this->PreLoading_get_org_settings();
         $data['countries'] = $this->admin_model->select('country');
@@ -41,13 +40,11 @@ class Organization_settings extends Home_Controller {
 
     public function org_exception_settings(): void
     {
-        if (!$this->session->userdata('logged_in')) {
-            redirect('login');
-        }
         if (!is_subscribed()) {
             redirect('/admin/subscription');
         }
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'Ex Organization settings';
         $data['countries'] = $this->admin_model->select('country');
         // $data["timezone"] = $this->admin_model->get_timezone_list();
@@ -245,7 +242,6 @@ class Organization_settings extends Home_Controller {
             'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
-            'self_login'           =>$self_login ,
             'timecards_time_interval'  => 5,
             'time_zone'                => $this->input->post('time_zone', TRUE), // <-- Added this line for timezone
             'created_at'               => get_user_datetime_only($user_id),
