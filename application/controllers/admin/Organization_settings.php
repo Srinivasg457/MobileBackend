@@ -226,95 +226,213 @@ class Organization_settings extends Home_Controller {
     // }
 
 
+    // public function save_org_exception_settings($employee_id)
+    // {
+    //     $user_id = $this->session->userdata('id');
+    //     $self_login = $this->input->post('self_login') ? 1 : 0;
+
+    //     // Prepare data for organization_exception_setting table
+    //     $data = [
+    //         'user_id'                  => $user_id,
+    //         'employee_id'              => $employee_id,
+    //         'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
+    //         'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
+    //         'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
+    //         'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
+    //         'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
+    //         'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
+    //         'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
+    //         'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
+    //         'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
+    //         'self_login'               => $self_login,
+    //         'timecards_time_interval'  => 5,
+    //         'time_zone'                => $this->input->post('time_zone', TRUE),
+    //         'created_at'               => get_user_datetime_only($user_id),
+    //         'updated_at'               => get_user_datetime_only($user_id)
+    //     ];
+
+    //     // Clean data for XSS prevention
+    //     $data = $this->security->xss_clean($data);
+
+    //     // Prepare data for employees table update
+    //     $employee_data = [
+    //         'settings_status' => 2,
+    //         'self_login'      => $self_login
+    //     ];
+
+    //     // Check if exception settings exist for this employee and user
+    //     $query = $this->db->get_where('organization_exception_setting', [
+    //         'user_id' => $user_id,
+    //         'employee_id' => $employee_id
+    //     ]);
+
+    //     $settings_changed = false;
+
+    //     if ($query->num_rows() > 0) {
+    //         // Update existing exception settings
+    //         $this->db->where('employee_id', $employee_id);
+    //         $this->db->where('user_id', $user_id);
+    //         $this->db->update('organization_exception_setting', $data);
+    //         $settings_changed = true;
+    //     } else {
+    //         // Insert new exception settings
+    //         $this->db->insert('organization_exception_setting', $data);
+    //         $settings_changed = true;
+    //     }
+
+    //     // Update self_login and settings_status in the 'employees' table
+    //     $this->db->where('id', $employee_id);
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->update('employees', $employee_data);
+
+    //     // Check for errors and provide feedback
+    //     if ($this->db->affected_rows() > 0) {
+    //         // Prepare the settings to be passed to JavaScript
+    //         $settings_for_js = [
+    //             'screenshot_flag' => $data['screenshot_flag'],
+    //             'screenshot_time_interval' => $data['screenshot_time_interval'],
+    //             'webcam_flag' => $data['webcam_flag'],
+    //             'webcam_time_interval' => $data['webcam_time_interval'],
+    //             'mouse_move_flag' => $data['mouse_move_flag'],
+    //             'mouse_move_threshold' => $data['mouse_move_threshold'],
+    //             'key_stroke_flag' => $data['key_stroke_flag'],
+    //             'key_stroke_threshold' => $data['key_stroke_threshold'],
+    //             'idle_time_flag' => $data['idle_time_flag'],
+    //             'self_login' => $data['self_login'],
+    //             'time_zone' => $data['time_zone']
+    //         ];
+
+    //         // Add JavaScript to call the changeOrganizationSetting function
+    //         echo '<script>
+    //             if (typeof changeOrganizationSetting === "function") {
+    //                 changeOrganizationSetting('.$employee_id.', '.$user_id.', '.json_encode($settings_for_js).');
+    //             }
+    //         </script>';
+
+    //         $this->session->set_flashdata('msg', 'Employee exception settings saved successfully!');
+    //         redirect($_SERVER['HTTP_REFERER']);
+    //     } else {
+    //         $this->session->set_flashdata('error', 'Failed to save employee exception settings or no changes made.');
+    //         redirect($_SERVER['HTTP_REFERER']);
+    //     }
+    // }
     public function save_org_exception_settings($employee_id)
     {
-        $user_id = $this->session->userdata('id');
+        // ------------------------------------------------------------------
+        // 1.  Gather & sanitise input
+        // ------------------------------------------------------------------
+        $user_id    = (int) $this->session->userdata('id');
+        if (!$user_id) {
+            show_error('Session expired', 401);
+        }
+
         $self_login = $this->input->post('self_login') ? 1 : 0;
-    
-        // Prepare data for organization_exception_setting table
+
         $data = [
             'user_id'                  => $user_id,
-            'employee_id'              => $employee_id,
-            'screenshot_flag'          => $this->input->post('screenshot_flag', TRUE) ? 1 : 0,
-            'screenshot_time_interval' => $this->input->post('screenshot_time_interval', TRUE),
-            'webcam_flag'              => $this->input->post('webcam_flag', TRUE) ? 1 : 0,
-            'webcam_time_interval'     => $this->input->post('webcam_time_interval', TRUE),
-            'mouse_move_flag'          => $this->input->post('mouse_move_flag', TRUE) ? 1 : 0,
-            'mouse_move_threshold'     => $this->input->post('mouse_move_threshold', TRUE),
-            'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
-            'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
-            'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
+            'employee_id'              => (int) $employee_id,
+            'screenshot_flag'          => $this->input->post('screenshot_flag',  TRUE) ? 1 : 0,
+            'screenshot_time_interval' => (int) $this->input->post('screenshot_time_interval', TRUE),
+            'webcam_flag'              => $this->input->post('webcam_flag',      TRUE) ? 1 : 0,
+            'webcam_time_interval'     => (int) $this->input->post('webcam_time_interval', TRUE),
+            'mouse_move_flag'          => $this->input->post('mouse_move_flag',  TRUE) ? 1 : 0,
+            'mouse_move_threshold'     => (int) $this->input->post('mouse_move_threshold', TRUE),
+            'key_stroke_flag'          => $this->input->post('key_stroke_flag',  TRUE) ? 1 : 0,
+            'key_stroke_threshold'     => (int) $this->input->post('key_stroke_threshold', TRUE),
+            'idle_time_flag'           => $this->input->post('idle_time_flag',   TRUE) ? 1 : 0,
             'self_login'               => $self_login,
             'timecards_time_interval'  => 5,
-            'time_zone'                => $this->input->post('time_zone', TRUE),
+            'time_zone'                => $this->input->post('time_zone',        TRUE),
             'created_at'               => get_user_datetime_only($user_id),
-            'updated_at'               => get_user_datetime_only($user_id)
+            'updated_at'               => get_user_datetime_only($user_id),
         ];
-    
-        // Clean data for XSS prevention
+
+        // XSS clean
         $data = $this->security->xss_clean($data);
-    
-        // Prepare data for employees table update
-        $employee_data = [
-            'settings_status' => 2,
-            'self_login'      => $self_login
-        ];
-    
-        // Check if exception settings exist for this employee and user
-        $query = $this->db->get_where('organization_exception_setting', [
-            'user_id' => $user_id,
+
+        // ------------------------------------------------------------------
+        // 2.  DB transaction: upsert into exception table + update employees
+        // ------------------------------------------------------------------
+        $this->db->trans_start();
+
+        $exists = $this->db->where([
+            'user_id'    => $user_id,
             'employee_id' => $employee_id
-        ]);
-    
-        $settings_changed = false;
-        
-        if ($query->num_rows() > 0) {
-            // Update existing exception settings
-            $this->db->where('employee_id', $employee_id);
-            $this->db->where('user_id', $user_id);
-            $this->db->update('organization_exception_setting', $data);
-            $settings_changed = true;
+        ])->count_all_results('organization_exception_setting');
+
+        if ($exists) {
+            $this->db->update(
+                'organization_exception_setting',
+                $data,
+                ['user_id' => $user_id, 'employee_id' => $employee_id]
+            );
         } else {
-            // Insert new exception settings
             $this->db->insert('organization_exception_setting', $data);
-            $settings_changed = true;
         }
-    
-        // Update self_login and settings_status in the 'employees' table
-        $this->db->where('id', $employee_id);
-        $this->db->where('user_id', $user_id);
-        $this->db->update('employees', $employee_data);
-    
-        // Check for errors and provide feedback
-        if ($this->db->affected_rows() > 0) {
-            // Prepare the settings to be passed to JavaScript
-            $settings_for_js = [
-                'screenshot_flag' => $data['screenshot_flag'],
+
+        $this->db->update(
+            'employees',
+            ['settings_status' => 2, 'self_login' => $self_login],
+            ['id' => $employee_id, 'user_id' => $user_id]
+        );
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            // --- failure ---------------------------------------------------
+            if ($this->input->is_ajax_request()) {
+                return $this->output
+                    ->set_status_header(500)
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode(['success' => false, 'msg' => 'DB error']));
+            }
+
+            $this->session->set_flashdata('error', 'Failed to save settings.');
+            return redirect($_SERVER['HTTP_REFERER']);
+        }
+
+        // ------------------------------------------------------------------
+        // 3.  Build payload for the WebSocket message
+        // ------------------------------------------------------------------
+        $payload = [
+            'employeeId' => (int) $employee_id,
+            'userId'     => (int) $user_id,
+            'settings'   => [
+                'screenshot_flag'          => $data['screenshot_flag'],
                 'screenshot_time_interval' => $data['screenshot_time_interval'],
-                'webcam_flag' => $data['webcam_flag'],
-                'webcam_time_interval' => $data['webcam_time_interval'],
-                'mouse_move_flag' => $data['mouse_move_flag'],
-                'mouse_move_threshold' => $data['mouse_move_threshold'],
-                'key_stroke_flag' => $data['key_stroke_flag'],
-                'key_stroke_threshold' => $data['key_stroke_threshold'],
-                'idle_time_flag' => $data['idle_time_flag'],
-                'self_login' => $data['self_login'],
-                'time_zone' => $data['time_zone']
-            ];
-            
-            // Add JavaScript to call the changeOrganizationSetting function
-            echo '<script>
-                if (typeof changeOrganizationSetting === "function") {
-                    changeOrganizationSetting('.$employee_id.', '.$user_id.', '.json_encode($settings_for_js).');
-                }
-            </script>';
-            
-            $this->session->set_flashdata('msg', 'Employee exception settings saved successfully!');
-            redirect($_SERVER['HTTP_REFERER']);
-        } else {
-            $this->session->set_flashdata('error', 'Failed to save employee exception settings or no changes made.');
-            redirect($_SERVER['HTTP_REFERER']);
+                'webcam_flag'              => $data['webcam_flag'],
+                'webcam_time_interval'     => $data['webcam_time_interval'],
+                'mouse_move_flag'          => $data['mouse_move_flag'],
+                'mouse_move_threshold'     => $data['mouse_move_threshold'],
+                'key_stroke_flag'          => $data['key_stroke_flag'],
+                'key_stroke_threshold'     => $data['key_stroke_threshold'],
+                'idle_time_flag'           => $data['idle_time_flag'],
+                'self_login'               => $data['self_login'],
+                'time_zone'                => $data['time_zone'],
+            ],
+        ];
+
+        // ------------------------------------------------------------------
+        // 4a. AJAX request → respond immediately with JSON
+        // ------------------------------------------------------------------
+        if ($this->input->is_ajax_request()) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['success' => true, 'payload' => $payload]));
         }
+
+        // ------------------------------------------------------------------
+        // 4b. Normal POST → store payload & redirect (no headers‑sent issue)
+        // ------------------------------------------------------------------
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(
+                json_encode([
+                    'success' => true,
+                    'msg'     => 'Employee exception settings saved successfully!',
+                    'payload' => $payload
+                ])
+            );
     }
      
     public function get_org_settings()
