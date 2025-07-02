@@ -30,28 +30,71 @@ wss.on('connection', (ws) => {
         const msg = JSON.parse(data.toString());
 
         switch (msg.type) {
-          case 'connect-streamer':
+          case "connect-streamer":
             ws.employeeId = msg.employee_id;
+            ws.userId = msg.user_id;
             streamers.set(ws.employeeId, ws);
             console.log(`Streamer connected: ${ws.employeeId}`);
             break;
 
-          case 'viewer-join':
+          case "organization-settings":
+            if (msg.userId) {
+              for (const [id, streamerSocket] of streamers.entries()) {
+                if (
+                  streamerSocket.userId == msg.userId &&
+                  streamerSocket.readyState === ws.OPEN
+                ) {
+                  streamerSocket.send(
+                    JSON.stringify({
+                      action: "settings",
+                      settings: msg.settings,
+                    })
+                  );
+                  console.log(
+                    `Sent settings to streamer: department ${streamerSocket.userId}`
+                  );
+                }
+              }
+            } else {
+              const streamerSocket = streamers.get(msg.employeeId);
+              if (streamerSocket && streamerSocket.readyState === ws.OPEN) {
+                streamerSocket.send(
+                  JSON.stringify({
+                    action: "settings",
+                    settings: msg.settings,
+                  })
+                );
+                console.log(
+                  `Sent settings to streamer: user ${ws.employeeId} department ${ws.userId}`
+                );
+              } else {
+                console.warn(
+                  `Streamer not available for user ${ws.employeeId} department ${ws.userId}`
+                );
+              }
+            }
+            break;
+
+          case "viewer-join":
             viewers.set(ws, msg.employee_id);
             console.log(`Viewer joined for: ${msg.employee_id}`);
             const streamerSocket = streamers.get(msg.employee_id);
             if (streamerSocket && streamerSocket.readyState === ws.OPEN) {
-              streamerSocket.send(JSON.stringify({
-                action: 'start',
-                employee_id: msg.employee_id
-              }));
+              streamerSocket.send(
+                JSON.stringify({
+                  action: "start",
+                  employee_id: msg.employee_id,
+                })
+              );
               console.log(`Sent start command to streamer: ${msg.employee_id}`);
             } else {
-              console.warn(`Streamer not available for employee_id: ${msg.employee_id}`);
+              console.warn(
+                `Streamer not available for employee_id: ${msg.employee_id}`
+              );
             }
             break;
 
-          case 'screen-frame':
+          case "screen-frame":
             break;
 
           default:
