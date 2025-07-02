@@ -596,20 +596,29 @@
 
             console.log(currentEmployeeId);
             console.log(dataObj);
+            src = "<?= base_url('ws-client.js'); ?>" >
+                $.ajax({
+                    url: '<?= base_url('admin/Organization_settings/save_org_exception_settings/') ?>' + currentEmployeeId,
+                    type: 'POST',
+                    data: dataObj,
+                    dataType: 'json', // ← tell jQuery to parse JSON
+                    success: function(res) {
+                        if (res.success) {
+                            /* fire the WebSocket */
+                            const p = res.payload;
+                            changeOrganizationSetting(p.employeeId, p.userId, p.settings);
 
-            $.ajax({
-                url: `<?= base_url('admin/Organization_settings/save_org_exception_settings/') ?>${currentEmployeeId}`,
-                method: 'POST',
-                data: dataObj,
-                success: function(res) {
-                    swal("Success!", "Employee Settings saved successfully.", "success");
-                },
-                error: function(res) {
-                    console.log(res);
-                    const errorMsg = res.responseJSON?.message || "Something went wrong.";
-                    swal("Error!", errorMsg, "error");
-                }
-            });
+                            /* UI feedback */
+                            swal('Success!', res.msg, 'success');
+                        } else {
+                            swal('Error!', 'Save failed.', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        const msg = xhr.responseJSON?.msg || 'Something went wrong.';
+                        swal('Error!', msg, 'error');
+                    }
+                });
         });
 
 

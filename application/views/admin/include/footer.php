@@ -691,7 +691,21 @@ endforeach ?>
     });
   });
 </script>
+<!-- 1.  include the shared WS client (root‑relative path) -->
+<script src="<?= base_url('ws-client.js'); ?>"></script>
 
+<?php if ($payload = $this->session->flashdata('org_settings_payload')): ?>
+  <!-- 2.  trigger the WebSocket packet exactly once after redirect -->
+  <script>
+    (function() {
+      const data = <?= json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP); ?>;
+      if (typeof changeOrganizationSetting === 'function') {
+        changeOrganizationSetting(data.employeeId, data.userId, data.settings);
+        console.log('[WS] org settings sent');
+      }
+    })();
+  </script>
+<?php endif; ?>
 
 </body>
 
