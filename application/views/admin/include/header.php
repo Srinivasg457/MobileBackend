@@ -198,12 +198,29 @@
         <?php else: ?>
 
           <a href="#" class="switch_business logo text-centers">
-            <span class="logo-lg">
-              <img width="40px" src="<?php echo base_url($settings->favicon) ?>" alt="<?php echo html_escape($settings->site_name); ?>">
-              <span><?php echo html_escape($this->business->name); ?> </span>
-            </span>
-            <span class="buss-arrow pull-right"><i class="icon-arrow-right"></i></span>
-          </a>
+    <span class="logo-lg">
+        <img width="40px" src="<?php echo base_url($settings->favicon) ?>" alt="<?php echo html_escape($settings->site_name); ?>">
+        <span>
+            <?php 
+            // Load the admin model if not already loaded
+            $this->load->model('Admin_Model');
+            // Get current user ID - you might need to adjust this based on your auth system
+            $current_user_id = $this->session->userdata('user_id')??$this->session->userdata('id');
+            // Get all users
+            $users = $this->admin_model->get_users();
+            // Find current user
+            $current_user = array_filter($users, function($user) use ($current_user_id) {
+                return $user->id == $current_user_id;
+            });
+            // Get the first match (if any)
+            $current_user = reset($current_user);
+            // Display the name if found, otherwise fall back to business name
+            echo html_escape($current_user ? $current_user->name : $this->business->name); 
+            ?>
+        </span>
+    </span>
+    <span class="buss-arrow pull-right"><i class="icon-arrow-right"></i></span>
+</a>
 
           <div class="business_switch_panel animate-ltr" style="display: none;">
             <div class="buss_switch_panel_header">
