@@ -13,6 +13,7 @@ class Notification extends Home_Controller {
 
     public function index()
     {
+        require_feature(3);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Notification';

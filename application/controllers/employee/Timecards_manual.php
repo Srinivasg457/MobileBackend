@@ -134,6 +134,7 @@ class Timecards_manual extends Home_Controller {
     }
 
      public function approve(){
+        require_feature(9);
         $data['page_title'] = 'Time_Approval';
         $data['is_employee_admin'] = true;
         $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);

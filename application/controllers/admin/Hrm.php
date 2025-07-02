@@ -16,6 +16,7 @@ class Hrm extends Home_Controller {
     }
 
     public function department(){
+        require_feature(12);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Department';      
@@ -229,6 +230,7 @@ class Hrm extends Home_Controller {
 
 
     public function employee(){
+        require_feature(10);
         if (!is_subscribed()) {
             redirect('/admin/subscription');
         }

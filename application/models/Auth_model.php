@@ -44,10 +44,32 @@ class Auth_model extends CI_Model {
     public function get_user_by_id($id)
     {
         $this->db->where('id', $id);
-        $query = $this->db->get('employees');
+        $query = $this->db->get('users');
         return $query->row();
     }
 
+   public function require_feature(int $featureId): void
+    {
+        // for security purpose
+        if (!$this->session->userdata('logged_in') && !$this->session->userdata('employee_logged_in')) {
+            redirect('login');
+        }
+        
+        if (!$this->session->userdata('is_org_admin') && !$this->session->userdata('is_org_ceo')) {
+ 
+        $CI = &get_instance();
+        $allowed = get_allowed_feature_ids();   // <- your existing helper
+
+        if (!in_array($featureId, $allowed, true)) {
+            // Either redirect...
+            redirect('error-404');
+
+            // ...or show a 403:
+            // show_error('Forbidden', 403, 'Access denied');
+            exit;
+        }
+    }
+    }
     //is admin
     public function is_admin()
     {
@@ -711,6 +733,32 @@ public function is_plan_standard()
 
         // 3️⃣  Compare name to “CEO” (case‑insensitive)
         return $role->role_id == 1;
+    }
+    public function is_super_employee($role_id)
+    {
+        if (!$role_id) {
+            // 1️⃣  Get role_id from session
+            $role_id = (int) $this->session->userdata('role_id');
+        }
+
+        if (!$role_id) {
+            return false;                       // no role in session
+        }
+
+        // 2️⃣  Fetch that role from employee_roles
+        $role = $this->db->select('role_id')       // or 'slug' if that’s your column
+            ->from('employee_roles')
+            ->where('id', $role_id)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if (!$role) {
+            return false;                       // role not found
+        }
+
+        // 3️⃣  Compare name to “CEO” (case‑insensitive)
+        return $role->role_id >= 2 && $role->role_id <= 5;
     }
 
     public function get_allowed_feature_ids()

@@ -241,8 +241,9 @@ class Auth extends Home_Controller
                         'email' => $user->email,
                         'role' => $user->role,
                         'parent' => $user->id,
-                        'logged_in' => TRUE
-                    );
+                        'logged_in' => TRUE,
+                        'is_org_admin'  => True
+                     );
                     $session_data = $this->security->xss_clean($session_data);
                     $this->session->set_userdata($session_data);
 
@@ -282,7 +283,9 @@ class Auth extends Home_Controller
                         'email'     => $email,
                         'role'      => 'user',        // 👈 treat CEO as regular org user
                         'parent'    => $orgUser ? $orgUser->id : $employee->user_id,
-                        'logged_in' => TRUE
+                        'logged_in' => TRUE,
+                        'is_org_ceo' => TRUE,
+                        'ceo_id'     => $employee->id
                     ];
 
                     $this->session->set_userdata($this->security->xss_clean($org_session));
