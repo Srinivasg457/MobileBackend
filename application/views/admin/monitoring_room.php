@@ -653,7 +653,7 @@
 
   function getLatestScreenshot(currentEmployeeId) {
     $.ajax({
-      url: "<?= base_url('/admin/ScreenshotController/get_last_screenshot') ?>",
+      url: "<?= base_url('/admin/ScreenshotController/get_last_monitoring_screenshot') ?>",
       method: "GET",
       dataType: "json",
       data: {
@@ -698,6 +698,14 @@
       console.error("WebSocket Error:", error);
     }
   }
+  function changeOrganizationSetting(employeeId,userId,setting) {
+  ws.send(JSON.stringify({
+    type: 'organization-settings',
+    employeeId: parseInt(employeeId),
+    userId: parseInt(userId),
+    settings: setting
+  }));
+}
 
   ws.addEventListener('message', (event) => {
     if (typeof event.data !== 'string') {
