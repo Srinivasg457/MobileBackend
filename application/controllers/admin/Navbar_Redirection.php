@@ -24,8 +24,71 @@ class Navbar_Redirection extends Home_Controller
     //         redirect('/admin/subscription');
     //     }
     // }
+    /**
+     * Attach organisation‑owner block to an employee session
+     * using the *same* key names & values that CEOs receive.
+     *
+     * Runs once per session.  Safe to call at the top of index().
+     */
+    private function _attach_org_block_to_employee_session(): void
+    {
+        // 1. Skip non‑employees and people already switched to org_user
+        if (
+            !$this->session->userdata('is_employee') ||
+            $this->session->userdata('user_type') === 'org_user'
+        ) {
+            return;
+        }
+
+        // 2. Look up the owner row (“parent” user in the users table)
+        $ownerId    = (int) $this->session->userdata('employee_org_id');
+        if (!$ownerId) {
+            return;                                   // should never happen
+        }
+
+        $orgUser = $this->auth_model->get_user_by_id($ownerId);
+        if (!$orgUser) {
+            return;                                   // defensive guard
+        }
+
+        // 3. Build the org‑user block (same fields CEO gets)
+        $orgBlock = [
+            'id'        => $orgUser->id,
+            'user_type' => 'org_user',
+            'name'      => $this->session->userdata('employee_name'),
+            'slug'      => $orgUser->slug  ?? '',
+            'thumb'     => $orgUser->thumb ?? '',
+            'email'     => $orgUser->email ?? $this->session->userdata('employee_email'),
+            'role'      => 'user',          // treat as regular org user
+            'parent'    => $orgUser->id,
+            'logged_in' => true
+        ];
+
+        // 4. Merge into the session (keeps employee_* keys)
+        $this->session->set_userdata($this->security->xss_clean($orgBlock));
+    }
+    private function _detach_org_block_from_employee_session(): void
+    {
+        if ($this->session->userdata('user_type') !== 'org_user') {
+            return;                    // nothing to clean up
+        }
+
+        $this->session->unset_userdata([
+            'id',
+            'user_type',
+            'name',
+            'slug',
+            'thumb',
+            'email',
+            'role',
+            'parent',
+            'logged_in'
+        ]);
+    }
     public function index()
     {
+        $this->_attach_org_block_to_employee_session();
+
         $allowed = get_allowed_feature_ids();
 
         // Check features in navbar order
@@ -60,7 +123,9 @@ class Navbar_Redirection extends Home_Controller
     }
 
 
-   public function  employee_nav(){
+   public function  employee_nav()
+   {
+        $this->_detach_org_block_from_employee_session();
         $data = array();
         $data['is_employee_admin'] = false;
         $data['page_title'] = 'Employee Dashboard';

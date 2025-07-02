@@ -25,6 +25,7 @@ class Organization_settings extends Home_Controller {
     }
     public function Organization_settings_edit()
     {
+        require_feature(4);
         if (!is_subscribed()) {
             redirect('/admin/subscription');
         }
@@ -40,6 +41,7 @@ class Organization_settings extends Home_Controller {
 
     public function org_exception_settings(): void
     {
+        require_feature(5);
         if (!is_subscribed()) {
             redirect('/admin/subscription');
         }
