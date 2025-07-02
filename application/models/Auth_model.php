@@ -734,33 +734,17 @@ public function is_plan_standard()
         // 3️⃣  Compare name to “CEO” (case‑insensitive)
         return $role->role_id == 1;
     }
-    public function is_super_employee($role_id)
+    public function is_user_ceo()
     {
-        if (!$role_id) {
-            // 1️⃣  Get role_id from session
-            $role_id = (int) $this->session->userdata('role_id');
-        }
+            // 1️⃣  Get from session
+            $is_ceo = (int) $this->session->userdata('is_org_ceo');
+        
 
-        if (!$role_id) {
+        if (!$is_ceo) {
             return false;                       // no role in session
         }
-
-        // 2️⃣  Fetch that role from employee_roles
-        $role = $this->db->select('role_id')       // or 'slug' if that’s your column
-            ->from('employee_roles')
-            ->where('id', $role_id)
-            ->limit(1)
-            ->get()
-            ->row();
-
-        if (!$role) {
-            return false;                       // role not found
-        }
-
-        // 3️⃣  Compare name to “CEO” (case‑insensitive)
-        return $role->role_id >= 2 && $role->role_id <= 5;
+       return true;
     }
-
     public function get_allowed_feature_ids()
     {
         $role_id = (int) $this->session->userdata('role_id');
@@ -773,5 +757,13 @@ public function is_plan_standard()
 
         // Flatten to a simple int array
         return array_map('intval', array_column($rows, 'feature_id'));
+    }
+
+    public function is_access_for_all_role()
+    {
+        $is_ceo = (int) $this->session->userdata('is_org_ceo');
+        $is_org_admin = (int) $this->session->userdata('is_org_admin');
+
+        return ($is_ceo === 1 || $is_org_admin === 1);
     }
 }

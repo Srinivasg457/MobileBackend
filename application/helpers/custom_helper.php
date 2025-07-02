@@ -63,6 +63,22 @@ if (!function_exists('require_feature')) {
 		return $ci->auth_model->require_feature($featureId);
 	}
 }
+if (!function_exists('is_user_ceo')) {
+	function is_user_ceo()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_user_ceo();
+	}
+}
+if (!function_exists('is_access_for_all_role')) {
+	function is_access_for_all_role()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_access_for_all_role();
+	}
+}
 
 if (!function_exists('get_allowed_feature_ids')) {
 	function get_allowed_feature_ids()
