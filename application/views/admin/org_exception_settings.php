@@ -131,7 +131,7 @@
                             <div class="col-md-6 form-group">
                                 <label class="form-label">Timezone:</label>
                                 <div class="input-group">
-                                    <input type="text" name="time_zone" value="" id="timezone_input" class="form-control" readonly>
+                                    <input type="text" name="time_zone" value="" id="timezone_input" class="form-control" required readonly>
                                     <div class="input-group-append" id="editTimezoneBtn" style="cursor:pointer;">
                                         <span class="input-group-text">
                                             <i class="fa fa-edit"></i>
