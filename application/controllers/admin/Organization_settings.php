@@ -242,6 +242,7 @@ class Organization_settings extends Home_Controller {
             'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
+            'self_login'           =>$self_login ,
             'timecards_time_interval'  => 5,
             'time_zone'                => $this->input->post('time_zone', TRUE), // <-- Added this line for timezone
             'created_at'               => get_user_datetime_only($user_id),
