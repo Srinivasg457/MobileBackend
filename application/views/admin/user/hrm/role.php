@@ -142,51 +142,55 @@
             </div>
         </div>
     <?php else: ?>
+        <?php $restricted_departments = ['Executive', 'Manager', 'Team Lead', 'Human Resource']; ?>
 
         <!-- ✅ Start single form for all departments -->
         <form action="<?= base_url('/employee/EmployeeRoles/create_role') ?>" method="post">
 
+
             <?php foreach ($departments as $dept): ?>
-                <div class="col-md-12 m-auto card mb-5">
-                    <div class="card-header">
-                        <h5>Department: <?= html_escape($dept->name); ?></h5>
-                    </div>
-                    <div class="card-body">
-                        <h6 class=""><i class="fa fa-user"></i> Roles</h6>
+                <?php if (!in_array($dept->name, $restricted_departments) || $this->auth_model->is_access_for_all_role()): ?>
+                    <div class="col-md-12 m-auto card mb-5">
+                        <div class="card-header">
+                            <h5>Department: <?= html_escape($dept->name); ?></h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class=""><i class="fa fa-user"></i> Roles</h6>
 
-                        <?php foreach ($default_roles as $index => $drole): ?>
-                            <?php if ($drole->department_id == $dept->department_id): ?>
-                                <?php
-                                $role_id   = $drole->id;
-                                $role_name = trim($drole->role_name);
-                                $dept_id   = $dept->id;
-                                $status    = isset($role_status_map[$role_id]) ? 1 : 0;
-                                ?>
-                                <div class="form-group row align-items-center my-4">
-                                    <div class="col-sm-7">
-                                        <label class="font-weight-bold"><?= html_escape($role_name) ?></label>
-                                        <input type="hidden" name="role_name[]" value="<?= html_escape($role_name) ?>">
-                                        <input type="hidden" name="department_id[]" value="<?= $dept_id ?>">
-                                        <input type="hidden" name="default_role_id[]" value="<?= $role_id ?>">
-                                        <input type="hidden" name="status[]" id="role-status-<?= $index ?>" value="<?= $status ?>">
-                                    </div>
-                                    <div class="col-sm-5 d-flex justify-content-start gap-5">
-                                        <div class="icheck-primary radio radio-inline mx-5">
-                                            <input type="radio" name="status_<?= $index ?>" id="role_active_<?= $index ?>" value="1" <?= $status == 1 ? 'checked' : '' ?>>
-                                            <label for="role_active_<?= $index ?>">Active</label>
+                            <?php foreach ($default_roles as $index => $drole): ?>
+                                <?php if ($drole->department_id == $dept->department_id): ?>
+                                    <?php
+                                    $role_id   = $drole->id;
+                                    $role_name = trim($drole->role_name);
+                                    $dept_id   = $dept->id;
+                                    $status    = isset($role_status_map[$role_id]) ? 1 : 0;
+                                    ?>
+                                    <div class="form-group row align-items-center my-4">
+                                        <div class="col-sm-7">
+                                            <label class="font-weight-bold"><?= html_escape($role_name) ?></label>
+                                            <input type="hidden" name="role_name[]" value="<?= html_escape($role_name) ?>">
+                                            <input type="hidden" name="department_id[]" value="<?= $dept_id ?>">
+                                            <input type="hidden" name="default_role_id[]" value="<?= $role_id ?>">
+                                            <input type="hidden" name="status[]" id="role-status-<?= $index ?>" value="<?= $status ?>">
                                         </div>
-                                        <div class="icheck-danger radio radio-inline">
-                                            <input type="radio" name="status_<?= $index ?>" id="role_inactive_<?= $index ?>" value="0" <?= $status == 0 ? 'checked' : '' ?>>
-                                            <label for="role_inactive_<?= $index ?>">Inactive</label>
+                                        <div class="col-sm-5 d-flex justify-content-start gap-5">
+                                            <div class="icheck-primary radio radio-inline mx-5">
+                                                <input type="radio" name="status_<?= $index ?>" id="role_active_<?= $index ?>" value="1" <?= $status == 1 ? 'checked' : '' ?>>
+                                                <label for="role_active_<?= $index ?>">Active</label>
+                                            </div>
+                                            <div class="icheck-danger radio radio-inline">
+                                                <input type="radio" name="status_<?= $index ?>" id="role_inactive_<?= $index ?>" value="0" <?= $status == 0 ? 'checked' : '' ?>>
+                                                <label for="role_inactive_<?= $index ?>">Inactive</label>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
 
-                        <hr>
+                            <hr>
+                        </div>
                     </div>
-                </div>
+                <?php endif; ?>
             <?php endforeach; ?>
 
             <!-- ✅ Single Save Button -->
