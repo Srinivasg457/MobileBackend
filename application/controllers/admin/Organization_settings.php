@@ -244,16 +244,16 @@ class Organization_settings extends Home_Controller {
             'key_stroke_flag'          => $this->input->post('key_stroke_flag', TRUE) ? 1 : 0,
             'key_stroke_threshold'     => $this->input->post('key_stroke_threshold', TRUE),
             'idle_time_flag'           => $this->input->post('idle_time_flag', TRUE) ? 1 : 0,
-            'self_login'           =>$self_login ,
+            'self_login'               => $self_login,
             'timecards_time_interval'  => 5,
-            'time_zone'                => $this->input->post('time_zone', TRUE), // <-- Added this line for timezone
+            'time_zone'                => $this->input->post('time_zone', TRUE),
             'created_at'               => get_user_datetime_only($user_id),
             'updated_at'               => get_user_datetime_only($user_id)
         ];
     
         // Clean data for XSS prevention
         $data = $this->security->xss_clean($data);
-
+    
         // Prepare data for employees table update
         $employee_data = [
             'settings_status' => 2,
@@ -266,14 +266,18 @@ class Organization_settings extends Home_Controller {
             'employee_id' => $employee_id
         ]);
     
+        $settings_changed = false;
+        
         if ($query->num_rows() > 0) {
             // Update existing exception settings
             $this->db->where('employee_id', $employee_id);
             $this->db->where('user_id', $user_id);
             $this->db->update('organization_exception_setting', $data);
+            $settings_changed = true;
         } else {
             // Insert new exception settings
             $this->db->insert('organization_exception_setting', $data);
+            $settings_changed = true;
         }
     
         // Update self_login and settings_status in the 'employees' table
@@ -283,6 +287,28 @@ class Organization_settings extends Home_Controller {
     
         // Check for errors and provide feedback
         if ($this->db->affected_rows() > 0) {
+            // Prepare the settings to be passed to JavaScript
+            $settings_for_js = [
+                'screenshot_flag' => $data['screenshot_flag'],
+                'screenshot_time_interval' => $data['screenshot_time_interval'],
+                'webcam_flag' => $data['webcam_flag'],
+                'webcam_time_interval' => $data['webcam_time_interval'],
+                'mouse_move_flag' => $data['mouse_move_flag'],
+                'mouse_move_threshold' => $data['mouse_move_threshold'],
+                'key_stroke_flag' => $data['key_stroke_flag'],
+                'key_stroke_threshold' => $data['key_stroke_threshold'],
+                'idle_time_flag' => $data['idle_time_flag'],
+                'self_login' => $data['self_login'],
+                'time_zone' => $data['time_zone']
+            ];
+            
+            // Add JavaScript to call the changeOrganizationSetting function
+            echo '<script>
+                if (typeof changeOrganizationSetting === "function") {
+                    changeOrganizationSetting('.$employee_id.', '.$user_id.', '.json_encode($settings_for_js).');
+                }
+            </script>';
+            
             $this->session->set_flashdata('msg', 'Employee exception settings saved successfully!');
             redirect($_SERVER['HTTP_REFERER']);
         } else {
