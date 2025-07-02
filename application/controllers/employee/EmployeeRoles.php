@@ -10,6 +10,7 @@ class EmployeeRoles extends Home_Controller {
     }
 
     public function index() {
+        require_feature(11);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Create Roles & Permission';

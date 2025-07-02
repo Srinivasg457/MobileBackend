@@ -12,9 +12,7 @@ class ScreenshotController extends Home_Controller
     }
     public function index()
     {
-        // if (!$this->session->userdata('logged_in')) {
-        //     redirect('login');
-        // }
+        require_feature(6);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Screenshots';
@@ -27,6 +25,7 @@ class ScreenshotController extends Home_Controller
     }
     public function webCam()
     {
+        require_feature(7);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Webcam screenshots';

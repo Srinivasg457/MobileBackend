@@ -14,6 +14,7 @@ class Activity_logs extends Home_Controller
         // if (!$this->session->userdata('logged_in')) {
         //     redirect('login');
         // }
+        require_feature(1);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Activity Log Admin';
@@ -343,9 +344,7 @@ public function get_employee_activity()
 }
 public function get_index()
     {
-        // if (!$this->session->userdata('logged_in')) {
-        //     redirect('login');
-        // }
+        require_feature(2);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'employee_activity';

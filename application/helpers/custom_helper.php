@@ -55,6 +55,14 @@ if (!function_exists('is_CEO')) {
 		return $ci->auth_model->is_CEO($role_id);
 	}
 }
+if (!function_exists('require_feature')) {
+	function require_feature($featureId)
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->require_feature($featureId);
+	}
+}
 
 if (!function_exists('get_allowed_feature_ids')) {
 	function get_allowed_feature_ids()
