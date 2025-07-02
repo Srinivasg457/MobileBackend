@@ -252,27 +252,55 @@ class Auth extends Home_Controller
                 }
             }
 
-         
-            // 2. If 'users' authentication fails, check 'employees' table
+            /* ----------------------------------------------------------
+ * 2.  Employee table authentication
+ * ---------------------------------------------------------- */
             $employee = $this->auth_model->validate_employee();   // returns row or null
 
-            /* ----------  Verify employee exists and password matches  ---------- */
             if (
                 !empty($employee) &&
                 $employee->is_registered == 1 &&
                 password_verify($password, $employee->password)
             ) {
-                /* ----------  CEO bypasses subscription check  ---------- */
-                $is_ceo = $this->auth_model->is_CEO($employee->role_id);   // true if role is CEO
+                $is_ceo = $this->auth_model->is_CEO($employee->role_id);   // check CEO role
 
-                /* ----------  Non‑CEO + unsubscribed org → upgrade message  ---------- */
-                if (! $is_ceo && ! $this->auth_model->is_organization_subscribed($employee->user_id)) {
-                    echo json_encode(['st' => 5]);     // “upgrade your plan”
+                /* ----------  CEO gets a regular org-user session  ---------- */
+                if ($is_ceo) {
+                    // Fetch organization owner info (from 'users' table)
+                    $orgUser = $this->auth_model->get_user_by_id($employee->user_id);
+
+                    $slug  = $orgUser ? $orgUser->slug  : '';
+                    $thumb = $orgUser ? $orgUser->thumb : '';
+                    $email = $orgUser ? $orgUser->email : $employee->email;
+
+                    $org_session = [
+                        'id'        => $orgUser ? $orgUser->id : $employee->user_id,
+                        'user_type' => 'org_user',
+                        'name'      => $employee->name,
+                        'slug'      => $slug,
+                        'thumb'     => $thumb,
+                        'email'     => $email,
+                        'role'      => 'user',        // 👈 treat CEO as regular org user
+                        'parent'    => $orgUser ? $orgUser->id : $employee->user_id,
+                        'logged_in' => TRUE
+                    ];
+
+                    $this->session->set_userdata($this->security->xss_clean($org_session));
+
+                    echo json_encode([
+                        'st'  => 1,
+                        'url' => base_url('admin/dashboard/business')   // 👈 user dashboard
+                    ]);
                     exit();
                 }
 
-                /* ----------  Successful login  ---------- */
-                $session_data_employee = [
+                /* ----------  Non‑CEO employees ---------- */
+                if (! $this->auth_model->is_organization_subscribed($employee->user_id)) {
+                    echo json_encode(['st' => 5]);   // “upgrade your plan”
+                    exit();
+                }
+
+                $emp_session = [
                     'employee_id'        => $employee->id,
                     'user_type'          => 'employee_user',
                     'employee_name'      => $employee->name,
@@ -284,7 +312,7 @@ class Auth extends Home_Controller
                     'employee_logged_in' => TRUE,
                     'is_employee'        => TRUE
                 ];
-                $this->session->set_userdata($this->security->xss_clean($session_data_employee));
+                $this->session->set_userdata($this->security->xss_clean($emp_session));
 
                 echo json_encode([
                     'st'  => 1,
@@ -293,9 +321,9 @@ class Auth extends Home_Controller
                 exit();
             }
 
-            /* ---------------------------------------------------------------
+            /* ----------------------------------------------------------
  * 3.  Unknown user or bad password
- * --------------------------------------------------------------- */
+ * ---------------------------------------------------------- */
             echo json_encode(['st' => 0]);    // Invalid credentials
             exit();
 

@@ -86,11 +86,30 @@
     .select-all-container {
         margin-bottom: 15px;
     }
+
+    .icheck-primary {
+        padding: 3px 10px 0px 5px;
+    }
+
+    .icheck-primary:hover {
+        background-color: #16D17F;
+        border-radius: 50px;
+    }
+
+    .icheck-danger {
+        padding: 3px 10px 0px 5px;
+    }
+
+    .icheck-danger:hover {
+        background-color: #FE5152;
+        border-radius: 50px;
+    }
 </style>
 
 
 <!-- Roles & Permissions Form -->
 
+<!-- Roles & Permissions Form -->
 <div class="content-wrapper">
     <div class="box-header">
         <h3>
@@ -111,7 +130,7 @@
 
     <?php if (empty($departments)): ?>
         <!-- No department message -->
-        <div class="col-md-6 m-auto card my-5">
+        <div class="col-md-10 m-auto card my-5">
             <div class="card-header">
                 <h5 class="text-danger text-center">No active departments found!</h5>
             </div>
@@ -123,18 +142,18 @@
             </div>
         </div>
     <?php else: ?>
-        <!-- Loop through active departments -->
-        <?php foreach ($departments as $dept): ?>
-            <div class="col-md-6 m-auto card my-5">
-                <div class="card-header">
-                    <h5>Department: <?= html_escape($dept->name); ?></h5>
-                </div>
-                <div class="card-body">
-                    <!-- Default Roles -->
-                    <h6 class="mx-5"><i class="fa fa-user"></i> Roles</h6>
 
-                    <!-- Role Form -->
-                    <form action="<?= base_url('/employee/EmployeeRoles/create_role') ?>" method="post">
+        <!-- ✅ Start single form for all departments -->
+        <form action="<?= base_url('/employee/EmployeeRoles/create_role') ?>" method="post">
+
+            <?php foreach ($departments as $dept): ?>
+                <div class="col-md-12 m-auto card mb-5">
+                    <div class="card-header">
+                        <h5>Department: <?= html_escape($dept->name); ?></h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class=""><i class="fa fa-user"></i> Roles</h6>
+
                         <?php foreach ($default_roles as $index => $drole): ?>
                             <?php if ($drole->department_id == $dept->department_id): ?>
                                 <?php
@@ -165,17 +184,24 @@
                             <?php endif; ?>
                         <?php endforeach; ?>
 
-                        <!-- Submit -->
-                        <button type="submit" class="btn btn-success pull-right btn-sm mt-3">Save Roles</button>
-                    </form>
-
-                    <hr>
+                        <hr>
+                    </div>
                 </div>
+            <?php endforeach; ?>
+
+            <!-- ✅ Single Save Button -->
+            <div class="text-end my-4" style="
+    text-align: end;
+">
+                <button type="submit" class="btn btn-success btn-sm">Save All Roles</button>
             </div>
-        <?php endforeach; ?>
+
+        </form> <!-- ✅ End of single form -->
+
     <?php endif; ?>
 </div>
 
+<!-- JS to update hidden status[] from radio buttons -->
 <script>
     $(document).ready(function() {
         $('input[type=radio][name^=status_]').on('change', function() {
