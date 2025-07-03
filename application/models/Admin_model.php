@@ -1021,7 +1021,117 @@ class Admin_model extends CI_Model {
                 $this->admin_model->insert($data, 'departments');
             }
         }
-        return true;
+        $stored_departments = $this->db
+            ->get_where('departments', [
+                'user_id' => $user_id,
+                'status'  => 1          // if you only want active depts
+            ])
+            ->result();
+
+        foreach ($stored_departments as $dept) {
+
+            /* $dept->department_id == master department’s ID */
+            $default_roles = $this->db->get_where('default_roles', [
+                'department_id' => $dept->department_id
+            ])->result();
+
+            foreach ($default_roles as $role) {
+                /* insert into employee_roles (or whatever you need) */
+                $this->db->insert('employee_roles', [
+                    'user_id'       => $user_id,
+                    'department_id' => $dept->id,      // ← PK in *your* departments table
+                    'role_id'       => $role->id,      // ← FK to master role
+                    'role_name'     => $role->role_name,
+                    'status'        => 1,
+                    'created_at'    => get_user_datetime_only($user_id),
+                    'updated_at'    => get_user_datetime_only($user_id),
+                ]);
+            }
+        }
+        $this->grant_super_role_access($user_id);
+       
+    }
+    public function grant_super_role_access(int $user_id): void
+    {
+        /* ------------------------------------------------------------
+     * 1.  Find *new* employee_roles rows that need permissions
+     * ------------------------------------------------------------ */
+        $empRoles = $this->db->query(
+            "SELECT er.id, er.role_id
+           FROM employee_roles er
+          WHERE er.user_id = ?
+            AND er.role_id IN (1,2,3,4,5)
+            AND er.status  = 1
+            AND NOT EXISTS (
+                  SELECT 1
+                    FROM role_feature_access r
+                   WHERE r.role_id = er.id
+                     AND r.user_id = er.user_id
+                 )",
+            [$user_id]
+        )->result();
+
+        if (empty($empRoles)) {
+            return;                                // nothing new to insert
+        }
+
+        /* ------------------------------------------------------------
+     * 2.  Prepare one big insert batch
+     * ------------------------------------------------------------ */
+        $now   = get_user_datetime_only($user_id);
+        $batch = [];
+
+        foreach ($empRoles as $er) {
+            switch ((int) $er->role_id) {
+                case 1:  // fall‑through
+                case 2:  // full access
+                    $ids = $this->db->select('id')->from('app_features')
+                        ->get()->result_array();
+                    $featureIds = array_column($ids, 'id');
+                    break;
+
+                case 3:
+                    $featureIds = [6, 3, 9, 8, 1];
+                    break;
+
+                case 4:  // fall‑through
+                case 5:
+                    $featureIds = [3, 5, 10, 11, 12];
+                    break;
+
+                default:
+                    continue 2;                    // skip unknown role
+            }
+
+            foreach ($featureIds as $fid) {
+                $batch[] = [
+                    'role_id'    => $er->id,       // PK in employee_roles
+                    'user_id'    => $user_id,
+                    'feature_id' => $fid,
+                    'is_read'    => 1,
+                    'is_write'   => 1,
+                    'is_action'  => 1,
+                    'is_delete'  => 1,
+                    'status'     => 1,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        /* ------------------------------------------------------------
+     * 3.  Insert (duplicates impossible by design)
+     * ------------------------------------------------------------ */
+        if (!empty($batch)) {
+            $this->db->insert_batch('role_feature_access', $batch);
+
+            if ($this->db->error()['code']) {
+                log_message(
+                    'error',
+                    'grant_super_role_access(): ' . json_encode($this->db->error())
+                );
+            }
+        }
     }
     //get product
     public function search_product($value, $type)
