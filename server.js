@@ -3,21 +3,21 @@ import https from 'https';
 import { WebSocketServer } from 'ws';
 
 // For production with SSL:
-const serverOptions = {
-  cert: fs.readFileSync('/etc/letsencrypt/live/work-room.io/fullchain.pem'),
-  key: fs.readFileSync('/etc/letsencrypt/live/work-room.io/privkey.pem')
-};
-const httpsServer = https.createServer(serverOptions);
-const wss = new WebSocketServer({ server: httpsServer });
-httpsServer.listen(8090, () => {
-  console.log('Secure WebSocket server running on wss://localhost:8090');
-});
+// const serverOptions = {
+//   cert: fs.readFileSync('/etc/letsencrypt/live/work-room.io/fullchain.pem'),
+//   key: fs.readFileSync('/etc/letsencrypt/live/work-room.io/privkey.pem')
+// };
+// const httpsServer = https.createServer(serverOptions);
+// const wss = new WebSocketServer({ server: httpsServer });
+// httpsServer.listen(8090, () => {
+//   console.log('Secure WebSocket server running on wss://localhost:8090');
+// });
 
 // For local dev without SSL:
-//const wss = new WebSocketServer({ port: 8090 });
+const wss = new WebSocketServer({ port: 8090 });
 
-const streamers = new Map(); 
-const viewers = new Map();   
+const streamers = new Map();
+const viewers = new Map();
 
 wss.on('connection', (ws) => {
   console.log('New client connected.');
@@ -32,18 +32,14 @@ wss.on('connection', (ws) => {
         switch (msg.type) {
           case "connect-streamer":
             ws.employeeId = msg.employee_id;
-            ws.userId = msg.user_id;
             streamers.set(ws.employeeId, ws);
             console.log(`Streamer connected: ${ws.employeeId}`);
             break;
 
           case "organization-settings":
-            if (msg.userId) {
+            if (!msg.employeeId) {
               for (const [id, streamerSocket] of streamers.entries()) {
-                if (
-                  streamerSocket.userId == msg.userId &&
-                  streamerSocket.readyState === ws.OPEN
-                ) {
+                if (streamerSocket.readyState === ws.OPEN) {
                   streamerSocket.send(
                     JSON.stringify({
                       action: "settings",
@@ -51,7 +47,7 @@ wss.on('connection', (ws) => {
                     })
                   );
                   console.log(
-                    `Sent settings to streamer: department ${streamerSocket.userId}`
+                    `Sent settings to department`
                   );
                 }
               }

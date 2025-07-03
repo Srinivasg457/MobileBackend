@@ -201,91 +201,170 @@ class EmployeeRoles extends Home_Controller {
     //     }
     // }
 
+    /* --------------------------------------------------------------------------
+ * 1.  Template: which features each *default* role should get on day‑one
+ * -------------------------------------------------------------------------- */
+    private function get_default_feature_ids(int $default_role_id): array
+    {
+        switch ($default_role_id) {
+            /* Full access — pull every feature ID dynamically */
+            case 1:     // Super Admin
+            case 2:     // Org Admin
+                $rows = $this->db->select('id')->from('app_features')->get()->result_array();
+                return array_column($rows, 'id');
+
+                /* CEO                           */
+            case 3:
+                return [6, 3, 9, 8, 1];
+
+                /* Team Lead / Manager           */
+            case 4:
+            case 5:
+                return [3, 5, 10, 11, 12];
+
+            default:
+                return [];   // unknown role ➜ no defaults
+        }
+    }
+
+    /* --------------------------------------------------------------------------
+ * 2.  Seed one employee_role row once (idempotent)
+ * -------------------------------------------------------------------------- */
+    private function seed_role_permissions(
+        int $emp_role_pk,
+        int $default_role_id,
+        int $user_id
+    ): void {
+        $already = $this->db->where([
+            'role_id' => $emp_role_pk,
+            'user_id' => $user_id
+        ])->count_all_results('role_feature_access');
+
+        if ($already) return;                          // permissions already exist
+
+        $feature_ids = $this->get_default_feature_ids($default_role_id);
+        if (empty($feature_ids)) return;               // nothing to seed
+
+        $now   = get_user_datetime_only($user_id);
+        $batch = [];
+
+        foreach ($feature_ids as $fid) {
+            $batch[] = [
+                'role_id'    => $emp_role_pk,
+                'user_id'    => $user_id,
+                'feature_id' => $fid,
+                'is_read'    => 1,
+                'is_write'   => 1,
+                'is_action'  => 1,
+                'is_delete'  => 1,
+                'status'     => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+        $this->db->insert_batch('role_feature_access', $batch);
+    }
+
+    /* --------------------------------------------------------------------------
+ * 3.  Main: create_role()
+ * -------------------------------------------------------------------------- */
     public function create_role()
     {
+        /* Guard clause */
         if (!$this->input->post()) {
             redirect(base_url('employee/EmployeeRoles'));
         }
 
-        $role_names       = $this->input->post('role_name', true);
-        $department_ids   = $this->input->post('department_id', true);
-        $default_role_ids = $this->input->post('default_role_id', true);
-        $statuses         = $this->input->post('status', true);
+        /* POST arrays (all same length) */
+        $role_names       = $this->input->post('role_name',        true);
+        $department_ids   = $this->input->post('department_id',    true);
+        $default_role_ids = $this->input->post('default_role_id',  true);
+        $statuses         = $this->input->post('status',           true);
 
         $user_id = user()->id;
+        $now     = get_user_datetime_only($user_id);
         $errors  = [];
 
-        /* ------------------------------------------------------------
-     * Start one DB transaction for the whole operation
-     * ------------------------------------------------------------ */
+        /* One transaction for everything */
         $this->db->trans_start();
 
-        if (is_array($role_names) && count($role_names) > 0) {
-            foreach ($role_names as $index => $role_name) {
+        if (is_array($role_names) && count($role_names)) {
+            foreach ($role_names as $idx => $role_name) {
 
-                $department_id   = $department_ids[$index]   ?? null;
-                $default_role_id = $default_role_ids[$index] ?? null;
-                $status          = $statuses[$index]         ?? 0;
+                $department_id   = $department_ids[$idx]   ?? null;
+                $default_role_id = $default_role_ids[$idx] ?? null;
+                $status          = (int) ($statuses[$idx]  ?? 0);
 
-                if (!$role_name || !$department_id) {
-                    continue;
+                if (!$role_name || !$department_id || !$default_role_id) {
+                    continue;      // skip incomplete rows
                 }
 
-                /* -------- Check if the role already exists -------- */
-                $exists = $this->db->get_where('employee_roles', [
+                /* Does this employee already have that default_role in that dept? */
+                $row = $this->db->get_where('employee_roles', [
                     'user_id'       => $user_id,
                     'department_id' => $department_id,
-                    'role_id'       => $default_role_id,
+                    'role_id'       => $default_role_id
                 ])->row();
 
-                if ($exists) {
-                    if ($status == 0) {
-                        // ensure role not assigned before delete
-                        $assigned = $this->db->where('role_id', $exists->id)
+                /* -------------------------------------------------------- *
+             * A) Row exists ➜ update or delete
+             * -------------------------------------------------------- */
+                if ($row) {
+                    if ($status === 0) {                // deactivate  ➜ delete row
+                        $assigned = $this->db->where('role_id', $row->id)
                             ->count_all_results('employees');
-                        if ($assigned > 0) {
-                            $errors[] = "Cannot deactivate role: <strong>{$role_name}</strong> is assigned.";
+                        if ($assigned) {
+                            $errors[] = "Cannot deactivate <strong>{$role_name}</strong> – role in use.";
                             continue;
                         }
-                        $this->db->delete('employee_roles', ['id' => $exists->id]);
-                    } else {
-                        $this->db->update(
-                            'employee_roles',
-                            ['status' => 1, 'updated_at' => get_user_datetime_only($user_id)],
-                            ['id' => $exists->id]
-                        );
-                    }
-                } else {
-                    if ($status == 1) {   // insert only active roles
-                        $this->db->insert('employee_roles', [
-                            'user_id'       => $user_id,
-                            'department_id' => $department_id,
-                            'role_id'       => $default_role_id,
-                            'role_name'     => $role_name,
-                            'status'        => 1,
-                            'created_at'    => get_user_datetime_only($user_id),
-                            'updated_at'    => get_user_datetime_only($user_id),
+                        // remove role + its permissions
+                        $this->db->delete('employee_roles',      ['id' => $row->id]);
+                        $this->db->delete('role_feature_access', [
+                            'role_id' => $row->id,
+                            'user_id' => $user_id
                         ]);
+                    } else {                           // activate/update name
+                        $this->db->update('employee_roles', [
+                            'role_name'  => $role_name,
+                            'status'     => 1,
+                            'updated_at' => $now
+                        ], ['id' => $row->id]);
+
+                        // ensure permissions exist (idempotent)
+                        $this->seed_role_permissions($row->id, $default_role_id, $user_id);
                     }
+
+                    continue;   // done with existing row
+                }
+
+                /* -------------------------------------------------------- *
+             * B) Brand‑new row ➜ insert + seed defaults
+             * -------------------------------------------------------- */
+                if ($status === 1) {      // insert only if flagged "Active"
+                    $this->db->insert('employee_roles', [
+                        'user_id'       => $user_id,
+                        'department_id' => $department_id,
+                        'role_id'       => $default_role_id,
+                        'role_name'     => $role_name,
+                        'status'        => 1,
+                        'created_at'    => $now,
+                        'updated_at'    => $now,
+                    ]);
+
+                    $new_pk = $this->db->insert_id();
+                    $this->seed_role_permissions($new_pk, $default_role_id, $user_id);
                 }
             }
         }
 
         $this->db->trans_complete();
 
-        /* ------------------------------------------------------------
-     * Give default permissions to any brand‑new super roles
-     * ------------------------------------------------------------ */
-        // $this->admin_model->grant_super_role_access($user_id);
-
-        /* ------------------------------------------------------------
-     * Flash messages & redirect
-     * ------------------------------------------------------------ */
+        /* Flash + redirect */
         if ($this->db->trans_status() === FALSE) {
             $errors[] = 'Database error. Please try again.';
         }
 
-        if (!empty($errors)) {
+        if ($errors) {
             $this->session->set_flashdata('error', implode('<br><br>', $errors));
         } else {
             $this->session->set_flashdata('msg', 'Roles updated successfully.');
@@ -293,6 +372,7 @@ class EmployeeRoles extends Home_Controller {
 
         redirect(base_url('employee/EmployeeRoles'));
     }
+
 
 
 
