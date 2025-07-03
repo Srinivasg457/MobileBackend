@@ -118,88 +118,88 @@ class EmployeeRoles extends Home_Controller {
      * A role is “new” if it has no rows yet in role_feature_access.
      * Nothing is updated; existing roles are ignored.
      */
-    public function grant_super_role_access(int $user_id): void
-    {
-        /* ------------------------------------------------------------
-     * 1.  Find *new* employee_roles rows that need permissions
-     * ------------------------------------------------------------ */
-        $empRoles = $this->db->query(
-            "SELECT er.id, er.role_id
-           FROM employee_roles er
-          WHERE er.user_id = ?
-            AND er.role_id IN (1,2,3,4,5)
-            AND er.status  = 1
-            AND NOT EXISTS (
-                  SELECT 1
-                    FROM role_feature_access r
-                   WHERE r.role_id = er.id
-                     AND r.user_id = er.user_id
-                 )",
-            [$user_id]
-        )->result();
+    // public function grant_super_role_access(int $user_id): void
+    // {
+    //     /* ------------------------------------------------------------
+    //  * 1.  Find *new* employee_roles rows that need permissions
+    //  * ------------------------------------------------------------ */
+    //     $empRoles = $this->db->query(
+    //         "SELECT er.id, er.role_id
+    //        FROM employee_roles er
+    //       WHERE er.user_id = ?
+    //         AND er.role_id IN (1,2,3,4,5)
+    //         AND er.status  = 1
+    //         AND NOT EXISTS (
+    //               SELECT 1
+    //                 FROM role_feature_access r
+    //                WHERE r.role_id = er.id
+    //                  AND r.user_id = er.user_id
+    //              )",
+    //         [$user_id]
+    //     )->result();
 
-        if (empty($empRoles)) {
-            return;                                // nothing new to insert
-        }
+    //     if (empty($empRoles)) {
+    //         return;                                // nothing new to insert
+    //     }
 
-        /* ------------------------------------------------------------
-     * 2.  Prepare one big insert batch
-     * ------------------------------------------------------------ */
-        $now   = get_user_datetime_only($user_id);
-        $batch = [];
+    //     /* ------------------------------------------------------------
+    //  * 2.  Prepare one big insert batch
+    //  * ------------------------------------------------------------ */
+    //     $now   = get_user_datetime_only($user_id);
+    //     $batch = [];
 
-        foreach ($empRoles as $er) {
-            switch ((int) $er->role_id) {
-                case 1:  // fall‑through
-                case 2:  // full access
-                    $ids = $this->db->select('id')->from('app_features')
-                        ->get()->result_array();
-                    $featureIds = array_column($ids, 'id');
-                    break;
+    //     foreach ($empRoles as $er) {
+    //         switch ((int) $er->role_id) {
+    //             case 1:  // fall‑through
+    //             case 2:  // full access
+    //                 $ids = $this->db->select('id')->from('app_features')
+    //                     ->get()->result_array();
+    //                 $featureIds = array_column($ids, 'id');
+    //                 break;
 
-                case 3:
-                    $featureIds = [6, 3, 9, 8, 1];
-                    break;
+    //             case 3:
+    //                 $featureIds = [6, 3, 9, 8, 1];
+    //                 break;
 
-                case 4:  // fall‑through
-                case 5:
-                    $featureIds = [3, 5, 10, 11, 12];
-                    break;
+    //             case 4:  // fall‑through
+    //             case 5:
+    //                 $featureIds = [3, 5, 10, 11, 12];
+    //                 break;
 
-                default:
-                    continue 2;                    // skip unknown role
-            }
+    //             default:
+    //                 continue 2;                    // skip unknown role
+    //         }
 
-            foreach ($featureIds as $fid) {
-                $batch[] = [
-                    'role_id'    => $er->id,       // PK in employee_roles
-                    'user_id'    => $user_id,
-                    'feature_id' => $fid,
-                    'is_read'    => 1,
-                    'is_write'   => 1,
-                    'is_action'  => 1,
-                    'is_delete'  => 1,
-                    'status'     => 1,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            }
-        }
+    //         foreach ($featureIds as $fid) {
+    //             $batch[] = [
+    //                 'role_id'    => $er->id,       // PK in employee_roles
+    //                 'user_id'    => $user_id,
+    //                 'feature_id' => $fid,
+    //                 'is_read'    => 1,
+    //                 'is_write'   => 1,
+    //                 'is_action'  => 1,
+    //                 'is_delete'  => 1,
+    //                 'status'     => 1,
+    //                 'created_at' => $now,
+    //                 'updated_at' => $now,
+    //             ];
+    //         }
+    //     }
 
-        /* ------------------------------------------------------------
-     * 3.  Insert (duplicates impossible by design)
-     * ------------------------------------------------------------ */
-        if (!empty($batch)) {
-            $this->db->insert_batch('role_feature_access', $batch);
+    //     /* ------------------------------------------------------------
+    //  * 3.  Insert (duplicates impossible by design)
+    //  * ------------------------------------------------------------ */
+    //     if (!empty($batch)) {
+    //         $this->db->insert_batch('role_feature_access', $batch);
 
-            if ($this->db->error()['code']) {
-                log_message(
-                    'error',
-                    'grant_super_role_access(): ' . json_encode($this->db->error())
-                );
-            }
-        }
-    }
+    //         if ($this->db->error()['code']) {
+    //             log_message(
+    //                 'error',
+    //                 'grant_super_role_access(): ' . json_encode($this->db->error())
+    //             );
+    //         }
+    //     }
+    // }
 
     public function create_role()
     {
@@ -276,7 +276,7 @@ class EmployeeRoles extends Home_Controller {
         /* ------------------------------------------------------------
      * Give default permissions to any brand‑new super roles
      * ------------------------------------------------------------ */
-        $this->grant_super_role_access($user_id);
+        // $this->admin_model->grant_super_role_access($user_id);
 
         /* ------------------------------------------------------------
      * Flash messages & redirect
