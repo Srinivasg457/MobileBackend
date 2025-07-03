@@ -1,21 +1,26 @@
-const ws = new WebSocket("wss://work-room.io:8090");
+function changeOrganizationSetting(employeeId, settings) {
+    const ws = new WebSocket('ws://localhost:8090');
 
-ws.onopen = () => console.log("[WS] connected");
-ws.onerror = (e) => console.error("[WS] error:", e);
-ws.onclose = () => console.warn("[WS] closed");
-
-window.changeOrganizationSetting = (employeeId, userId, settings) => {
     const payload = {
         type: "organization-settings",
         employeeId: +employeeId,
-        userId: +userId,
         settings
     };
 
     if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(payload));
         console.log("[WS] sent organization-settings:", payload);
+
+        // Close after sending
+        ws.close();
+    } else if (ws.readyState === WebSocket.CONNECTING) {
+        // Wait until it opens, then send and close
+        ws.addEventListener("open", () => {
+            ws.send(JSON.stringify(payload));
+            console.log("[WS] sent organization-settings:", payload);
+            ws.close();
+        });
     } else {
         console.warn("[WS] not ready – packet skipped");
     }
-};
+}
