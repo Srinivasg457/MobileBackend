@@ -1,5 +1,6 @@
 function changeOrganizationSetting(employeeId, settings) {
-    const ws = new WebSocket('ws://localhost:8090');
+    //const ws = new WebSocket('ws://localhost:8090');
+    const ws = new WebSocket("wss://work-room.io:8090");
 
     const payload = {
         type: "organization-settings",
