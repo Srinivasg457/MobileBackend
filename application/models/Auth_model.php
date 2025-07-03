@@ -764,6 +764,9 @@ public function is_plan_standard()
         $is_ceo = (int) $this->session->userdata('is_org_ceo');
         $is_org_admin = (int) $this->session->userdata('is_org_admin');
 
-        return ($is_ceo === 1 || $is_org_admin === 1);
+        if($is_ceo === 1 || $is_org_admin === 1){
+            return true;
+        }
+        return false;
     }
 }
