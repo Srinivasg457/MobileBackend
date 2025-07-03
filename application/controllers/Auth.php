@@ -407,7 +407,8 @@ class Auth extends Home_Controller
                             'role' => $user->role,
                             'thumb' =>$user->thumb,
                             'email' => $user->email,
-                            'logged_in' => true
+                            'logged_in' => true,
+                            'is_org_admin' => true
                         );
                         $this->session->set_userdata($data);
 
