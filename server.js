@@ -3,18 +3,18 @@ import https from 'https';
 import { WebSocketServer } from 'ws';
 
 // For production with SSL:
-// const serverOptions = {
-//   cert: fs.readFileSync('/etc/letsencrypt/live/work-room.io/fullchain.pem'),
-//   key: fs.readFileSync('/etc/letsencrypt/live/work-room.io/privkey.pem')
-// };
-// const httpsServer = https.createServer(serverOptions);
-// const wss = new WebSocketServer({ server: httpsServer });
-// httpsServer.listen(8090, () => {
-//   console.log('Secure WebSocket server running on wss://localhost:8090');
-// });
+const serverOptions = {
+  cert: fs.readFileSync('/etc/letsencrypt/live/work-room.io/fullchain.pem'),
+  key: fs.readFileSync('/etc/letsencrypt/live/work-room.io/privkey.pem')
+};
+const httpsServer = https.createServer(serverOptions);
+const wss = new WebSocketServer({ server: httpsServer });
+httpsServer.listen(8090, () => {
+  console.log('Secure WebSocket server running on wss://localhost:8090');
+});
 
 // For local dev without SSL:
-const wss = new WebSocketServer({ port: 8090 });
+//const wss = new WebSocketServer({ port: 8090 });
 
 const streamers = new Map();
 const viewers = new Map();
