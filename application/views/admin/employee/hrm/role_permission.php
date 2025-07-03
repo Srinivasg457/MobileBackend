@@ -309,12 +309,20 @@
             <table class="table table-hover cushover" id="user-role-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Department</th>
-                        <th>Role</th>
-                        <th>Features</th>
-                        <th>Assign Permission</th>
-                        <th>Action</th>
+                        <?php if (is_access_for_all_role()) { ?>
+                            <th>#</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th>Features</th>
+                            <th>Assign Permission</th>
+                            <th>Action</th>
+                        <?php } else { ?>
+                            <th>#</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th>status</th>
+                            <th>Action</th>
+                        <?php } ?>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -332,7 +340,7 @@
     $(document).ready(function() {
         const canSeeAllRoles = <?= is_access_for_all_role() ? 'true' : 'false' ?>;
         console.log(canSeeAllRoles);
-        
+
         const userId = <?= json_encode($this->session->userdata('id') ?: $this->session->userdata('employee_org_id')) ?>;
         //  for loading the roles
         function loadRolesForCurrentUser() {
@@ -367,26 +375,47 @@
                 success: function(response) {
                     console.log(response);
 
-                    if (response.status === 200 || response.status === 'success') {
-                        const tbody = $('#user-role-table tbody').empty();
-                        let index = 1;
+                    if (response.status !== 200 && response.status !== 'success') {
+                        alert(response.message || 'No data found.');
+                        return;
+                    }
 
-                        const hiddenDepartments = ['Executive', 'Manager', 'Team Lead', 'Human Resource'];
+                    const tbody = $('#user-role-table tbody').empty();
+                    let index = 1;
 
-                        if ($('#permissionsModal').length === 0) {
-                            $('body').append(`<!-- modal HTML here (same as your code) -->`);
-                        }
+                    // Modal creation once
+                    if ($('#permissionsModal').length === 0) {
+                        $('body').append(`
+            <div class="modal fade" id="permissionsModal" tabindex="-1" role="dialog" aria-labelledby="permissionsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content" style="margin-top: 10% !important">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="permissionsModalLabel">Role Permissions</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="permissionsContent"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+                    }
 
+                    const hiddenDepartments = ['Executive', 'Manager', 'Team Lead', 'Human Resource'];
+
+                    if (canSeeAllRoles) {
+                        // === Admin / Org-level ===
                         response.data.forEach(function(role) {
-                            // 🔒 Filter based on department if not allowed
-                            if (!canSeeAllRoles && hiddenDepartments.includes(role.department_name)) {
-                                return; // skip this role
-                            }
+                            const featureNames = [];
+                            const featureDetails = [];
 
-                            let featureNames = [];
-                            let featureDetails = [];
-
-                            if (role.features.length > 0) {
+                            if (Array.isArray(role.features) && role.features.length) {
                                 role.features.forEach(function(feature) {
                                     featureNames.push(feature.feature_name);
                                     featureDetails.push({
@@ -399,84 +428,113 @@
                                 });
                             }
 
-                            let assignButton = '';
-                            if (role.role_name.toLowerCase() === 'ceo') {
-                                assignButton = `
-                            <button class="btn btn-default btn-sm rounded mx-5 disabled" disabled
-                                    title="CEO already has full access">
+                            const assignButton = (role.role_name.toLowerCase() === 'ceo') ?
+                                `<button class="btn btn-default btn-sm rounded mx-5 disabled" disabled title="CEO already has full access">
                                 <i class="fa fa-plus"></i> Assign
-                            </button>`;
-                            } else {
-                                assignButton = `
-                            <a href="#" class="edit-row edit_row_button btn btn-default btn-sm rounded create_role_permssion mx-5"
-                               data-role-name="${role.role_name}"
-                               data-role-id="${role.role_id}"
-                               title="Assign permission to Role">
-                               <i class="fa fa-plus"></i> Assign
+                            </button>` :
+                                `<a href="#" class="edit-row edit_row_button btn btn-default btn-sm rounded create_role_permssion mx-5"
+                                data-role-name="${role.role_name}" data-role-id="${role.role_id}"
+                                title="Assign permission to Role">
+                                <i class="fa fa-plus"></i> Assign
                             </a>`;
-                            }
 
                             const row = `
-                        <tr>
-                            <td>${index++}</td>
-                            <td>${role.department_name}</td>
-                            <td>${role.role_name}</td>
-                            <td style="width:48%">
-                                <div>${featureNames.length ? featureNames.join(', ') : 'No features'}</div>
-                            </td>
-                            <td>${assignButton}</td>
-                            <td class="actions" width="15%">
-                                <a href="#" class="view-permissions mx-5"
-                                   data-role="${role.role_name}"
-                                   data-features='${JSON.stringify(featureDetails)}'
-                                   title="View Permissions">
-                                   <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
-                                </a>
-                                <a href="#"
-                                   class="remove-row delete-role-btn"
-                                   data-val="employee"
-                                   data-id="${userId}"
-                                   data-department-id="${role.department_id}"
-                                   data-role="${role.role_name}"
-                                   title="Delete Role">
-                                   <i class="fa fa-trash-o"></i>
-                                </a>
-                            </td>
-                        </tr>`;
+                            <tr>
+                                <td>${index++}</td>
+                                <td>${role.department_name}</td>
+                                <td>${role.role_name}</td>
+                                <td style="width:48%">
+                                    <div>${featureNames.length ? featureNames.join(', ') : `<i class="bi bi-pencil-square text-muted" title="No features to update" style="cursor: not-allowed;">No feature to update</i>`}</div>
+                                </td>
+                                <td>${featureDetails.length > 0 ? assignButton :'' }</td>
+                                <td class="actions" width="15%">
+                                    ${featureDetails.length > 0 ? `
+                                        <a href="#" class="view-permissions mx-5"
+                                            data-role="${role.role_name}"
+                                            data-features='${JSON.stringify(featureDetails)}'
+                                            title="View Permissions">
+                                            <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
+                                        </a>` :  `
+                                        <a href="#" class="mx-5"
+                                            title="No Permissions">
+                                            <i class="bi bi-eye-slash text-muted" style="font-size: 1.5rem;"></i>
+                                            </a>`
+                                    }
+                                    <a href="#"
+                                        class="remove-row delete-role-btn"
+                                        data-val="employee"
+                                        data-id="${userId}"
+                                        data-department-id="${role.department_id}"
+                                        data-role="${role.role_name}"
+                                        title="Delete Role">
+                                        <i class="fa fa-trash-o"></i>
+                                    </a>
+                                </td>
+                            </tr>`;
                             tbody.append(row);
                         });
+                    } else {
+                        // === Employee / Limited Role View ===
+                        response.data.forEach(function(role) {
+                            if (hiddenDepartments.includes(role.department_name)) return;
+                            const row = `
+                <tr>
+                    <td>${index++}</td>
+                    <td>${role.department_name}</td>
+                    <td>${role.role_name}</td>
+                    <td><span class="label label-success">Active</span></td>
+                    <td class="actions" width="15%">
+                     <a href="#" class="mx-5"
+                        title="No Permissions">
+                        <i class="bi bi-eye-slash hide text-muted" style="font-size: 1.5rem;"></i>
+                        </a>
+                        <a href="#"
+                            class="remove-row delete-role-btn"
+                            data-val="employee"
+                            data-id="${userId}"
+                            data-department-id="${role.department_id}"
+                            data-role="${role.role_name}"
+                            title="Delete Role">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
+                    </td>
+                </tr>`;
+                            tbody.append(row);
+                        });
+                    }
 
-                        // 🔍 View-permissions modal logic
+                    // Modal handling only for admin/org-level (canSeeAllRoles)
+                    if (canSeeAllRoles) {
                         $(document).off('click', '.view-permissions').on('click', '.view-permissions', function(e) {
                             e.preventDefault();
                             const role = $(this).data('role');
                             const features = $(this).data('features');
 
                             let tableHtml = `
-                        <h6><i class="bi bi-person-gear"></i> Role: ${role}</h6>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Feature</th>
-                                        <th>Read</th>
-                                        <th class="hide">Write</th>
-                                        <th>Action</th>
-                                        <th class="hide">Delete</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
+                <h6><i class="bi bi-person-gear"></i> Role: ${role}</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Read</th>
+                                <th class="hide">Write</th>
+                                <th>Action</th>
+                                <th class="hide">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
                             if (features && features.length) {
                                 features.forEach(feature => {
                                     tableHtml += `
-                                <tr>
-                                    <td>${feature.name}</td>
-                                    <td>${feature.read == 1 ? '✅' : '❌'}</td>
-                                    <td class="hide">${feature.write == 1 ? '✅' : '❌'}</td>
-                                    <td>${feature.action == 1 ? '✅' : '❌'}</td>
-                                    <td class="hide">${feature.delete == 1 ? '✅' : '❌'}</td>
-                                </tr>`;
+                        <tr>
+                            <td>${feature.name}</td>
+                            <td>${feature.read == 1 ? '✅' : '❌'}</td>
+                            <td class="hide">${feature.write == 1 ? '✅' : '❌'}</td>
+                            <td>${feature.action == 1 ? '✅' : '❌'}</td>
+                            <td class="hide">${feature.delete == 1 ? '✅' : '❌'}</td>
+                        </tr>`;
                                 });
                             } else {
                                 tableHtml += `<tr><td colspan="5">No permissions found for this role.</td></tr>`;
@@ -487,7 +545,7 @@
                             $('#permissionsModal').modal('show');
                         });
                     } else {
-                        alert(response.message || 'No data found.');
+                        $(document).off('click', '.view-permissions');
                     }
                 },
                 error: function(err) {
