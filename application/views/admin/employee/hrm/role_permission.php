@@ -302,7 +302,7 @@
             <!-- <a href="#" class="pull-right btn btn-info btn-sm rounded create_role_permssion mx-5">
                 <i class="fa fa-plus"></i> Assign Permission to Role</a> -->
             <a href="<?php echo base_url('employee/EmployeeRoles/role') ?>" class="pull-right btn btn-info btn-sm rounded  mx-5">
-                <i class="fa fa-plus"></i> Select Role</a>
+                <i class="fa fa-plus"></i> Manage Role</a>
         </h3>
 
         <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">

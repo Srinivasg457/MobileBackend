@@ -104,6 +104,25 @@
         background-color: #FE5152;
         border-radius: 50px;
     }
+
+    /* Override Bootstrap’s collapse timing */
+    .collapsing {
+        transition: height 0.5s ease;
+    }
+
+    .collapse:not(.show) {
+        display: block;
+        height: 0;
+        overflow: hidden;
+    }
+
+    .rotate-icon{
+     font-size: larger;
+    } 
+    .card-header:hover {
+        background-color: whitesmoke;
+        border-radius: 5px;
+    }
 </style>
 
 
@@ -113,7 +132,7 @@
 <div class="content-wrapper">
     <div class="box-header">
         <h3>
-            Add new role
+            Role Management
             <a href="<?php echo base_url('employee/EmployeeRoles') ?>" class="pull-right btn btn-default btn-sm rounded">
                 <i class="fa fa-angle-left"></i> <?php echo trans('back') ?>
             </a>
@@ -150,12 +169,21 @@
 
             <?php foreach ($departments as $dept): ?>
                 <?php if (!in_array($dept->name, $restricted_departments) || $this->auth_model->is_access_for_all_role()): ?>
-                    <div class="col-md-12 m-auto card mb-5">
-                        <div class="card-header">
-                            <h5>Department: <?= html_escape($dept->name); ?></h5>
+                    <div class="col-md-12 card" style="margin-bottom: 20px;">
+                        <div class="card-header d-flex justify-content-between align-items-center
+             cursor-pointer department-header my-4"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#dept-body-<?= $dept->id ?>"
+                            aria-expanded="false"
+                            aria-controls="dept-body-<?= $dept->id ?>">
+
+                            <h5 class="mb-0">Department: <?= html_escape($dept->name); ?></h5>
+
+                            <!-- rotate‑me icon -->
+                            <i class="fa fa-angle-down rotate-icon"></i>
                         </div>
-                        <div class="card-body">
-                            <h6 class=""><i class="fa fa-user"></i> Roles</h6>
+
+                        <div id="dept-body-<?= $dept->id ?>" class="card-body collapse" style="padding:0px 1rem;">
 
                             <?php foreach ($default_roles as $index => $drole): ?>
                                 <?php if ($drole->department_id == $dept->department_id): ?>
@@ -194,9 +222,7 @@
             <?php endforeach; ?>
 
             <!-- ✅ Single Save Button -->
-            <div class="text-end my-4" style="
-    text-align: end;
-">
+            <div class="text-end my-4" style="text-align: end;">
                 <button type="submit" class="btn btn-success btn-sm">Save All Roles</button>
             </div>
 
@@ -206,11 +232,17 @@
 </div>
 
 <!-- JS to update hidden status[] from radio buttons -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    $(document).ready(function() {
-        $('input[type=radio][name^=status_]').on('change', function() {
-            var index = $(this).attr('name').split('_')[1];
-            $('#role-status-' + index).val($(this).val());
-        });
+    document.addEventListener('shown.bs.collapse', e => {
+        e.target.previousElementSibling
+            .querySelector('.rotate-icon')
+            .classList.replace('fa-angle-down', 'fa-angle-up');
+    });
+    document.addEventListener('hidden.bs.collapse', e => {
+        e.target.previousElementSibling
+            .querySelector('.rotate-icon')
+            .classList.replace('fa-angle-up', 'fa-angle-down');
     });
 </script>

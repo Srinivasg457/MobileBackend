@@ -561,6 +561,7 @@
                 data: formData,
                 success: function(response) {
                     swal("Success!", response, "success");
+                    changeOrganizationSetting(null, formData);
                     window.location.href = "<?= base_url('organization/edit') ?>";
                 },
                 error: function(res) {
