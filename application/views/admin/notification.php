@@ -221,12 +221,6 @@
             <div class="box desktop">Desktop</div>
             <div class="box webcam active">Webcam</div>
         </div>
-        <?php
-        echo '
-        <pre>';
-print_r($this->session->all_userdata());
-echo '</pre>';
-?>
         <div class="notification-container" id="notifications-list">
             <!-- <div class="loading">Loading notifications...</div> -->
         </div>

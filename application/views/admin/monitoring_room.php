@@ -680,9 +680,7 @@
     });
   }
 
-  <
-  script src = "<?= base_url('ws-client.js'); ?>" >
-</script>
+  <script src = "<?= base_url('ws-client.js'); ?>"></script>
 
 $(document).ready(function () {
 let currentOrder = 'asc'; // Default sorting order
