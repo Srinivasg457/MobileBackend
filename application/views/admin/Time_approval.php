@@ -1,6 +1,4 @@
 <style>
-  
-
     .btn-group {
         display: flex;
         gap: 25px;
@@ -50,17 +48,17 @@
         .btn-group {
             flex-direction: column;
         }
-        
+
         .btn-group button {
             width: 100%;
         }
-        
+
         #toast-container {
             left: 10px;
             right: 10px;
             top: 10px;
         }
-        
+
         .toast {
             min-width: auto;
             width: calc(100% - 20px);
@@ -74,7 +72,7 @@
     <h3>Time Approval</h3>
     <div class="row" style="margin: 25px auto;">
         <div class="col-lg-6">
-         Employee List:   <select id="employee-select" class="form-control single_select">
+            Employee List: <select id="employee-select" class="form-control single_select">
                 <option value="">Select Employee</option>
             </select>
         </div>
@@ -209,8 +207,13 @@
                         let actionBtns = '';
                         if (row.approved != 1) {
                             actionBtns = `
+                            <?php if ($can_edit): ?>
                                 <button class="btn btn-success btn-sm" onclick="updateApproval(${row.manual_id}, 'approved', ${row.employee_id}, ${userId})">Approve</button>
                                 <button class="btn btn-danger btn-sm disabled" onclick="">Decline</button>
+                                 <?php else: ?>
+                                <button data-toggle="tooltip" data-placement="top" title="permission denied to approve" class="btn btn-sm m-5">Approve</button>
+                                <button data-toggle="tooltip" data-placement="top" title="permission denied to decline" class="btn btn-sm m-5">Decline</button>
+                                <?php endif; ?>
                             `;
                         }
 
@@ -230,6 +233,8 @@
                     });
                 }
                 $('#log-data').html(html);
+                $('[data-toggle="tooltip"]').tooltip(); // Re-initialize tooltips
+
             },
             error: function() {
                 console.error("Failed to fetch timecards.");

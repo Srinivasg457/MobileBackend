@@ -747,10 +747,12 @@ public function is_plan_standard()
     }
     public function get_allowed_feature_ids()
     {
+        $user_id = $this->session->userdata('id');
         $role_id = (int) $this->session->userdata('role_id');
         $rows = $this->db->select('feature_id')
             ->from('role_feature_access')
             ->where('role_id', $role_id)
+            ->where('user_id', $user_id)
             ->where('status', 1)
             ->get()
             ->result_array();          // [['feature_id' => 1], …]
@@ -768,5 +770,47 @@ public function is_plan_standard()
             return true;
         }
         return false;
+    }
+
+    /**
+     * Check whether the logged‑in user has action‑level access
+     * to a given feature.
+     *
+     * @param  int|string $feature_id
+     * @return int  1 = allowed, 0 = denied
+     */
+    public function get_permission($feature_id)
+    {
+        // Always allow CEO or Org Admin
+        if (
+            (int) $this->session->userdata('is_org_ceo') === 1 ||
+            (int) $this->session->userdata('is_org_admin') === 1
+        ) {
+            return true;
+        }
+
+        // Otherwise, check permission for the current user's role
+        $user_id = (int) $this->session->userdata('id');
+        $role_id = (int) $this->session->userdata('role_id');
+
+        // If no role assigned, deny access
+        if (empty($role_id)) {
+            return false;
+        }
+
+        // Look up permission
+        $row = $this->db->select('is_action')
+            ->from('role_feature_access')
+            ->where([
+                'role_id'    => $role_id,
+                'feature_id' => $feature_id,
+                'user_id'    => $user_id,
+                'status'     => 1
+            ])
+            ->limit(1)
+            ->get()
+            ->row(); // stdClass or NULL
+
+        return !empty($row) && (int) $row->is_action === 1;
     }
 }

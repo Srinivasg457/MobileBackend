@@ -16,6 +16,7 @@ class Monitoring_room extends Home_Controller {
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Live Monitoring';
+        $data['can_edit'] = $this->auth_model->get_permission(8);
         $data['main_content'] = $this->load->view('admin/monitoring_room', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {

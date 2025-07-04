@@ -13,6 +13,7 @@ class EmployeeRoles extends Home_Controller {
         require_feature(11);
         $data = array();
         $data['is_employee_admin'] = true;
+        $data['can_edit'] = $this->auth_model->get_permission(11);
         $data['page_title'] = 'Create Roles & Permission';
         $data['departments'] = $this->admin_model->get_by_user('departments');
         $data['main_content'] = $this->load->view('admin/employee/hrm/role_permission', $data, TRUE);

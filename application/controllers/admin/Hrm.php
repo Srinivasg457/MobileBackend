@@ -19,7 +19,8 @@ class Hrm extends Home_Controller {
         require_feature(12);
         $data = array();
         $data['is_employee_admin'] = true;
-        $data['page_title'] = 'Department';      
+        $data['page_title'] = 'Department';
+        $data['can_edit'] = $this->auth_model->get_permission(12);
         $data['page'] = 'Hrm';   
         $data['main_page'] = 'Hrm';   
         $data['department'] = FALSE;
@@ -237,6 +238,7 @@ class Hrm extends Home_Controller {
         $data = array();
         $data['page_title'] = 'Employee';
         $data['is_employee_admin'] = true;
+        $data['can_edit'] = $this->auth_model->get_permission(10);
         $data['page'] = 'Hrm';   
         $data['main_page'] = 'Hrm';   
         $data['employee'] = FALSE;
