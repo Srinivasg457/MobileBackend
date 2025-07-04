@@ -601,7 +601,7 @@ if (!$image) {
     
 public function get_screenshots()
 {
-        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+        $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
         $date = $this->input->get('date');
 
@@ -664,7 +664,7 @@ public function get_screenshots()
 
 public function get_webcam_screenshots()
 {
-        $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+        $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
         $date = $this->input->get('date');
 
