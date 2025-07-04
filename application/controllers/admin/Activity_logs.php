@@ -232,8 +232,8 @@ private function get_closest_interval($dynamic_interval, $valid_intervals)
 
 public function get_activity()
 {
-    // Get inputs from GET request (query parameters)
-    $employee_id = $this->session->userdata('employee_id')??$this->input->get('employee_id');
+        // Get inputs from GET request (query parameters)
+    $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
     $user_id = $this->session->userdata('employee_org_id')??$this->session->userdata('id'); // fallback for Postman or URL query params
     $date = $this->input->get('date'); // Get the date from the query parameter (if provided)
 
@@ -293,7 +293,7 @@ public function get_activity()
 public function get_employee_activity()
 {
         // Get parameters from request
-    $employee_id = $this->session->userdata('employee_id') ?? $this->input->get('employee_id');
+    $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
     $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id'); // fallback for Postman or URL query params
     $date = $this->input->get('date') ?? date('Y-m-d');
     $from_time = $this->input->get('from_time') ?? '00:00:00';

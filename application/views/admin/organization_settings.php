@@ -444,6 +444,7 @@
         opacity: 0.8;
     }
 </style>
+<script src="<?= base_url('ws-client.js'); ?>"></script>
 <script>
     $(document).ready(function() {
         // Show modal
