@@ -329,11 +329,7 @@
         </div>
     </div>
 </div>
-
-
-
-
-
+<script src="<?= base_url('ws-client.js'); ?>"></script>
 <script>
     let currentEmployeeId = null;
 
