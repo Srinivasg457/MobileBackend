@@ -448,13 +448,12 @@
           </div>
           <div class="timestamp" id="modalTimestamp"></div>
         </div> -->
-          </div>
-        </div>
       </div>
     </div>
-  </section>
+  </div>
 </div>
-<script src="<?= base_url('ws-client.js'); ?>"></script>
+</section>
+</div>
 
 <script>
   // All your existing JavaScript functionality remains unchanged
@@ -665,9 +664,9 @@
 
         if (response.status === 'success' && response.screenshot.image_url) {
           thumbnail.attr('src', response.screenshot.image_url)
-            .on('error', function() {
-              container.addClass('blank-screen').html('<span>No Screen Available</span>');
-            });
+          .on('error', function() {
+            container.addClass('blank-screen').html('<span>No Screen Available</span>');
+          });
           container.removeClass('blank-screen');
         } else {
           container.addClass('blank-screen').html('<span>No Screen Available</span>');
@@ -675,31 +674,32 @@
       },
       error: function() {
         $(`#screenshot-${currentEmployeeId}`).parent()
-          .addClass('blank-screen')
-          .html('<span>No Screen Available</span>');
+        .addClass('blank-screen')
+        .html('<span>No Screen Available</span>');
       }
     });
   }
 
-  $(document).ready(function() {
-    let currentOrder = 'asc'; // Default sorting order
-    let currentSort = ''; // Track current selected sort
 
-    function fetchSortedEmployees(order) {
-      $.ajax({
-        url: "<?= base_url('/admin/Monitoring_room/list_employees_ordered') ?>",
-        method: 'GET',
-        data: {
-          order: order
-        },
-        dataType: 'json',
-        success: function(response) {
-          const employeeGrid = $('#employeeGrid');
-          employeeGrid.empty();
+  $(document).ready(function () {
+let currentOrder = 'asc'; // Default sorting order
+let currentSort = ''; // Track current selected sort
 
-          if (response.status === 'success' && response.employees.length > 0) {
-            $.each(response.employees, function(index, employee) {
-              const card = `
+function fetchSortedEmployees(order) {
+  $.ajax({
+    url: "<?= base_url('/admin/Monitoring_room/list_employees_ordered') ?>",
+    method: 'GET',
+    data: {
+      order: order
+    },
+    dataType: 'json',
+    success: function(response) {
+      const employeeGrid = $('#employeeGrid');
+      employeeGrid.empty();
+
+      if (response.status === 'success' && response.employees.length > 0) {
+        $.each(response.employees, function(index, employee) {
+          const card = `
 <div class="employee-card" id="employee-card-${employee.id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
     <img id="screenshot-${employee.id}" src="" alt="Employee Screen">
@@ -722,105 +722,105 @@
     </div>
   </div>
 </div>
-`;
-              employeeGrid.append(card);
-              getActivity(employee.id);
-              getLatestScreenshot(employee.id);
-            });
-          } else {
-            employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
-          }
-        },
-        error: function() {
-          $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error searching employees</p>');
-        }
-      });
-    }
-
-    // Sort icon click behavior
-    $('#sortIcon').on('click', function() {
-      const selectedSort = $('#sortSelect').val();
-
-      if (selectedSort === 'employeeName') {
-        fetchSortedEmployees(currentOrder);
-
-        // Toggle the order
-        if (currentOrder === 'asc') {
-          currentOrder = 'desc';
-          $('#sortIcon i').removeClass().addClass('bi bi-arrow-down');
-        } else {
-          currentOrder = 'asc';
-          $('#sortIcon i').removeClass().addClass('bi bi-arrow-up');
-        }
-      }
-    });
-
-    // On dropdown change
-    $('#sortSelect').on('change', function() {
-      currentSort = $(this).val();
-
-      if (currentSort === 'employeeName') {
-        // Reset icon and default order
-        currentOrder = 'asc';
-        $('#sortIcon i').removeClass().addClass('bi bi-arrow-up');
-        fetchSortedEmployees(currentOrder);
+          `;
+          employeeGrid.append(card);
+          getActivity(employee.id);
+          getLatestScreenshot(employee.id);
+        });
       } else {
-        $('#sortIcon i').removeClass().addClass('bi bi-arrow-down-up');
-        fetchSortedEmployees(currentSort);
+        employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
       }
-    });
-  });
-
-  let sortOrder = 'desc'; // default sort order
-
-  // Listen for change in dropdown
-  $('#sortSelect').on('change', function() {
-    const selectedValue = $(this).val();
-
-    if (selectedValue === 'active') {
-      fetchSortedEmployees('active', sortOrder);
-    } else if (selectedValue === 'employeeName') {
-      fetchSortedEmployees('employeeName', sortOrder);
-    } else if (selectedValue === 'inactive') {
-      fetchSortedEmployees('inactive', sortOrder);
+    },
+    error: function() {
+      $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error searching employees</p>');
     }
   });
+}
 
-  // Optional: toggle sorting order when clicking icon
-  $('#sortIcon').on('click', function() {
-    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-    const selectedValue = $('#sortSelect').val();
+// Sort icon click behavior
+$('#sortIcon').on('click', function () {
+  const selectedSort = $('#sortSelect').val();
 
-    if (selectedValue) {
-      fetchSortedEmployees(selectedValue, sortOrder);
+  if (selectedSort === 'employeeName') {
+    fetchSortedEmployees(currentOrder);
+
+// Toggle the order
+    if (currentOrder === 'asc') {
+      currentOrder = 'desc';
+      $('#sortIcon i').removeClass().addClass('bi bi-arrow-down');
+    } else {
+      currentOrder = 'asc';
+      $('#sortIcon i').removeClass().addClass('bi bi-arrow-up');
     }
-  });
+  }
+});
 
-  // Function to fetch and reload employees
-  function fetchSortedEmployees(type, order) {
-    let orderParam = 'desc'; // fallback
+// On dropdown change
+$('#sortSelect').on('change', function () {
+  currentSort = $(this).val();
 
-    if (type === 'active') {
-      orderParam = order;
-    }
+  if (currentSort === 'employeeName') {
+// Reset icon and default order
+    currentOrder = 'asc';
+    $('#sortIcon i').removeClass().addClass('bi bi-arrow-up');
+    fetchSortedEmployees(currentOrder);
+  } else {
+    $('#sortIcon i').removeClass().addClass('bi bi-arrow-down-up');
+    fetchSortedEmployees(currentSort);
+  }
+});
+});
 
-    $.ajax({
-      url: "<?= base_url('/admin/Monitoring_room/get_active_hours_by_latest_date') ?>",
+let sortOrder = 'desc'; // default sort order
 
-      type: 'GET',
-      dataType: 'json',
-      data: {
-        order: orderParam
-      },
-      success: function(response) {
-        const employeeGrid = $('#employeeGrid');
-        employeeGrid.empty();
+// Listen for change in dropdown
+$('#sortSelect').on('change', function () {
+  const selectedValue = $(this).val();
 
-        if (response.status === true && response.active_hours.length > 0) {
-          const employees = response.active_hours;
+  if (selectedValue === 'active') {
+    fetchSortedEmployees('active', sortOrder);
+  } else if (selectedValue === 'employeeName') {
+    fetchSortedEmployees('employeeName', sortOrder);
+  } else if (selectedValue === 'inactive') {
+    fetchSortedEmployees('inactive', sortOrder);
+  }
+});
 
-          $.each(employees, function(index, employee) {
-            const card = `
+// Optional: toggle sorting order when clicking icon
+$('#sortIcon').on('click', function () {
+  sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+  const selectedValue = $('#sortSelect').val();
+
+  if (selectedValue) {
+    fetchSortedEmployees(selectedValue, sortOrder);
+  }
+});
+
+// Function to fetch and reload employees
+function fetchSortedEmployees(type, order) {
+let orderParam = 'desc'; // fallback
+
+if (type === 'active') {
+  orderParam = order;
+}
+
+$.ajax({
+  url: "<?= base_url('/admin/Monitoring_room/get_active_hours_by_latest_date') ?>",
+
+  type: 'GET',
+  dataType: 'json',
+  data: {
+    order: orderParam
+  },
+  success: function(response) {
+    const employeeGrid = $('#employeeGrid');
+    employeeGrid.empty();
+
+    if (response.status === true && response.active_hours.length > 0) {
+      const employees = response.active_hours;
+
+      $.each(employees, function(index, employee) {
+        const card = `
 <div class="employee-card" id="employee-card-${employee.employee_id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
     <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
@@ -843,58 +843,58 @@
     </div>
   </div>
 </div>
-`;
+        `;
 
-            employeeGrid.append(card);
-            getActivity(employee.employee_id);
-            getLatestScreenshot(employee.employee_id);
-          });
-        } else {
-          employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
-        }
-      },
-      error: function() {
-        $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading employees</p>');
-      }
-    });
-  }
-
-  // Add this to your sort select change handler
-  $('#sortSelect').on('change', function() {
-    const selectedValue = $(this).val();
-
-    if (selectedValue === 'inactive') {
-      fetchInactiveEmployees();
+        employeeGrid.append(card);
+        getActivity(employee.employee_id);
+        getLatestScreenshot(employee.employee_id);
+      });
+    } else {
+      employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
     }
-    // ... other sort options
-  });
+  },
+  error: function() {
+    $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading employees</p>');
+  }
+});
+}
 
-  function fetchInactiveEmployees(order = 'desc') {
-    $.ajax({
-      url: "<?= base_url('/admin/Monitoring_room/get_inactive_hours_by_latest_date') ?>",
-      type: 'GET',
-      dataType: 'json',
-      data: {
-        order: order
-      },
-      success: function(response) {
-        const employeeGrid = $('#employeeGrid');
-        employeeGrid.empty();
+// Add this to your sort select change handler
+$('#sortSelect').on('change', function() {
+  const selectedValue = $(this).val();
 
-        if (response.status === true && response.inactive_hours.length > 0) {
-          const employees = response.inactive_hours;
+  if (selectedValue === 'inactive') {
+    fetchInactiveEmployees();
+  }
+// ... other sort options
+});
 
-          $.each(employees, function(index, employee) {
-            // Format the inactive time (remove seconds if present)
-            let inactiveTime = employee.total_idle_time;
-            if (inactiveTime && inactiveTime.includes(':')) {
-              const parts = inactiveTime.split(':');
-              if (parts.length === 3) {
-                inactiveTime = `${parts[0]}:${parts[1]}`; // HH:MM
-              }
-            }
+function fetchInactiveEmployees(order = 'desc') {
+  $.ajax({
+    url: "<?= base_url('/admin/Monitoring_room/get_inactive_hours_by_latest_date') ?>",
+    type: 'GET',
+    dataType: 'json',
+    data: {
+      order: order
+    },
+    success: function(response) {
+      const employeeGrid = $('#employeeGrid');
+      employeeGrid.empty();
 
-            const card = `
+      if (response.status === true && response.inactive_hours.length > 0) {
+        const employees = response.inactive_hours;
+
+        $.each(employees, function(index, employee) {
+// Format the inactive time (remove seconds if present)
+          let inactiveTime = employee.total_idle_time;
+          if (inactiveTime && inactiveTime.includes(':')) {
+            const parts = inactiveTime.split(':');
+            if (parts.length === 3) {
+inactiveTime = `${parts[0]}:${parts[1]}`; // HH:MM
+}
+}
+
+const card = `
 <div class="employee-card" id="employee-card-${employee.employee_id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
     <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
@@ -919,33 +919,35 @@
 </div>
 `;
 
-            employeeGrid.append(card);
-            getActivity(employee.employee_id);
-            getLatestScreenshot(employee.employee_id);
-          });
-        } else {
-          employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No employees with inactive hours found</p>');
-        }
-      },
-      error: function(xhr, status, error) {
-        console.error('Error fetching inactive hours:', error);
-        $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading inactive hours data</p>');
+employeeGrid.append(card);
+getActivity(employee.employee_id);
+getLatestScreenshot(employee.employee_id);
+});
+      } else {
+        employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No employees with inactive hours found</p>');
       }
-    });
-  }
-
-  // Optional: Add toggle functionality for sort order
-  $('#sortIcon').on('click', function() {
-    if ($('#sortSelect').val() === 'inactive') {
-      const currentOrder = $(this).data('order') || 'desc';
-      const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
-      $(this).data('order', newOrder);
-
-      // Update icon to show sort direction
-      $(this).find('i').removeClass('bi-arrow-down bi-arrow-up')
-        .addClass(newOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up');
-
-      fetchInactiveEmployees(newOrder);
+    },
+    error: function(xhr, status, error) {
+      console.error('Error fetching inactive hours:', error);
+      $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading inactive hours data</p>');
     }
   });
+}
+
+// Optional: Add toggle functionality for sort order
+$('#sortIcon').on('click', function() {
+  if ($('#sortSelect').val() === 'inactive') {
+    const currentOrder = $(this).data('order') || 'desc';
+    const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
+    $(this).data('order', newOrder);
+
+// Update icon to show sort direction
+    $(this).find('i').removeClass('bi-arrow-down bi-arrow-up')
+    .addClass(newOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up');
+
+    fetchInactiveEmployees(newOrder);
+  }
+});
 </script>
+
+<script src="<?= base_url('ws-client.js'); ?>"></script>
