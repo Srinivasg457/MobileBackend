@@ -1,9 +1,9 @@
 {
-    "name": "mediasoup-server",
-    "version": "1.0.0",
-    "type": "module",
-    "main": "server.js",
-    "dependencies": {
-        "ws": "^8.13.0"
-    }
+  "name": "websocket-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "dependencies": {
+    "ws": "^8.13.0"
+  }
 }
