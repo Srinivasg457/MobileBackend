@@ -2,7 +2,7 @@ import fs from 'fs';
 import https from 'https';
 import { WebSocketServer } from 'ws';
 
-// For production with SSL:
+//For production with SSL:
 const serverOptions = {
   cert: fs.readFileSync('/etc/letsencrypt/live/work-room.io/fullchain.pem'),
   key: fs.readFileSync('/etc/letsencrypt/live/work-room.io/privkey.pem')
@@ -14,7 +14,7 @@ httpsServer.listen(8090, () => {
 });
 
 // For local dev without SSL:
-//const wss = new WebSocketServer({ port: 8090 });
+// const wss = new WebSocketServer({ port: 8090 });
 
 const streamers = new Map();
 const viewers = new Map();
@@ -61,11 +61,11 @@ wss.on('connection', (ws) => {
                   })
                 );
                 console.log(
-                  `Sent settings to streamer: user ${ws.employeeId} department ${ws.userId}`
+                  `Sent settings to streamer: user ${ws.employeeId}`
                 );
               } else {
                 console.warn(
-                  `Streamer not available for user ${ws.employeeId} department ${ws.userId}`
+                  `Streamer not available for user ${ws.employeeId}`
                 );
               }
             }
