@@ -16,6 +16,7 @@ class ScreenshotController extends Home_Controller
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Screenshots';
+        $data['can_edit'] = $this->auth_model->get_permission(6);
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/user_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -29,6 +30,7 @@ class ScreenshotController extends Home_Controller
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Webcam screenshots';
+        $data['can_edit'] = $this->auth_model->get_permission(7);
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/webcam_screenshot', $data, TRUE);
         $this->load->view('admin/index', $data);

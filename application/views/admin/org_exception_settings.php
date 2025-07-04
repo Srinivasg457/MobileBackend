@@ -266,9 +266,11 @@
                                         <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
                                     </span>
                                 <?php else: ?>
-                                    <button type="submit" class="btn btn-info">
-                                        Save Settings
-                                    </button>
+                                    <?php if ($can_edit): ?>
+                                        <button type="submit" class="btn btn-info">Save Settings</button>
+                                    <?php else: ?>
+                                        <button data-toggle="tooltip" data-placement="top" title="permission denied to manage organization settings" class="btn btn-sm m-5">save Settings</button>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </div>
