@@ -1,8 +1,8 @@
 if (!window._wsClientLoaded) {
   window._wsClientLoaded = true;
 
-  const ws = new WebSocket("wss://work-room.io:8090");
-  //const ws = new WebSocket('ws://localhost:8090');
+  // const ws = new WebSocket('wss://work-room.io:8090');
+  const ws = new WebSocket("ws://localhost:8090");
 
   ws.binaryType = "arraybuffer";
 
