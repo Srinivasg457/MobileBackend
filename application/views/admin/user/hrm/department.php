@@ -35,7 +35,7 @@
         <?php if (isset($page_title) && $page_title == "Edit"): ?>
           <h3><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/department') ?>" class="pull-right btn btn-default rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
-          <h3><?php echo trans('add-new-department') ?> <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_btn"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
+          <h3><?php echo "Department Management" ?> <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_btn"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php endif; ?>
       </div>
 
@@ -108,53 +108,63 @@
         <?php if (isset($page_title) && $page_title == "Edit"): ?>
           <h3 class="box-title"><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/department') ?>" class="pull-right btn btn-primary rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
-          <h3 class="box-title"><?php echo trans('departments') ?> <a href="#" class="pull-right btn btn-info btn-sm rounded add_btn"><i class="fa fa-plus"></i> <?php echo trans('add-new-department') ?></a></h3>
+          <h3 class="box-title"><?php echo trans('departments') ?>
+            <?php if ($can_edit): ?>
+              <a href="#" class="pull-right btn btn-info btn-sm rounded add_btn"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></a>
+          </h3>
+        <?php else: ?>
+          <button data-toggle="tooltip" data-placement="top" title="permission denied to manage Departments" class=" pull-right btn btn-sm m-5"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></button>
         <?php endif; ?>
 
-        <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
-          <table class="table table-hover cushover <?php if (count($departments) > 10) {
-                                                      echo "datatable";
-                                                    } ?>" id="dg_table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th><?php echo trans('name') ?></th>
-                <th><?php echo trans('status') ?></th>
-                <th><?php echo trans('action') ?></th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php $i = 1;
-              foreach ($departments as $department): ?>
-                <?php
-                if (!$can_view_all_departments && in_array(trim($department->name), $restricted_departments)) {
-                  continue; // Hide restricted department from list
-                }
-                ?>
-                <tr id="row_<?php echo html_escape($department->id); ?>">
+      <?php endif; ?>
 
-                  <td><?php echo $i; ?></td>
-                  <td><?php echo html_escape($department->name); ?></td>
-                  <td>
-                    <?php if ($department->status == 1): ?>
-                      <span class="label label-success">Active</span>
-                    <?php else: ?>
-                      <span class="label label-danger">Dective</span>
-                    <?php endif ?>
-                  </td>
+      <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
+        <table class="table table-hover cushover <?php if (count($departments) > 10) {
+                                                    echo "datatable";
+                                                  } ?>" id="dg_table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th><?php echo trans('name') ?></th>
+              <th><?php echo trans('status') ?></th>
+              <th><?php echo trans('action') ?></th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php $i = 1;
+            foreach ($departments as $department): ?>
+              <?php
+              if (!$can_view_all_departments && in_array(trim($department->name), $restricted_departments)) {
+                continue; // Hide restricted department from list
+              }
+              ?>
+              <tr id="row_<?php echo html_escape($department->id); ?>">
 
-                  <td class="actions" width="15%">
-                    <a href="<?php echo base_url('admin/hrm/department_edit/' . html_escape($department->id)); ?>" class="on-default edit-row hide" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a> &nbsp;
+                <td><?php echo $i; ?></td>
+                <td><?php echo html_escape($department->name); ?></td>
+                <td>
+                  <?php if ($department->status == 1): ?>
+                    <span class="label label-success">Active</span>
+                  <?php else: ?>
+                    <span class="label label-danger">Dective</span>
+                  <?php endif ?>
+                </td>
 
+                <td class="actions" width="15%">
+                  <a href="<?php echo base_url('admin/hrm/department_edit/' . html_escape($department->id)); ?>" class="on-default edit-row hide" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a> &nbsp;
+                  <?php if ($can_edit): ?>
                     <a data-val="department" data-id="<?php echo html_escape($department->id); ?>" href="<?php echo base_url('admin/hrm/department_delete/' . html_escape($department->id)); ?>" class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></a>
-                  </td>
-                </tr>
+                  <?php else: ?>
+                    <a class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="permission deined to delete department"><i class="fa fa-trash-o"></i></a>
+                  <?php endif; ?>
+                </td>
+              </tr>
 
-              <?php $i++;
-              endforeach; ?>
-            </tbody>
-          </table>
-        </div>
+            <?php $i++;
+            endforeach; ?>
+          </tbody>
+        </table>
+      </div>
 
       </div>
     <?php endif; ?>

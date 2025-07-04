@@ -17,6 +17,7 @@ class Notification extends Home_Controller {
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Notification';
+        $data['can_edit'] = $this->auth_model->get_permission(3);
         $data['main_content'] = $this->load->view('admin/notification', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {

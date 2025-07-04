@@ -390,7 +390,10 @@
         <!-- Screenshot Section -->
         <div class="container">
             <div class="header">
-                <h3>Screenshots</h3>
+                <?php if ($is_action) { ?>
+
+                    <h3>Screenshots</h3>
+                <?php }  ?>
             </div>
 
             <!-- Search Filters -->
@@ -650,7 +653,7 @@
                                                 </div>
                                                 <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
                                             </div>`;
-                                                                        }
+                                    }
                                 });
 
 
@@ -710,9 +713,11 @@
                                                             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                                                 <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
                                                                 <span>${timeWithoutSeconds}</span>
+                                                                <?php if($can_edit): ?>
                                                                 <div data-id="${screenshot.id}" data-empID="${$('#employeeSelect').val()}" class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
                                                                     <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
                                                                 </div>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </div>
                                                     </div>

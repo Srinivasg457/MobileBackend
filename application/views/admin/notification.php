@@ -221,6 +221,7 @@
             <div class="box desktop">Desktop</div>
             <div class="box webcam active">Webcam</div>
         </div>
+
         <div class="notification-container" id="notifications-list">
             <!-- <div class="loading">Loading notifications...</div> -->
         </div>
@@ -379,9 +380,18 @@
 
                 const timeHtml = isOnline ? '' : '<div class="time">' + timeAgo + '</div>';
 
+
                 const sendButtonHtml = showDescription ?
-                    `<button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>` :
+                    `
+                    <?php if ($can_edit): ?>
+                        <button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>
+                        <?php else: ?>
+                        <button class="btn" data-toggle="tooltip" data-placement="top" title="permission denied to send mail" style="margin-top:5px;">Send Email</button>
+
+                        <?php endif; ?>` :
                     '';
+
+
 
                 const html =
                     `<div class="notification">
@@ -405,6 +415,7 @@
                     </div>`;
 
                 $('#notifications-list').append(html);
+                $('[data-toggle="tooltip"]').tooltip(); // Re-initialize tooltips
             }
 
 
@@ -470,7 +481,12 @@
                 const isOnline = notification.status == 1;
 
                 const sendButtonHtml = (!isOnline) ?
-                    `<button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>` :
+                    `
+                    <?php if ($can_edit): ?>
+                    <button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>
+                    <?php else: ?>
+                        <button class="btn" data-toggle="tooltip" data-placement="top" title="permission denied to send mail" style="margin-top:5px;">Send Email</button>
+                        <?php endif; ?>` :
                     '';
 
                 const html =
@@ -501,6 +517,7 @@
                         </div>`;
 
                 $('#notifications-list').append(html);
+                $('[data-toggle="tooltip"]').tooltip(); // Re-initialize tooltips
             }
 
 
@@ -517,6 +534,7 @@
             }
 
             $(document).ready(function() {
+
                 // Initially load webcam notifications
                 loadNotifications("web");
 
@@ -528,6 +546,7 @@
                 $('.box.desktop').on('click', function() {
                     loadNotifications("desk");
                 });
+
             });
             $(document).on('click', '.send-email', function() {
                 const $btn = $(this);

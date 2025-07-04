@@ -32,6 +32,7 @@ class Organization_settings extends Home_Controller {
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Edit';
+        $data['can_edit'] = $this->auth_model->get_permission(4);
         $data["settings"] = $this->PreLoading_get_org_settings();
         $data['countries'] = $this->admin_model->select('country');
         // $data["timezone"] = $this->admin_model->get_timezone_list();
@@ -48,6 +49,7 @@ class Organization_settings extends Home_Controller {
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Ex Organization settings';
+        $data['can_edit'] = $this->auth_model->get_permission(5);
         $data['countries'] = $this->admin_model->select('country');
         // $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
