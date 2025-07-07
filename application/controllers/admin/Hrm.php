@@ -709,12 +709,16 @@ public function employee_add()
                         $duplicateEmails[] = $email;
                         continue;
                     }
-    
+                    $role_id = $this->admin_model->get_department_id_by_role_id($employeeData['role'] ?? null);
+
+                    // ✅ Get department_id from role_id
+                    $department_id = $this->admin_model->get_department_id_by_role($role_id);
                     $data = [
                         'user_id' => user()->id,
                         'business_id' => $this->business->uid,
                         'name' => $name,
-                        'department_id' => null,
+                        'department_id' => $department_id,
+                        'role_id' => $role_id,
                         'email' => $email,
                         'phone' => $employeeData['phone'] ?? null,
                         'address' => $employeeData['address'] ?? null,
@@ -790,46 +794,146 @@ public function employee_add()
     
 
 
-public function download_sample_excel()
-{
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+    // public function download_sample_excel()
+    // {
+    //     $spreadsheet = new Spreadsheet();
+    //     $sheet = $spreadsheet->getActiveSheet();
 
-    // Set headings
-    $sheet->setCellValue('A1', 'name');
-    $sheet->setCellValue('B1', 'department_id');
-    $sheet->setCellValue('C1', 'email');
-    $sheet->setCellValue('D1', 'phone');
-    $sheet->setCellValue('E1', 'address');
-    $sheet->setCellValue('F1', 'city');
-    $sheet->setCellValue('G1', 'country');
+    //     // Set headings
+    //     $sheet->setCellValue('A1', 'name');
+    //     $sheet->setCellValue('B1', 'department_id');
+    //     $sheet->setCellValue('C1', 'email');
+    //     $sheet->setCellValue('D1', 'phone');
+    //     $sheet->setCellValue('E1', 'address');
+    //     $sheet->setCellValue('F1', 'city');
+    //     $sheet->setCellValue('G1', 'country');
 
-    // Make first row bold
-    $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+    //     // Make first row bold
+    //     $sheet->getStyle('A1:G1')->getFont()->setBold(true);
 
-    // Add sample row
-    $sheet->setCellValue('A2', 'John Doe');
-    $sheet->setCellValue('B2', '1');
-    $sheet->setCellValue('C2', 'john@example.com');
-    $sheet->setCellValue('D2', '1234567890');
-    $sheet->setCellValue('E2', '123 Main St');
-    $sheet->setCellValue('F2', 'New York');
-    $sheet->setCellValue('G2', 'USA');
+    //     // Add sample row
+    //     $sheet->setCellValue('A2', 'John Doe');
+    //     $sheet->setCellValue('B2', '1');
+    //     $sheet->setCellValue('C2', 'john@example.com');
+    //     $sheet->setCellValue('D2', '1234567890');
+    //     $sheet->setCellValue('E2', '123 Main St');
+    //     $sheet->setCellValue('F2', 'New York');
+    //     $sheet->setCellValue('G2', 'USA');
 
-    // Send file to browser
-    $filename = 'employee_sample.xlsx';
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header("Content-Disposition: attachment; filename=\"$filename\"");
-    header('Cache-Control: max-age=0');
+    //     // Send file to browser
+    //     $filename = 'employee_sample.xlsx';
+    //     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //     header("Content-Disposition: attachment; filename=\"$filename\"");
+    //     header('Cache-Control: max-age=0');
 
-    $writer = new Xlsx($spreadsheet);
-    $writer->save('php://output');
-    exit;
-}
+    //     $writer = new Xlsx($spreadsheet);
+    //     $writer->save('php://output');
+    //     exit;
+    // }
+
+    public function download_sample_excel()
+    {
+        // Get the user_id and roles
+        $user_id = user()->id;
+        if (!$user_id) {
+            $user_id = $this->session->userdata('employee_org_id') || $this->session->userdata('id');
+        }
+
+        // Get roles for the user
+        $this->db->select('role_id as id, role_name as name');
+        $this->db->from('employee_roles');
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('role_id', 'ASC');
+        $query = $this->db->get();
+        $roles = $query->result_array();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Create a note at the top showing role_id:role_name mapping
+        if (!empty($roles)) {
+            $roleMappings = [];
+            foreach ($roles as $role) {
+                $roleMappings[] = $role['id'] . ': ' . $role['name'];
+            }
+
+            // Create a comment/note in cell A1
+            $comment = $sheet->getComment('B1');
+            $comment->getText()->createTextRun("Role ID to Role Name mappings:\n" . implode("\n", $roleMappings));
+            $comment->setWidth('300pt');
+            $comment->setHeight('200pt');
+
+            // Add a red dot indicator
+            $sheet->getStyle('B1')->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
+            $sheet->setCellValue('B1', '●'); // Red dot character
+        }
+
+        // Set headings (starting from row 2 now)
+        $sheet->setCellValue('A1', 'name');
+        $sheet->setCellValue('B1', 'role');
+        $sheet->setCellValue('C1', 'email');
+        $sheet->setCellValue('D1', 'phone');
+        $sheet->setCellValue('E1', 'address');
+        $sheet->setCellValue('F1', 'city');
+        $sheet->setCellValue('G1', 'country');
+
+        // Make first row bold
+        $sheet->getStyle('A2:G2')->getFont()->setBold(true);
+
+        // Add sample row
+        $sheet->setCellValue('A2', 'John Doe');
+        $sheet->setCellValue('C2', 'john@example.com');
+        $sheet->setCellValue('D2', '1234567890');
+        $sheet->setCellValue('E2', '123 Main St');
+        $sheet->setCellValue('F2', 'New York');
+        $sheet->setCellValue('G2', 'USA');
+
+        // Create dropdown for role_id (column B)
+        if (!empty($roles)) {
+            // Extract role IDs
+            $roleIds = array_column($roles, 'id');
+
+            // Create data validation for dropdown
+            $validation = $sheet->getCell('B3')->getDataValidation();
+            $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(false);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a role from the dropdown list');
+
+            // Set the dropdown options
+            $validation->setFormula1('"' . implode(',', $roleIds) . '"');
+
+            // Apply this validation to the entire column (adjust range as needed)
+            $sheet->setDataValidation('B3:B1048576', $validation); // For entire column in Excel 2007+
+
+            // Set the first role as default value
+            $sheet->setCellValue('B2', $roleIds[0]);
+        } else {
+            // If no roles found, just set default value
+            $sheet->setCellValue('B2', '1');
+        }
+
+        // Send file to browser
+        $filename = 'employee_sample.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
 
 
-// Reuse email logic as a helper method
-private function _send_invitation_email($name, $email, $token)
+
+    // Reuse email logic as a helper method
+    private function _send_invitation_email($name, $email, $token)
 {
     $config = array(
         'protocol'    => 'smtp',
