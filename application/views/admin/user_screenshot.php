@@ -394,6 +394,8 @@
 
                     <h3>Screenshots</h3>
                 <?php }  ?>
+
+                <H3>View Screenshots</H3>
             </div>
 
             <!-- Search Filters -->
