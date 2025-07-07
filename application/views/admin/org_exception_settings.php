@@ -130,9 +130,9 @@
                             </div>
                             <div class="col-md-6 form-group">
                                 <label class="form-label">Timezone:</label>
-                                <div class="input-group">
-                                    <input type="text" name="time_zone" value="" id="timezone_input" class="form-control" required readonly>
-                                    <div class="input-group-append" id="editTimezoneBtn" style="cursor:pointer;">
+                                <div class="input-group" id="editTimezoneBtn" style="cursor:pointer;">
+                                    <input type="text" name="time_zone" value="" id="timezone_input" class="form-control" required readonly style="cursor:pointer;">
+                                    <div class="input-group-append" style="cursor:pointer;">
                                         <span class="input-group-text">
                                             <i class="fa fa-edit"></i>
                                         </span>
@@ -269,7 +269,7 @@
                                     <?php if ($can_edit): ?>
                                         <button type="submit" class="btn btn-info">Save Settings</button>
                                     <?php else: ?>
-                                        <button data-toggle="tooltip" data-placement="top" title="permission denied to manage organization settings" class="btn btn-sm m-5">save Settings</button>
+                                        <span data-toggle="tooltip" data-placement="top" title="permission denied to manage employee settings" class="btn btn-default btn-sm m-5">save Settings</span>
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </div>

@@ -113,7 +113,7 @@
               <a href="#" class="pull-right btn btn-info btn-sm rounded add_btn"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></a>
           </h3>
         <?php else: ?>
-          <button data-toggle="tooltip" data-placement="top" title="permission denied to manage Departments" class=" pull-right btn btn-sm m-5"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></button>
+          <button data-toggle="tooltip" data-placement="top" title="permission denied to manage Departments" class=" pull-right btn btn-default btn-sm m-5"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></button>
         <?php endif; ?>
 
       <?php endif; ?>
@@ -155,7 +155,7 @@
                   <?php if ($can_edit): ?>
                     <a data-val="department" data-id="<?php echo html_escape($department->id); ?>" href="<?php echo base_url('admin/hrm/department_delete/' . html_escape($department->id)); ?>" class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></a>
                   <?php else: ?>
-                    <a class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="permission deined to delete department"><i class="fa fa-trash-o"></i></a>
+                    <a class="on-default" data-toggle="tooltip" data-placement="top" title="permission deined to delete department"><i class="fa fa-trash-o"></i></a>
                   <?php endif; ?>
                 </td>
               </tr>

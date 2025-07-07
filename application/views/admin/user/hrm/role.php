@@ -223,7 +223,11 @@
 
             <!-- ✅ Single Save Button -->
             <div class="text-end my-4" style="text-align: end;">
-                <button type="submit" class="btn btn-success btn-sm">Save All Roles</button>
+                <?php if ($can_edit): ?>
+                    <button type="submit" class="btn btn-success btn-sm">Save All Roles</button>
+                <?php else: ?>
+                    <span data-toggle="tooltip" data-placement="top" title="permission denied to manage role " class="btn btn-default btn-sm m-5">Save All Roles</span>
+                <?php endif; ?>
             </div>
 
         </form> <!-- ✅ End of single form -->

@@ -301,8 +301,12 @@
         <h3 class="box-title"><?php echo "Roles & Permissions" ?>
             <!-- <a href="#" class="pull-right btn btn-info btn-sm rounded create_role_permssion mx-5">
                 <i class="fa fa-plus"></i> Assign Permission to Role</a> -->
-            <a href="<?php echo base_url('employee/EmployeeRoles/role') ?>" class="pull-right btn btn-info btn-sm rounded  mx-5">
-                <i class="fa fa-plus"></i> Manage Role</a>
+            <?php if ($can_edit): ?>
+                <a href="<?php echo base_url('employee/EmployeeRoles/role') ?>" class="pull-right btn btn-info btn-sm rounded  mx-5">
+                    <i class="fa fa-plus"></i> Manage Role</a>
+            <?php else: ?>
+                <button class="pull-right btn btn-default btn-sm rounded  mx-5" data-toggle="tooltip" data-placement="top" title="permission deined to manage role"><i class="fa fa-plus"></i> Manage Role</button>
+            <?php endif; ?>
         </h3>
 
         <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
@@ -460,18 +464,30 @@
                                             <i class="bi bi-eye-slash text-muted" style="font-size: 1.5rem;"></i>
                                             </a>`
                                     }
+                                    <?php if ($can_edit): ?>
                                     <a href="#"
                                         class="remove-row delete-role-btn"
                                         data-val="employee"
                                         data-id="${userId}"
                                         data-department-id="${role.department_id}"
                                         data-role="${role.role_name}"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
                                         title="Delete Role">
                                         <i class="fa fa-trash-o"></i>
                                     </a>
+                                    <?php else: ?>
+                                         <a href="#"
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="permission denied to Delete Role">
+                                            <i class="fa fa-trash-o"></i>
+                                        </a>  
+                        <?php endif; ?>
                                 </td>
                             </tr>`;
                             tbody.append(row);
+                            $('[data-toggle="tooltip"]').tooltip();
                         });
                     } else {
                         // === Employee / Limited Role View ===
@@ -488,18 +504,32 @@
                         title="No Permissions">
                         <i class="bi bi-eye-slash hide text-muted" style="font-size: 1.5rem;"></i>
                         </a>
+                        <?php if ($can_edit): ?>
                         <a href="#"
                             class="remove-row delete-role-btn"
                             data-val="employee"
                             data-id="${userId}"
                             data-department-id="${role.department_id}"
                             data-role="${role.role_name}"
+                            data-toggle="tooltip"
+                            data-placement="top"
                             title="Delete Role">
                             <i class="fa fa-trash-o"></i>
                         </a>
+                        <?php else: ?>
+                          <a href="#"
+                            class=""
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title="permission denied to Delete Role">
+                            <i class="fa fa-trash-o"></i>
+                        </a>  
+                        <?php endif; ?>
                     </td>
                 </tr>`;
                             tbody.append(row);
+                            $('[data-toggle="tooltip"]').tooltip();
+
                         });
                     }
 
