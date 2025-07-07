@@ -2,7 +2,7 @@
     "require": {
         "mpdf/mpdf": "^8.2",
         "phpmailer/phpmailer": "^6.5",
-        "phpoffice/phpspreadsheet": "^4.2",
+        "phpoffice/phpspreadsheet": "^2.0",
         "firebase/php-jwt": "^6.11"
     }
 }
