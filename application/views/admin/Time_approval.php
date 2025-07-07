@@ -211,8 +211,8 @@
                                 <button class="btn btn-success btn-sm" onclick="updateApproval(${row.manual_id}, 'approved', ${row.employee_id}, ${userId})">Approve</button>
                                 <button class="btn btn-danger btn-sm disabled" onclick="">Decline</button>
                                  <?php else: ?>
-                                <button data-toggle="tooltip" data-placement="top" title="permission denied to approve" class="btn btn-sm m-5">Approve</button>
-                                <button data-toggle="tooltip" data-placement="top" title="permission denied to decline" class="btn btn-sm m-5">Decline</button>
+                                <button data-toggle="tooltip" data-placement="top" title="permission denied to approve" class="btn btn-default btn-sm m-5">Approve</button>
+                                <button data-toggle="tooltip" data-placement="top" title="permission denied to decline" class="btn btn-default btn-sm m-5">Decline</button>
                                 <?php endif; ?>
                             `;
                         }

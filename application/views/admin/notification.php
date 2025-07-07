@@ -386,7 +386,7 @@
                     <?php if ($can_edit): ?>
                         <button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>
                         <?php else: ?>
-                        <button class="btn" data-toggle="tooltip" data-placement="top" title="permission denied to send mail" style="margin-top:5px;">Send Email</button>
+                        <button class="btn btn-default rounded" data-toggle="tooltip" data-placement="top" title="permission denied to send mail" style="margin-top:5px;">Send Email</button>
 
                         <?php endif; ?>` :
                     '';
