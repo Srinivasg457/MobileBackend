@@ -319,7 +319,7 @@ class Auth extends Home_Controller
 
                 echo json_encode([
                     'st'  => 1,
-                    'url' => base_url('employeedashboard')
+                    'url' => base_url('employee/dashboard')
                 ]);
                 exit();
             }
