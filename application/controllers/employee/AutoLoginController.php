@@ -70,7 +70,7 @@ class AutoLoginController extends CI_Controller {
                 'is_employee' => true
             ]);
              log_message('info', "AutoLogin: Employee login successful. Employee ID: $employee->id");
-            redirect('employeedashboard');
+            redirect('employee/dashboard');
         } catch (\Exception $e) {
             log_message('error', 'AutoLogin: Session setting failed: ' . $e->getMessage());
              $this->session->set_flashdata('error_message', 'Login error. Please try again.');

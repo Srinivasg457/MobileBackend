@@ -16,28 +16,28 @@
             <li class="<?php if (isset($page_title) && $page_title == "Employee Dashboard") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('employeedashboard') ?>">
+              <a href="<?php echo base_url('employee/dashboard') ?>">
                 <i class="bi bi-house-door mr-5"></i> <span><?php echo trans('dashboard') ?></span>
               </a>
             </li>
             <li class="<?php if (isset($page_title) && $page_title == "Screenshots") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('employeedashboard/screenshot') ?>">
+              <a href="<?php echo base_url('employee/view_screenshots') ?>">
                 <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
               </a>
             </li>
             <li class="<?php if (isset($page_title) && $page_title == "Employee Webcam screenshots") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('admin/ScreenshotController/Employeewebcam') ?>">
+              <a href="<?php echo base_url('employee/webcam_screenshots') ?>">
                 <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
               </a>
             </li>
             <li class="<?php if (isset($page_title) && $page_title == "Activity Log") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('employee/Timecards_manual') ?>">
+              <a href="<?php echo base_url('employee/activity_log') ?>">
                 <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Activity Log" ?></span>
               </a>
             </li>
@@ -75,7 +75,7 @@
                     <?php if ($can(6)): ?>
                       <li class="<?= (isset($page_title) && $page_title === 'User Screenshots') ? 'active' : '' ?>"
                         <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                        <a href="<?= base_url('admin/ScreenshotController') ?>">
+                        <a href="<?= base_url('admin/view_screenshots') ?>">
                           <i class="bi bi-camera mr-5"></i> <span>View Screenshots</span>
                         </a>
                       </li>
@@ -84,7 +84,7 @@
                     <?php if ($can(7)): ?>
                       <li class="<?= (isset($page_title) && $page_title === 'Webcam screenshots') ? 'active' : '' ?>"
                         <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                        <a href="<?= base_url('admin/ScreenshotController/webcam') ?>">
+                        <a href="<?= base_url('admin/webcam_screenshots') ?>">
                           <i class="bi bi-webcam mr-5"></i> <span>Webcam screenshots</span>
                         </a>
                       </li>
@@ -570,14 +570,14 @@
                     <li class="<?php if (isset($page_title) && $page_title == "User Screenshots") {
                                   echo "active";
                                 } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                      <a href="<?php echo base_url('admin/ScreenshotController') ?>">
+                      <a href="<?php echo base_url('admin/view_screenshots') ?>">
                         <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
                       </a>
                     </li>
                     <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") {
                                   echo "active";
                                 } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                      <a href="<?php echo base_url('admin/ScreenshotController/webcam') ?>">
+                      <a href="<?php echo base_url('admin/webcam_screenshots') ?>">
                         <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
                       </a>
                     </li>

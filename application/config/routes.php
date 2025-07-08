@@ -84,12 +84,21 @@ $route['payment-cancel/(:any)'] = 'auth/payment_cancel/$1';
 $route['setup'] = 'auth/setup';
 $route['change_password'] = 'admin/dashboard/change_password';
 
+//organization sites
+$route['admin/view_screenshots'] = 'admin/ScreenshotController';
+$route['admin/webcam_screenshots'] = 'admin/ScreenshotController/webcam';
+
+
+
 //employee sites
 $route['accept-invitation'] = 'employee/Employee/accept_invitation';
 $route['complete-registration'] = 'employee/Employee/complete_registration';
 
-$route['employeedashboard'] = 'employee/Employee';
-$route['employeedashboard/screenshot'] = 'employee/Employee/screenshot';
+$route['employee/dashboard'] = 'employee/Employee';
+$route['employee/view_screenshots'] = 'employee/Employee/screenshot';
+$route['employee/webcam_screenshots'] = 'admin/ScreenshotController/Employeewebcam';
+$route['employee/activity_log'] = 'employee/Timecards_manual';
+
 
 $route['organization'] = 'admin/Organization_settings';
 $route['organization/edit'] = 'admin/Organization_settings/Organization_settings_edit';
