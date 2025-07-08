@@ -93,9 +93,9 @@ class Navbar_Redirection extends Home_Controller
 
         // Check features in navbar order
         if (in_array(6, $allowed)) {
-            redirect('admin/ScreenshotController');
+            redirect('admin/view_screenshots');
         } elseif (in_array(7, $allowed)) {
-            redirect('admin/ScreenshotController/webcam');
+            redirect('admin/webcam_screenshots');
         } elseif (in_array(1, $allowed)) {
             redirect('admin/Activity_logs');
         } elseif (in_array(2, $allowed)) {
