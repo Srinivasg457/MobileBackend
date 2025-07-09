@@ -1,6 +1,6 @@
 <div class="content-wrapper monitoring_room">
   <section class="content">
-    <div class="container">
+    <div class="container-fluid">
       <h3><?php echo "Live Monitoring" ?>
       </h3>
       <div class="row mb-5 reprt-box">
