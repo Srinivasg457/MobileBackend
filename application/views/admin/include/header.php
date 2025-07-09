@@ -38,7 +38,7 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="<?php echo base_url() ?>assets/admin/css/admin_style.css?var=<?php echo settings()->version ?>&time=<?= time(); ?>">
   <link rel="stylesheet" href="<?php echo base_url() ?>assets/admin/css/skins/theme_<?php echo settings()->theme ?>.css">
-  <link rel="stylesheet" href="<?php echo base_url() ?>assets/admin/css/screenshots.css">
+  <link rel="stylesheet" href="<?php echo base_url() ?>assets/admin/css/custom.css">
 
   <?php if (text_dir() == 'rtl'): ?>
     <?php if (settings()->theme == 1): ?>
