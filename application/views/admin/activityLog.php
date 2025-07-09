@@ -1,7 +1,7 @@
     
 <div class="content-wrapper activity_log">
     <div class="manual-entry-container">
-        <h2>Activity Logs</h2>
+        <h3>Activity Logs</h3>
 
         <div class="row mb-5 reprt-box">
             <div class="col-lg-4 mb-5"><label class="control-label">Employee </label>
