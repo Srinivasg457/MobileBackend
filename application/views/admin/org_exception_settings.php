@@ -1,139 +1,27 @@
-<!-- Add to your <head> or <style> block -->
-<style>
-    .input-group-append {
-        border: 1px solid #ddd !important;
-        width: 40px;
-        align-items: center;
-        justify-content: center;
-        display: flex;
-        font-size: large;
-    }
-
-    .input-group-append:hover {
-        background-color: whitesmoke;
-    }
-
-    .switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 28px;
-    }
-
-    .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #e74c3c;
-        transition: .4s;
-        border-radius: 34px;
-        text-align: center;
-        line-height: 28px;
-        color: white;
-        font-size: 12px;
-        font-weight: bold;
-    }
-
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 20px;
-        width: 20px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        transition: .4s;
-        border-radius: 50%;
-    }
-
-    input:checked+.slider {
-        background-color: #28a745;
-    }
-
-    input:checked+.slider:before {
-        transform: translateX(32px);
-    }
-
-    .switch input:not(:checked)+.slider::after {
-        content: "OFF";
-        position: absolute;
-        right: 10px;
-    }
-
-    .switch input:checked+.slider::after {
-        content: "ON";
-        position: absolute;
-        left: 10px;
-    }
-
-    .toast {
-        padding: 10px;
-        margin: 5px;
-        border-radius: 4px;
-        color: #fff;
-        min-width: 200px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .toast-success {
-        background-color: #28a745;
-    }
-
-    .toast-error {
-        background-color: #e74c3c;
-    }
-
-    .is-invalid {
-        border: 2px solid #e74c3c;
-        background-color: #fcebea;
-    }
-
-    #toast-container {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 9999;
-    }
-
-    .content-wrapper {
-        height: unset !important;
-        min-height: unset !important;
-    }
-</style>
-
-<div class="content-wrapper">
+<div class="content-wrapper org_exception_settings">
     <section class="content">
         <div class="container mt-4">
             <h3 class="box-title">Employee Settings</h3>
-            <div class="box mt-20">
+            <div class="box">
                 <div class="box-body">
                     <div class="form-group row"> <!-- Added 'row' class here -->
-                        <div class="col-md-12">
-                            <label for="employeeSelect">Employee:</label>
+                        <div class="col-md-10">
+                            <label class="control-label" for="employeeSelect">Employee:</label>
                             <select id="employeeSelect" class="form-control single_select"></select>
                         </div>
                     </div>
                     <form id="orgExceptionForm">
-                        <div class="row" style="max-width: 1000px;padding:30px">
+                        <div class="row  mt-4">
                             <!-- timezone -->
-                            <div class="col-md-6 form-group">
-
+                            <div class="col-md-4 mb-5 form-group">
                             </div>
-                            <div class="col-md-6 form-group">
+
+                            <div class="col-md-6 mb-5 form-group">
                                 <label class="form-label">Timezone:</label>
                                 <div class="input-group" id="editTimezoneBtn" style="cursor:pointer;">
-                                    <input type="text" name="time_zone" value="" id="timezone_input" class="form-control" required readonly style="cursor:pointer;">
-                                    <div class="input-group-append" style="cursor:pointer;">
-                                        <span class="input-group-text">
+                                    <input type="text" name="time_zone" value="" id="timezone_input" class="form-control" readonly style="cursor:pointer;">
+                                    <div class="input-group-addon" style="cursor:pointer;">
+                                        <span class="">
                                             <i class="fa fa-edit"></i>
                                         </span>
                                     </div>
@@ -141,12 +29,17 @@
                             </div>
 
                             <!-- Screenshot -->
-                            <div class="col-md-6 form-group">
-                                <label>Screenshot Flag:</label><br>
-                                <label class="switch">
+                            <div class="col-md-4 mb-5 form-group">
+                                <label class="control-label">Screenshot Flag:</label><br>
+                                <!-- <label class="switch">
                                     <input type="checkbox" name="screenshot_flag" checked>
                                     <span class="slider"></span>
-                                </label>
+                                </label> -->
+                                <div>
+                                    <label class="toggle-switch ">
+                                        <input type="checkbox" class="toggle-flag" name="screenshot_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                    </label>
+                                </div>
                             </div>
                             <!-- <div class="col-md-6 form-group">
                                 <label>Screenshot Interval (mins):</label>
@@ -158,7 +51,7 @@
                                     <option value="10">10</option>
                                 </select>
                             </div> -->
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-6 mb-5 form-group">
                                 <label>Screenshot Interval (mins):</label>
                                 <select name="screenshot_time_interval" class="form-control interval-field">
                                     <?php if (is_plan_basic()): ?>
@@ -176,16 +69,20 @@
                             </div>
 
                             <!-- Webcam -->
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-4 mb-5 form-group">
                                 <label>Webcam Flag:</label><br>
-                                <label class="switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
+                                <!-- <label class="switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
                                     <input type="checkbox" name="webcam_flag"
                                         <?= (!is_plan_basic()) ? 'checked' : 'disabled' ?>>
                                     <span class="slider"></span>
-                                </label>
-
+                                </label> -->
+                                <div>
+                                    <label class="toggle-switch ">
+                                        <input type="checkbox" class="toggle-flag" name="webcam_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                    </label>
+                                </div>
                             </div>
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-6 mb-5 form-group">
                                 <label>Webcam Interval (mins):</label>
                                 <select name="webcam_time_interval" class="form-control interval-field"
                                     <?php echo is_plan_basic() ? 'disabled' : ''; ?>>
@@ -207,40 +104,55 @@
 
 
                             <!-- Mouse Move -->
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-4 mb-5 form-group">
                                 <label>Mouse Move Flag:</label><br>
-                                <label class="switch">
+                                <!-- <label class="switch">
                                     <input type="checkbox" name="mouse_move_flag" checked>
                                     <span class="slider"></span>
-                                </label>
+                                </label> -->
+                                <div>
+                                    <label class="toggle-switch ">
+                                        <input type="checkbox" class="toggle-flag" name="mouse_move_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                    </label>
+                                </div>
                             </div>
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-6 mb-5 form-group">
                                 <label>Mouse Move Threshold:</label>
                                 <input type="number" name="mouse_move_threshold" class="form-control" value="20" readonly />
                             </div>
 
                             <!-- Keystroke -->
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-4 mb-5 form-group">
                                 <label>Keystroke Flag:</label><br>
-                                <label class="switch">
+                                <!-- <label class="switch">
                                     <input type="checkbox" name="key_stroke_flag" checked>
                                     <span class="slider"></span>
-                                </label>
+                                </label> -->
+                                <div>
+                                    <label class="toggle-switch ">
+                                        <input type="checkbox" class="toggle-flag" name="key_stroke_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                    </label>
+                                </div>
                             </div>
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-6 mb-5 form-group">
                                 <label>Keystroke Threshold:</label>
                                 <input type="number" name="key_stroke_threshold" class="form-control" value="40" readonly />
                             </div>
 
                             <!-- Idle Time -->
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-4 mb-5 form-group">
                                 <label>Idle Time Flag:</label><br>
-                                <label class="switch">
+                                <!-- <label class="switch">
                                     <input type="checkbox" name="idle_time_flag" checked>
                                     <span class="slider"></span>
-                                </label>
+                                </label> -->
+                                <div>
+                                    <label class="toggle-switch ">
+                                        <input type="checkbox" class="toggle-flag" name="idle_time_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                    </label>
+                                </div>
                             </div>
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-6 mb-5 form-group">
                                 <label>Timecards Interval (mins):</label>
                                 <!-- <select name="timecards_time_interval" class="form-control interval-field">
                             <option value="1">1</option>
@@ -251,16 +163,21 @@
                                 <input type="text" name="timecards_time_interval" class="form-control" value="1" readonly>
                             </div>
 
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-4 mb-5 form-group">
                                 <label>Self Login:</label><br>
-                                <label class="switch">
+                                <!-- <label class="switch">
                                     <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
                                     <span class="slider"></span>
-                                </label>
+                                </label> -->
+                                <div>
+                                    <label class="toggle-switch ">
+                                        <input type="checkbox" class="toggle-flag" name="self_login" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                    </label>
+                                </div>
                             </div>
 
 
-                            <div class="col-12 mt-5 form-group">
+                            <div class="col-12 form-group">
                                 <?php if (is_pack_trial()): ?>
                                     <span class="text-danger pull-left " data-toggle="tooltip" data-placement="bottom" title="Upgrade your plan to enable editing.">
                                         <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
@@ -302,7 +219,7 @@
                         <strong>Select a Country</strong>
                     </div>
                     <div class="form-group">
-                        <select class="form-control single_select" name="country" id="country_select">
+                        <select class="form-control" name="country" id="country_select">
                             <option value=""><?php echo trans('select') ?></option>
                             <?php foreach ($countries as $country): ?>
                                 <option value="<?php echo html_escape($country->id); ?>">
@@ -317,7 +234,7 @@
                         <strong>Select a Timezone</strong>
                     </div>
                     <div class="form-group">
-                        <select name="time_zone" id="timezone_select" class="form-control single_select" disabled>
+                        <select name="time_zone" id="timezone_select" class="form-control" disabled>
                             <option value="">Select</option>
                         </select>
                     </div>
@@ -360,6 +277,14 @@
 
     function validateThresholds() {
         let isValid = true;
+        const timeZoneField = $('[name="time_zone"]');
+        const timeZoneValue = timeZoneField.val();
+
+        if (!timeZoneValue) {
+            // time_zone is present and has a non-empty value
+            showToast("Please select timezone", 'error');
+            return flase;
+        }
         const limits = {
             mouse_move_threshold: 20,
             key_stroke_threshold: 40
@@ -368,10 +293,9 @@
         for (const [fieldName, max] of Object.entries(limits)) {
             const field = $(`[name="${fieldName}"]`);
             const value = parseInt(field.val(), 10);
-            field.removeClass('is-invalid');
+            console.log(`${field}: ${value}`);
 
             if (!field.prop('disabled') && (isNaN(value) || value < 1 || value > max)) {
-                field.addClass('is-invalid');
                 const readableName = fieldName.replace(/_/g, ' ');
                 showToast(`${readableName} must be between 1 and ${max}`, 'error');
                 isValid = false;
@@ -389,10 +313,14 @@
 
         // Save and close modal
         $('#saveTimezoneBtn').on('click', function() {
+
             const selectedTimezone = $('#timezone_select').val();
-            if (selectedTimezone != "")
+            if (selectedTimezone != "") {
                 $('#timezone_input').val(selectedTimezone);
-            $('#timezoneModal').modal('hide');
+                $('#timezoneModal').modal('hide');
+            } else {
+                showToast("Please select timezone", 'error');
+            }
         });
 
 
@@ -552,7 +480,7 @@
                         }
                         showToast('Data fetched successfully.', 'success');
                     } else {
-                        showToast('No settings found for this employee. Please insert the data.', 'success');
+                        showToast('No settings found. Please insert the data.', 'success');
                     }
                 },
                 error: function() {

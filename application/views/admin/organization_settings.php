@@ -1,214 +1,22 @@
-<style>
-    .input-group-append {
-        border: 1px solid #ddd !important;
-        width: 40px;
-        align-items: center;
-        justify-content: center;
-        display: flex;
-        font-size: large;
-    }
-
-    .input-group-append:hover {
-        background-color: whitesmoke;
-    }
-
-    [type=radio]:not(:checked),
-    [type=radio]:checked {
-        position: static;
-        opacity: 1;
-    }
-
-
-    #orgSettingsForm {
-        max-width: 1000px;
-    }
-
-    .toggle-switch {
-        position: relative;
-        width: 60px;
-        height: 30px;
-        display: inline-block;
-    }
-
-    .toggle-switch input {
-        display: none;
-    }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        border-radius: 34px;
-        transition: 0.4s;
-    }
-
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 2px;
-        bottom: 2px;
-        background-color: white;
-        border-radius: 50%;
-        transition: 0.4s;
-    }
-
-    input:checked+.slider {
-        background-color: #4CAF50;
-    }
-
-    input:checked+.slider:before {
-        transform: translateX(30px);
-    }
-
-    .slider::after {
-        content: 'OFF';
-        color: white;
-        font-size: 12px;
-        position: absolute;
-        right: 10px;
-        top: 7px;
-    }
-
-    input:checked+.slider::after {
-        content: 'ON';
-        left: 10px;
-        right: auto;
-    }
-
-    .form-label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        display: block;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .target-input:disabled {
-        background-color: #f8f9fa;
-        opacity: 0.7;
-    }
-
-    .toggle-switch {
-        position: relative;
-        width: 60px;
-        height: 30px;
-        display: inline-block;
-    }
-
-    .toggle-switch input {
-        display: none;
-    }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #f44336;
-        /* Red color for OFF state */
-        border-radius: 34px;
-        transition: 0.4s;
-    }
-
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 2px;
-        bottom: 2px;
-        background-color: white;
-        border-radius: 50%;
-        transition: 0.4s;
-    }
-
-    input:checked+.slider {
-        background-color: #4CAF50;
-        /* Green color for ON state */
-    }
-
-    input:checked+.slider:before {
-        transform: translateX(30px);
-    }
-
-    .slider::after {
-        content: 'OFF';
-        color: white;
-        font-size: 12px;
-        position: absolute;
-        right: 10px;
-        top: 7px;
-    }
-
-    input:checked+.slider::after {
-        content: 'ON';
-        left: 10px;
-        right: auto;
-    }
-
-    .toast {
-        padding: 10px;
-        margin: 5px;
-        border-radius: 4px;
-        color: #fff;
-        min-width: 200px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .toast-success {
-        background-color: #28a745;
-    }
-
-    .toast-error {
-        background-color: #e74c3c;
-    }
-
-    .is-invalid {
-        border: 2px solid #e74c3c;
-        background-color: #fcebea;
-    }
-
-    #toast-container {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 9999;
-    }
-
-    .content-wrapper {
-        height: unset !important;
-        min-height: unset !important;
-    }
-</style>
 <?php $is_edit_mode = (isset($page_title) && $page_title == "Edit"); ?>
 
-<div class="content-wrapper" style="min-height: 760.5px;">
+<div class="content-wrapper org-settings">
     <section class="content">
-        <div class="container mt-4">
+        <div class="container">
             <?php if ($is_edit_mode): ?>
-                <h3 class="box-title"> Organization Settings
+                <h3 class=""> Organization Settings
                     <!-- <a href="<?= base_url('organization') ?>" class="pull-right btn btn-default  rounded btn-sm">
                         <i class="fa fa-angle-left"></i> <?= trans('back') ?>
                     </a> -->
                 </h3>
             <?php else: ?>
-                <h3 class="box-title">Organization Settings
+                <h3 class="">Organization Settings
                     <?php if (is_pack_trial()): ?>
                         <span class="text-danger pull-right mt-2" data-toggle="tooltip" data-placement="top" title="Upgrade your plan to enable editing.">
                             <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
                         </span>
                     <?php else: ?>
-                        <a href="<?= base_url('organization/edit') ?>" class="pull-right btn btn-info btn-sm rounded">
+                        <a href="<?= base_url('admin/organization_settings') ?>" class="pull-right btn btn-info btn-sm rounded">
                             <i class="fa fa-edit"></i> Edit Settings
                         </a>
                     <?php endif; ?>
@@ -217,21 +25,23 @@
                 </h3>
             <?php endif; ?>
 
-            <div class="box mt-20">
+            <div class="box">
                 <div class="box-body">
                     <form id="orgSettingsForm" class="validate-form <?= $is_edit_mode ? '' : 'readonly-form' ?>" role="form">
 
-                        <div class="row mt-5">
-                            <div class="col-md-6 form-group">
+                        <div class="row mt-4">
+                            <div class="col-md-4 mb-5 form-group">
                             </div>
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Timezone:</label>
+
+                            <!-- Timezone -->
+                            <div class="col-md-6 mb-5 form-group">
+                                <label class="control-label">Timezone:</label>
                                 <div class="input-group" id="editTimezoneBtn" style="cursor:pointer;">
                                     <input type="text" name="time_zone" value="<?= isset($settings['time_zone']) ? $settings['time_zone'] : '' ?>"
-                                        id="timezone_input" class="form-control" readonly style="cursor:pointer;"   >
+                                        id="timezone_input" class="form-control" readonly style="cursor:pointer;">
                                     <?php if ($is_edit_mode): ?>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">
+                                        <div class="input-group-addon">
+                                            <span class="">
                                                 <i class="fa fa-edit"></i>
                                             </span>
                                         </div>
@@ -240,22 +50,20 @@
                             </div>
 
                             <!-- Screenshot Flag -->
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-4 mb-5 form-group">
 
-                                <label class="form-label">Screenshot Flag:</label>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" name="screenshot_flag" value="1" class="toggle-flag" data-target="screenshot_time_interval"
-                                        <?= isset($settings['screenshot_flag']) && $settings['screenshot_flag'] ? 'checked' : '' ?>
-                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
-                                    <span class="slider"></span>
-                                </label>
+                                <label class="control-label">Screenshot Flag:</label>
+                                <div>
+                                    <label class="toggle-switch ">
+                                        <input type="checkbox" class="toggle-flag" name="screenshot_flag" value="1" <?= isset($settings['screenshot_flag']) && $settings['screenshot_flag'] ? 'checked' : '' ?> data-target="screenshot_time_interval" data-toggle="toggle" data-onstyle="info" data-width="100"
+                                            <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    </label>
+                                </div>
                             </div>
 
-
-
                             <!-- Screenshot Interval -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Screenshot Interval (mins):</label>
+                            <div class="col-md-6 mb-5 form-group">
+                                <label class="control-label">Screenshot Interval (mins):</label>
 
                                 <?php if ($is_edit_mode): ?>
                                     <select name="screenshot_time_interval" class="form-control" id="screenshot_time_interval">
@@ -273,22 +81,20 @@
                                     <input type="text" class="form-control" value="<?= isset($settings['screenshot_time_interval']) ? $settings['screenshot_time_interval'] : '' ?>" readonly>
                                 <?php endif; ?>
                             </div>
-
-
                             <!-- Webcam Flag -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Webcam Flag:</label>
-                                <label class="toggle-switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
-                                    <input type="checkbox" name="webcam_flag" value="1" class="toggle-flag" data-target="webcam_time_interval"
-                                        <?= isset($settings['webcam_flag']) && $settings['webcam_flag'] ? 'checked' : '' ?>
-                                        <?= ($is_edit_mode && !is_plan_basic()) ? '' : 'disabled' ?>>
-                                    <span class="slider"></span>
-                                </label>
+                            <div class="col-md-4 mb-5 form-group">
+                                <label class="control-label">Webcam Flag:</label>
+                                <div>
+                                    <label class="toggle-switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
+                                        <input type="checkbox" class="toggle-flag" name="webcam_flag" value="1" <?= isset($settings['webcam_flag']) && $settings['webcam_flag'] ? 'checked' : '' ?> data-target="webcam_time_interval" data-toggle="toggle" data-onstyle="info" data-width="100"
+                                            <?= ($is_edit_mode && !is_plan_basic()) ? '' : 'disabled' ?>>
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Webcam Interval -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Webcam Interval (mins):</label>
+                            <div class="col-md-6 mb-5 form-group">
+                                <label class="control-label">Webcam Interval (mins):</label>
 
                                 <?php if ($is_edit_mode): ?>
 
@@ -312,57 +118,58 @@
                             </div>
 
                             <!-- Mouse Movement Flag -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Mouse Movement Flag:</label>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" name="mouse_move_flag" value="1" class="toggle-flag" data-target="mouse_move_threshold"
-                                        <?= isset($settings['mouse_move_flag']) && $settings['mouse_move_flag'] ? 'checked' : '' ?>
-                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
-                                    <span class="slider"></span>
-                                </label>
+                            <div class="col-md-4 mb-5 form-group">
+                                <label class="control-label">Mouse Movement Flag:</label>
+                                <div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" class="toggle-flag" name="mouse_move_flag" value="1" <?= isset($settings['mouse_move_flag']) && $settings['mouse_move_flag'] ? 'checked' : '' ?> data-target="mouse_move_threshold" data-toggle="toggle" data-onstyle="info" data-width="100"
+                                            <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Mouse Movement Threshold -->
-                            <div class="col-md-6">
-                                <label class="form-label">Mouse Movement Threshold:</label>
+                            <div class="col-md-6 mb-5 form-group">
+                                <label class="control-label">Mouse Movement Threshold:</label>
                                 <input type="number" name="mouse_move_threshold" class="form-control" id="mouse_move_threshold"
                                     value="<?= isset($settings['mouse_move_threshold']) ? $settings['mouse_move_threshold'] : '' ?>"
                                     readonly />
                             </div>
 
                             <!-- Keystroke Flag -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Keystroke Flag:</label>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" name="key_stroke_flag" value="1" class="toggle-flag" data-target="key_stroke_threshold"
-                                        <?= isset($settings['key_stroke_flag']) && $settings['key_stroke_flag'] ? 'checked' : '' ?>
-                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
-                                    <span class="slider"></span>
-                                </label>
+                            <div class="col-md-4 mb-5 form-group">
+                                <label class="control-label">Keystroke Flag:</label>
+                                <div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" class="toggle-flag" name="key_stroke_flag" value="1" <?= isset($settings['key_stroke_flag']) && $settings['key_stroke_flag'] ? 'checked' : '' ?> data-target="key_stroke_threshold" data-toggle="toggle" data-onstyle="info" data-width="100"
+                                            <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Keystroke Threshold -->
-                            <div class="col-md-6">
-                                <label class="form-label">Keystroke Threshold:</label>
+                            <div class="col-md-6 mb-5 form-group">
+                                <label class="control-label">Keystroke Threshold:</label>
                                 <input type="number" name="key_stroke_threshold" class="form-control" id="key_stroke_threshold"
                                     value="<?= isset($settings['key_stroke_threshold']) ? $settings['key_stroke_threshold'] : '' ?>"
                                     readonly />
                             </div>
 
                             <!-- Idle Time Flag -->
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Idle Time Flag:</label>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" name="idle_time_flag" value="1" class="toggle-flag" data-target="timecards_time_interval"
-                                        <?= isset($settings['idle_time_flag']) && $settings['idle_time_flag'] ? 'checked' : '' ?>
-                                        <?= $is_edit_mode ? '' : 'disabled' ?>>
-                                    <span class="slider"></span>
-                                </label>
+                            <div class="col-md-4 mb-5 form-group">
+                                <label class="control-label">Idle Time Flag:</label>
+                                <div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" class="toggle-flag" name="idle_time_flag" value="1"
+                                            <?= isset($settings['idle_time_flag']) && $settings['idle_time_flag'] ? 'checked' : '' ?> data-target="timecards_time_interval" data-toggle="toggle" data-onstyle="info" data-width="100"
+                                            <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Timecards Interval -->
-                            <div class="col-md-6">
-                                <label class="form-label">Timecards Interval (mins):</label>
+                            <div class="col-md-6 mb-5 form-group">
+                                <label class="control-label">Timecards Interval (mins):</label>
                                 <input type="text" name="timecards_time_interval" class="form-control" id="timecards_time_interval"
                                     value="<?= isset($settings['timecards_time_interval']) ? $settings['timecards_time_interval'] : '' ?>"
                                     <?= $is_edit_mode ? '' : 'readonly' ?>>
@@ -370,7 +177,7 @@
                         </div>
 
                         <?php if ($is_edit_mode): ?>
-                            <div class="mt-3">
+                            <div class="">
                                 <?php if (is_pack_trial()): ?>
                                     <span class="text-danger pull-left mt-2" data-toggle="tooltip" data-placement="top" title="Upgrade your plan to enable editing.">
                                         <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
@@ -409,7 +216,7 @@
                         <strong>Select a Country</strong>
                     </div>
                     <div class="form-group">
-                        <select class="form-control single_select" name="country" id="country_select">
+                        <select class="form-control" name="country" id="country_select">
                             <option value=""><?php echo trans('select') ?></option>
                             <?php foreach ($countries as $country): ?>
                                 <option value="<?php echo html_escape($country->id); ?>">
@@ -424,7 +231,7 @@
                         <strong>Select a Timezone</strong>
                     </div>
                     <div class="form-group">
-                        <select name="time_zone" id="timezone_select" class="form-control single_select" disabled>
+                        <select name="time_zone" id="timezone_select" class="form-control" disabled>
                             <option value="">Select</option>
                         </select>
                     </div>
@@ -438,16 +245,7 @@
         </div>
     </div>
 </div>
-<!-- Optional CSS for graying out form -->
-<style>
-    .readonly-form input[readonly],
-    .readonly-form select:disabled,
-    .readonly-form input:disabled {
-        background-color: #f9f9f9;
-        pointer-events: none;
-        opacity: 0.8;
-    }
-</style>
+
 <script>
     $(document).ready(function() {
         // Show modal
@@ -458,9 +256,12 @@
         // Save and close modal
         $('#saveTimezoneBtn').on('click', function() {
             const selectedTimezone = $('#timezone_select').val();
-            if (selectedTimezone != "")
+            if (selectedTimezone != "") {
                 $('#timezone_input').val(selectedTimezone);
-            $('#timezoneModal').modal('hide');
+                $('#timezoneModal').modal('hide');
+            } else {
+                showToast("Please select timezone", 'error');
+            }
         });
 
 
@@ -521,7 +322,14 @@
 
         $('#orgSettingsForm').on('submit', function(e) {
             e.preventDefault();
+            const timeZoneField = $('[name="time_zone"]');
+            const timeZoneValue = timeZoneField.val();
 
+            if (!timeZoneValue) {
+                // time_zone is present and has a non-empty value
+                showToast("Please select timezone", 'error');
+                return;
+            }
             let isValid = true;
             $('.is-invalid').removeClass('is-invalid');
 
@@ -564,9 +372,9 @@
                 method: "POST",
                 data: formData,
                 success: function(response) {
-                    swal("Success!", response, "success");
+                    swal("Success!", 'Organization settings saved successfully!', "success");
                     changeOrganizationSetting(null, formData);
-                    window.location.href = "<?= base_url('organization/edit') ?>";
+                    window.location.href = "<?= base_url('admin/organization_settings') ?>";
                 },
                 error: function(res) {
                     const errorMsg = res.responseJSON?.message || "Something went wrong.";

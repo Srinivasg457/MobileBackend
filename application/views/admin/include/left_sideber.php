@@ -143,7 +143,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Edit") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('organization/edit') ?>">
+                  <a href="<?php echo base_url('admin/organization_settings') ?>">
                     <i class="bi bi-toggle-on mr-5"></i> <span><?php echo "Organization settings" ?></span>
                   </a>
                 </li>
@@ -152,7 +152,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Ex Organization settings") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('organization/org_exception') ?>">
+                  <a href="<?php echo base_url('admin/employee_settings') ?>">
                     <i class="bi bi-tools mr-5"></i> <span><?php echo "Employee settings" ?></span>
                   </a>
                 </li>
@@ -622,14 +622,14 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Edit") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('organization/edit') ?>">
+                  <a href="<?php echo base_url('admin/organization_settings') ?>">
                     <i class="bi bi-toggle-on mr-5"></i> <span><?php echo "Organization settings" ?></span>
                   </a>
                 </li>
                 <li class="<?php if (isset($page_title) && $page_title == "Ex Organization settings") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('organization/org_exception') ?>">
+                  <a href="<?php echo base_url('admin/employee_settings') ?>">
                     <i class="bi bi-tools mr-5"></i> <span><?php echo "Employee settings" ?></span>
                   </a>
                 </li>
