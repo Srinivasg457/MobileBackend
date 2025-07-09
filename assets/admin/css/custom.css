@@ -1,3 +1,4 @@
+.screenshot{
 .card-container {
   > p {
     text-align: center;
@@ -250,6 +251,9 @@
   }
 }
 
+}
+
+.activity_log{
 .cancel-btn {
   background: red;
   color: #fff;
@@ -722,3 +726,4 @@ textarea {
 /* EMPLOYEEACTIVITY LOG Start*/
 
 /* EMPLOYEEACTIVITYLOG END */
+}
