@@ -1,6 +1,6 @@
 <div class="content-wrapper timecards">
     <section class="content">
-        <div class="container">
+        <div class="container-fluid">
             <h3>Time Cards</h3>
             <div class="row mb-5 reprt-box">
                 <!-- Employee Select -->
