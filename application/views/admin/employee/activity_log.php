@@ -1,126 +1,126 @@
 <div class="content-wrapper">
-<div class="manual-entry-container">
-                <h2>Activity Log</h2>
-                <div class="entry-header reprt-box">
-  <label class="hide">Employee
-    <input type="text" placeholder="Enter employee name" />
-  </label>
-  <label for="datePicker">Date
-    <input type="date" id="datePicker" value="">
-  </label>
-</div>
+  <div class="manual-entry-container">
+    <h2>Activity Log</h2>
+    <div class="entry-header mb-5 reprt-box">
+      <label class="hide control-label">Employee
+        <input type="text" class="form-control" placeholder="Enter employee name" />
+      </label>
+      <label class="control-label" for="datePicker">Date
+        <input type="date" id="datePicker" value="" class="form-control">
+      </label>
+    </div>
 
 
     <div class="row box-payout-areas mt-20">
-<div class="col-md-3 col-sm-6 col-12 mb-1">
-    <div class="info-box-pay border">
-        <div class="info-box-content-pay">
+      <div class="col-md-3 col-sm-6 col-12 mb-1">
+        <div class="info-box-pay border">
+          <div class="info-box-content-pay">
             <span class="info-box-number-pay text-success" id="active-time"><strong>0 hr 0 min</strong></span>
             <span class="info-box-texts text-dark fs-13 text-capitalize">Active Time</span>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
 
-<div class="col-md-3 col-sm-6 col-12 mb-1">
-    <div class="info-box-pay border ">
-        <div class="info-box-content-pay">
+      <div class="col-md-3 col-sm-6 col-12 mb-1">
+        <div class="info-box-pay border ">
+          <div class="info-box-content-pay">
             <span class="info-box-number-pay text-success danger inactive"><strong>00 hrs 00 min</strong></span>
             <span class="info-box-texts text-dark fs-13 text-capitalize">Inactive Time</span>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
 
-<div class="col-md-3 col-sm-6 col-12 mb-1">
-    <div class="info-box-pay border ">
-        <div class="info-box-content-pay">
+      <div class="col-md-3 col-sm-6 col-12 mb-1">
+        <div class="info-box-pay border ">
+          <div class="info-box-content-pay">
             <span class="info-box-number-pay  text-success"><strong>0 hr 0 min</strong></span>
             <span class="info-box-texts text-dark fs-13 text-capitalize">Manual Time</span>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
 
-<div class="col-md-3 col-sm-6 col-12 mb-1">
-    <div class="info-box-pay border">
-        <div class="info-box-content-pay">
+      <div class="col-md-3 col-sm-6 col-12 mb-1">
+        <div class="info-box-pay border">
+          <div class="info-box-content-pay">
             <span class="info-box-number-pay text-success"><strong>00:00</strong></span>
             <span class="info-box-texts text-dark fs-13 text-capitalize">Meeting Time</span>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-</div>
 
     <div class="mt-30" id="activity">
 
-<h5>Activity Bar</h5>
-<div class="legend">
-    <div class="legend-item">
-        <div class="legend-color bg-green"></div>
-        <span>Active</span>
-    </div>
-    <div class="legend-item">
-        <div class="legend-color bg-yellow"></div>
-        <span>Moderate Active</span>
-    </div>
-    <div class="legend-item">
-      <div class="legend-color box-danger"></div>
-      <span>Inactive</span>
-  </div>
-</div>
+      <h5>Activity Bar</h5>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color bg-green"></div>
+          <span>Active</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color bg-yellow"></div>
+          <span>Moderate Active</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color box-danger"></div>
+          <span>Inactive</span>
+        </div>
+      </div>
 
 
-    <div class="timeline-container">
+      <div class="timeline-container">
         <!-- <div class="time-row"> -->
         <div id="timeline-track">
-            <!-- Dynamic blocks will be added here -->
+          <!-- Dynamic blocks will be added here -->
 
-            <!-- Static time markers (08:00 to 20:00) -->
-            <!-- Each hour = 100% / 12 = 8.33% -->
-            <div class="time-marker" style="left: 0%;" data-time="08:00"></div>
-            <div class="time-marker" style="left: 8.33%;" data-time="09:00"></div>
-            <div class="time-marker" style="left: 16.66%;" data-time="10:00"></div>
-            <div class="time-marker" style="left: 25%;" data-time="11:00"></div>
-            <div class="time-marker" style="left: 33.33%;" data-time="12:00"></div>
-            <div class="time-marker" style="left: 41.66%;" data-time="13:00"></div>
-            <div class="time-marker" style="left: 50%;" data-time="14:00"></div>
-            <div class="time-marker" style="left: 58.33%;" data-time="15:00"></div>
-            <div class="time-marker" style="left: 66.66%;" data-time="16:00"></div>
-            <div class="time-marker" style="left: 75%;" data-time="17:00"></div>
-            <div class="time-marker" style="left: 83.33%;" data-time="18:00"></div>
-            <div class="time-marker" style="left: 91.66%;" data-time="19:00"></div>
-            <div class="time-marker" style="left: 100%;" data-time="20:00"></div>
+          <!-- Static time markers (08:00 to 20:00) -->
+          <!-- Each hour = 100% / 12 = 8.33% -->
+          <div class="time-marker" style="left: 0%;" data-time="08:00"></div>
+          <div class="time-marker" style="left: 8.33%;" data-time="09:00"></div>
+          <div class="time-marker" style="left: 16.66%;" data-time="10:00"></div>
+          <div class="time-marker" style="left: 25%;" data-time="11:00"></div>
+          <div class="time-marker" style="left: 33.33%;" data-time="12:00"></div>
+          <div class="time-marker" style="left: 41.66%;" data-time="13:00"></div>
+          <div class="time-marker" style="left: 50%;" data-time="14:00"></div>
+          <div class="time-marker" style="left: 58.33%;" data-time="15:00"></div>
+          <div class="time-marker" style="left: 66.66%;" data-time="16:00"></div>
+          <div class="time-marker" style="left: 75%;" data-time="17:00"></div>
+          <div class="time-marker" style="left: 83.33%;" data-time="18:00"></div>
+          <div class="time-marker" style="left: 91.66%;" data-time="19:00"></div>
+          <div class="time-marker" style="left: 100%;" data-time="20:00"></div>
         </div>
         <!-- </div> -->
+      </div>
     </div>
-</div>
 
   </div>
 
 
-    <div id="dg_table">
+  <div id="dg_table">
     <div class="reprt-box-1">
-    <h5>Manual Entry Logs</h5>
+      <h5>Manual Entry Logs</h5>
 
-    <table class="log-table">
-      <thead>
-        <tr>
-          <th>S.No</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-          <th>Duration (minutes)</th>
-          <th>Reason</th>
-          <th>Status</th>
-        </tr>
-      </thead>
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Duration (minutes)</th>
+            <th>Reason</th>
+            <th>Status</th>
+          </tr>
+        </thead>
 
-      <tbody id="log-data">
-        <!-- Data from database will go here -->
-      </tbody>
-    </table>
+        <tbody id="log-data">
+          <!-- Data from database will go here -->
+        </tbody>
+      </table>
 
-    <div class="manual-button-wrap">
-      <button class="manual-add-btn" onclick="openModal()"><i class="fa fa-plus-circle" aria-hidden="true"></i>
-        Add Manual Entry</button>
-    </div>
+      <div class="manual-button-wrap">
+        <button class="manual-add-btn" onclick="openModal()"><i class="fa fa-plus-circle" aria-hidden="true"></i>
+          Add Manual Entry</button>
+      </div>
     </div>
   </div>
 
@@ -360,17 +360,17 @@
             // Skip if the time is outside 08:00 - 20:00
             if (totalTimeInMinutes < 0 || totalTimeInMinutes > totalMinutes) return;
 
-        
+
             let blockColorClass = '';
-                if (item.is_active == '1') {
-                    blockColorClass = 'bg-yellow';
-                } else if (item.is_active == '2') {
-                    blockColorClass = 'bg-green';
-                } else if (item.is_active == '3') {
-                    blockColorClass = 'bg-green';
-                } else {
-                    blockColorClass = 'bg-red';
-                }
+            if (item.is_active == '1') {
+              blockColorClass = 'bg-yellow';
+            } else if (item.is_active == '2') {
+              blockColorClass = 'bg-green';
+            } else if (item.is_active == '3') {
+              blockColorClass = 'bg-green';
+            } else {
+              blockColorClass = 'bg-red';
+            }
 
             const blockWidthPercent = (5 / totalMinutes) * 100;
             const leftPositionPercent = (totalTimeInMinutes / totalMinutes) * 100;
@@ -443,9 +443,9 @@
 
           // Update the second .status-box strong tag (Inactive)
           $('.danger.inactive strong').text(idleFormatted);
-                    } else {
-                        $('#active-time').text("00 hrs 00 min");
-                        $('.danger.inactive strong').text("00 hrs 00 min");
+        } else {
+          $('#active-time').text("00 hrs 00 min");
+          $('.danger.inactive strong').text("00 hrs 00 min");
         }
       },
       error: function() {
@@ -468,8 +468,8 @@
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-      $(document).ready(function() {
+<script>
+  $(document).ready(function() {
 
-      });
-    </script>
+  });
+</script>

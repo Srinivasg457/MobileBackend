@@ -94,7 +94,7 @@
                     <?php if ($can(1)): ?>
                       <li class="<?= (isset($page_title) && $page_title === 'Activity Log Admin') ? 'active' : '' ?>"
                         <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                        <a href="<?= base_url('admin/Activity_logs') ?>">
+                        <a href="<?= base_url('admin/activity_log') ?>">
                           <i class="bi bi-file-bar-graph mr-5"></i> <span>Activity Log</span>
                         </a>
                       </li>
@@ -104,7 +104,7 @@
                     <?php if ($can(2)): ?>
                       <li class="<?= (isset($page_title) && $page_title === 'employee_activity') ? 'active' : '' ?>"
                         <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                        <a href="<?= base_url('admin/Activity_logs/Time_Cards') ?>">
+                        <a href="<?= base_url('admin/time_cards') ?>">
                           <i class="bi bi-clock mr-5"></i> <span>Time Cards</span>
                         </a>
                       </li>
@@ -116,7 +116,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/Monitoring_room') ?>">
+                  <a href="<?php echo base_url('admin/live_monitoring') ?>">
                     <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
                   </a>
                 </li>
@@ -584,14 +584,14 @@
                     <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
                                   echo "active";
                                 } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                      <a href="<?php echo base_url('admin/Activity_logs') ?>">
+                      <a href="<?php echo base_url('admin/activity_log') ?>">
                         <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Logs" ?></span>
                       </a>
                     </li>
                     <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
                                   echo "active";
                                 } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                      <a href="<?php echo base_url('admin/Activity_logs/Time_Cards') ?>">
+                      <a href="<?php echo base_url('admin/time_cards') ?>">
                         <i class="bi bi-clock mr-5"></i> <span><?php echo "Time Cards" ?></span>
                       </a>
                     </li>
@@ -601,7 +601,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/Monitoring_room') ?>">
+                  <a href="<?php echo base_url('admin/live_monitoring') ?>">
                     <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
                   </a>
                 </li>

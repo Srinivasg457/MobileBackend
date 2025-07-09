@@ -97,11 +97,11 @@ class Navbar_Redirection extends Home_Controller
         } elseif (in_array(7, $allowed)) {
             redirect('admin/webcam_screenshots');
         } elseif (in_array(1, $allowed)) {
-            redirect('admin/Activity_logs');
+            redirect('admin/activity_log');
         } elseif (in_array(2, $allowed)) {
-            redirect('admin/Activity_logs/Time_Cards');
+            redirect('admin/time_cards');
         } elseif (in_array(8, $allowed)) {
-            redirect('admin/Monitoring_room');
+            redirect('admin/live_monitoring');
         } elseif (in_array(3, $allowed)) {
             redirect('admin/Notification');
         } elseif (in_array(9, $allowed)) {

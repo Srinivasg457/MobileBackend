@@ -4,9 +4,9 @@
             <h3>Employee Settings</h3>
             <div class="box">
                 <div class="box-body">
-                    <div class="form-group row"> <!-- Added 'row' class here -->
+                    <div class="form-group mt-4 row"> <!-- Added 'row' class here -->
                         <div class="col-md-10">
-                            <label class="control-label" for="employeeSelect">Employee:</label>
+                            <label class="control-label" for="employeeSelect">Employee</label>
                             <select id="employeeSelect" class="form-control single_select"></select>
                         </div>
                     </div>
