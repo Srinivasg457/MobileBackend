@@ -94,7 +94,7 @@
                     <?php if ($can(1)): ?>
                       <li class="<?= (isset($page_title) && $page_title === 'Activity Log Admin') ? 'active' : '' ?>"
                         <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                        <a href="<?= base_url('admin/activity_log') ?>">
+                        <a href="<?= base_url('admin/activity_logs') ?>">
                           <i class="bi bi-file-bar-graph mr-5"></i> <span>Activity Log</span>
                         </a>
                       </li>
@@ -125,7 +125,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Notification") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/Notification') ?>">
+                  <a href="<?php echo base_url('admin/notification') ?>">
                     <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
                   </a>
                 </li>
@@ -565,7 +565,7 @@
                     <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
                                   echo "active";
                                 } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                      <a href="<?php echo base_url('admin/activity_log') ?>">
+                      <a href="<?php echo base_url('admin/activity_logs') ?>">
                         <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Logs" ?></span>
                       </a>
                     </li>
@@ -598,7 +598,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Notification") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/Notification') ?>">
+                  <a href="<?php echo base_url('admin/notification') ?>">
                     <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
                   </a>
                 </li>
