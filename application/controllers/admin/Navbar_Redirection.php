@@ -107,9 +107,9 @@ class Navbar_Redirection extends Home_Controller
         } elseif (in_array(9, $allowed)) {
             redirect('employee/Timecards_manual/approve');
         } elseif (in_array(4, $allowed)) {
-            redirect('organization/edit');
+            redirect('admin/organization_settings');
         } elseif (in_array(5, $allowed)) {
-            redirect('organization/org_exception');
+            redirect('admin/employee_settings');
         } elseif (in_array(12, $allowed)) {
             redirect('admin/hrm/department');
         } elseif (in_array(10, $allowed)) {

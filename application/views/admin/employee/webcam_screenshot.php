@@ -1,4 +1,4 @@
-<div class="content-wrapper">
+<div class="content-wrapper screenshot">
     <section class="content">
         <!-- Screenshot Section -->
         <div class="container">
