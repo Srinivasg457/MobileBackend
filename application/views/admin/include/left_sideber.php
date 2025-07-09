@@ -563,7 +563,7 @@
                                     } ?>">
 
                   <a href="#"><i class="bi bi-graph-up-arrow mr-5"></i>
-                    <span><?php echo "Analytics" ?></span>
+                    <span><?php echo "Employee Metrics" ?></span>
                     <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
                   </a>
                   <ul class="treeview-menu">
@@ -585,7 +585,7 @@
                                   echo "active";
                                 } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
                       <a href="<?php echo base_url('admin/Activity_logs') ?>">
-                        <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Log" ?></span>
+                        <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Logs" ?></span>
                       </a>
                     </li>
                     <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
