@@ -1,5 +1,5 @@
     
-<div class="content-wrapper ">
+<div class="content-wrapper activity_log">
     <div class="manual-entry-container">
         <h2>Activity Logs</h2>
 
