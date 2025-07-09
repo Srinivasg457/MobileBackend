@@ -1204,3 +1204,77 @@
   }
 }
 
+
+.Time_Approval{
+
+.btn-group {
+  display: flex;
+  gap: 13px;
+  justify-content: end;
+}
+
+
+/* New mobile-responsive styles */
+@media (max-width: 768px) {
+  .row {
+      flex-direction: column;
+      margin: 15px auto !important;
+  }
+
+  .col-lg-6 {
+      width: 100%;
+      margin-bottom: 15px;
+  }
+
+  #employee-select {
+      width: 100%;
+  }
+
+  .btn-group {
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-start;
+  }
+
+  .btn-group button {
+      flex: 1 0 100px;
+      margin: 5px 0 !important;
+  }
+
+  .content-wrapper h3 {
+      font-size: 1.5rem;
+      text-align: center;
+  }
+
+  .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-group {
+      flex-direction: column;
+  }
+
+  .btn-group button {
+      width: 100%;
+  }
+
+  #toast-container {
+      left: 10px;
+      right: 10px;
+      top: 10px;
+  }
+
+  .toast {
+      min-width: auto;
+      width: calc(100% - 20px);
+  }
+}
+.manual-entry-container {
+padding: 20px;
+border-radius: 16px;
+margin: auto;
+}
+}
