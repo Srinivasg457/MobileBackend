@@ -1,430 +1,37 @@
-<style>
-  :root {
-    --primary: #4361ee;
-    --primary-light: #e6e9ff;
-    --secondary: #3f37c9;
-    --success: #5cb85c;
-    --danger: #ff0505;
-    --warning: #f8961e;
-    --info: #4895ef;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --gray: #6c757d;
-    --light-gray: #e9ecef;
-    --border-radius: 0.375rem;
-    --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-
-  .monitoring-container {
-    padding: 2rem;
-    background-color: #f5f7fb;
-    min-height: 100vh;
-  }
-
-  .monitoring-header {
-    margin-bottom: 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .monitoring-title {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: var(--dark);
-    margin: 0;
-  }
-
-  .monitoring-toolbar {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .search-input {
-    padding: 0.625rem 1rem;
-    border-radius: var(--border-radius);
-    border: 1px solid #ced4da;
-    font-size: 0.875rem;
-    width: 240px;
-    transition: var(--transition);
-  }
-
-  .search-input:focus {
-    /* outline: none; */
-    /* border-color: var(--primary); */
-    /* box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25); */
-  }
-
-  .sort-select {
-    padding: 0.625rem 1rem !important;
-    border-radius: var(--border-radius);
-    border: 1px solid #ced4da;
-    font-size: 0.875rem;
-    background-color: white;
-    transition: var(--transition);
-    width: 200px;
-  }
-
-  .sort-select:focus {
-    /* outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25); */
-  }
-
-  .employee-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-  }
-
-  .employee-card {
-    background-color: white;
-    border-radius: var(--border-radius);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: var(--transition);
-    border: 1px solid var(--light-gray);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .employee-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--box-shadow);
-    border-color: var(--primary-light);
-  }
-
-  .card-thumbnail {
-    position: relative;
-    height: 180px;
-    overflow: hidden;
-    background-color: #f0f2f5;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .card-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-    background-color: #e9ecef;
-  }
-
-  .blank-screen {
-    background-color: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--gray);
-    font-size: 0.875rem;
-  }
-
-  .employee-card:hover .card-thumbnail img {
-    transform: scale(1.03);
-  }
-
-  .live-badge {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background-color: var(--danger);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    z-index: 2;
-  }
-
-  .live-badge::before {
-    content: "";
-    display: block;
-    width: 0.5rem;
-    height: 0.5rem;
-    background-color: white;
-    border-radius: 50%;
-    animation: pulse 1.5s infinite;
-  }
-
-  @keyframes pulse {
-    0% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0.3;
-    }
-
-    100% {
-      opacity: 1;
-    }
-  }
-
-  .card-body {
-    padding: 0.55rem;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .employee-name {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 0.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .employee-id {
-    font-size: 1.0rem;
-    color: var(--gray);
-    margin-bottom: 0.5rem;
-  }
-
-  .activity-stats {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 1rem;
-    margin-top: auto;
-    border-top: 1px solid var(--light-gray);
-
-    >div {
-      border-radius: 5px;
-      padding: 3px 10px;
-    }
-  }
-
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 0.5rem;
-  }
-
-  .stat-value {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-
-  .stat-label {
-    font-size: 0.875rem;
-    /* color: var(--gray); */
-    /* text-transform: uppercase; */
-    letter-spacing: 0.5px;
-  }
-
-  .active-stat {
-    color: var(--success);
-    display: inline;
-    background-color: #DEF9EC;
-  }
-
-  .inactive-stat {
-    color: var(--danger);
-    display: inline;
-    background-color: #FFF2F1;
-  }
-
-  /* Modal Styles */
-  .monitoring-modal {
-    display: none;
-    position: fixed;
-    z-index: 1050;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-  }
-
-  .modal-dialog {
-    position: absolute;
-    top: 20%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 1000px;
-  }
-
-  .modal-content {
-    background-color: white;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: var(--box-shadow);
-    /* animation: modalFadeIn 0.1s ease-out; */
-  }
-
-  @keyframes modalFadeIn {
-    from {
-      opacity: 0;
-      transform: translate(-50%, -55%);
-    }
-
-    to {
-      opacity: 1;
-      transform: translate(-50%, -50%);
-    }
-  }
-
-  .modal-header {
-    padding: 1rem 1.5rem;
-    background-color: var(--primary);
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .modal-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .modal-subtitle {
-    font-size: 0.875rem;
-    opacity: 0.9;
-  }
-
-  .modal-close {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: var(--transition);
-  }
-
-  .modal-close:hover {
-    opacity: 1;
-  }
-
-  .modal-body {
-    padding: 0;
-    text-align: center;
-  }
-
-  .modal-screen {
-    max-width: 100%;
-    max-height: 70vh;
-    object-fit: contain;
-    background-color: black;
-  }
-
-  .modal-footer {
-    padding: 1rem 1.5rem;
-    background-color: var(--light);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .connection-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-  }
-
-  .status-indicator {
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background-color: var(--success);
-    animation: pulse 1.5s infinite;
-  }
-
-  /* Responsive Adjustments */
-  @media (max-width: 992px) {
-    .employee-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .monitoring-container {
-      padding: 1.5rem;
-    }
-
-    .monitoring-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .monitoring-toolbar {
-      width: 100%;
-    }
-
-    .search-input {
-      width: 100%;
-    }
-
-    .modal-dialog {
-      width: 95%;
-    }
-  }
-
-  @media (max-width: 576px) {
-    .employee-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .activity-stats {
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .stat-item {
-      align-items: flex-start;
-    }
-  }
-
-  #sortIcon {
-    vertical-align: middle;
-    font-size: 18px;
-  }
-</style>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
-
-<div class="content-wrapper">
+<div class="content-wrapper monitoring_room">
   <section class="content">
-    <div class="monitoring-container">
-      <div class="monitoring-header">
-        <h1 class="monitoring-title">Employee Monitoring Dashboard</h1>
-        <div class="monitoring-toolbar">
-          <input type="text" class="search-input form-control" placeholder="Search employees...">
-          <select class="sort-select form-control" id="sortSelect">
-            <option value="">Sort by</option>
-            <option value="employeeName">Employee Name</option>
-            <option value="active">Active Hours</option>
-            <option value="inactive">Inactive Hours</option>
-          </select>
-          <!-- Sorting icon -->
-          <span id="sortIcon" style="cursor: pointer; display: inline-block; margin-left: 10px;">
-            <i class="bi bi-arrow-down-up"></i>
-          </span>
+    <div class="container">
+      <h3><?php echo "Live Monitoring" ?>
+      </h3>
+      <div class="row mb-5 reprt-box">
+        <div class="form-group col-lg-4 my-3">
+          <label class="control-label">Employee</label>
+          <div class="input-group">
+            <input type="text" class="search-input form-control" placeholder="Search employees...">
+          </div>
+        </div>
+        <div class="form-group col-lg-4 my-3"></div>
+
+        <div class="form-group col-lg-4 my-3">
+          <label class="control-label">Sort By</label>
+          <div class="input-group">
+            <select class="form-control single_select" id="sortSelect">
+              <option value="employeeName">Employee Name</option>
+              <option value="active">Active Hours</option>
+              <option value="inactive">Inactive Hours</option>
+            </select>
+            <!-- Sorting icon -->
+            <div class="input-group-addon border-0">
+              <span id="sortIcon" style="cursor: pointer;">
+                <i class="bi bi-arrow-down-up"></i>
+              </span>
+            </div>
+          </div>
+
         </div>
       </div>
-      <div class="employee-grid" id="employeeGrid">
+
+      <div class="employee-grid mt-20" id="employeeGrid">
         <!-- Employee list will appear here -->
       </div>
       <!-- Monitoring Modal -->
@@ -433,26 +40,27 @@
           <div class="modal-content">
             <div class="modal-header">
               <div>
-                <h3 class="modal-title" id="modalEmployeeName"></h3>
+                <label class="modal-title textwhite my-2" id="modalEmployeeName"></label>
                 <p class="modal-subtitle" id="modalEmployeeId"></p>
               </div>
-              <button class="modal-close" onclick="closeVideoModal()">&times;</button>
+              <button type="button" class="btn" onclick="closeVideoModal()" style="background-color: white; border: none;">
+                <i class="fa fa-times" style="color: black;"></i>
+              </button>
             </div>
             <div class="modal-body">
               <img id="modalScreen" class="modal-screen" autoplay playsinline>
             </div>
             <!-- <div class="modal-footer">
-          <div class="connection-status">
-            <span class="status-indicator"></span>
-            <span>Connected</span>
+                <div class="connection-status">
+                  <span class="status-indicator"></span>
+                  <span>Connected</span>
+                </div>
+                <div class="timestamp" id="modalTimestamp"></div>
+              </div> -->
           </div>
-          <div class="timestamp" id="modalTimestamp"></div>
-        </div> -->
+        </div>
       </div>
-    </div>
-  </div>
-</div>
-</section>
+  </section>
 </div>
 
 <script>
@@ -664,9 +272,9 @@
 
         if (response.status === 'success' && response.screenshot.image_url) {
           thumbnail.attr('src', response.screenshot.image_url)
-          .on('error', function() {
-            container.addClass('blank-screen').html('<span>No Screen Available</span>');
-          });
+            .on('error', function() {
+              container.addClass('blank-screen').html('<span>No Screen Available</span>');
+            });
           container.removeClass('blank-screen');
         } else {
           container.addClass('blank-screen').html('<span>No Screen Available</span>');
@@ -674,32 +282,32 @@
       },
       error: function() {
         $(`#screenshot-${currentEmployeeId}`).parent()
-        .addClass('blank-screen')
-        .html('<span>No Screen Available</span>');
+          .addClass('blank-screen')
+          .html('<span>No Screen Available</span>');
       }
     });
   }
 
 
-  $(document).ready(function () {
-let currentOrder = 'asc'; // Default sorting order
-let currentSort = ''; // Track current selected sort
+  $(document).ready(function() {
+    let currentOrder = 'asc'; // Default sorting order
+    let currentSort = ''; // Track current selected sort
 
-function fetchSortedEmployees(order) {
-  $.ajax({
-    url: "<?= base_url('/admin/Monitoring_room/list_employees_ordered') ?>",
-    method: 'GET',
-    data: {
-      order: order
-    },
-    dataType: 'json',
-    success: function(response) {
-      const employeeGrid = $('#employeeGrid');
-      employeeGrid.empty();
+    function fetchSortedEmployees(order) {
+      $.ajax({
+        url: "<?= base_url('/admin/Monitoring_room/list_employees_ordered') ?>",
+        method: 'GET',
+        data: {
+          order: order
+        },
+        dataType: 'json',
+        success: function(response) {
+          const employeeGrid = $('#employeeGrid');
+          employeeGrid.empty();
 
-      if (response.status === 'success' && response.employees.length > 0) {
-        $.each(response.employees, function(index, employee) {
-          const card = `
+          if (response.status === 'success' && response.employees.length > 0) {
+            $.each(response.employees, function(index, employee) {
+              const card = `
 <div class="employee-card" id="employee-card-${employee.id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
     <img id="screenshot-${employee.id}" src="" alt="Employee Screen">
@@ -723,104 +331,104 @@ function fetchSortedEmployees(order) {
   </div>
 </div>
           `;
-          employeeGrid.append(card);
-          getActivity(employee.id);
-          getLatestScreenshot(employee.id);
-        });
-      } else {
-        employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+              employeeGrid.append(card);
+              getActivity(employee.id);
+              getLatestScreenshot(employee.id);
+            });
+          } else {
+            employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+          }
+        },
+        error: function() {
+          $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error searching employees</p>');
+        }
+      });
+    }
+
+    // Sort icon click behavior
+    $('#sortIcon').on('click', function() {
+      const selectedSort = $('#sortSelect').val();
+
+      if (selectedSort === 'employeeName') {
+        fetchSortedEmployees(currentOrder);
+
+        // Toggle the order
+        if (currentOrder === 'asc') {
+          currentOrder = 'desc';
+          $('#sortIcon i').removeClass().addClass('bi bi-arrow-down');
+        } else {
+          currentOrder = 'asc';
+          $('#sortIcon i').removeClass().addClass('bi bi-arrow-up');
+        }
       }
-    },
-    error: function() {
-      $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error searching employees</p>');
+    });
+
+    // On dropdown change
+    $('#sortSelect').on('change', function() {
+      currentSort = $(this).val();
+
+      if (currentSort === 'employeeName') {
+        // Reset icon and default order
+        currentOrder = 'asc';
+        $('#sortIcon i').removeClass().addClass('bi bi-arrow-up');
+        fetchSortedEmployees(currentOrder);
+      } else {
+        $('#sortIcon i').removeClass().addClass('bi bi-arrow-down-up');
+        fetchSortedEmployees(currentSort);
+      }
+    });
+  });
+
+  let sortOrder = 'desc'; // default sort order
+
+  // Listen for change in dropdown
+  $('#sortSelect').on('change', function() {
+    const selectedValue = $(this).val();
+
+    if (selectedValue === 'active') {
+      fetchSortedEmployees('active', sortOrder);
+    } else if (selectedValue === 'employeeName') {
+      fetchSortedEmployees('employeeName', sortOrder);
+    } else if (selectedValue === 'inactive') {
+      fetchSortedEmployees('inactive', sortOrder);
     }
   });
-}
 
-// Sort icon click behavior
-$('#sortIcon').on('click', function () {
-  const selectedSort = $('#sortSelect').val();
+  // Optional: toggle sorting order when clicking icon
+  $('#sortIcon').on('click', function() {
+    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    const selectedValue = $('#sortSelect').val();
 
-  if (selectedSort === 'employeeName') {
-    fetchSortedEmployees(currentOrder);
-
-// Toggle the order
-    if (currentOrder === 'asc') {
-      currentOrder = 'desc';
-      $('#sortIcon i').removeClass().addClass('bi bi-arrow-down');
-    } else {
-      currentOrder = 'asc';
-      $('#sortIcon i').removeClass().addClass('bi bi-arrow-up');
+    if (selectedValue) {
+      fetchSortedEmployees(selectedValue, sortOrder);
     }
-  }
-});
+  });
 
-// On dropdown change
-$('#sortSelect').on('change', function () {
-  currentSort = $(this).val();
+  // Function to fetch and reload employees
+  function fetchSortedEmployees(type, order) {
+    let orderParam = 'desc'; // fallback
 
-  if (currentSort === 'employeeName') {
-// Reset icon and default order
-    currentOrder = 'asc';
-    $('#sortIcon i').removeClass().addClass('bi bi-arrow-up');
-    fetchSortedEmployees(currentOrder);
-  } else {
-    $('#sortIcon i').removeClass().addClass('bi bi-arrow-down-up');
-    fetchSortedEmployees(currentSort);
-  }
-});
-});
+    if (type === 'active') {
+      orderParam = order;
+    }
 
-let sortOrder = 'desc'; // default sort order
+    $.ajax({
+      url: "<?= base_url('/admin/Monitoring_room/get_active_hours_by_latest_date') ?>",
 
-// Listen for change in dropdown
-$('#sortSelect').on('change', function () {
-  const selectedValue = $(this).val();
+      type: 'GET',
+      dataType: 'json',
+      data: {
+        order: orderParam
+      },
+      success: function(response) {
+        const employeeGrid = $('#employeeGrid');
+        employeeGrid.empty();
 
-  if (selectedValue === 'active') {
-    fetchSortedEmployees('active', sortOrder);
-  } else if (selectedValue === 'employeeName') {
-    fetchSortedEmployees('employeeName', sortOrder);
-  } else if (selectedValue === 'inactive') {
-    fetchSortedEmployees('inactive', sortOrder);
-  }
-});
+        if (response.status === true && response.active_hours.length > 0) {
+          const employees = response.active_hours;
 
-// Optional: toggle sorting order when clicking icon
-$('#sortIcon').on('click', function () {
-  sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-  const selectedValue = $('#sortSelect').val();
-
-  if (selectedValue) {
-    fetchSortedEmployees(selectedValue, sortOrder);
-  }
-});
-
-// Function to fetch and reload employees
-function fetchSortedEmployees(type, order) {
-let orderParam = 'desc'; // fallback
-
-if (type === 'active') {
-  orderParam = order;
-}
-
-$.ajax({
-  url: "<?= base_url('/admin/Monitoring_room/get_active_hours_by_latest_date') ?>",
-
-  type: 'GET',
-  dataType: 'json',
-  data: {
-    order: orderParam
-  },
-  success: function(response) {
-    const employeeGrid = $('#employeeGrid');
-    employeeGrid.empty();
-
-    if (response.status === true && response.active_hours.length > 0) {
-      const employees = response.active_hours;
-
-      $.each(employees, function(index, employee) {
-        const card = `
+          $.each(employees, function(index, employee) {
+            const card = `
 <div class="employee-card" id="employee-card-${employee.employee_id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
     <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
@@ -845,56 +453,56 @@ $.ajax({
 </div>
         `;
 
-        employeeGrid.append(card);
-        getActivity(employee.employee_id);
-        getLatestScreenshot(employee.employee_id);
-      });
-    } else {
-      employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+            employeeGrid.append(card);
+            getActivity(employee.employee_id);
+            getLatestScreenshot(employee.employee_id);
+          });
+        } else {
+          employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+        }
+      },
+      error: function() {
+        $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading employees</p>');
+      }
+    });
+  }
+
+  // Add this to your sort select change handler
+  $('#sortSelect').on('change', function() {
+    const selectedValue = $(this).val();
+
+    if (selectedValue === 'inactive') {
+      fetchInactiveEmployees();
     }
-  },
-  error: function() {
-    $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading employees</p>');
-  }
-});
-}
+    // ... other sort options
+  });
 
-// Add this to your sort select change handler
-$('#sortSelect').on('change', function() {
-  const selectedValue = $(this).val();
+  function fetchInactiveEmployees(order = 'desc') {
+    $.ajax({
+      url: "<?= base_url('/admin/Monitoring_room/get_inactive_hours_by_latest_date') ?>",
+      type: 'GET',
+      dataType: 'json',
+      data: {
+        order: order
+      },
+      success: function(response) {
+        const employeeGrid = $('#employeeGrid');
+        employeeGrid.empty();
 
-  if (selectedValue === 'inactive') {
-    fetchInactiveEmployees();
-  }
-// ... other sort options
-});
+        if (response.status === true && response.inactive_hours.length > 0) {
+          const employees = response.inactive_hours;
 
-function fetchInactiveEmployees(order = 'desc') {
-  $.ajax({
-    url: "<?= base_url('/admin/Monitoring_room/get_inactive_hours_by_latest_date') ?>",
-    type: 'GET',
-    dataType: 'json',
-    data: {
-      order: order
-    },
-    success: function(response) {
-      const employeeGrid = $('#employeeGrid');
-      employeeGrid.empty();
+          $.each(employees, function(index, employee) {
+            // Format the inactive time (remove seconds if present)
+            let inactiveTime = employee.total_idle_time;
+            if (inactiveTime && inactiveTime.includes(':')) {
+              const parts = inactiveTime.split(':');
+              if (parts.length === 3) {
+                inactiveTime = `${parts[0]}:${parts[1]}`; // HH:MM
+              }
+            }
 
-      if (response.status === true && response.inactive_hours.length > 0) {
-        const employees = response.inactive_hours;
-
-        $.each(employees, function(index, employee) {
-// Format the inactive time (remove seconds if present)
-          let inactiveTime = employee.total_idle_time;
-          if (inactiveTime && inactiveTime.includes(':')) {
-            const parts = inactiveTime.split(':');
-            if (parts.length === 3) {
-inactiveTime = `${parts[0]}:${parts[1]}`; // HH:MM
-}
-}
-
-const card = `
+            const card = `
 <div class="employee-card" id="employee-card-${employee.employee_id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
     <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
@@ -919,35 +527,35 @@ const card = `
 </div>
 `;
 
-employeeGrid.append(card);
-getActivity(employee.employee_id);
-getLatestScreenshot(employee.employee_id);
-});
-      } else {
-        employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No employees with inactive hours found</p>');
+            employeeGrid.append(card);
+            getActivity(employee.employee_id);
+            getLatestScreenshot(employee.employee_id);
+          });
+        } else {
+          employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No employees with inactive hours found</p>');
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('Error fetching inactive hours:', error);
+        $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading inactive hours data</p>');
       }
-    },
-    error: function(xhr, status, error) {
-      console.error('Error fetching inactive hours:', error);
-      $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading inactive hours data</p>');
+    });
+  }
+
+  // Optional: Add toggle functionality for sort order
+  $('#sortIcon').on('click', function() {
+    if ($('#sortSelect').val() === 'inactive') {
+      const currentOrder = $(this).data('order') || 'desc';
+      const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
+      $(this).data('order', newOrder);
+
+      // Update icon to show sort direction
+      $(this).find('i').removeClass('bi-arrow-down bi-arrow-up')
+        .addClass(newOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up');
+
+      fetchInactiveEmployees(newOrder);
     }
   });
-}
-
-// Optional: Add toggle functionality for sort order
-$('#sortIcon').on('click', function() {
-  if ($('#sortSelect').val() === 'inactive') {
-    const currentOrder = $(this).data('order') || 'desc';
-    const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
-    $(this).data('order', newOrder);
-
-// Update icon to show sort direction
-    $(this).find('i').removeClass('bi-arrow-down bi-arrow-up')
-    .addClass(newOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up');
-
-    fetchInactiveEmployees(newOrder);
-  }
-});
 </script>
 
 <script src="<?= base_url('ws-client.js'); ?>"></script>
