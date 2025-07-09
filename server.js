@@ -32,10 +32,23 @@ wss.on('connection', (ws) => {
         switch (msg.type) {
           case "connect-streamer":
             ws.employeeId = msg.employee_id;
-            streamers.set(ws.employeeId, ws);
-            console.log(`Streamer connected: ${ws.employeeId}`);
-            break;
 
+            if (streamers.has(ws.employeeId)) {
+              const existingWs = streamers.get(ws.employeeId);
+
+              if (existingWs && existingWs.readyState === WebSocket.OPEN) {
+                ws.send(
+                  JSON.stringify({
+                    action: "logout",
+                    reason: "Duplicate connection",
+                  })
+                );
+              }
+            } else {
+              streamers.set(ws.employeeId, ws);
+              console.log(`Streamer connected: ${ws.employeeId}`);
+            }
+            break;
           case "organization-settings":
             if (!msg.employeeId) {
               for (const [id, streamerSocket] of streamers.entries()) {
@@ -46,9 +59,7 @@ wss.on('connection', (ws) => {
                       settings: msg.settings,
                     })
                   );
-                  console.log(
-                    `Sent settings to department`
-                  );
+                  console.log(`Sent settings to department`);
                 }
               }
             } else {
@@ -60,9 +71,7 @@ wss.on('connection', (ws) => {
                     settings: msg.settings,
                   })
                 );
-                console.log(
-                  `Sent settings to streamer: user ${ws.employeeId}`
-                );
+                console.log(`Sent settings to streamer: user ${ws.employeeId}`);
               } else {
                 console.warn(
                   `Streamer not available for user ${ws.employeeId}`
