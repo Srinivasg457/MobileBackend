@@ -133,7 +133,7 @@ class Timecards_manual extends Home_Controller {
         echo json_encode($query->result());
     }
 
-     public function approve(){
+     public function Time_Approval(){
         require_feature(9);
         $data['page_title'] = 'Time_Approval';
         $data['can_edit'] = $this->auth_model->get_permission(9);

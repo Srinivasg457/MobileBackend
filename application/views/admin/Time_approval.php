@@ -1,87 +1,22 @@
-<style>
-    .btn-group {
-        display: flex;
-        gap: 25px;
-        justify-content: end;
-    }
-
-
-    /* New mobile-responsive styles */
-    @media (max-width: 768px) {
-        .row {
-            flex-direction: column;
-            margin: 15px auto !important;
-        }
-
-        .col-lg-6 {
-            width: 100%;
-            margin-bottom: 15px;
-        }
-
-        #employee-select {
-            width: 100%;
-        }
-
-        .btn-group {
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: flex-start;
-        }
-
-        .btn-group button {
-            flex: 1 0 100px;
-            margin: 5px 0 !important;
-        }
-
-        .content-wrapper h3 {
-            font-size: 1.5rem;
-            text-align: center;
-        }
-
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .btn-group {
-            flex-direction: column;
-        }
-
-        .btn-group button {
-            width: 100%;
-        }
-
-        #toast-container {
-            left: 10px;
-            right: 10px;
-            top: 10px;
-        }
-
-        .toast {
-            min-width: auto;
-            width: calc(100% - 20px);
-        }
-    }
-</style>
-
 <div id="toast-container"></div>
 
-<div class="content-wrapper">
+<div class="content-wrapper Time_Approval">
+<div class="manual-entry-container">
+
     <h3>Time Approval</h3>
-    <div class="row" style="margin: 25px auto;">
+    <div class="row reprt-box" style="margin: 25px auto;">
         <div class="col-lg-6">
             Employee List: <select id="employee-select" class="form-control single_select">
                 <option value="">Select Employee</option>
             </select>
         </div>
-        <div class="col-lg-6 align-content-center justify-content-center mt-3">
+        <div class="col-lg-6 align-content-center justify-content-center mt-3 ">
+        <span style="display: flex;justify-content:center">Filters:</span>
+
             <div class="btn-group">
-                <span class="m-10">Filters:</span>
                 <button id="approved-btn" class="btn btn-success btn-sm m-5">Approved</button>
                 <button id="unapproved-btn" class="btn btn-warning btn-sm m-5">Unapproved</button>
-                <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>" class="btn btn-default btn-sm m-5 "><i class="flaticon-reload"></i> <?php echo trans('reset-filter') ?></a>
+                <a href="<?php echo base_url('employee/Timecards_manual/Time_Approval') ?>" class="btn btn-default btn-sm m-5 "><i class="flaticon-reload"></i> <?php echo trans('reset-filter') ?></a>
                 <!-- <button id="cancel-btn" class="btn btn-secondary btn-sm m-5">Cancel Filter</button> -->
             </div>
         </div>
@@ -107,7 +42,7 @@
         </table>
     </div>
 </div>
-
+</div>
 <script>
     let globalUserId = null;
     let employeeData = {}; // Store employee data for matching names

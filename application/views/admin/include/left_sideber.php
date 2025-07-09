@@ -134,7 +134,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
+                  <a href="<?php echo base_url('employee/Timecards_manual/Time_Approval') ?>">
                     <i class="bi-clipboard-check mr-5"></i> <span><?php echo "Time Approval" ?></span>
                   </a>
                 </li>
@@ -615,7 +615,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('employee/Timecards_manual/approve') ?>">
+                  <a href="<?php echo base_url('employee/Timecards_manual/Time_Approval') ?>">
                     <i class="bi-clipboard-check mr-5"></i> <span><?php echo "Time Approval" ?></span>
                   </a>
                 </li>

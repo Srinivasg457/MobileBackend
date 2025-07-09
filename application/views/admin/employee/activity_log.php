@@ -1,4 +1,4 @@
-<div class="content-wrapper">
+<div class="content-wrapper activity_log">
   <div class="manual-entry-container">
     <h2>Activity Log</h2>
     <div class="entry-header mb-5 reprt-box">
