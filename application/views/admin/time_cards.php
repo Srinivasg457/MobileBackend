@@ -1,164 +1,17 @@
-<div class="content-wrapper">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <style>
-        .content-wrapper{
-    height: unset !important;
-    min-height: unset !important;
-}
-
-        #activityChart {
-            max-width: 100%;
-            height: 400px;
-            margin-top: 20px;
-        }
-
-        .chart-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            gap: 10px;
-        }
-
-        .chart-actions button {
-            padding: 6px 12px;
-            background-color: #4e73df;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .chart-actions button:hover {
-            background-color: #2e59d9;
-        }
-
-        .filter-controls {
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-group label {
-            margin-bottom: 5px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .filter-group select,
-        .filter-group input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            min-width: 120px;
-            background: white;
-        }
-
-        #noDataMessage {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-            display: none;
-            font-size: 16px;
-            border: 1px dashed #ddd;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-            border: 1px solid #ddd;
-        }
-
-        .loading-indicator {
-            display: none;
-            text-align: center;
-            padding: 10px;
-            color: #4e73df;
-        }
-
-        .apexcharts-tooltip-custom {
-            padding: 5px 10px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .apexcharts-tooltip-custom div {
-            margin: 3px 0;
-        }
-
-        .totals-display {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 10px;
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-            border: 1px solid #ddd;
-        }
-
-        .total-box {
-            flex: 1;
-            text-align: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-
-        .total-box h3 {
-            margin-top: 0;
-            color: #5a5c69;
-            font-size: 16px;
-        }
-
-        .total-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4e73df;
-        }
-
-        .total-box:nth-child(2) .total-value {
-            color: #1cc88a;
-        }
-    </style>
-
-    <h2>Employee Activity Report</h2>
-
-
-    <div class="filter-controls" style="font-family: 'Segoe UI', Arial, sans-serif; margin: 20px auto; padding: 20px; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 5px rgba(0,0,0,0.1);  width: 100%;">
-        <div class="row mb-5">
+<div class="content-wrapper timecards">
+   <div class="manual-entry-container">
+         <h3>Time Cards</h3>
+     <div class="filter-controls" id="filterControls">
+        <div class="row">
             <!-- Employee Select -->
-            <div class="col-lg-3 mb-5">
-                <label for="employeeSelect" class="control-label">Employee</label>
+            <div class="col-lg-3">
+                <label for="employeeSelect" class="control-label" >Employee</label>
                 <select id="employeeSelect" class="form-control single_select">
                 </select>
             </div>
 
-            <!-- Date and Time Filters -->
-            <!-- <div style="display: flex; gap: 20px; flex: 2; flex-wrap: wrap; justify-content: space-between; min-width: 300px;"> -->
-                <!-- Date Picker -->
-                <!-- <div class="col-lg-3 mb-5">
-                    <label for="datePicker" class="control-label">Date</label>
-                    <input type="date" id="datePicker" class="form-control">
-                </div> -->
-
-                <div class="col-lg-3 mb-5"> 
+     
+                <div class="col-lg-3"> 
     <label class="control-label">Date</label>
     <?php
     $today = date('Y-m-d');
@@ -188,7 +41,7 @@
 </div>
 
                 <!-- From Time -->
-                <div class="col-lg-3 mb-5">
+                <div class="col-lg-3">
                     <label for="fromTime" class="control-label">From</label>
                     <select id="fromTime" class="form-control single_select">
                         <option value="00:00">00:00</option>
@@ -219,7 +72,7 @@
                 </div>
 
                 <!-- To Time -->
-                <div class="col-lg-3 mb-5">
+                <div class="col-lg-3">
                     <label for="toTime" class="control-label">To</label>
                     <select id="toTime" class="form-control single_select">
                         <option value="01:00">01:00</option>
@@ -283,7 +136,7 @@
             <p>Please try a different time range.</p>
         </div>
     </div>
-
+    </div>
     <script>
         let chart;
         let debounceTimer;
@@ -664,4 +517,6 @@ function renderAreaChart(labels, mouseData, keyData, timestamps) {
 }
         });
     </script>
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </div>
