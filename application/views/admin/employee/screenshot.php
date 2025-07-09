@@ -1,7 +1,7 @@
 <div class="content-wrapper screenshot">
     <section class="content">
         <!-- Screenshot Section -->
-        <div class="container">
+        <div class="container-fluid">
             <h3><?php echo "View Screenshots" ?>
             </h3>
             <div class="row mb-5 reprt-box">

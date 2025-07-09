@@ -5,21 +5,33 @@
 
     <h3>Time Approval</h3>
     <div class="row reprt-box" style="margin: 25px auto;">
-        <div class="col-lg-6">
-            Employee List: <select id="employee-select" class="form-control single_select">
-                <option value="">Select Employee</option>
-            </select>
-        </div>
-        <div class="col-lg-6 align-content-center justify-content-center mt-3 ">
-        <span style="display: flex;justify-content:center">Filters:</span>
+    <div class="col-lg-4">
+        Employee List
+        <select id="employee-select" class="form-control single_select">
+            <option value="">Select Employee</option>
+        </select>
+    </div>
+<div class="col-lg-4 "></div>
+    <div class="form-group col-lg-4">
+    <label class="control-label">Sort By</label>
+    <div class="input-group">
+        <select class="form-control single_select" id="sortSelect">
+            <option value="Filters">Filters</option>
+            <option value="Approved">Approved</option>
+            <option value="Unapproved">UnApproved</option>
+        </select>
 
-            <div class="btn-group">
-                <button id="approved-btn" class="btn btn-success btn-sm m-5">Approved</button>
-                <button id="unapproved-btn" class="btn btn-warning btn-sm m-5">Unapproved</button>
-                <a href="<?php echo base_url('employee/Timecards_manual/Time_Approval') ?>" class="btn btn-default btn-sm m-5 "><i class="flaticon-reload"></i> <?php echo trans('reset-filter') ?></a>
-                <!-- <button id="cancel-btn" class="btn btn-secondary btn-sm m-5">Cancel Filter</button> -->
-            </div>
+        <!-- Sort Icon -->
+        <div class="input-group-addon border-0">
+            <span id="sortIcon" style="cursor: pointer;">
+                <i class="bi bi-arrow-down-up"></i>
+            </span>
         </div>
+
+        
+    </div>
+</div>
+
     </div>
 
     <hr>
@@ -186,13 +198,19 @@
             loadTimecards(empId, userId);
         });
 
-        $('#approved-btn').on('click', function() {
-            loadTimecards($('#employee-select').val(), globalUserId, 'approved');
-        });
+        $('#sortSelect').on('change', function () {
+    const selectedValue = $(this).val();
+    const empId = $('#employee-select').val();
+    const userId = $('#employee-select option:selected').data('user-id') || globalUserId;
 
-        $('#unapproved-btn').on('click', function() {
-            loadTimecards($('#employee-select').val(), globalUserId, 'unapproved');
-        });
+    if (selectedValue === 'Approved') {
+        loadTimecards(empId, userId, 'approved');
+    } else if (selectedValue === 'Unapproved') {
+        loadTimecards(empId, userId, 'unapproved');
+    } else {
+        loadTimecards(empId, userId); // Filters or default
+    }
+});
 
         // $('#cancel-btn').on('click', function() {
         //     loadTimecards('', globalUserId);
