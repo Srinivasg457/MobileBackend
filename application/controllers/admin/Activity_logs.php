@@ -343,7 +343,7 @@ public function get_employee_activity()
             'message' => empty($result) ? 'No activity data available for the selected time range.' : ''
         ]));
 }
-public function get_index()
+public function Time_Cards()
     {
         require_feature(2);
         $data = array();

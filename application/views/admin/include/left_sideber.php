@@ -104,7 +104,7 @@
                     <?php if ($can(2)): ?>
                       <li class="<?= (isset($page_title) && $page_title === 'employee_activity') ? 'active' : '' ?>"
                         <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                        <a href="<?= base_url('admin/Activity_logs/get_index') ?>">
+                        <a href="<?= base_url('admin/Activity_logs/Time_Cards') ?>">
                           <i class="bi bi-clock mr-5"></i> <span>Time Cards</span>
                         </a>
                       </li>
@@ -591,7 +591,7 @@
                     <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
                                   echo "active";
                                 } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                      <a href="<?php echo base_url('admin/Activity_logs/get_index') ?>">
+                      <a href="<?php echo base_url('admin/Activity_logs/Time_Cards') ?>">
                         <i class="bi bi-clock mr-5"></i> <span><?php echo "Time Cards" ?></span>
                       </a>
                     </li>

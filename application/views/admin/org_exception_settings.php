@@ -1,7 +1,7 @@
 <div class="content-wrapper org_exception_settings">
     <section class="content">
         <div class="container mt-4">
-            <h3 class="box-title">Employee Settings</h3>
+            <h3>Employee Settings</h3>
             <div class="box">
                 <div class="box-body">
                     <div class="form-group row"> <!-- Added 'row' class here -->
