@@ -76,6 +76,16 @@
   }
   ?>
   <style type="text/css">
+    .org-settings,
+    .org_exception_settings {
+      .toggle-switch {
+        >.toggle {
+          width: 90px !important;
+          height: 35px !important;
+        }
+      }
+    }
+
     .content-wrapper,
     body,
     .wrapper {

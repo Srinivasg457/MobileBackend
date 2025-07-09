@@ -24,8 +24,10 @@ class EmployeeRoles extends Home_Controller {
     }
     public function role()
     {
+        require_feature(11);
         $data = array();
         $data['is_employee_admin'] = true;
+        $data['can_edit'] = $this->auth_model->get_permission(11);
         $data['page_title'] = 'Roles & Permission';
         $data['departments'] = $this->admin_model->get_by_user_status('departments');
         $data['default_roles'] = $this->admin_model->select_asc('default_roles');

@@ -87,6 +87,9 @@ $route['change_password'] = 'admin/dashboard/change_password';
 //organization sites
 $route['admin/view_screenshots'] = 'admin/ScreenshotController';
 $route['admin/webcam_screenshots'] = 'admin/ScreenshotController/webcam';
+$route['admin/organization_settings'] = 'admin/Organization_settings/Organization_settings_edit';
+$route['admin/employee_settings'] = 'admin/Organization_settings/org_exception_settings';
+
 
 
 
@@ -101,8 +104,5 @@ $route['employee/activity_log'] = 'employee/Timecards_manual';
 
 
 $route['organization'] = 'admin/Organization_settings';
-$route['organization/edit'] = 'admin/Organization_settings/Organization_settings_edit';
-
-$route['organization/org_exception'] = 'admin/Organization_settings/org_exception_settings';
 
 $route['employee/report'] = 'employee/Report';
