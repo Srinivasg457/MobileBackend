@@ -213,7 +213,7 @@
                     $('.step_3').addClass('active');
                     $('.pricing_area').show();
                 }else if (json.st == 3) {  
-                    window.location.href = base_url+'admin/subscription';
+                    window.location.href = base_url +'admin/subscription/upgrade_plan';
                 }else if (json.st == 4) {  
                     window.location.href = base_url+'auth/verify_email';
                 }else {

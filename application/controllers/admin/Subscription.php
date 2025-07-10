@@ -125,13 +125,13 @@ class Subscription extends Home_Controller
             }
 
             if (number_format($amount, 0) == 0) {
-                redirect(base_url('admin/subscription'));
+                redirect(base_url('admin/subscription/upgrade_plan'));
             } else {
                 if ($this->settings->enable_paypal == 1) {
                     $data['main_content'] = $this->load->view('admin/user/payment', $data, TRUE);
                     $this->load->view('admin/index', $data);
                 } else {
-                    redirect(base_url('admin/subscription'));
+                    redirect(base_url('admin/subscription/upgrade_plan'));
                 }
             }
         }

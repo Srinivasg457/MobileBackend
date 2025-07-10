@@ -20,13 +20,13 @@ class Employee extends Home_Controller
         $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
     }
 
     public function screenshot(){
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
         $data['page_title'] = 'Screenshots';

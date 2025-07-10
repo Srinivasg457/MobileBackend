@@ -29,7 +29,7 @@ class Hrm extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/user/hrm/department',$data,TRUE);
         $this->load->view('admin/index',$data);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
     }
 
@@ -233,7 +233,7 @@ class Hrm extends Home_Controller {
     public function employee(){
         require_feature(10);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
         $data['page_title'] = 'Employee';
@@ -459,7 +459,7 @@ public function employee_add()
         $id = $this->input->post('id', true);
         $email = $this->input->post('email', true);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
 
             $role_id = $this->input->post('role', true);
