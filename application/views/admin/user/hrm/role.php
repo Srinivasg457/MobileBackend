@@ -26,7 +26,7 @@
                     </div>
                     <div class="box-body text-center">
                         <p>Please add a department to manage roles.</p>
-                        <a href="<?= base_url('admin/hrm/department') ?>" class="btn btn-info">
+                        <a href="<?= base_url('admin/hrm/departments') ?>" class="btn btn-info">
                             <i class="fa fa-plus"></i> Add Department
                         </a>
                     </div>

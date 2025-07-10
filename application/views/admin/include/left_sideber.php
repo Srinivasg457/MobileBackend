@@ -161,8 +161,8 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Department") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/hrm/department') ?>">
-                    <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('department') ?></span>
+                  <a href="<?php echo base_url('admin/hrm/departments') ?>">
+                    <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('departments') ?></span>
                   </a>
                 </li>
               <?php endif; ?>
@@ -615,8 +615,8 @@
                  <li class="<?php if (isset($page_title) && $page_title == "Department") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/hrm/department') ?>">
-                    <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('department') ?></span>
+                  <a href="<?php echo base_url('admin/hrm/departments') ?>">
+                    <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('departments') ?></span>
                   </a>
                 </li>
                 <!-- Roles and permission -->
@@ -746,8 +746,8 @@
                   <li class="<?php if (isset($page_title) && $page_title == "Department") {
                                 echo "active";
                               } ?>">
-                    <a href="<?php echo base_url('admin/hrm/department') ?>">
-                      <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('department') ?></span>
+                    <a href="<?php echo base_url('admin/hrm/departments') ?>">
+                      <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('departments') ?></span>
                     </a>
                   </li>
 

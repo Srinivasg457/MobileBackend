@@ -15,7 +15,7 @@ class Hrm extends Home_Controller {
         $this->load->model('hrm_model');
     }
 
-    public function department(){
+    public function departments(){
         require_feature(12);
         $data = array();
         $data['is_employee_admin'] = true;
@@ -183,7 +183,7 @@ class Hrm extends Home_Controller {
                 }
             }
 
-            redirect(base_url('admin/hrm/department'));
+            redirect(base_url('admin/hrm/departments'));
         }
     }
 
