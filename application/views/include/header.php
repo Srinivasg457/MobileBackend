@@ -4,9 +4,16 @@
 <head>
     <meta charset="utf-8">
     <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge" /><![endif]-->
-    <meta name="description" content="">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
     
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi">
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Workroom - Employee Productivity Monitoring Software | Screen Capture & Activity Tracking</title>
+    <meta name="description" content="Workroom is the leading employee monitoring software that tracks productivity, captures screenshots, and analyzes work activity. Perfect alternative to TimeCamp, TeamLogger, and other workforce analytics tools.">
+    <meta name="keywords" content="employee monitoring software, productivity tracking tool, screenshot capture software, work activity tracker, team productivity software, time tracking software, workforce analytics, employee productivity monitoring, workroom alternative, timecamp competitor, teamlogger competitor">
     <!-- <meta name = "viewport" content = "width=device-width, minimum-scale=1.0, maximum-scale = 1.0, user-scalable = no"> -->
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" href="<?php echo base_url(settings()->favicon) ?>">
