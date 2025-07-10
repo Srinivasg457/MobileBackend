@@ -16,6 +16,7 @@ class Employee extends Home_Controller
         // }
         $data = array();
         $data['page_title'] = 'Employee Dashboard';
+        $data['is_employee_admin'] = false;
         $data['details'] = $this->session->userdata('employee_id');
         $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
         $this->load->view('admin/index', $data);
