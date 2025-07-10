@@ -13,7 +13,7 @@ class Organization_settings extends Home_Controller {
     public function index(): void
     {
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
         
         $data = array();
@@ -27,7 +27,7 @@ class Organization_settings extends Home_Controller {
     {
         require_feature(4);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
         $data['is_employee_admin'] = true;
@@ -44,7 +44,7 @@ class Organization_settings extends Home_Controller {
     {
         require_feature(5);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
         $data['is_employee_admin'] = true;

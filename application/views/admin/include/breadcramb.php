@@ -13,7 +13,7 @@
 
   		<div class="pt-sm">
         <?php if (check_payment_status() == FALSE || user()->user_type == 'trial'): ?>
-  			  <a href="<?php echo base_url('admin/subscription') ?>" class="btn btn-info pull-right">
+  			  <a href="<?php echo base_url('admin/subscription/upgrade_plan') ?>" class="btn btn-info pull-right">
             <i class="fa fa-rocket"></i> <span><?php echo trans('upgrade') ?></span>
           </a>
         <?php endif ?>

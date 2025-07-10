@@ -16,7 +16,7 @@ class Report extends Home_Controller
         //     redirect('login');
         // }
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
         $data['page_title'] = 'Report';

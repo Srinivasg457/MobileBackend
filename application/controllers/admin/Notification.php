@@ -21,7 +21,7 @@ class Notification extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/notification', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
     }
 
