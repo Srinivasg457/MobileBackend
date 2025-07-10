@@ -170,7 +170,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Employee") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/hrm/employee') ?>">
+                  <a href="<?php echo base_url('admin/hrm/employees') ?>">
                     <i class="bi bi-people mr-5"></i> <span><?php echo trans('employees') ?></span>
                   </a>
                 </li>
@@ -607,8 +607,8 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Employee") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/hrm/employee') ?>">
-                    <i class="bi bi-people mr-5"></i> <span><?php echo ('Employee') ?></span>
+                  <a href="<?php echo base_url('admin/hrm/employees') ?>">
+                    <i class="bi bi-people mr-5"></i> <span><?php echo ('Employees') ?></span>
                   </a>
                 </li>
                  <!-- Departments -->
@@ -754,7 +754,7 @@
                   <li class="<?php if (isset($page_title) && $page_title == "Employee") {
                                 echo "active";
                               } ?>">
-                    <a href="<?php echo base_url('admin/hrm/employee') ?>">
+                    <a href="<?php echo base_url('admin/hrm/employees') ?>">
                       <i class="bi bi-people mr-5"></i> <span><?php echo trans('employees') ?></span>
                     </a>
                   </li>
