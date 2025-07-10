@@ -108,7 +108,7 @@
         <?php if (isset($page_title) && $page_title == "Edit"): ?>
           <h3 class="box-title"><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/department') ?>" class="pull-right btn btn-primary rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
-          <h3 class="box-title"><?php echo trans('departments') ?>
+          <h3 class="box-title"><?php echo ('Department') ?>
             <?php if ($can_edit): ?>
               <a href="#" class="pull-right btn btn-info btn-sm rounded add_btn"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></a>
           </h3>

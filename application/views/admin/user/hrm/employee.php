@@ -189,7 +189,7 @@
           <h3 class="box-title"><?php echo trans('edit-employee') ?> <a href="<?php echo base_url('admin/hrm/employee') ?>" class="pull-right btn btn-primary rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
 
-          <h3 class="box-title"><?php echo trans('employees') ?>
+          <h3 class="box-title"><?php echo ('Employee') ?>
             <?php if (is_pack_trial()): ?>
               <span class="text-danger pull-right  mx-5" data-toggle="tooltip" data-placement="top" title="Upgrade your plan to enable employee bulk upload.">
                 <i class="fa fa-lock"></i> Bulk upload is disabled.
