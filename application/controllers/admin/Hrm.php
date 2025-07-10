@@ -230,7 +230,7 @@ class Hrm extends Home_Controller {
 
 
 
-    public function employee(){
+    public function employees(){
         require_feature(10);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
@@ -500,7 +500,7 @@ public function employee_add()
 
                 if ($employee_count >= 2) {
                     $this->session->set_flashdata('error', 'Trial users can add a maximum of 2 employees only.');
-                    redirect(base_url('admin/hrm/employee'));
+                    redirect(base_url('admin/hrm/employees'));
                     exit; // Stop execution
                 }
             }
@@ -511,7 +511,7 @@ public function employee_add()
 
             if ($exists) {
                 $this->session->set_flashdata('error', 'Email address already exists.');
-                redirect(base_url('admin/hrm/employee'));
+                redirect(base_url('admin/hrm/employees'));
                 exit;
             }
 
@@ -591,7 +591,7 @@ public function employee_add()
             $this->admin_model->edit_option($data_img, $id, 'employees');
         }
 
-        redirect(base_url('admin/hrm/employee'));
+        redirect(base_url('admin/hrm/employees'));
         exit;
     }
 }
@@ -674,7 +674,7 @@ public function employee_add()
     
             if (!$this->upload->do_upload('import_file')) {
                 $this->session->set_flashdata('error', $this->upload->display_errors());
-                redirect(base_url('admin/hrm/employee'));
+                redirect(base_url('admin/hrm/employees'));
                 exit;
             }
     
@@ -760,13 +760,13 @@ public function employee_add()
                     $this->session->set_flashdata('msg', 'Employees imported and invitations sent successfully.');
                 }
     
-                redirect(base_url('admin/hrm/employee'));
+                redirect(base_url('admin/hrm/employees'));
                 exit;
             } catch (Exception $e) {
                 unlink($filePath);
                 log_message('error', 'Import error: ' . $e->getMessage());
                 $this->session->set_flashdata('error', 'Failed to import employees. Please check the file format.');
-                redirect(base_url('admin/hrm/employee'));
+                redirect(base_url('admin/hrm/employees'));
                 exit;
             }
         }

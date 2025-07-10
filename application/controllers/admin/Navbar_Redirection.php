@@ -113,7 +113,7 @@ class Navbar_Redirection extends Home_Controller
         } elseif (in_array(12, $allowed)) {
             redirect('admin/hrm/department');
         } elseif (in_array(10, $allowed)) {
-            redirect('admin/hrm/employee');
+            redirect('admin/hrm/employees');
         } elseif (in_array(11, $allowed)) {
             redirect('admin/roles_permissions');
         } else {

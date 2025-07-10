@@ -133,7 +133,7 @@
                   </li>
                   
                   <li class="<?php if(isset($page_title) && $page_title == "Employee"){echo "active";} ?>">
-                    <a href="<?php echo base_url('admin/hrm/employee') ?>">
+                    <a href="<?php echo base_url('admin/hrm/employees') ?>">
                       <i class="flaticon-group"></i> <span><?php echo trans('employees') ?></span>
                     </a>
                   </li>
