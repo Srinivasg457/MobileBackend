@@ -126,14 +126,6 @@ class Navbar_Redirection extends Home_Controller
    public function  employee_nav()
    {
         $this->_detach_org_block_from_employee_session();
-        $data = array();
-        $data['is_employee_admin'] = false;
-        $data['page_title'] = 'Employee Dashboard';
-        $data['details'] = $this->session->userdata('employee_id');
-        $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
-        $this->load->view('admin/index', $data);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription/upgrade_plan');
-        }
+        redirect('employee/dashboard');
     }
     }

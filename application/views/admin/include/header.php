@@ -452,7 +452,7 @@
     <?php if (isset($page_title) && $page_title != 'Online Payment'): ?>
       <header class="main-header">
         <?php if (is_employee()): ?>
-          <a target="_blank" href="<?php echo base_url() ?>" class="switch_businesss logo text-centers">
+          <a href="#" class="switch_businesss logo text-centers">
             <span class="logo-lg">
               <img width="50px" class="mr-5" src="<?php echo base_url($settings->favicon) ?>" alt="<?php echo $this->session->userdata("employee_name"); ?>"> <span data-toggle="tooltip" data-placement="top" title="<?php echo $this->session->userdata("employee_name"); ?>" class="ml-20"><?php echo $this->session->userdata("employee_name"); ?></span>
             </span>
