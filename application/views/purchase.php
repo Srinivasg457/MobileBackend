@@ -17,12 +17,12 @@
                             <h1 class="text-success"><i class="icon-check"></i> <br><?php echo trans('done') ?></h1>
                             <h5 class="text-successs"><?php echo trans('payment-success-msg') ?></h5><br>
                             
-                            <a href="<?php echo base_url('admin/subscription') ?>" class="custom-btn custom-btn--medium custom-btn--style-2">Continue <i class="fa fa-long-arrow-right"></i></a>
+                            <a href="<?php echo base_url('admin/subscription/upgrade_plan') ?>" class="custom-btn custom-btn--medium custom-btn--style-2">Continue <i class="fa fa-long-arrow-right"></i></a>
 
                         <?php elseif (isset($error_msg) && $error_msg=='Error'): ?>
                             <h3 class="text-danger"><i class="icon-close"></i> <?php echo trans('error') ?></h3>
                             <h5 class="error"><?php echo trans('payment-error-msg') ?></h5><br>
-                            <a href="<?php echo base_url('admin/subscription') ?>" class="btn btn-secondary btn-lg"><?php echo trans('back') ?></a>
+                            <a href="<?php echo base_url('admin/subscription/upgrade_plan') ?>" class="btn btn-secondary btn-lg"><?php echo trans('back') ?></a>
                         <?php else: ?>
                     </div>
 

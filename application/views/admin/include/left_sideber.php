@@ -843,7 +843,7 @@
                   <li class="<?php if (isset($page_title) && $page_title == "CurrentPlan") {
                                 echo "active";
                               } ?>">
-                    <a href="<?php echo base_url('admin/subscription/currentPlan') ?>">
+                    <a href="<?php echo base_url('admin/subscription/current_plan') ?>">
                       <i class="bi bi-clock-history mr-5"></i> <span><?php echo "Current plan" ?></span>
                     </a>
                   </li>
@@ -851,7 +851,7 @@
                   <li class="<?php if (isset($page_title) && $page_title == "Subscription") {
                                 echo "active";
                               } ?>">
-                    <a href="<?php echo base_url('admin/subscription') ?>">
+                    <a href="<?php echo base_url('admin/subscription/upgrade_plan') ?>">
                       <i class="bi bi-gem mr-5"></i> <span><?php echo trans('upgrade-plan') ?></span>
                     </a>
                   </li>
@@ -931,7 +931,7 @@
           <?php else: ?>
             <div class="d-flex justify-content-start mt-20">
               <div>
-                <a href="<?php echo base_url('admin/subscription') ?>" class="btn btn-secondary bg-dark upgrade_btn">
+                <a href="<?php echo base_url('admin/subscription/upgrade_plan') ?>" class="btn btn-secondary bg-dark upgrade_btn">
                   <i class="bi bi-rocket-takeoff mr-5"></i> <span><?php echo trans('upgrade') ?></span>
                 </a>
               </div>

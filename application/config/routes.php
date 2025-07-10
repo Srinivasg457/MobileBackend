@@ -95,6 +95,10 @@ $route['admin/live_monitoring'] = 'admin/Monitoring_room';
 $route['admin/notification'] = 'admin/Notification';
 $route['admin/roles_permissions'] = 'employee/EmployeeRoles';
 $route['admin/roles_permissions/role_management'] = 'employee/EmployeeRoles/role';
+$route['admin/subscription/current_plan'] = 'admin/subscription/currentPlan';
+$route['admin/subscription/upgrade_plan'] = 'admin/subscription';
+
+
 
 
 

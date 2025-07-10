@@ -23,7 +23,7 @@ class Activity_logs extends Home_Controller
         $data['main_content'] = $this->load->view('admin/activityLog', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
     }
     // public function check_activity_status()
@@ -354,7 +354,7 @@ public function Time_Cards()
         $data['main_content'] = $this->load->view('admin/time_cards', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
     }
 }

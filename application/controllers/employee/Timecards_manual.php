@@ -19,7 +19,7 @@ class Timecards_manual extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
-            redirect('/admin/subscription');
+            redirect('/admin/subscription/upgrade_plan');
         }
     }
 
@@ -141,7 +141,7 @@ class Timecards_manual extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);
     $this->load->view('admin/index', $data);
     if (!is_subscribed()) {
-        redirect('/admin/subscription');
+        redirect('/admin/subscription/upgrade_plan');
     }
     }
        public function get_timecards_by_employee() {
