@@ -127,7 +127,7 @@
                   </li>
                   
                   <li class="<?php if(isset($page_title) && $page_title == "Department"){echo "active";} ?>">
-                    <a href="<?php echo base_url('admin/hrm/department') ?>">
+                    <a href="<?php echo base_url('admin/hrm/departments') ?>">
                       <i class="flaticon-menu-3"></i> <span><?php echo trans('department') ?></span>
                     </a>
                   </li>
