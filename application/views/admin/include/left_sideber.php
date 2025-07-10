@@ -608,7 +608,7 @@
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
                   <a href="<?php echo base_url('admin/hrm/employee') ?>">
-                    <i class="bi bi-people mr-5"></i> <span><?php echo trans('employees') ?></span>
+                    <i class="bi bi-people mr-5"></i> <span><?php echo ('Employee') ?></span>
                   </a>
                 </li>
                  <!-- Departments -->
