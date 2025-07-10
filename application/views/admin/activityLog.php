@@ -44,7 +44,7 @@
                     <div class="col-md-3 col-sm-6 col-12 mb-1">
                         <div class="info-box-pay border">
                             <div class="info-box-content-pay">
-                                <span class="info-box-number-pay text-success" id="active-time"><strong>0 hr 0 min</strong></span>
+                                <span class="info-box-number-pay text-success" id="active-time"><strong>00 hrs 00 min</strong></span>
                                 <span class="info-box-texts text-dark fs-13 text-capitalize">Active Time</span>
                             </div>
                         </div>
@@ -62,7 +62,7 @@
                     <div class="col-md-3 col-sm-6 col-12 mb-1">
                         <div class="info-box-pay border">
                             <div class="info-box-content-pay">
-                                <span class="info-box-number-pay text-success"><strong>0 hr 0 min</strong></span>
+                                <span class="info-box-number-pay text-success"><strong>00 hrs 00 min</strong></span>
                                 <span class="info-box-texts text-dark fs-13 text-capitalize">Manual Time</span>
                             </div>
                         </div>
@@ -71,7 +71,7 @@
                     <div class="col-md-3 col-sm-6 col-12 mb-1">
                         <div class="info-box-pay border">
                             <div class="info-box-content-pay">
-                                <span class="info-box-number-pay text-success"><strong>00:00</strong></span>
+                                <span class="info-box-number-pay text-success"><strong>00 hrs 00 min</strong></span>
                                 <span class="info-box-texts text-dark fs-13 text-capitalize">Meeting Time</span>
                             </div>
                         </div>

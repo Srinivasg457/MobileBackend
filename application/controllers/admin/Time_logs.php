@@ -11,7 +11,7 @@ class Time_logs extends Home_Controller {
     public function get_time_logs() {
         // Get inputs from session or GET request
         $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
-        $user_id = $this->input->get('employee_org_id') ?? $this->input->get('id') ?? $this->session->userdata('id');
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
         $date = $this->input->get('date') ?: date('Y-m-d'); // Default to today if not provided
     
         // Validate inputs
