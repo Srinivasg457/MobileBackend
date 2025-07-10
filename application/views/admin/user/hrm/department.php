@@ -14,7 +14,7 @@
 
       <div class="box-header">
         <?php if (isset($page_title) && $page_title == "Edit"): ?>
-          <h3><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/department') ?>" class="pull-right btn btn-default rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
+          <h3><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/departments') ?>" class="pull-right btn btn-default rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
           <h3><?php echo "Department Management" ?> <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_btn"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php endif; ?>
@@ -87,9 +87,9 @@
       <div class="list_area container">
 
         <?php if (isset($page_title) && $page_title == "Edit"): ?>
-          <h3 class="box-title"><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/department') ?>" class="pull-right btn btn-primary rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
+          <h3 class="box-title"><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/departments') ?>" class="pull-right btn btn-primary rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
-          <h3 class="box-title"><?php echo ('Department') ?>
+          <h3 class="box-title"><?php echo ('Departments') ?>
             <?php if ($can_edit): ?>
               <a href="#" class="pull-right btn btn-info btn-sm rounded add_btn"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></a>
           </h3>
