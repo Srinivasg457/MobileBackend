@@ -1,22 +1,3 @@
-<style>
-  .icheck-primary {
-    padding: 3px 10px 0px 5px;
-  }
-
-  .icheck-primary:hover {
-    background-color: #16D17F;
-    border-radius: 50px;
-  }
-
-  .icheck-danger {
-    padding: 3px 10px 0px 5px;
-  }
-
-  .icheck-danger:hover {
-    background-color: #FE5152;
-    border-radius: 50px;
-  }
-</style>
 <div class="content-wrapper">
   <?php
   $restricted_departments = ['Executive', 'Manager', 'Team Lead', 'Human Resource'];

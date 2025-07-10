@@ -93,6 +93,9 @@ $route['admin/activity_logs'] = 'admin/Activity_logs';
 $route['admin/time_cards'] = 'admin/Activity_logs/Time_Cards';
 $route['admin/live_monitoring'] = 'admin/Monitoring_room';
 $route['admin/notification'] = 'admin/Notification';
+$route['admin/roles_permissions'] = 'employee/EmployeeRoles';
+$route['admin/roles_permissions/role_management'] = 'employee/EmployeeRoles/role';
+
 
 
 
