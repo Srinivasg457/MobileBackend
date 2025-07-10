@@ -179,7 +179,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
+                  <a href="<?php echo base_url('admin/roles_permissions') ?>">
                     <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
                   </a>
                 </li>
@@ -623,7 +623,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
+                  <a href="<?php echo base_url('admin/roles_permissions') ?>">
                     <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
                   </a>
                 </li>
@@ -780,7 +780,7 @@
                   <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
                                 echo "active";
                               } ?>">
-                    <a href="<?php echo base_url('employee/EmployeeRoles') ?>">
+                    <a href="<?php echo base_url('admin/roles_permissions') ?>">
                       <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
                     </a>
                   </li>

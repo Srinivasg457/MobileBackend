@@ -275,7 +275,7 @@ class EmployeeRoles extends Home_Controller {
     {
         /* Guard clause */
         if (!$this->input->post()) {
-            redirect(base_url('employee/EmployeeRoles'));
+            redirect(base_url('admin/roles_permissions'));
         }
 
         /* POST arrays (all same length) */
@@ -373,7 +373,7 @@ class EmployeeRoles extends Home_Controller {
             $this->session->set_flashdata('msg', 'Roles updated successfully.');
         }
 
-        redirect(base_url('employee/EmployeeRoles'));
+        redirect(base_url('admin/roles_permissions'));
     }
 
 
