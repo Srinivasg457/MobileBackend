@@ -1,161 +1,161 @@
 <div class="content-wrapper activity_log">
-  <div class="manual-entry-container">
-    <h2>Activity Log</h2>
-    <div class="entry-header mb-5 reprt-box">
-      <label class="hide control-label">Employee
-        <input type="text" class="form-control" placeholder="Enter employee name" />
-      </label>
-      <label class="control-label" for="datePicker">Date
-        <input type="date" id="datePicker" value="" class="form-control">
-      </label>
-    </div>
+  <section class="content">
+    <div class="container-fluid">
+      <h2>Activity Log</h2>
+      <div class="entry-header mb-5 reprt-box">
+        <label class="hide control-label">Employee
+          <input type="text" class="form-control" placeholder="Enter employee name" />
+        </label>
+        <label class="control-label" for="datePicker">Date
+          <input type="date" id="datePicker" value="" class="form-control">
+        </label>
+      </div>
 
 
-    <div class="row box-payout-areas mt-20">
-      <div class="col-md-3 col-sm-6 col-12 mb-1">
-        <div class="info-box-pay border">
-          <div class="info-box-content-pay">
-            <span class="info-box-number-pay text-success" id="active-time"><strong>0 hr 0 min</strong></span>
-            <span class="info-box-texts text-dark fs-13 text-capitalize">Active Time</span>
+      <div class="row box-payout-areas mt-20">
+        <div class="col-md-3 col-sm-6 col-12 mb-1">
+          <div class="info-box-pay border">
+            <div class="info-box-content-pay">
+              <span class="info-box-number-pay text-success" id="active-time"><strong>00 hrs 00 min</strong></span>
+              <span class="info-box-texts text-dark fs-13 text-capitalize">Active Time</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6 col-12 mb-1">
+          <div class="info-box-pay border ">
+            <div class="info-box-content-pay">
+              <span class="info-box-number-pay text-success danger inactive"><strong>00 hrs 00 min</strong></span>
+              <span class="info-box-texts text-dark fs-13 text-capitalize">Inactive Time</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6 col-12 mb-1">
+          <div class="info-box-pay border ">
+            <div class="info-box-content-pay">
+              <span class="info-box-number-pay  text-success"><strong>00 hrs 00 min</strong></span>
+              <span class="info-box-texts text-dark fs-13 text-capitalize">Manual Time</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6 col-12 mb-1">
+          <div class="info-box-pay border">
+            <div class="info-box-content-pay">
+              <span class="info-box-number-pay text-success"><strong>00 hrs 00 min</strong></span>
+              <span class="info-box-texts text-dark fs-13 text-capitalize">Meeting Time</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="col-md-3 col-sm-6 col-12 mb-1">
-        <div class="info-box-pay border ">
-          <div class="info-box-content-pay">
-            <span class="info-box-number-pay text-success danger inactive"><strong>00 hrs 00 min</strong></span>
-            <span class="info-box-texts text-dark fs-13 text-capitalize">Inactive Time</span>
+      <div class="mt-30" id="activity">
+
+        <h5>Activity Bar</h5>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color bg-green"></div>
+            <span>Active</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color bg-yellow"></div>
+            <span>Moderate Active</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color box-danger"></div>
+            <span>Inactive</span>
+          </div>
+        </div>
+
+
+        <div class="timeline-container">
+          <!-- <div class="time-row"> -->
+          <div id="timeline-track">
+            <!-- Dynamic blocks will be added here -->
+
+            <!-- Static time markers (08:00 to 20:00) -->
+            <!-- Each hour = 100% / 12 = 8.33% -->
+            <div class="time-marker" style="left: 0%;" data-time="08:00"></div>
+            <div class="time-marker" style="left: 8.33%;" data-time="09:00"></div>
+            <div class="time-marker" style="left: 16.66%;" data-time="10:00"></div>
+            <div class="time-marker" style="left: 25%;" data-time="11:00"></div>
+            <div class="time-marker" style="left: 33.33%;" data-time="12:00"></div>
+            <div class="time-marker" style="left: 41.66%;" data-time="13:00"></div>
+            <div class="time-marker" style="left: 50%;" data-time="14:00"></div>
+            <div class="time-marker" style="left: 58.33%;" data-time="15:00"></div>
+            <div class="time-marker" style="left: 66.66%;" data-time="16:00"></div>
+            <div class="time-marker" style="left: 75%;" data-time="17:00"></div>
+            <div class="time-marker" style="left: 83.33%;" data-time="18:00"></div>
+            <div class="time-marker" style="left: 91.66%;" data-time="19:00"></div>
+            <div class="time-marker" style="left: 100%;" data-time="20:00"></div>
+          </div>
+          <!-- </div> -->
+        </div>
+      </div>
+
+      <div id="dg_table">
+        <div class="reprt-box mt-30">
+          <h5>Manual Entry Logs</h5>
+
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Duration (minutes)</th>
+                <th>Reason</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody id="log-data">
+              <!-- Data from database will go here -->
+            </tbody>
+          </table>
+
+          <div class="manual-button-wrap">
+            <button class="manual-add-btn" onclick="openModal()"><i class="fa fa-plus-circle" aria-hidden="true"></i>
+              Add Manual Entry</button>
           </div>
         </div>
       </div>
 
-      <div class="col-md-3 col-sm-6 col-12 mb-1">
-        <div class="info-box-pay border ">
-          <div class="info-box-content-pay">
-            <span class="info-box-number-pay  text-success"><strong>0 hr 0 min</strong></span>
-            <span class="info-box-texts text-dark fs-13 text-capitalize">Manual Time</span>
+      <!-- Modal -->
+      <div class="manual-modal" id="manualModal">
+        <div class="manual-modal-overlay" onclick="closeModal()"></div>
+        <div class="manual-modal-content">
+          <h3>Add Manual Entry</h3>
+          <div class="manual-entry-form" id="manualEntryForm">
+            <div class="form-row">
+              <label>Start Time <input type="time" id="timestamp_start" required /></label>
+              <label>End Time <input type="time" id="timestamp_end" required /></label>
+            </div>
+            <div class="form-row">
+              <label>Project
+                <input type="text" value="Lorem" readonly />
+              </label>
+              <label>Task
+                <select disabled>
+                  <option selected>Ipsum</option>
+                  <option>Dolor</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row full-width">
+              <label for="notes">Notes</label>
+              <textarea id="reason" rows="2" placeholder="Enter notes" class="textarea-full" required></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" id="saveManualBtn" class="save-btn">Save</button>
+              <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+            </div>
           </div>
         </div>
       </div>
-
-      <div class="col-md-3 col-sm-6 col-12 mb-1">
-        <div class="info-box-pay border">
-          <div class="info-box-content-pay">
-            <span class="info-box-number-pay text-success"><strong>00:00</strong></span>
-            <span class="info-box-texts text-dark fs-13 text-capitalize">Meeting Time</span>
-          </div>
-        </div>
-      </div>
     </div>
-
-    <div class="mt-30" id="activity">
-
-      <h5>Activity Bar</h5>
-      <div class="legend">
-        <div class="legend-item">
-          <div class="legend-color bg-green"></div>
-          <span>Active</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color bg-yellow"></div>
-          <span>Moderate Active</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color box-danger"></div>
-          <span>Inactive</span>
-        </div>
-      </div>
-
-
-      <div class="timeline-container">
-        <!-- <div class="time-row"> -->
-        <div id="timeline-track">
-          <!-- Dynamic blocks will be added here -->
-
-          <!-- Static time markers (08:00 to 20:00) -->
-          <!-- Each hour = 100% / 12 = 8.33% -->
-          <div class="time-marker" style="left: 0%;" data-time="08:00"></div>
-          <div class="time-marker" style="left: 8.33%;" data-time="09:00"></div>
-          <div class="time-marker" style="left: 16.66%;" data-time="10:00"></div>
-          <div class="time-marker" style="left: 25%;" data-time="11:00"></div>
-          <div class="time-marker" style="left: 33.33%;" data-time="12:00"></div>
-          <div class="time-marker" style="left: 41.66%;" data-time="13:00"></div>
-          <div class="time-marker" style="left: 50%;" data-time="14:00"></div>
-          <div class="time-marker" style="left: 58.33%;" data-time="15:00"></div>
-          <div class="time-marker" style="left: 66.66%;" data-time="16:00"></div>
-          <div class="time-marker" style="left: 75%;" data-time="17:00"></div>
-          <div class="time-marker" style="left: 83.33%;" data-time="18:00"></div>
-          <div class="time-marker" style="left: 91.66%;" data-time="19:00"></div>
-          <div class="time-marker" style="left: 100%;" data-time="20:00"></div>
-        </div>
-        <!-- </div> -->
-      </div>
-    </div>
-
-  </div>
-
-
-  <div id="dg_table">
-    <div class="reprt-box-1">
-      <h5>Manual Entry Logs</h5>
-
-      <table class="log-table">
-        <thead>
-          <tr>
-            <th>S.No</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-            <th>Duration (minutes)</th>
-            <th>Reason</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody id="log-data">
-          <!-- Data from database will go here -->
-        </tbody>
-      </table>
-
-      <div class="manual-button-wrap">
-        <button class="manual-add-btn" onclick="openModal()"><i class="fa fa-plus-circle" aria-hidden="true"></i>
-          Add Manual Entry</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div class="manual-modal" id="manualModal">
-    <div class="manual-modal-overlay" onclick="closeModal()"></div>
-    <div class="manual-modal-content">
-      <h3>Add Manual Entry</h3>
-      <div class="manual-entry-form" id="manualEntryForm">
-        <div class="form-row">
-          <label>Start Time <input type="time" id="timestamp_start" required /></label>
-          <label>End Time <input type="time" id="timestamp_end" required /></label>
-        </div>
-        <div class="form-row">
-          <label>Project
-            <input type="text" value="Lorem" readonly />
-          </label>
-          <label>Task
-            <select disabled>
-              <option selected>Ipsum</option>
-              <option>Dolor</option>
-            </select>
-          </label>
-        </div>
-        <div class="form-row full-width">
-          <label for="notes">Notes</label>
-          <textarea id="reason" rows="2" placeholder="Enter notes" class="textarea-full" required></textarea>
-        </div>
-        <div class="form-actions">
-          <button type="button" id="saveManualBtn" class="save-btn">Save</button>
-          <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  </section>
 </div>
 
 
@@ -425,6 +425,8 @@
         date: date1
       },
       success: function(response) {
+        console.log(response);
+
         if (response.status && response.data.length > 0) {
           const data = response.data[0];
 
