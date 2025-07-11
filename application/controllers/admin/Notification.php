@@ -28,37 +28,55 @@ class Notification extends Home_Controller {
     public function send_notification()
     {
         try {
-            // Load input and session helpers
-            $this->load->helper('security');
+            // Get all data from headers instead of POST
+            $employee_id = $this->input->get_request_header('employee_id', TRUE);
+            $description = $this->input->get_request_header('description', TRUE);
+            $status = $this->input->get_request_header('status', TRUE);
+            $user_id = $this->input->get_request_header('user_id', TRUE);
     
-            // Fetch inputs securely
-            $employee_id = $this->input->post('employee_id', true);
-            $description = $this->input->post('description', true);
-            $status = $this->input->post('status', true); // New status field (1 or 0)
-    
-            // Get user_id from session or POST (for Postman/local testing)
-            $user_id = $this->session->userdata('user_id');
-            if (empty($user_id)) {
-                $user_id = $this->input->post('user_id', true); // fallback
-            }
-    
-            // Validate inputs
-            if (empty($user_id) || empty($employee_id) || empty($description)) {
+            // Basic validation (similar to file1 style)
+            if(empty($employee_id) || empty($user_id) || empty($description)) {
                 return $this->output
                     ->set_content_type('application/json')
-                    ->set_status_header(400)
                     ->set_output(json_encode([
                         'status' => 'error',
-                        'message' => 'User ID, Employee ID, and Description are required.'
+                        'message' => 'Missing required data',
+                        'required_fields' => [
+                            'employee_id (got: '.$employee_id.')',
+                            'user_id (got: '.$user_id.')',
+                            'description (got: '.$description.')'
+                        ]
                     ]));
             }
     
-            // Validate status (must be 0 or 1)
-            $status = ($status === '1' || $status === 1) ? 1 : 0;
+            // Validate numeric IDs
+            if(!is_numeric($employee_id) || !is_numeric($user_id)) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Invalid ID format',
+                        'invalid_fields' => [
+                            'employee_id (must be numeric, got: '.$employee_id.')',
+                            'user_id (must be numeric, got: '.$user_id.')'
+                        ]
+                    ]));
+            }
     
-            // Set timezone to Indian Standard Time
-            date_default_timezone_set('Asia/Kolkata');
-            $created_at = date('Y-m-d H:i:s');
+            // Validate status (must be between 0 and 6)
+            $status = intval($status);
+            if($status < 0 || $status > 6) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Invalid status value',
+                        'details' => 'Status must be between 0 and 6 (got: '.$status.')'
+                    ]));
+            }
+    
+            // Get current datetime in user's timezone
+            $current_datetime = get_user_datetime_only($user_id);
     
             // Prepare data
             $data = [
@@ -66,33 +84,31 @@ class Notification extends Home_Controller {
                 'employee_id' => $employee_id,
                 'description' => $description,
                 'status'      => $status,
-                'created_at'  => $created_at
+                'created_at'  => $current_datetime
             ];
     
             // Insert into DB
             $this->db->insert('notifications', $data);
     
-            if ($this->db->affected_rows() > 0) {
+            if($this->db->affected_rows() > 0) {
+                $notification_id = $this->db->insert_id();
                 return $this->output
                     ->set_content_type('application/json')
-                    ->set_status_header(200)
+                    ->set_status_header(201)
                     ->set_output(json_encode([
                         'status' => 'success',
-                        'user_id' => $user_id,
-                        'employee_id' => $employee_id,
-                        'description' => $description,
-                        'notification_status' => $status,
-                        'created_at' => $created_at,
-                        'timezone' => 'IST (Asia/Kolkata)', // Indicate the timezone
-                        'message' => 'Notification sent successfully.'
+                        'message' => 'Notification sent successfully',
+                        'notification_id' => $notification_id,
+                        'data' => $data,
+                        'user_timezone' => 'Based on user_id: '.$user_id
                     ]));
             } else {
                 return $this->output
                     ->set_content_type('application/json')
-                    ->set_status_header(500)
                     ->set_output(json_encode([
                         'status' => 'error',
-                        'message' => 'Failed to send notification.'
+                        'message' => 'Failed to send notification',
+                        'database_error' => $this->db->error()
                     ]));
             }
         } catch (Exception $e) {
@@ -100,10 +116,10 @@ class Notification extends Home_Controller {
     
             return $this->output
                 ->set_content_type('application/json')
-                ->set_status_header(500)
                 ->set_output(json_encode([
                     'status' => 'error',
-                    'message' => 'An unexpected error occurred.'
+                    'message' => 'An unexpected error occurred',
+                    'error_details' => $e->getMessage()
                 ]));
         }
     }
