@@ -1,59 +1,57 @@
-<div id="toast-container"></div>
-
 <div class="content-wrapper Time_Approval">
-<div class="manual-entry-container">
+    <div class="manual-entry-container">
 
-    <h3>Time Approval</h3>
-    <div class="row reprt-box" style="margin: 25px auto;">
-    <div class="col-lg-4">
-        Employee List
-        <select id="employee-select" class="form-control single_select">
-            <option value="">Select Employee</option>
-        </select>
-    </div>
-<div class="col-lg-4 "></div>
-    <div class="form-group col-lg-4">
-    <label class="control-label">Sort By</label>
-    <div class="input-group">
-        <select class="form-control single_select" id="sortSelect">
-            <option value="Filters">Filters</option>
-            <option value="Approved">Approved</option>
-            <option value="Unapproved">UnApproved</option>
-        </select>
+        <h3>Time Approval</h3>
+        <div class="row mb-5 reprt-box">
+            <div class="col-lg-4 form-group my-3">
+                <label class="control-label">Employee</label>
+                <select id="employee-select" class="form-control single_select">
+                    <option value="">Select Employee</option>
+                </select>
+            </div>
+            <div class="col-lg-4 form-group my-3"></div>
+            <div class="form-group col-lg-4 my-3">
+                <label class="control-label">Sort By</label>
+                <div class="input-group">
+                    <select class="form-control single_select" id="sortSelect">
+                        <option value="Filters">Filters</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Unapproved">UnApproved</option>
+                    </select>
 
-        <!-- Sort Icon -->
-        <div class="input-group-addon border-0">
-            <span id="sortIcon" style="cursor: pointer;">
-                <i class="bi bi-arrow-down-up"></i>
-            </span>
+                    <!-- Sort Icon -->
+                    <div class="input-group-addon border-0">
+                        <span id="sortIcon" style="cursor: pointer;">
+                            <i class="bi bi-arrow-down-up"></i>
+                        </span>
+                    </div>
+
+
+                </div>
+            </div>
+
         </div>
 
-        
-    </div>
-</div>
+        <hr>
 
+        <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
+            <table class="table table-hover cushover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Employee Name</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Duration</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="log-data"></tbody>
+            </table>
+        </div>
     </div>
-
-    <hr>
-
-    <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
-        <table class="table table-hover cushover">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Employee Name</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Duration</th>
-                    <th>Reason</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="log-data"></tbody>
-        </table>
-    </div>
-</div>
 </div>
 <script>
     let globalUserId = null;
@@ -198,19 +196,19 @@
             loadTimecards(empId, userId);
         });
 
-        $('#sortSelect').on('change', function () {
-    const selectedValue = $(this).val();
-    const empId = $('#employee-select').val();
-    const userId = $('#employee-select option:selected').data('user-id') || globalUserId;
+        $('#sortSelect').on('change', function() {
+            const selectedValue = $(this).val();
+            const empId = $('#employee-select').val();
+            const userId = $('#employee-select option:selected').data('user-id') || globalUserId;
 
-    if (selectedValue === 'Approved') {
-        loadTimecards(empId, userId, 'approved');
-    } else if (selectedValue === 'Unapproved') {
-        loadTimecards(empId, userId, 'unapproved');
-    } else {
-        loadTimecards(empId, userId); // Filters or default
-    }
-});
+            if (selectedValue === 'Approved') {
+                loadTimecards(empId, userId, 'approved');
+            } else if (selectedValue === 'Unapproved') {
+                loadTimecards(empId, userId, 'unapproved');
+            } else {
+                loadTimecards(empId, userId); // Filters or default
+            }
+        });
 
         // $('#cancel-btn').on('click', function() {
         //     loadTimecards('', globalUserId);
