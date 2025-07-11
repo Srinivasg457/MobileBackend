@@ -125,7 +125,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Notification") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/notification') ?>">
+                  <a href="<?php echo base_url('admin/notification/webcam') ?>">
                     <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
                   </a>
                 </li>
@@ -598,7 +598,7 @@
                 <li class="<?php if (isset($page_title) && $page_title == "Notification") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/notification') ?>">
+                  <a href="<?php echo base_url('admin/notification/webcam') ?>">
                     <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
                   </a>
                 </li>

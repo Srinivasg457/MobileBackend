@@ -1,358 +1,129 @@
-
+<?php $status_messages = [
+    0 => 'Webcam permission denied by system, but the user is online',
+    1 => 'Webcam permission denied by system and the user is offline',
+    2 => 'Webcam is closed, but the user is online',
+    3 => 'Webcam is closed and the user is offline',
+    4 => 'Webcam is live and the user is online',
+    5 => 'Webcam is live, but the user is offline',
+    6 => 'User sign off',
+    7 => 'User is inactive for a while',
+    8 => 'User is active now'
+]; ?>
 <div class="content-wrapper notificaion_style">
     <section class="content">
         <div class="list_area container">
-            <h3 class="box-title"><?php echo 'Notification' ?>
-                <div class="pull-right rounded  mx-2 box desktop"><?php echo "Desktop" ?></div>
-                <div class="pull-right  rounded  box webcam active"><?php echo "Webcam" ?></div>
+            <h3><?php echo 'Notification' ?>
             </h3>
+            <div class="container mt-50">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="nav-tabs-custom">
+                            <ul class="nav nav-tabs admin">
+                                <li>
+                                    <a class="<?php if (isset($navbar) && $navbar == 'webcam') echo 'active'; ?>"
+                                        href="<?php echo base_url('admin/notification/webcam') ?>">
+                                        <i class="fa fa-camera"></i>
+                                        <span class="hidden-xs"><?php echo "Webcam" ?></span>
+                                    </a>
+                                </li>
 
+                                <li>
+                                    <a class="<?php if (isset($navbar) && $navbar == 'desktop') echo 'active'; ?>"
+                                        href="<?php echo base_url('admin/notification/desktop') ?>">
+                                        <i class="fa fa-desktop"></i>
+                                        <span class="hidden-xs"><?php echo "Desktop" ?></span>
+                                    </a>
+                                </li>
+                            </ul>
 
-
-            <div class="container my-5"></div>
-            <!-- <div class="row mt-20"> -->
-            <div class="notification-container col-md-10 col-sm-12 col-xs-10  bg-white rounded m-auto border-bottom" style="border-bottom: 1px solid whitesmoke;">
-                <!-- <div class="loading">Loading notifications...</div> -->
-                <div class="notification form-group mb-0">
-                    <div class="text-center">
-                        <label for="control-label fw-bolder">User</label>
-                    </div>
-                    <div class="right" style="display: grid; grid-template-columns: 1fr 1fr; align-items: flex-end; gap: 25px;">
-                        <div> <label for="control-label ">Status</label>
                         </div>
-                        <div> <label for="control-label">Send mail</label>
-                        </div>
                     </div>
+                    <!-- <div class="col-sm-6">
+                        <div class="row">
+                            <div class="form-group col-lg-2  my-3">
+                            </div>
+                            <div class="form-group col-lg-6  my-3">
+                                <div class="input-group">
+                                    <input type="text" class="search-input form-control" placeholder="Search employees...">
+                                </div>
+                            </div>
+                            <div class="form-group col-lg-4 my-3">
+                                <div class="input-group">
+                                    <select class="form-control single_select" id="sortSelect">
+                                        <option value="employeeName">sort by</option>
+                                        <option value="active">Active Hours</option>
+                                        <option value="inactive">Inactive Hours</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div> -->
                 </div>
             </div>
-            <div class="notification-container col-md-10 col-sm-12 col-xs-10  bg-white rounded m-auto" id="notifications-list">
+            <!-- <div class="row m-5 mt-20">
+                        <div class="col-md-8 box"> -->
+            <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive p-0 ">
+                <table class="table table-hover cushover mt-0 <?php if (count($notifications) > 10) {
+                                                                            echo "datatable";
+                                                                        } ?>" id="dg_table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th><?php echo trans('avatar') ?></th>
+                            <th><?php echo trans('user') ?></th>
+                            <th><?php echo trans('status') ?></th>
+                            <th><?php echo trans('action') ?></th>
+                        </tr>
+                    </thead>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($notifications)): ?>
+                            <tr>
+                                <td>notification not found</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php $i = 1;
+                            foreach ($notifications as $notification): ?>
+                                <tr>
+                                    <td><?php echo $i; ?></td>
+                                    <td> <img src="<?php echo base_url("assets/images/avatar.png") ?>" style="border-radius: 50px; height: 50px; width: 50px;">
+                                    </td>
+                                    <td>
+                                        <p class="mb-0"><?php echo $notification['employee_name']; ?></p>
+                                        <p class="mb-0 text-muted">Message: <?php echo $notification['description']; ?></p>
+                                    </td>
+                                    <td>
+                                        <?php if (in_array($notification['status'], [0, 1, 2, 4, 6, 7])): ?>
+                                            <span class="status online">ONLINE</span>
+                                        <?php else: ?>
+                                            <span class="status offline">OFFLINE</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (in_array($notification['status'], [0, 1, 2, 3, 5, 6, 7])): ?>
+                                            <?php if ($can_edit): ?>
+                                                <button class="send-email btn btn-default btn-sm rounded" data-id="<?php echo $notification['employee_id']; ?>" data-name="<?php echo $notification['employee_name']; ?>" data-email="<?php echo $notification['email']; ?>" data-description="<?php echo $notification['description']; ?>" style="margin-top:5px;"><i class="fa fa-envelope-o"></i> Send Email</button>
+                                            <?php else: ?>
+                                                <button class="btn btn-default rounded" data-toggle="tooltip" data-placement="top" title="permission denied to send mail" style="margin-top:5px;">Send Email</button>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
 
+                            <?php $i++;
+                            endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
-            <!-- </div> -->
+            <!-- </div>
+                    </div> -->
+        </div>
     </section>
 </div>
 <script>
-    // Main function to load notifications
-    function loadNotifications(application) {
-        if (application === "web") {
-            $('.box.webcam').addClass('active');
-            $('.box.desktop').removeClass('active');
-        } else {
-            $('.box.desktop').addClass('active');
-            $('.box.webcam').removeClass('active');
-        }
-
-        $('#notifications-list').html('');
-
-        // Choose API endpoint based on application
-        const url = application === "web" ?
-            "<?= base_url('admin/Notification/get_notifications') ?>" :
-            "<?= base_url('admin/Notification/desktop_notifications') ?>";
-
-        $.ajax({
-            url: url,
-            method: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success' && response.data.length > 0) {
-                    console.log(response);
-
-                    const formattedData = response.data.map(item => ({
-                        employeeId: item.employee_id,
-                        employeeName: item.employee_name,
-                        employeeEmail: item.email, // If you want email, return it in the API
-                        notification: {
-                            status: parseInt(item.status),
-                            description: item.description,
-                            created_at: item.created_at
-                        }
-                    }));
-
-                    // Display all notifications in one go
-                    displaySortedNotifications(application, formattedData);
-                } else {
-                    $('#notifications-list').html(
-                        '<div class="notification">No notifications found.</div>'
-                    );
-                }
-            },
-            error: function() {
-                $('#notifications-list').html(
-                    '<div class="error-message">Error loading notifications.</div>'
-                );
-            }
-        });
-    }
-
-
-    // Helper function to display notifications in sorted order (offline first)
-    function displaySortedNotifications(application, notificationsData) {
-
-        // notificationsData.sort((a, b) => a.notification.status - b.notification.status);
-        // $('#notifications-list').html('');
-        notificationsData.forEach(data => {
-            if (application === "web") {
-                displayWebcamNotification(data.employeeId, data.employeeName, data.employeeEmail, data.notification);
-            } else {
-                displayDesktopNotification(data.employeeId, data.employeeName, data.employeeEmail, data.notification);
-            }
-        });
-    }
-
-
-
-    // Webcam Notifications
-    function fetchWebcamNotifications(employeeId, employeeName, employeeEmail) {
-        $.ajax({
-            url: "<?= base_url('admin/Notification/get_notifications') ?>",
-            type: 'GET',
-            data: {
-                employee_id: employeeId,
-                employee_name: employeeName
-            },
-            dataType: 'json',
-            success: function(response) {
-
-                if (response.status === 'success' && response.data.length > 0) {
-                    // Get all current notifications from DOM
-                    // const currentNotifications = [];
-                    // $('.notification').each(function() {
-                    //     const empId = $(this).data('emp-id');
-                    //     const empName = $(this).find('.name').text().replace('Emp Name: ', '');
-                    //     const isOnline = $(this).find('.status').hasClass('online');
-
-                    //     currentNotifications.push({
-                    //         employeeId: empId,
-                    //         employeeName: empName,
-                    //         notification: {
-                    //             status: isOnline ? 1 : 0,
-                    //             description: $(this).find('.desc').text().replace('Message: ', '') || '',
-                    //             created_at: $(this).find('.time').text() || new Date().toISOString()
-                    //         }
-                    //     });
-                    // });
-
-                    // Update the matched employee's notification by ID
-                    // const updatedNotifications = currentNotifications.map(notif => {
-                    //     if (parseInt(notif.employeeId) === parseInt(employeeId)) {
-                    //         return {
-                    //             employeeId: employeeId,
-                    //             employeeName: employeeName,
-                    //             notification: response.data[0]
-                    //         };
-                    //     }
-                    //     return notif;
-                    // });
-
-                    const formattedData = [{
-                        employeeId: employeeId,
-                        employeeName: employeeName,
-                        employeeEmail: employeeEmail,
-                        notification: {
-                            status: parseInt(response.data[0].status), // ensure it's number
-                            description: response.data[0].description,
-                            created_at: response.data[0].created_at
-                        }
-                    }];
-
-                    displaySortedNotifications("web", formattedData);
-                }
-
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading webcam notifications for employee ID ' + employeeId, error);
-            }
-        });
-    }
-
-
-    function displayWebcamNotification(employeeId, employeeName, employeeEmail, notification) {
-        const timeAgo = formatTimeAgo(notification.created_at);
-        const isOnline = notification.status == 1;
-
-        const statusHtml = isOnline ?
-            '<span class="status online">ONLINE</span>' :
-            '<span class="status offline">OFFLINE</span>';
-
-        const showDescription = !isOnline ||
-            (notification.description &&
-                (notification.description.includes("webcam is closed, but the user is online") ||
-                    notification.description.includes("Webcam permission denied by system, but the user is online")));
-
-        const descriptionHtml = showDescription ?
-            '<span class="desc">Message: ' + notification.description + '</span>' :
-            '';
-
-        const timeHtml = isOnline ? '' : '<div class="time">' + timeAgo + '</div>';
-
-
-        const sendButtonHtml = showDescription ?
-            `
-                    <?php if ($can_edit): ?>
-                        <button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>
-                        <?php else: ?>
-                        <button class="btn btn-default rounded" data-toggle="tooltip" data-placement="top" title="permission denied to send mail" style="margin-top:5px;">Send Email</button>
-
-                        <?php endif; ?>` :
-            '<button class="send-email" style="margin-top:5px; visibility: hidden;"> Send Email </button>';
-
-
-
-        const html =
-            `<div class="notification">
-                        <div class="profile">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
-                            <div class="details">
-                                <span class="name">Emp Name: ${employeeName}</span>
-                                ${descriptionHtml}
-                            </div>
-                        </div>
-                      <div class="right" style="display: grid; grid-template-columns: 1fr 1fr; align-items: flex-end; gap: 25px;">
-                        <div>
-                            <div class="status-wrapper">${statusHtml}</div>
-                            <div class="time-wrapper">${timeHtml}</div>
-                        </div>
-                        <div class="button-wrapper">
-                            ${sendButtonHtml}
-                        </div>
-                    </div>
-
-                    </div>`;
-
-        $('#notifications-list').append(html);
-        $('[data-toggle="tooltip"]').tooltip(); // Re-initialize tooltips
-    }
-
-
-    // Desktop Notifications
-    function fetchDesktopNotifications(employeeId, employeeName, employeeEmail) {
-        $.ajax({
-            url: "<?= base_url('admin/Notification/desktop_notifications') ?>",
-            type: 'GET',
-            data: {
-                employee_id: employeeId,
-                employee_name: employeeName
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success' && response.data.length > 0) {
-                    // Get all current notifications
-                    // const currentNotifications = [];
-                    // $('.notification').each(function() {
-                    //     const name = $(this).find('.name').text().replace('Emp Name: ', '');
-                    //     const isOnline = $(this).find('.status').hasClass('online');
-                    //     currentNotifications.push({
-                    //         employeeName: name,
-                    //         notification: {
-                    //             status: isOnline ? 1 : 0,
-                    //             description: $(this).find('.desc').text().replace('Message: ', '') || '',
-                    //             created_at: $(this).find('.time').text() || new Date().toISOString()
-                    //         }
-                    //     });
-                    // });
-
-                    // // Update the notification for this employee
-                    // const updatedNotifications = currentNotifications.map(notif => {
-                    //     if (notif.employeeName === employeeName) {
-                    //         return {
-                    //             employeeName: employeeName,
-                    //             notification: response.data[0]
-                    //         };
-                    //     }
-                    //     return notif;
-                    // });
-                    const formattedData = [{
-                        employeeId: employeeId,
-                        employeeName: employeeName,
-                        employeeEmail: employeeEmail,
-                        notification: {
-                            status: parseInt(response.data[0].status), // ensure it's number
-                            description: response.data[0].description,
-                            created_at: response.data[0].created_at
-                        }
-                    }];
-
-                    displaySortedNotifications("desk", formattedData);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading desktop notifications', error);
-            }
-        });
-    }
-
-    function displayDesktopNotification(employeeId, employeeName, employeeEmail, notification) {
-        const timeAgo = formatTimeAgo(notification.created_at);
-        const isOnline = notification.status == 1;
-
-        const sendButtonHtml = (!isOnline) ?
-            `
-                    <?php if ($can_edit): ?>
-                    <button class="send-email" data-id="${employeeId}" data-name="${employeeName}" data-email="${employeeEmail}" data-description="${notification.description}" style="margin-top:5px;">Send Email</button>
-                    <?php else: ?>
-                        <button class="btn" data-toggle="tooltip" data-placement="top" title="permission denied to send mail" style="margin-top:5px;">Send Email</button>
-                        <?php endif; ?>` :
-            '<button class="send-email" style="margin-top:5px; visibility: hidden;"> Send Email </button>';
-
-        const html =
-            `<div class="notification">
-                        <div class="profile">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTknqZMo9wWXmrjrwgdRD29sKWtvzxb-MWkVNnCgYujtPDxdK57cMM2vgaGnFdqhqcxCY8&usqp=CAU" alt="Profile">
-                            <div class="details">
-                                <span class="name">Emp Name: ${employeeName}</span>
-                                ${isOnline ? '' : `<span class="desc">Message: ${notification.description}</span>`}
-                            </div>
-                        </div>
-                        <div class="right" style="display: grid; grid-template-columns: 1fr 1fr; align-items: flex-end; gap: 25px;">
-                        <div>
-                            <div class="status-wrapper">
-                                ${isOnline ? '<span class="status online">ONLINE</span>' : '<span class="status offline">OFFLINE</span>'}
-                            </div>
-                            ${isOnline ? '' : `
-                                <div class="time-wrapper">
-                                    <div class="time">${timeAgo}</div>
-                                </div>
-                            
-                            `}
-                            </div>
-                            <div class="button-wrapper">
-                                    ${sendButtonHtml}
-                                </div>
-                        </div>
-                        </div>`;
-
-        $('#notifications-list').append(html);
-        $('[data-toggle="tooltip"]').tooltip(); // Re-initialize tooltips
-    }
-
-
-
-    function formatTimeAgo(createdAt) {
-        const createdDate = new Date(createdAt);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - createdDate) / 1000);
-
-        if (diffInSeconds < 60) return 'just now';
-        if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' mins ago';
-        if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' hours ago';
-        return Math.floor(diffInSeconds / 86400) + ' days ago';
-    }
-
-    $(document).ready(function() {
-
-        // Initially load webcam notifications
-        loadNotifications("web");
-
-        // Tab click handlers
-        $('.box.webcam').on('click', function() {
-            loadNotifications("web");
-        });
-
-        $('.box.desktop').on('click', function() {
-            loadNotifications("desk");
-        });
-
-    });
     $(document).on('click', '.send-email', function() {
         const $btn = $(this);
         const employeeId = $btn.data('id');
@@ -365,7 +136,7 @@
         // Disable button and add loader
         $btn.prop('disabled', true);
         const originalText = $btn.html();
-        $btn.html('Sending... <span class="button-loader"></span>');
+        $btn.html('<i class="fa fa-envelope-o"></i> Sending.....');
 
         $.ajax({
             url: "<?= base_url('admin/Notification/send_alert_mail') ?>",
