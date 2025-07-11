@@ -569,7 +569,7 @@ public function store_Time_Log()
     $total_active_time = $this->input->get_request_header('total_active_time', TRUE);
     $total_idle_time = $this->input->get_request_header('total_idle_time', TRUE);
 
-    // Basic validation
+    // Basic validation (similar to file1 style)
     if(empty($employee_id) || empty($user_id) || empty($log_date) || 
        empty($start_time) || empty($end_time) || 
        empty($total_active_time) || empty($total_idle_time)) {
@@ -604,34 +604,23 @@ public function store_Time_Log()
             ]));
     }
 
-    // Get current user datetime
-    $current_datetime = get_user_datetime_only($user_id);
-    $current_date = date('Y-m-d', strtotime($current_datetime));
-    $current_time = date('H:i:s', strtotime($current_datetime));
-    $expected_start_datetime = $current_date . ' ' . $current_time;
-
-    // Check if logging for today
-    if ($log_date == $current_date) {
-        // For today's log, start_time must match current user time
-        if ($start_time != $current_time) {
-            // Format received start time as datetime if it's not already
-            $received_datetime = (strpos($start_time, ' ') !== false) ? $start_time : $log_date . ' ' . $start_time;
-            
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode([
-                    'status' => 'error',
-                    'message' => 'Invalid start time for today',
-                    'details' => [
-                        'expected_start_time' => $expected_start_datetime,
-                        'received_start_time' => $received_datetime,
-                        'user_timezone' => 'Based on user_id: '.$user_id
-                    ]
-                ]));
-        }
+    // Extract date part from start_time
+    $start_date = date('Y-m-d', strtotime($start_time));
+    
+    // If log_date is different from start_time's date, adjust start_time
+    if ($log_date != $start_date) {
+        // Option 1: Set start_time to beginning of the log_date (00:00:00)
+        // $start_time = $log_date . ' 00:00:00';
+        
+        // Option 2: Keep the time portion but use the log_date
+        $time_part = date('H:i:s', strtotime($start_time));
+        $start_time = $log_date . ' ' . $time_part;
+        
+        // Note: Choose the option that makes more sense for your business logic
     }
 
     // Prepare data
+    $current_time = get_user_datetime_only($user_id);
     $data = [
         'employee_id' => $employee_id,
         'user_id' => $user_id,
@@ -640,8 +629,8 @@ public function store_Time_Log()
         'end_time' => $end_time,
         'total_active_time' => $total_active_time,
         'total_idle_time' => $total_idle_time,
-        'created_at' => $current_datetime,
-        'updated_at' => $current_datetime
+        'created_at' => $current_time,
+        'updated_at' => $current_time
     ];
 
     // Insert to database
