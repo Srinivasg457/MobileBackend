@@ -606,7 +606,7 @@ public function store_Time_Log()
     }
 
     // Prepare data
-    $current_time = get_user_datetime_only($user_id);
+    $current_time = '2025-07-11 15:29:12';
     $data = [
         'employee_id' => $employee_id,
         'user_id' => $user_id,
