@@ -32,7 +32,7 @@ class Notification extends Home_Controller {
             $employee_id = $this->input->get_request_header('employee_id', TRUE);
             $description = $this->input->get_request_header('description', TRUE);
             $status = $this->input->get_request_header('status', TRUE);
-            $user_id = $this->input->get_request_header('user_id', TRUE);
+            $user_id = $this->input->get_request_header('user_id', TRUE)??$this->session->userdata('id')??$this->session->userdata('user_id')??$this->input->post('user_id', TRUE);
     
             // Basic validation (similar to file1 style)
             if(empty($employee_id) || empty($user_id) || empty($description)) {
