@@ -24,7 +24,6 @@ class Notification extends Home_Controller {
             redirect('/admin/subscription/upgrade_plan');
         }
     }
-
     public function send_notification()
     {
         try {
@@ -63,28 +62,33 @@ class Notification extends Home_Controller {
                     ]));
             }
     
-            // Validate status (must be between 0 and 6)
+            // Validate status (must be between 0 and 9 now)
             $status = intval($status);
-            if($status < 0 || $status > 6) {
+            if($status < 0 || $status > 9) {
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_output(json_encode([
                         'status' => 'error',
                         'message' => 'Invalid status value',
-                        'details' => 'Status must be between 0 and 6 (got: '.$status.')'
+                        'details' => 'Status must be between 0 and 9 (got: '.$status.')'
                     ]));
             }
     
             // Validate status text matches status code
             $status_messages = [
-                0 => 'Webcam image is too dark or black',
-                1 => 'Webcam closed by the User',
-                2 => 'Requested device not found',
-                3 => 'Permission denied by system',
-                4 => 'User sign off',
-                5 => 'User is active now',
-                6 => 'User is inactive for a while'
+                0 => 'Webcam permission denied by system, but the user is online',
+                1 => 'Webcam permission denied by system and the user is offline',
+                2 => 'Webcam is closed, but the user is online',
+                3 => 'Webcam is closed and the user is offline',
+                4 => 'Webcam is live and the user is online',
+                5 => 'Webcam is live, but the user is offline',
+                6 => 'User sign off',
+                7 => 'User is inactive for a while',
+                8 => 'User is active now'
             ];
+    
+            // Special case: Status 5 ("User is active now") is now removed as we have more specific webcam states
+            // Status 6 from previous version is now status 9
     
             if (!isset($status_messages[$status]) || stripos($description, $status_messages[$status]) === false) {
                 return $this->output
