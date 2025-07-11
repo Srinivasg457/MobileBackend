@@ -75,6 +75,31 @@ class Notification extends Home_Controller {
                     ]));
             }
     
+            // Validate status text matches status code
+            $status_messages = [
+                0 => 'Webcam image is too dark or black',
+                1 => 'Webcam closed by the User',
+                2 => 'Requested device not found',
+                3 => 'Permission denied by system',
+                4 => 'User sign off',
+                5 => 'User is active now',
+                6 => 'User is inactive for a while'
+            ];
+    
+            if (!isset($status_messages[$status]) || stripos($description, $status_messages[$status]) === false) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Status code and description mismatch',
+                        'details' => [
+                            'status_code' => $status,
+                            'expected_description_contains' => $status_messages[$status],
+                            'received_description' => $description
+                        ]
+                    ]));
+            }
+    
             // Get current datetime in user's timezone
             $current_datetime = get_user_datetime_only($user_id);
     
