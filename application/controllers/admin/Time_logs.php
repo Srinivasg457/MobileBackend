@@ -562,7 +562,7 @@ public function store_Time_Log()
 {
     // Get all headers
     $employee_id = $this->input->get_request_header('employee_id', TRUE);
-    $user_id = $this->input->get_request_header('user_id', TRUE);
+    $user_id = $this->input->get_request_header('user_id', TRUE)??$this->input->post('id')??$this->input->post('user_id');
     $log_date = $this->input->get_request_header('log_date', TRUE);
     $start_time = $this->input->get_request_header('start_time', TRUE);
     $end_time = $this->input->get_request_header('end_time', TRUE);
@@ -620,7 +620,7 @@ public function store_Time_Log()
     }
 
     // Prepare data
-    $current_time = get_user_datetime_only($user_id);
+    $current_time = date('y-m-d H:i:s', $timestamp);
     $data = [
         'employee_id' => $employee_id,
         'user_id' => $user_id,

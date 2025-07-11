@@ -166,17 +166,17 @@
       <form method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/hrm/employee_import') ?>" class="validate-form mt-20 p-30">
 
         <div class="form-group">
-          <label>upload-excel-file  (.xlsx or .csv)</label>
-          <input type="file" class="form-control" name="import_file" accept=".csv, .xls, .xlsx" required>
+          <label class="">upload-excel-file  (.xlsx or .csv)</label>
+          <input type="file" class="form-control mb-5" name="import_file" accept=".csv, .xls, .xlsx" required>
         </div>
 
         <!-- CSRF Token -->
         <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
 
-        <button type="submit" class="btn btn-success btn-rounded"><i class="fa fa-upload"></i> import</button>
+        <button type="submit" class="btn btn-info btn-rounded"><i class="fa fa-upload"></i> import</button>
 
         <!-- Download Sample Excel -->
-        <a href="<?php echo base_url('admin/hrm/download_sample_excel') ?>" class="btn btn-primary btn-rounded ml-2">
+        <a href="<?php echo base_url('admin/hrm/download_sample_excel') ?>" class="btn btn-default btn-rounded ml-2">
           <i class="fa fa-download"></i> download-sample
         </a>
       </form>
