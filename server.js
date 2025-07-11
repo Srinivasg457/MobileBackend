@@ -1,6 +1,7 @@
 import fs from 'fs';
 import https from 'https';
-import { WebSocketServer } from 'ws';
+// import { WebSocketServer } from 'ws';
+import WebSocket, { WebSocketServer } from "ws";
 
 //For production with SSL:
 const serverOptions = {
