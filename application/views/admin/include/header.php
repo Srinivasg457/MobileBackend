@@ -83,18 +83,18 @@
         color: #333;
       }
 
-      .send-email {
+      /* .send-email {
         padding: 4px 8px;
         background-color: #007bff;
         color: white;
         border: none;
         border-radius: 6px;
         cursor: pointer;
-      }
+      } */
 
-      .send-email:hover {
+      /* .send-email:hover {
         background-color: #0056b3;
-      }
+      } */
 
 
       .notification {
