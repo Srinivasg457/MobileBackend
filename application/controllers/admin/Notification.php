@@ -17,13 +17,85 @@ class Notification extends Home_Controller {
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Notification';
+        $data['navbar'] = 'webcam';
         $data['can_edit'] = $this->auth_model->get_permission(3);
+        $data['notifications'] = $this->web_notifications();
         $data['main_content'] = $this->load->view('admin/notification', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
     }
+
+    public function desktop()
+    {
+        require_feature(3);
+        $data = array();
+        $data['is_employee_admin'] = true;
+        $data['page_title'] = 'Notification';
+        $data['navbar'] = 'desktop';
+        $data['can_edit'] = $this->auth_model->get_permission(3);
+        $data['notifications'] = $this->desktop_notifications();
+        $data['main_content'] = $this->load->view('admin/notification', $data, TRUE);
+        $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
+    }
+
+    public function desktop_notifications()
+    {
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+        $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
+            ->from('notifications')
+            ->where('user_id', $user_id)
+            ->group_by('employee_id')
+            ->get_compiled_select();
+
+        // Main query joins on latest notification per employee
+        $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
+        $this->db->from('notifications n');
+        $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
+        $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+        $this->db->where('n.user_id', $user_id);
+        $this->db->where_in('n.status', [6, 7, 8]);
+
+
+        // Sort by status (0 first), then by created_at desc
+        $this->db->order_by('n.status', 'ASC');
+        $this->db->order_by('n.created_at', 'ASC');
+        $query = $this->db->get();
+        $query = $query->result_array();
+        return $query;
+    }
+    public function web_notifications()
+    {
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+        $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
+            ->from('notifications')
+            ->where('user_id', $user_id)
+            ->group_by('employee_id')
+            ->get_compiled_select();
+
+        // Main query joins on latest notification per employee
+        $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
+        $this->db->from('notifications n');
+        $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
+        $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+        $this->db->where('n.user_id', $user_id);
+        $this->db->where_in('n.status', [0, 1, 2, 3, 4, 5]);
+
+
+        // Sort by status (0 first), then by created_at desc
+        $this->db->order_by('n.status', 'ASC');
+        $this->db->order_by('n.created_at', 'ASC');
+        $query = $this->db->get();
+        $query = $query->result_array();
+        return $query;
+    }
+
 
     public function send_notification()
     {
@@ -191,175 +263,8 @@ class Notification extends Home_Controller {
     //             'data' => $notifications
     //         ]));
     // }
-    public function desktop_notifications()
-    {
-        $employee_id = $this->input->get('employee_id');
-        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
-    
-        if (empty($user_id)) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    'status' => 'error',
-                    'message' => 'User ID is required from session.'
-                ]));
-        }
-
-        if (!empty($employee_id)) {
-            // If employee_id given, get latest notification for that employee only
-            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
-            $this->db->from('notifications n');
-            $this->db->join('employees e', 'n.employee_id = e.id', 'left');
-            $this->db->where('n.user_id', $user_id);
-            $this->db->where('n.employee_id', $employee_id);
-            $this->db->order_by('n.created_at', 'DESC');
-            $this->db->limit(1);
-
-            $query = $this->db->get();
-            $notifications = $query->result_array();
-        } else {
-            // If no employee_id, get latest notification per employee
-
-            // Subquery to get latest created_at per employee
-            $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
-                ->from('notifications')
-                ->where('user_id', $user_id)
-                ->group_by('employee_id')
-                ->get_compiled_select();
-
-            // Main query joins on latest notification per employee
-            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
-            $this->db->from('notifications n');
-            $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
-            $this->db->join('employees e', 'n.employee_id = e.id', 'left');
-            $this->db->where('n.user_id', $user_id);
-
-            // Sort by status (0 first), then by created_at desc
-            $this->db->order_by('n.status', 'ASC');
-            $this->db->order_by('n.created_at', 'ASC');
-
-            $query = $this->db->get();
-            $notifications = $query->result_array();
-        }
-
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(200)
-            ->set_output(json_encode([
-                'status' => 'success',
-                'data' => $notifications
-            ]));
-    }
-    
-    public function get_notifications()
-    {
-        $employee_id = $this->input->get('employee_id');
-        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
-
-        if (empty($user_id)) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(400)
-                ->set_output(json_encode([
-                    'status' => 'error',
-                    'message' => 'User ID is required from session.'
-                ]));
-        }
-
-        if (!empty($employee_id)) {
-            // If employee_id given, get latest notification for that employee only
-            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
-            $this->db->from('notifications n');
-            $this->db->join('employees e', 'n.employee_id = e.id', 'left');
-            $this->db->where('n.user_id', $user_id);
-            $this->db->where('n.employee_id', $employee_id);
-            $this->db->order_by('n.created_at', 'DESC');
-            $this->db->limit(1);
-
-            $query = $this->db->get();
-            $notifications = $query->result_array();
-        } else {
-            // If no employee_id, get latest notification per employee
-
-            // Subquery to get latest created_at per employee
-            $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
-                ->from('notifications')
-                ->where('user_id', $user_id)
-                ->group_by('employee_id')
-                ->get_compiled_select();
-
-            // Main query joins on latest notification per employee
-            $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
-            $this->db->from('notifications n');
-            $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
-            $this->db->join('employees e', 'n.employee_id = e.id', 'left');
-            $this->db->where('n.user_id', $user_id);
-
-            // Sort by status (0 first), then by created_at desc
-            $this->db->order_by('n.status', 'ASC');
-            $this->db->order_by('n.created_at', 'ASC');
-
-            $query = $this->db->get();
-            $notifications = $query->result_array();
-        }
-
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(200)
-            ->set_output(json_encode([
-                'status' => 'success',
-                'data' => $notifications
-            ]));
-    }
-
-
-
-
-
-
-    // public function get_notifications()
-    // {
-    //     $employee_id = 5;
-    //     $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
-
-    //     if (empty($user_id)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'User ID is required from session.'
-    //             ]));
-    //     }
-
-    //     $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.name as employee_name');
-    //     $this->db->from('notifications n');
-    //     $this->db->join('employees e', 'n.employee_id = e.id', 'left');
-    //     $this->db->where('n.user_id', $user_id);
-
-    //     if (!empty($employee_id)) {
-    //         $this->db->where('n.employee_id', $employee_id);
-    //     }
-
-    //     $this->db->order_by('n.created_at', 'DESC');
-    //     $this->db->limit(1);
-
-    //     $query = $this->db->get();
-    //     $notifications = $query->result_array();
-
-    //     return $this->output
-    //         ->set_content_type('application/json')
-    //         ->set_status_header(200)
-    //         ->set_output(json_encode([
-    //             'status' => 'success',
-    //             'data' => $notifications
-    //         ]));
-    // }
+   
   
-
-
-
     public function list_employees_by_user()
     {
         $user_id = 3; // Or get from session: $this->session->userdata('id');
