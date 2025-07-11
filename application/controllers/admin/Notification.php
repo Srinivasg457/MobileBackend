@@ -24,6 +24,7 @@ class Notification extends Home_Controller {
             redirect('/admin/subscription/upgrade_plan');
         }
     }
+
     public function send_notification()
     {
         try {
@@ -87,9 +88,6 @@ class Notification extends Home_Controller {
                 8 => 'User is active now'
             ];
     
-            // Special case: Status 5 ("User is active now") is now removed as we have more specific webcam states
-            // Status 6 from previous version is now status 9
-    
             if (!isset($status_messages[$status]) || stripos($description, $status_messages[$status]) === false) {
                 return $this->output
                     ->set_content_type('application/json')
@@ -105,7 +103,8 @@ class Notification extends Home_Controller {
             }
     
             // Get current datetime in user's timezone
-            $current_datetime = get_user_datetime_only($user_id);
+            $current_datetime = date('y-m-d H:i:s', $timestamp);
+            ;
     
             // Prepare data
             $data = [
