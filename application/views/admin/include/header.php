@@ -331,6 +331,35 @@
           color: red;
         }
       }
+
+      [type=checkbox]:checked,
+      [type=checkbox]:not(:checked) {
+        position: static;
+        left: none;
+        opacity: 9999;
+        font-size: 20px;
+      }
+
+
+      .rolesandpermission .role {
+        height: 475px;
+        overflow-y: auto;
+      }
+
+      .permission-table {
+        width: 100%;
+      }
+
+      .permission-table th {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+      }
+
+      .select-all-container {
+        margin-bottom: 15px;
+      }
     }
 
 

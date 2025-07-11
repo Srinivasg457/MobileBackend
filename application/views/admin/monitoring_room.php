@@ -260,7 +260,7 @@
 
   function getLatestScreenshot(currentEmployeeId) {
     $.ajax({
-      url: "<?= base_url('/admin/ScreenshotController/get_last_monitoring_screenshot') ?>",
+      url: "<?= base_url('/admin/ScreenshotController/get_last_screenshot') ?>",
       method: "GET",
       dataType: "json",
       data: {
@@ -273,18 +273,44 @@
         if (response.status === 'success' && response.screenshot.image_url) {
           thumbnail.attr('src', response.screenshot.image_url)
             .on('error', function() {
-              container.addClass('blank-screen').html('<span>No Screen Available</span>');
+              container.addClass('blank-screen')
+                .removeAttr('onclick') // Disable click
+                .html('<span>No Screen Available</span><div class="live-badge" style="background-color: gray;">OFFLINE</div>')
+                .css({
+                  'pointer-events': 'not-allowed',
+                  'opacity': 0.6,
+                  'cursor': 'not-allowed'
+                });
             });
-          container.removeClass('blank-screen');
+          container.removeClass('blank-screen')
+            .css({
+              'pointer-events': '',
+              'opacity': '',
+              'cursor': ''
+            }); // Re-enable click
         } else {
-          container.addClass('blank-screen').html('<span>No Screen Available</span>');
+          container.addClass('blank-screen')
+            .removeAttr('onclick') // Disable click
+            .html('<span>No Screen Available</span><div class="live-badge" style="background-color: gray;">OFFLINE</div>')
+            .css({
+              'pointer-events': 'not-allowed',
+              'opacity': 0.6,
+              'cursor': 'not-allowed'
+            });
         }
       },
       error: function() {
-        $(`#screenshot-${currentEmployeeId}`).parent()
-          .addClass('blank-screen')
-          .html('<span>No Screen Available</span>');
+        const container = $(`#screenshot-${currentEmployeeId}`).parent();
+        container.addClass('blank-screen')
+          .removeAttr('onclick') // Disable click
+          .html('<span>No Screen Available</span><div class="live-badge" style="background-color: gray;">OFFLINE</div>')
+          .css({
+            'pointer-events': 'not-allowed',
+            'opacity': 0.6,
+            'cursor': 'not-allowed'
+          });
       }
+
     });
   }
 
