@@ -134,8 +134,8 @@
 
         > #modal-additional-screenshots {
           display: grid;
-          grid-template-columns: repeat(6, auto);
-
+          grid-template-columns: repeat(5, auto);
+          row-gap: 10px;
           .thumbnail-item {
             margin: 0px 5px;
           }
