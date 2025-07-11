@@ -558,7 +558,6 @@ public function save_activity()
 
 
 
-
 public function store_Time_Log()
 {
     // Get all headers
@@ -613,19 +612,34 @@ public function store_Time_Log()
 
     // Check if logging for today
     if ($log_date == $current_date) {
-        // For today's log, start_time must match current user time
-        if ($start_time != $current_time) {
-            // Format received start time as datetime if it's not already
-            $received_datetime = (strpos($start_time, ' ') !== false) ? $start_time : $log_date . ' ' . $start_time;
-            
+        // For today's log, check if times are within a 3-minute window
+        $current_timestamp = strtotime($current_datetime);
+        
+        // Create timestamps for -1 minute, current minute, and +1 minute
+        $prev_minute = date('Y-m-d H:i', $current_timestamp - 60);
+        $current_minute = date('Y-m-d H:i', $current_timestamp);
+        $next_minute = date('Y-m-d H:i', $current_timestamp + 60);
+        
+        // Format received time (handle both time-only and datetime formats)
+        $received_time = (strpos($start_time, ' ') !== false) ? $start_time : $log_date . ' ' . $start_time;
+        $received_minute = date('Y-m-d H:i', strtotime($received_time));
+        
+        // Check if received time is within the 3-minute window
+        $is_valid = in_array($received_minute, [$prev_minute, $current_minute, $next_minute]);
+        
+        if (!$is_valid) {
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'error',
-                    'message' => 'Invalid start time for today',
+                    'message' => 'Invalid start time for today - must be within a 3-minute window around current time',
                     'details' => [
-                        'expected_start_time' => $expected_start_datetime,
-                        'received_start_time' => $received_datetime,
+                        'valid_window' => [
+                            'from' => $prev_minute . ':00',
+                            'to' => $next_minute . ':00'
+                        ],
+                        'expected_current_time' => $expected_start_datetime,
+                        'received_start_time' => $received_time,
                         'user_timezone' => 'Based on user_id: '.$user_id
                     ]
                 ]));
