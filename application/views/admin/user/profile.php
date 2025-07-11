@@ -47,10 +47,11 @@
                     <?php if (isset($page_title) && $page_title != "Edit"): ?>
     <div class="form-group">
         <label><?php echo trans('country') ?></label>
-        <select class="selectfield textfield--grey single_select col-sm-12" name="country" id="country_select" style="width: 100%">
+        <select class="selectfield textfield--grey single_select col-sm-12" name="country" id="country" style="width: 100%">
             <option value=""><?php echo trans('select') ?></option>
             <?php foreach ($countries as $country): ?>
-                <option value="<?php echo html_escape($country->id); ?>">
+                <option value="<?php echo html_escape($country->id); ?>"
+                    <?php if (!empty($user) && $user->country == $country->id) echo 'selected'; ?>>
                     <?php echo html_escape($country->name); ?>
                 </option>
             <?php endforeach ?>
@@ -60,11 +61,13 @@
                                 <div class="form-group">
 
                                     <label class="form-label">Timezone:</label>
-                                    <select name="time_zone" id="timezone" class="form-control single_select">
-                                        <option value="">Select</option>
-                                        <?php foreach ($timezone as $tz): print_r($tz); ?>
-                                            <option value="<?= htmlspecialchars($tz) ?>"><?= htmlspecialchars($tz) ?></option>
-                                        <?php endforeach; ?>
+                                    <select name="time_zone" id="timezone_select" class="form-control single_select">
+                                        <?php if (isset($user->timezone)) : ?>
+                                            <option value="<?php echo isset($user->timezone) ? $user->timezone : ''; ?>"> <?php echo isset($user->timezone) ? $user->timezone : ''; ?>
+                                            </option>
+                                        <?php else: ?>
+                                            <option value="">Select</option>
+                                        <?php endif; ?>
                                     </select>
 
                                 </div>
