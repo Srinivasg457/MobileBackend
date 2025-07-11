@@ -87,6 +87,7 @@ class Notification extends Home_Controller {
                 7 => 'User is inactive for a while',
                 8 => 'User is active now'
             ];
+
     
             if (!isset($status_messages[$status]) || stripos($description, $status_messages[$status]) === false) {
                 return $this->output
@@ -103,8 +104,7 @@ class Notification extends Home_Controller {
             }
     
             // Get current datetime in user's timezone
-            $current_datetime = date('y-m-d H:i:s', $timestamp);
-            ;
+            $current_datetime = get_user_datetime_only($user_id);
     
             // Prepare data
             $data = [

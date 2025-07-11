@@ -558,11 +558,12 @@ public function save_activity()
 
 
 
+
 public function store_Time_Log()
 {
     // Get all headers
     $employee_id = $this->input->get_request_header('employee_id', TRUE);
-    $user_id = $this->input->get_request_header('user_id', TRUE)??$this->input->post('id')??$this->input->post('user_id');
+    $user_id = $this->input->get_request_header('user_id', TRUE);
     $log_date = $this->input->get_request_header('log_date', TRUE);
     $start_time = $this->input->get_request_header('start_time', TRUE);
     $end_time = $this->input->get_request_header('end_time', TRUE);
@@ -604,23 +605,8 @@ public function store_Time_Log()
             ]));
     }
 
-    // Extract date part from start_time
-    $start_date = date('Y-m-d', strtotime($start_time));
-    
-    // If log_date is different from start_time's date, adjust start_time
-    if ($log_date != $start_date) {
-        // Option 1: Set start_time to beginning of the log_date (00:00:00)
-        // $start_time = $log_date . ' 00:00:00';
-        
-        // Option 2: Keep the time portion but use the log_date
-        $time_part = date('H:i:s', strtotime($start_time));
-        $start_time = $log_date . ' ' . $time_part;
-        
-        // Note: Choose the option that makes more sense for your business logic
-    }
-
     // Prepare data
-    $current_time = date('y-m-d H:i:s', $timestamp);
+    $current_time = get_user_datetime_only($user_id);
     $data = [
         'employee_id' => $employee_id,
         'user_id' => $user_id,
