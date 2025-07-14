@@ -1,4 +1,4 @@
-<div class="content-wrapper timecards">
+<div class="content-wrapper timecards" >
     <section class="content">
         <div class="container-fluid">
             <h3>Time Cards</h3>
@@ -9,7 +9,6 @@
                     <select id="employeeSelect" class="form-control single_select">
                     </select>
                 </div>
-
 
                 <div class="form-group col-lg-3 my-3">
                     <label class="control-label">Date</label>
@@ -137,6 +136,11 @@
             </div>
     </section>
 </div>
+<style>
+    .wrapper{
+        position:static;
+    }
+</style>
 <script>
     let chart;
     let debounceTimer;
