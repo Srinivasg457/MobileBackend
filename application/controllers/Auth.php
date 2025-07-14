@@ -357,19 +357,23 @@ class Auth extends Home_Controller
             }else{
 
                 $mail =  strtolower(trim($this->input->post('email', true)));
-                $email = $this->auth_model->check_email($mail);
-                
+                $exists_in_users = $this->auth_model->check_email($mail);
+
+                $this->db->where('LOWER(email)', $mail);
+                $exists_in_employees = $this->db->get('employees')->row();
+
+                // Determine user type
                 if ($this->session->userdata('trial') == 'trial') {
                     $user_type = 'trial';
-                    $trial_expire = date('Y-m-d', strtotime('+'.$this->settings->trial_days .' days'));
-                }else{
+                    $trial_expire = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
+                } else {
                     $user_type = 'registered';
                     $trial_expire = date('Y-m-d');
                 }
 
-                // if email already exist
-                if ($email){
-                    echo json_encode(array('st'=>2));
+                // If email exists in either table
+                if ($exists_in_users || $exists_in_employees) {
+                    echo json_encode(['st' => 2]); // 2 means email already exists
                     exit();
                 } else {
 

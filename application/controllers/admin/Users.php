@@ -89,9 +89,13 @@ class Users extends Home_Controller {
                     $new_password = $this->input->post('password');
                     $password = hash_password($this->input->post('password'));
                 }
-    
+               $mail = $this->input->post('email', true);
                 $email = $this->auth_model->check_email($mail);
-                if ($email){
+                // Manually check email in employees table
+                $this->db->where('LOWER(email)', $mail);
+                $exists_in_employees = $this->db->get('employees')->row();
+                
+                if ($email || $exists_in_employees){
                     $this->session->set_flashdata('msg', trans('email-exist'));
                     redirect(base_url('admin/users'));
                 }

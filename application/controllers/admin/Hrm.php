@@ -505,18 +505,23 @@ public function employee_add()
                 }
             }
 
-            // Check if email exists
-            $this->db->where('LOWER(email)', strtolower($email));
-            $exists = $this->db->get('employees')->row();
+                // Check if email exists in employees
+                $this->db->where('LOWER(email)', strtolower($email));
+                $exists_in_employees = $this->db->get('employees')->row();
 
-            if ($exists) {
-                $this->session->set_flashdata('error', 'Email address already exists.');
-                redirect(base_url('admin/hrm/employees'));
-                exit;
-            }
+                // Check if email exists in users
+                $this->db->where('LOWER(email)', strtolower($email));
+                $exists_in_users = $this->db->get('users')->row();
 
-            // Insert new employee
-            $this->db->insert('employees', $data);
+                if ($exists_in_employees || $exists_in_users) {
+                    $this->session->set_flashdata('error', 'Email address already exists in the system.');
+                    redirect(base_url('admin/hrm/employees'));
+                    exit;
+                }
+
+
+                // Insert new employee
+                $this->db->insert('employees', $data);
             $id = $this->db->insert_id();
 
             // Generate and save invitation token
@@ -700,15 +705,31 @@ public function employee_add()
                     if (empty($name) || empty($email)) {
                         continue; // Skip rows missing essential fields
                     }
-    
-                    // Check if email already exists
-                    $this->db->where('LOWER(email)', $email);
-                    $exists = $this->db->get('employees')->row();
-    
-                    if ($exists) {
+
+                    // // Check if email already exists
+                    // $this->db->where('LOWER(email)', $email);
+                    // $exists = $this->db->get('employees')->row();
+
+                    // if ($exists) {
+                    //     $duplicateEmails[] = $email;
+                    //     continue;
+                    // }
+                    // Normalize email to lowercase
+                    $email_lower = strtolower($email);
+
+                    // Check if email exists in employees
+                    $this->db->where('LOWER(email)', $email_lower);
+                    $exists_in_employees = $this->db->get('employees')->row();
+
+                    // Check if email exists in users
+                    $this->db->where('LOWER(email)', $email_lower);
+                    $exists_in_users = $this->db->get('users')->row();
+
+                    if ($exists_in_employees || $exists_in_users) {
                         $duplicateEmails[] = $email;
-                        continue;
+                        continue; // Skip this iteration
                     }
+
                     $role_id = $this->admin_model->get_department_id_by_role_id($employeeData['role'] ?? null);
 
                     // ✅ Get department_id from role_id
