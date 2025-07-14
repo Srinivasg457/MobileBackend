@@ -88,7 +88,7 @@
                 <div class="employee-card" id="employee-card-${employee.id}">
                   <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
                     <img id="screenshot-${employee.id}" src="" alt="Employee Screen">
-                    <div class="live-badge">LIVE</div>
+                    <div class="live-badge">ONLINE</div>
                   </div>
                   <div class="card-body">
                                       <p class="employee-id">ID: ${employee.id}</p>
@@ -156,7 +156,7 @@
                 <div class="employee-card" id="employee-card-${employee.id}">
                   <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
                     <img id="screenshot-${employee.id}" src="" alt="Employee Screen">
-                    <div class="live-badge">LIVE</div>
+                    <div class="live-badge">ONLINE</div>
                   </div>
                   <div class="card-body">
                                       <p class="employee-id">ID: ${employee.id}</p>
@@ -270,12 +270,12 @@
         const thumbnail = $(`#screenshot-${currentEmployeeId}`);
         const container = thumbnail.parent();
 
-        if (response.status === 'success' && response.screenshot.image_url) {
+        if (response.status === 'success' && response.screenshot.image_url && !response.user_offline) {
           thumbnail.attr('src', response.screenshot.image_url)
             .on('error', function() {
               container.addClass('blank-screen')
                 .removeAttr('onclick') // Disable click
-                .html('<span>No Screen Available</span><div class="live-badge" style="background-color: gray;">OFFLINE</div>')
+                .html('<span>No Screen Available</span><div class="offline-badge">OFFLINE</div>')
                 .css({
                   'pointer-events': 'not-allowed',
                   'opacity': 0.6,
@@ -289,9 +289,10 @@
               'cursor': ''
             }); // Re-enable click
         } else {
+          // Either no screenshot or user is offline
           container.addClass('blank-screen')
             .removeAttr('onclick') // Disable click
-            .html('<span>No Screen Available</span><div class="live-badge" style="background-color: gray;">OFFLINE</div>')
+            .html('<span>No Screen Available</span><div class="offline-badge">OFFLINE</div>')
             .css({
               'pointer-events': 'not-allowed',
               'opacity': 0.6,
@@ -303,7 +304,7 @@
         const container = $(`#screenshot-${currentEmployeeId}`).parent();
         container.addClass('blank-screen')
           .removeAttr('onclick') // Disable click
-          .html('<span>No Screen Available</span><div class="live-badge" style="background-color: gray;">OFFLINE</div>')
+          .html('<span>No Screen Available</span><div class="offline-badge">OFFLINE</div>')
           .css({
             'pointer-events': 'not-allowed',
             'opacity': 0.6,
@@ -337,7 +338,7 @@
 <div class="employee-card" id="employee-card-${employee.id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.id}', '${employee.name}', '${employee.id}')">
     <img id="screenshot-${employee.id}" src="" alt="Employee Screen">
-    <div class="live-badge">LIVE</div>
+    <div class="live-badge">ONLINE</div>
   </div>
   <div class="card-body">
     <p class="employee-id">ID: ${employee.id}</p>
@@ -458,7 +459,7 @@
 <div class="employee-card" id="employee-card-${employee.employee_id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
     <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
-    <div class="live-badge">LIVE</div>
+    <div class="live-badge">ONLINE</div>
   </div>
   <div class="card-body">
     <p class="employee-id">ID: ${employee.employee_id}</p>
@@ -532,7 +533,7 @@
 <div class="employee-card" id="employee-card-${employee.employee_id}">
   <div class="card-thumbnail" onclick="openVideoModal('${employee.employee_id}', '${employee.name}', '${employee.employee_id}')">
     <img id="screenshot-${employee.employee_id}" src="" alt="Employee Screen">
-    <div class="live-badge">LIVE</div>
+    <div class="live-badge">ONLINE</div>
   </div>
   <div class="card-body">
     <p class="employee-id">ID: ${employee.employee_id}</p>

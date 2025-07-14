@@ -751,6 +751,19 @@ public function get_last_screenshot()
     $query = $this->db->get('screenshots');
     $row = $query->row_array();
 
+
+        // After fetching the screenshot, check latest status
+        $this->db->select('status');
+        $this->db->from('notifications');
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->where('DATE(created_at)', date('Y-m-d'));
+        $this->db->where_in('status', 6); // ✅ Matches subquery filter
+        $this->db->order_by('created_at', 'DESC');
+        $this->db->limit(1);
+        $notif = $this->db->get()->row_array();
+
+        $is_offline = ($notif && $notif['status'] == 6);
     if ($row) {
         // Get the filename from compressed_path
         $filename = basename($row['compressed_path']);
@@ -775,18 +788,20 @@ public function get_last_screenshot()
                     "screenshot" => $screenshot,
                     "date" => $date,
                     "user_id" => $user_id,
-                    "employee_id" => $employee_id
+                    "employee_id" => $employee_id,
+                    "user_offline" => $is_offline
                 ]));
         }
     }
 
-    return $this->output->set_content_type('application/json')
-        ->set_status_header(404)
-        ->set_output(json_encode([
-            "status" => "error",
-            "message" => "No recent screenshot found for user ID {$user_id} on {$date}"
-        ]));
-}
+        return $this->output->set_content_type('application/json')
+            ->set_status_header(404)
+            ->set_output(json_encode([
+                "status" => "error",
+                "message" => "No recent screenshot found for user ID {$user_id} on {$date}",
+                "user_offline" => $is_offline
+            ]));
+    }
 
 
 
@@ -856,7 +871,8 @@ public function get_last_screenshot()
         }
     }
 
-    return $this->output->set_content_type('application/json')
+
+        return $this->output->set_content_type('application/json')
         ->set_status_header(200)
         ->set_output(json_encode([
             "status" => "success",
