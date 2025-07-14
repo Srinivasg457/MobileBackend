@@ -47,54 +47,62 @@ class Notification extends Home_Controller {
     {
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
-        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+        // Subquery: only get the latest notification per employee with status 6–8
         $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
             ->from('notifications')
             ->where('user_id', $user_id)
+            ->where_in('status', [6, 7, 8]) // ✅ Only consider valid statuses here
             ->group_by('employee_id')
             ->get_compiled_select();
 
-        // Main query joins on latest notification per employee
-        $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
+        // Main query: join on filtered latest notifications
+        $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.email, e.name as employee_name');
         $this->db->from('notifications n');
         $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
         $this->db->join('employees e', 'n.employee_id = e.id', 'left');
         $this->db->where('n.user_id', $user_id);
-        $this->db->where_in('n.status', [6, 7, 8]);
+        $this->db->where_in('n.status', [6, 7, 8]); // ✅ Matches subquery filter
+        $this->db->where('DATE(n.created_at)', date('Y-m-d'));
 
 
-        // Sort by status (0 first), then by created_at desc
+        // Order: status first, then time
         $this->db->order_by('n.status', 'ASC');
         $this->db->order_by('n.created_at', 'ASC');
+
         $query = $this->db->get();
-        $query = $query->result_array();
-        return $query;
+        return $query->result_array();
     }
+
     public function web_notifications()
     {
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+
+        // Subquery: only consider notifications with status 0–5
         $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
             ->from('notifications')
             ->where('user_id', $user_id)
+            ->where_in('status', [0, 1, 2, 3, 4, 5]) // <-- status condition here
             ->group_by('employee_id')
             ->get_compiled_select();
 
-        // Main query joins on latest notification per employee
-        $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status,e.email, e.name as employee_name');
+        // Main query: join on subquery
+        $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.email, e.name as employee_name');
         $this->db->from('notifications n');
         $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
         $this->db->join('employees e', 'n.employee_id = e.id', 'left');
         $this->db->where('n.user_id', $user_id);
         $this->db->where_in('n.status', [0, 1, 2, 3, 4, 5]);
+        $this->db->where('DATE(n.created_at)', date('Y-m-d'));
 
 
-        // Sort by status (0 first), then by created_at desc
+        // Order by status, then time
         $this->db->order_by('n.status', 'ASC');
         $this->db->order_by('n.created_at', 'ASC');
+
         $query = $this->db->get();
-        $query = $query->result_array();
-        return $query;
+        return $query->result_array();
     }
+
 
 
     public function send_notification()
