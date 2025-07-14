@@ -961,6 +961,22 @@
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
+    background-color: var(--success);
+    /* color: var(--success); */
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    z-index: 2;
+  }
+   .offline-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
     background-color: var(--danger);
     color: white;
     padding: 0.25rem 0.5rem;
@@ -973,6 +989,15 @@
     z-index: 2;
   }
 
+    .offline-badge::before {
+    content: "";
+    display: block;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: white;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
   .live-badge::before {
     content: "";
     display: block;
@@ -1180,6 +1205,7 @@
   @media (max-width: 768px) {
 
     .modal-dialog {
+      margin: auto;
       width: 95%;
     }
   }
