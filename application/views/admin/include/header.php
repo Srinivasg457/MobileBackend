@@ -181,14 +181,23 @@
         font-size: 12px;
         /* Slightly smaller for better hierarchy */
       }
+   .time-ago{
+      font-size: 12px;
+      color: #999;
+      font-style: italic;
+   }
 
       .online {
+        width: 80px;
+        text-align: center;
         background-color: #dcfce7;
         color: #166534;
         border: 2px solid #166534;
       }
 
       .offline {
+        width: 80px;
+        text-align: center;
         background-color: #fee2e2;
         color: #991b1b;
         border: 2px solid #991b1b;

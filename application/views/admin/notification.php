@@ -65,15 +65,15 @@
                         <div class="col-md-8 box"> -->
             <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive p-0 ">
                 <table class="table table-hover cushover mt-0 <?php if (count($notifications) > 10) {
-                                                                            echo "datatable";
-                                                                        } ?>" id="dg_table">
+                                                                    echo "datatable";
+                                                                } ?>" id="dg_table">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th><?php echo trans('avatar') ?></th>
-                            <th><?php echo trans('user') ?></th>
-                            <th><?php echo trans('status') ?></th>
-                            <th><?php echo trans('action') ?></th>
+                            <th><?php echo 'Employee' ?></th>
+                            <th class="text-center"><?php echo trans('status') ?></th>
+                            <th class="text-center"><?php echo trans('action') ?></th>
                         </tr>
                     </thead>
                     </thead>
@@ -91,16 +91,16 @@
                                     </td>
                                     <td>
                                         <p class="mb-0"><?php echo $notification['employee_name']; ?></p>
-                                        <p class="mb-0 text-muted">Message: <?php echo $notification['description']; ?></p>
+                                        <p class="mb-0 text-muted"><?php echo $notification['description']; ?></p>
                                     </td>
-                                    <td>
-                                        <?php if (in_array($notification['status'], [0, 1, 2, 4, 6, 7])): ?>
+                                    <td class="text-center">
+                                        <?php if (in_array($notification['status'], [0, 2, 4, 8])): ?>
                                             <span class="status online">ONLINE</span>
                                         <?php else: ?>
                                             <span class="status offline">OFFLINE</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <?php if (in_array($notification['status'], [0, 1, 2, 3, 5, 6, 7])): ?>
                                             <?php if ($can_edit): ?>
                                                 <button class="send-email btn btn-default btn-sm rounded" data-id="<?php echo $notification['employee_id']; ?>" data-name="<?php echo $notification['employee_name']; ?>" data-email="<?php echo $notification['email']; ?>" data-description="<?php echo $notification['description']; ?>" style="margin-top:5px;"><i class="fa fa-envelope-o"></i> Send Email</button>
