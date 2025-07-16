@@ -110,7 +110,7 @@ $route['admin/subscription/upgrade_plan'] = 'admin/subscription';
 $route['accept-invitation'] = 'employee/Employee/accept_invitation';
 $route['complete-registration'] = 'employee/Employee/complete_registration';
 
-$route['employee/dashboard'] = 'employee/Employee';
+$route['employee/dashboard'] = 'employee/EmployeeDashboard';
 $route['employee/view_screenshots'] = 'employee/Employee/screenshot';
 $route['employee/webcam_screenshots'] = 'admin/ScreenshotController/Employeewebcam';
 $route['employee/activity_log'] = 'employee/Timecards_manual';
