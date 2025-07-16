@@ -33,11 +33,11 @@
                 <form class="user_filter_form" role="search" autocomplete="off" action="<?php echo base_url('employee/dashboard') ?>" method="post">
 
                     <!-- <label class="control-label">Date</label> -->
-                    <!-- <input type="date" class="form-control" name="date" id="datePicker" value="<?php echo $chart_data['date'] ?>"> -->
-                    <div class="input-group">
+                    <input type="date" class="form-control" name="date" id="datePicker" value="<?php echo $chart_data['date'] ?>">
+                    <!-- <div class="input-group">
                         <input type="text" id="datePicker" class="inv-dpick form-control datepicker" value="<?php echo $chart_data['date'] ?>">
                         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                    </div>
+                    </div> -->
                 </form>
             </div>
         </div>
