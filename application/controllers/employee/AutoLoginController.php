@@ -1,132 +1,156 @@
 <?php
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 require_once APPPATH . '../vendor/autoload.php';
+
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 
 class AutoLoginController extends CI_Controller {
 
     private $jwt_key;
-    private $allowed_algs = ['HS256']; // Only allow secure algorithm
 
     public function __construct() {
         parent::__construct();
         $this->load->library('session');
         $this->load->database();
-        $this->jwt_key = getenv('JWT_SECRET_KEY'); // Move to environment variable
-        $this->load->helper('url');
+        $this->jwt_key = "limitscale_workroom";
     }
 
-    public function auto_login()
-    {
-        // Prefer header over URL parameter for token
-        $token = $this->input->get('token') ?? $this->input->get_request_header('Authorization');
-        
-        // Clean token if it comes with 'Bearer ' prefix
-        $token = str_replace('Bearer ', '', $token);
+    public function auto_login() {
+        $token = $this->input->get('token');
+
+        // Check if this is an API request (like from Postman)
+        $is_api_request = $this->input->is_ajax_request() || !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
 
         if (!$token) {
-            $this->log_and_redirect('AutoLogin: Token is missing.', 'Token is missing.');
-            return;
+            $error_message = 'Token is missing.';
+            log_message('error', 'AutoLogin: ' . $error_message);
+            
+            if ($is_api_request) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(400)
+                    ->set_output(json_encode(['success' => false, 'message' => $error_message]));
+                return;
+            } else {
+                $this->session->set_flashdata('error_message', $error_message);
+                redirect('login');
+                return;
+            }
         }
 
         try {
             $decoded = JWT::decode($token, new Key($this->jwt_key, 'HS256'));
-            
-            // Additional validation
-            if (empty($decoded->sub) || empty($decoded->email)) {
-                throw new Exception('Required token claims missing');
-            }
-            
-            // Validate token expiration manually (double-check)
-            $now = time();
-            if (isset($decoded->exp) && $decoded->exp < $now) {
-                throw new Exception('Token expired');
-            }
-            
-            // Validate token was issued at acceptable time
-            if (isset($decoded->iat) && $decoded->iat > $now + 60) {
-                throw new Exception('Token issued in future');
-            }
-
         } catch (\Exception $e) {
-            $this->log_and_redirect('AutoLogin: Token validation failed: ' . $e->getMessage(), 
-                                  'Invalid or expired token.');
-            return;
+            $error_message = 'Invalid or expired token: ' . $e->getMessage();
+            log_message('error', 'AutoLogin: ' . $error_message);
+            
+            if ($is_api_request) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(401)
+                    ->set_output(json_encode(['success' => false, 'message' => $error_message]));
+                return;
+            } else {
+                $this->session->set_flashdata('error_message', $error_message);
+                redirect('login');
+                return;
+            }
         }
 
-        // Get employee with additional security checks
-        $employee = $this->db->select('id, name, email, business_id, department_id, user_id')
-                            ->from('employees')
-                            ->where([
-                                'id' => $decoded->sub,
-                                'email' => $decoded->email,
-                                'is_registered' => 1,
-                                'is_active' => 1 // Additional check for active status
-                            ])
-                            ->limit(1)
-                            ->get()
-                            ->row();
+        $employee_id = $decoded->sub ?? null;
+        if (!$employee_id) {
+            $error_message = 'Employee ID is missing from token.';
+            log_message('error', 'AutoLogin: ' . $error_message);
+            
+            if ($is_api_request) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(400)
+                    ->set_output(json_encode(['success' => false, 'message' => $error_message]));
+                return;
+            } else {
+                $this->session->set_flashdata('error_message', $error_message);
+                redirect('login');
+                return;
+            }
+        }
+
+        $employee = $this->db->get_where('employees', [
+            'id' => $employee_id,
+            'email' => $decoded->email ?? '',
+            'is_registered' => 1
+        ])->row();
 
         if (!$employee) {
-            $this->log_and_redirect("AutoLogin: Employee not found or inactive. Employee ID: {$decoded->sub}", 
-                                  'Invalid token: Employee not found or account disabled.');
-            return;
+            $error_message = "Employee not found in database. Employee ID: $employee_id";
+            log_message('error', 'AutoLogin: ' . $error_message);
+            
+            if ($is_api_request) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(404)
+                    ->set_output(json_encode(['success' => false, 'message' => 'Invalid token: Employee not found.']));
+                return;
+            } else {
+                $this->session->set_flashdata('error_message', 'Invalid token: Employee not found.');
+                redirect('login');
+                return;
+            }
         }
-
-        // Regenerate session ID to prevent fixation
-        $this->session->sess_regenerate(true);
-
-        // Set minimal required session data
-        $session_data = [
-            'user_type' => 'employee_user',
-            'employee_id' => $employee->id,
-            'employee_name' => $employee->name,
-            'employee_email' => $employee->email,
-            'business_id' => $employee->business_id,
-            'department_id' => $employee->department_id,
-            'employee_org_id' => $employee->user_id,
-            'employee_logged_in' => true,
-            'is_employee' => true,
-            'last_activity' => time(), // Track activity
-            'ip_address' => $this->input->ip_address(), // Bind session to IP
-            'user_agent' => $this->input->user_agent() // Bind session to browser
-        ];
 
         try {
-            $this->session->set_userdata($session_data);
-            
-            // Log successful login
-            $this->db->insert('employee_login_logs', [
+            $this->session->set_userdata([
+                'user_type' => 'employee_user',
                 'employee_id' => $employee->id,
-                'login_time' => date('Y-m-d H:i:s'),
-                'ip_address' => $this->input->ip_address(),
-                'user_agent' => $this->input->user_agent(),
-                'login_method' => 'auto_login'
+                'employee_name' => $employee->name,
+                'employee_email' => $employee->email,
+                'business_id' => $employee->business_id,
+                'department_id' => $employee->department_id,
+                'employee_org_id' => $employee->user_id,
+                'employee_logged_in' => true,
+                'is_employee' => true
             ]);
-            
-            log_message('info', "AutoLogin: Employee login successful. Employee ID: {$employee->id}");
-            
-            // Secure redirect with no caching
-            $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate');
-            $this->output->set_header('Pragma: no-cache');
-            $this->output->set_header('Expires: 0');
-            redirect('employee/dashboard', 'auto', 302);
-            
-        } catch (\Exception $e) {
-            $this->log_and_redirect('AutoLogin: Session setting failed: ' . $e->getMessage(), 
-                                  'Login error. Please try again.');
-            return;
-        }
-    }
 
-    /**
-     * Helper method for consistent error handling
-     */
-    private function log_and_redirect($log_message, $flash_message) {
-        log_message('error', $log_message);
-        $this->session->set_flashdata('error_message', $flash_message);
-        redirect('login', 'auto', 302);
+            log_message('info', "AutoLogin: Employee login successful. Employee ID: $employee->id");
+            
+            if ($is_api_request) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(200)
+                    ->set_output(json_encode([
+                        'success' => true,
+                        'message' => 'Login successful',
+                        'employee' => [
+                            'id' => $employee->id,
+                            'name' => $employee->name,
+                            'email' => $employee->email,
+                            'business_id' => $employee->business_id,
+                            'department_id' => $employee->department_id
+                        ]
+                    ]));
+                return;
+            } else {
+                redirect('employee/dashboard');
+                return;
+            }
+        } catch (\Exception $e) {
+            $error_message = 'Session setting failed: ' . $e->getMessage();
+            log_message('error', 'AutoLogin: ' . $error_message);
+            
+            if ($is_api_request) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(500)
+                    ->set_output(json_encode(['success' => false, 'message' => 'Login error. Please try again.']));
+                return;
+            } else {
+                $this->session->set_flashdata('error_message', 'Login error. Please try again.');
+                redirect('login');
+                return;
+            }
+        }
     }
 }
