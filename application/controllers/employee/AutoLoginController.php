@@ -1,5 +1,4 @@
 <?php
-
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 require_once APPPATH . '../vendor/autoload.php';
@@ -15,93 +14,60 @@ class AutoLoginController extends CI_Controller {
         parent::__construct();
         $this->load->library('session');
         $this->load->database();
-        $this->jwt_key = "limitscale_workroom";
+        $this->jwt_key = "limitscale_workroom"; // Should be in config and more secure
     }
 
+    /**
+     * Generate JWT token for automatic login
+     */
+    public function generate_login_token($employee_id, $email) {
+        $issuedAt = time();
+        $expire = $issuedAt + (24 * 60 * 60); // Token valid for 24 hours
+        
+        $payload = [
+            'sub' => $employee_id,
+            'email' => $email,
+            'iat' => $issuedAt,
+            'exp' => $expire
+        ];
+        
+        return JWT::encode($payload, $this->jwt_key, 'HS256');
+    }
+
+    /**
+     * Automatic login endpoint
+     */
     public function auto_login() {
         $token = $this->input->get('token');
-
-        // Check if this is an API request (like from Postman)
-        $is_api_request = $this->input->is_ajax_request() || !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
-
+        
+        // If no token provided, show regular login page
         if (!$token) {
-            $error_message = 'Token is missing.';
-            log_message('error', 'AutoLogin: ' . $error_message);
-            
-            if ($is_api_request) {
-                $this->output
-                    ->set_content_type('application/json')
-                    ->set_status_header(400)
-                    ->set_output(json_encode(['success' => false, 'message' => $error_message]));
-                return;
-            } else {
-                $this->session->set_flashdata('error_message', $error_message);
-                redirect('login');
-                return;
-            }
+            $this->load->view('login_view');
+            return;
         }
-
+        
         try {
+            // Verify and decode the token
             $decoded = JWT::decode($token, new Key($this->jwt_key, 'HS256'));
-        } catch (\Exception $e) {
-            $error_message = 'Invalid or expired token: ' . $e->getMessage();
-            log_message('error', 'AutoLogin: ' . $error_message);
+            $employee_id = $decoded->sub ?? null;
+            $email = $decoded->email ?? '';
             
-            if ($is_api_request) {
-                $this->output
-                    ->set_content_type('application/json')
-                    ->set_status_header(401)
-                    ->set_output(json_encode(['success' => false, 'message' => $error_message]));
-                return;
-            } else {
-                $this->session->set_flashdata('error_message', $error_message);
-                redirect('login');
-                return;
+            if (!$employee_id) {
+                throw new Exception('Employee ID missing in token');
             }
-        }
-
-        $employee_id = $decoded->sub ?? null;
-        if (!$employee_id) {
-            $error_message = 'Employee ID is missing from token.';
-            log_message('error', 'AutoLogin: ' . $error_message);
             
-            if ($is_api_request) {
-                $this->output
-                    ->set_content_type('application/json')
-                    ->set_status_header(400)
-                    ->set_output(json_encode(['success' => false, 'message' => $error_message]));
-                return;
-            } else {
-                $this->session->set_flashdata('error_message', $error_message);
-                redirect('login');
-                return;
-            }
-        }
-
-        $employee = $this->db->get_where('employees', [
-            'id' => $employee_id,
-            'email' => $decoded->email ?? '',
-            'is_registered' => 1
-        ])->row();
-
-        if (!$employee) {
-            $error_message = "Employee not found in database. Employee ID: $employee_id";
-            log_message('error', 'AutoLogin: ' . $error_message);
+            // Verify employee exists and is registered
+            $employee = $this->db->get_where('employees', [
+                'id' => $employee_id,
+                'email' => $email,
+                'is_registered' => 1
+            ])->row();
             
-            if ($is_api_request) {
-                $this->output
-                    ->set_content_type('application/json')
-                    ->set_status_header(404)
-                    ->set_output(json_encode(['success' => false, 'message' => 'Invalid token: Employee not found.']));
-                return;
-            } else {
-                $this->session->set_flashdata('error_message', 'Invalid token: Employee not found.');
-                redirect('login');
-                return;
+            if (!$employee) {
+                throw new Exception('Employee not found or not registered');
             }
-        }
-
-        try {
+            
+            // Set session data
             $this->session->set_userdata([
                 'user_type' => 'employee_user',
                 'employee_id' => $employee->id,
@@ -113,8 +79,13 @@ class AutoLoginController extends CI_Controller {
                 'employee_logged_in' => true,
                 'is_employee' => true
             ]);
-
-            log_message('info', "AutoLogin: Employee login successful. Employee ID: $employee->id");
+            
+            log_message('info', "AutoLogin: Successful login for employee ID: $employee->id");
+            
+            // Check if this is an API request
+            $is_api_request = $this->input->is_ajax_request() || 
+                              !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || 
+                              strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
             
             if ($is_api_request) {
                 $this->output
@@ -126,30 +97,32 @@ class AutoLoginController extends CI_Controller {
                         'employee' => [
                             'id' => $employee->id,
                             'name' => $employee->name,
-                            'email' => $employee->email,
-                            'business_id' => $employee->business_id,
-                            'department_id' => $employee->department_id
+                            'email' => $employee->email
                         ]
                     ]));
-                return;
             } else {
+                // Redirect to dashboard for regular web requests
                 redirect('employee/dashboard');
-                return;
             }
+            
         } catch (\Exception $e) {
-            $error_message = 'Session setting failed: ' . $e->getMessage();
-            log_message('error', 'AutoLogin: ' . $error_message);
+            log_message('error', 'AutoLogin failed: ' . $e->getMessage());
+            
+            $is_api_request = $this->input->is_ajax_request() || 
+                              !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || 
+                              strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
             
             if ($is_api_request) {
                 $this->output
                     ->set_content_type('application/json')
-                    ->set_status_header(500)
-                    ->set_output(json_encode(['success' => false, 'message' => 'Login error. Please try again.']));
-                return;
+                    ->set_status_header(401)
+                    ->set_output(json_encode([
+                        'success' => false,
+                        'message' => 'Login failed: ' . $e->getMessage()
+                    ]));
             } else {
-                $this->session->set_flashdata('error_message', 'Login error. Please try again.');
+                $this->session->set_flashdata('error_message', 'Invalid or expired login link');
                 redirect('login');
-                return;
             }
         }
     }
