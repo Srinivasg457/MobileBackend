@@ -5,19 +5,16 @@
         gap: 20px;
         margin-top: 20px;
     }
-
     @media (max-width: 1200px) {
         .card-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
-
     @media (max-width: 768px) {
         .card-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
-
     @media (max-width: 480px) {
         .card-grid {
             grid-template-columns: 1fr;
@@ -25,7 +22,6 @@
     }
 </style>
 <div class="content-wrapper">
-
     <section class="content">
         <div class="d-flex justify-content-between align-items-baseline mb-3">
             <h3 class="mb-0">Dashboard</h3>
@@ -33,15 +29,14 @@
                 <form class="user_filter_form" role="search" autocomplete="off" action="<?php echo base_url('employee/dashboard') ?>" method="post">
 
                     <!-- <label class="control-label">Date</label> -->
-                    <input type="date" class="form-control" name="date" id="datePicker" value="<?php echo $employee_activity['date'] ?>">
+                    <input type="date" class="form-control" name="date" id="datePicker" value="<?php echo $chart_data['date'] ?>">
                     <!-- <div class="input-group">
-                        <input type="text" id="datePicker" class="inv-dpick form-control datepicker" value="<?php echo $employee_activity['date'] ?>">
+                        <input type="text" id="datePicker" class="inv-dpick form-control datepicker" value="<?php echo $chart_data['date'] ?>">
                         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                     </div> -->
                 </form>
             </div>
         </div>
-
         <div class=" mt-20">
             <div class="card-grid">
                 <div class="card counts">
@@ -49,7 +44,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Productive Hours" ?></h4>
-                                <h2 class="m-b-0"><?php echo $employee_activity['total_active'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $chart_data['total_active'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -59,7 +54,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Unproductive Hours" ?></h4>
-                                <h2 class="m-b-0"><?php echo $employee_activity['total_idle'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $chart_data['total_idle'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -69,7 +64,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Shift Time" ?></h4>
-                                <h2 class="m-b-0"><?php echo $employee_activity['shift_time'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $chart_data['shift_time'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -79,7 +74,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
-                                <h2 class="m-b-0"><?php echo $employee_activity['total_keystrokes'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $chart_data['total_keystrokes'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -89,7 +84,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
-                                <h2 class="m-b-0"><?php echo $employee_activity['total_mouse_movements'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $chart_data['total_mouse_movements'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -137,87 +132,81 @@
                 </div>
             </div>
         </div>
-
     </section>
 </div>
 <script>
     $(document).ready(function() {
-        $(document).on('change', "#datePicker", function() {
-            $('.user_filter_form').submit();
-        });
+                $(document).on('change', "#datePicker", function() {
+                    $('.user_filter_form').submit();
+                });
+            });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchWeeklyReports();
+    });
 
+    async function fetchWeeklyReports() {
+        try {
+            const url = "<?= base_url('admin/Time_logs/get_weekly_reports'); ?>";
 
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     fetchWeeklyReports();
-        // });
+            const employeeId = 20; // Example employee ID
+            const userId = 6;      // Example user ID
 
-        // async function fetchWeeklyReports() {
-        //     try {
-        //         const url = "<?= base_url('admin/Time_logs/get_weekly_reports'); ?>";
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'employee_id': employeeId,
+                    'user_id': userId
+                }
+            });
 
-        //         const employeeId = 20; // Example employee ID
-        //         const userId = 6;      // Example user ID
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch data');
+            }
 
-        //         const response = await fetch(url, {
-        //             method: 'GET',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //                 'employee_id': employeeId,
-        //                 'user_id': userId
-        //             }
-        //         });
+            const data = await response.json();
+            console.log('API Response:', data);
 
-        //         if (!response.ok) {
-        //             const errorData = await response.json();
-        //             throw new Error(errorData.message || 'Failed to fetch data');
-        //         }
+            if (data.status === 'success' && data.data) {
+                renderChart(data.data);
+            } else {
+                console.error('API returned an error or no data:', data.message);
+                alert('Error: ' + (data.message || 'Could not retrieve data.'));
+            }
 
-        //         const data = await response.json();
-        //         console.log('API Response:', data);
+        } catch (error) {
+            console.error('Error fetching weekly reports:', error);
+            alert('Failed to load chart data: ' + error.message);
+        }
+    }
 
-        //         if (data.status === 'success' && data.data) {
-        //             renderChart(data.data);
-        //         } else {
-        //             console.error('API returned an error or no data:', data.message);
-        //             alert('Error: ' + (data.message || 'Could not retrieve data.'));
-        //         }
-
-        //     } catch (error) {
-        //         console.error('Error fetching weekly reports:', error);
-        //         alert('Failed to load chart data: ' + error.message);
-        //     }
-        // }
-
-        // function renderChart(weeklyReportsData) {
-        const weeklyReportsData = <?php echo json_encode($weekly_report); ?>;
+    function renderChart(weeklyReportsData) {
         const ctx = document.getElementById('weeklyReportChart').getContext('2d');
 
         const labels = [];
         const barData = [];
         const lineData = [];
         let maxBarValue = 0;
-
         weeklyReportsData.sort((a, b) => {
             const dateA = new Date(a.date_range.split(' to ')[0]);
             const dateB = new Date(b.date_range.split(' to ')[0]);
             return dateA - dateB;
         });
-
         weeklyReportsData.forEach(report => {
             const timeParts = report.total_active_time.split(':');
             const totalHours = parseInt(timeParts[0]) +
                                 parseInt(timeParts[1]) / 60 +
                                 parseInt(timeParts[2]) / 3600;
-
             labels.push(report.week_name.replace('Week of ', 'Week '));
             barData.push(totalHours);
             lineData.push(totalHours * 1.05); // Adjust line data to be slightly above bar data
-
             if (totalHours > maxBarValue) {
                 maxBarValue = totalHours;
             }
         });
-
         // Calculate dynamic max for y-axis
         const suggestedMaxY = Math.ceil((maxBarValue + 5) / 10) * 10;
         new Chart(ctx, {
@@ -318,7 +307,7 @@
                             font: {
                                 size: 14,
                                 weight: 600 ,      // Added from file 2
-                                color: '#444' // Added from file 2
+                                color: '#444'       // Added from file 2
                             },
                             padding: 20
                         }
@@ -326,7 +315,6 @@
                 }
             }
         });
-    });
-    // }
+    }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
