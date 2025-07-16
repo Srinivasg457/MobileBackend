@@ -36,7 +36,7 @@ class AutoLoginController extends CI_Controller {
             return;
         }
 
-        $employee_id = $decoded->sub ?? null;
+        $employee_id = $decoded->userId ?? null;
         if (!$employee_id) {
             log_message('error', 'AutoLogin: Employee ID is missing from token.');
             $this->session->set_flashdata('error_message', 'Invalid token: Employee ID missing.');
