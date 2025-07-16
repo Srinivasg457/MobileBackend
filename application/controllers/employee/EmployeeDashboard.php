@@ -19,19 +19,19 @@ class EmployeeDashboard extends Home_Controller {
         $data['page_title'] = 'Employee Dashboard';
         $data['is_employee_admin'] = false;
         $data['details'] = $this->session->userdata('employee_id');
-        $data['chart_data'] = $this->Employee_chart_Data();
+        $date = $this->input->post('date', true);
+        $data['chart_data'] = $this->Employee_chart_Data($date);
 
         $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
 
 
-    private function Employee_chart_Data()
+    private function Employee_chart_Data($date)
     {
-        $date = $this->input->post('date', true);
 
         // Load session data
-        $employee_id = "21"; // Replace with session if needed
+        $employee_id = $this->session->userdata('employee_id'); // Replace with session if needed
         $organization_id = $this->session->userdata('employee_org_id');
 
         // Set date range (today's date)
