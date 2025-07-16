@@ -19,8 +19,10 @@ class EmployeeDashboard extends Home_Controller {
         $data['page_title'] = 'Employee Dashboard';
         $data['is_employee_admin'] = false;
         $data['details'] = $this->session->userdata('employee_id');
-        $date = $this->input->post('date', true);
-        $data['employee_activity'] = $this->Employee_chart_Data($date);
+        $from_date = $this->input->post('fromDate', true);
+        $to_date = $this->input->post('toDate', true);
+        $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
+        $data['overall_productivity'] = $this->employee_overall_productivity($from_date,$to_date);
         $data['weekly_report'] = $this->get_weekly_report_data();
         $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -80,7 +82,7 @@ class EmployeeDashboard extends Home_Controller {
             $week_name = $week_data['name_prefix'];
 
             $this->db->select('log_date, total_active_time')
-                ->from('worksmart.time_logs')
+                ->from('time_logs')
                 ->where('employee_id', $employee_id)
                 ->where('user_id', $user_id)
                 ->where('log_date >=', $week_data['start_date'])
@@ -131,37 +133,81 @@ class EmployeeDashboard extends Home_Controller {
         return $weekly_reports;
     }
 
-    private function Employee_chart_Data($date)
+    private function employee_overall_productivity($from_date, $to_date)
     {
-
-        // Load session data
-        $employee_id = $this->session->userdata('employee_id'); // Replace with session if needed
+        $employee_id = $this->session->userdata('employee_id');
         $organization_id = $this->session->userdata('employee_org_id');
 
-        // Set date range (today's date)
-        if (empty($date)) {
-            $date = date('Y-m-d');
-            // $date = '2025-07-14';   
+        // Set default date
+        if (empty($from_date) || empty($to_date)) {
+            $from_date = date('Y-m-d');
+            $to_date = date('Y-m-d');
         }
- 
 
-        // Fetch activity data from time_logs for today
-        $this->db->select('total_active_time AS total_active, total_idle_time AS total_idle, start_time, end_time');
+        // Fetch time log data
+        $this->db->select('
+        SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active, 
+        SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle, 
+        MIN(start_time) AS start_time, 
+        MAX(end_time) AS end_time
+    ');
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->like('created_at', $date);
+        $this->db->where("DATE(created_at) >=", $from_date);
+        $this->db->where("DATE(created_at) <=", $to_date);
         $query = $this->db->get()->row();
 
-        // Default values
+        // Convert times to seconds
+        $active_seconds = strtotime("1970-01-01 " . $query->total_active) - strtotime("1970-01-01 00:00:00");
+        $idle_seconds   = strtotime("1970-01-01 " . $query->total_idle) - strtotime("1970-01-01 00:00:00");
+
+        $shift_seconds = 0;
+        if (!empty($query->start_time) && !empty($query->end_time)) {
+            $shift_seconds = strtotime($query->end_time) - strtotime($query->start_time);
+        }
+
+        $active_percentage = $shift_seconds > 0 ? round(($active_seconds / $shift_seconds) * 100, 1) : 0;
+        $idle_percentage   = $shift_seconds > 0 ? round(($idle_seconds / $shift_seconds) * 100, 1) : 0;
+
+        return [
+            'active_time' => $query->total_active,
+            'idle_time' => $query->total_idle,
+            'shift_duration' => gmdate("H:i:s", $shift_seconds),
+            'active_percentage' => $active_percentage,
+            'idle_percentage' => $idle_percentage
+        ];
+    }
+
+
+    private function Employee_chart_Data($from_date, $to_date)
+    {
+        $employee_id = $this->session->userdata('employee_id');
+        $organization_id = $this->session->userdata('employee_org_id');
+
+        // Set date range to today if empty
+        if (empty($from_date) || empty($to_date)) {
+            $from_date = date('Y-m-d');
+            $to_date = date('Y-m-d');
+        }
+
+        // Fetch total active, idle, and shift from time_logs
+        $this->db->select('SUM(total_active_time) AS total_active, SUM(total_idle_time) AS total_idle, MIN(start_time) AS start_time, MAX(end_time) AS end_time');
+        $this->db->from('time_logs');
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('user_id', $organization_id);
+        $this->db->where("DATE(created_at) >=", $from_date);
+        $this->db->where("DATE(created_at) <=", $to_date);
+        $query = $this->db->get()->row();
+
+        // Defaults
         $total_active = $query->total_active ?? "0h 0m";
-        $total_idle   = $query->total_idle ?? "0h 0m";
-        $shift_time   = "0h 0m";
+        $total_idle = $query->total_idle ?? "0h 0m";
+        $shift_time = "0h 0m";
 
         if (!empty($query->start_time) && !empty($query->end_time)) {
             $start_time = strtotime($query->start_time);
-            $end_time   = strtotime($query->end_time);
-
+            $end_time = strtotime($query->end_time);
             if ($end_time > $start_time) {
                 $shift_seconds = $end_time - $start_time;
                 $hours = floor($shift_seconds / 3600);
@@ -170,31 +216,33 @@ class EmployeeDashboard extends Home_Controller {
             }
         }
 
-        // ✅ Fetch total mouse movement and keystroke from Employee_Activity
+        // Fetch total mouse and keystrokes
         $this->db->select('SUM(total_mouse_movement) AS total_mouse, SUM(total_keystrokes) AS total_keys');
         $this->db->from('Employee_Activity');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->like('created_at', $date);
+        $this->db->where("DATE(created_at) >=", $from_date);
+        $this->db->where("DATE(created_at) <=", $to_date);
         $activity = $this->db->get()->row();
 
-        // Format with commas
+        // Format data
         $total_mouse = number_format($activity->total_mouse ?? 0);
-        $total_keys  = number_format($activity->total_keys ?? 0);
-
+        $total_keys = number_format($activity->total_keys ?? 0);
 
         $formatted_total_active = $this->formatToHoursMins($total_active);
-        $formatted_total_idle   = $this->formatToHoursMins($total_idle);
+        $formatted_total_idle = $this->formatToHoursMins($total_idle);
 
         return [
-            'total_active'     => $formatted_total_active,
-            'total_idle'       => $formatted_total_idle,
-            'shift_time'       => $shift_time,
-            'total_mouse_movements'  => $total_mouse,
-            'total_keystrokes'       => $total_keys,
-            'date'                   => $date
+            'total_active' => $formatted_total_active,
+            'total_idle' => $formatted_total_idle,
+            'shift_time' => $shift_time,
+            'total_mouse_movements' => $total_mouse,
+            'total_keystrokes' => $total_keys,
+            'from_date' => $from_date,
+            'to_date' => $to_date
         ];
     }
+
 
 
     private function formatToHoursMins($time)
