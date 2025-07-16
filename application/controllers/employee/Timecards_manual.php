@@ -27,17 +27,19 @@ class Timecards_manual extends Home_Controller {
      * Create a manual timecard for an employee (by admin/org user)
      */
     public function create_timecard() {
-        $user_id     = $this->session->userdata('employee_org_id');
-        $employee_id = $this->session->userdata('employee_id');
+        $user_id         = $this->session->userdata('employee_org_id');
+        $employee_id     = $this->session->userdata('employee_id');
         $timestamp_start = $this->input->post('timestamp_start');
         $timestamp_end   = $this->input->post('timestamp_end');
         $reason          = $this->input->post('reason');
-
+        // Get the current date for the new 'date_added' column
+        $date_added      = date('Y-m-d'); // Format: YYYY-MM-DD
+    
         if (!$user_id || !$employee_id || !$timestamp_start || !$timestamp_end || !$reason) {
             echo "All fields are required: employee_id, timestamp_start, timestamp_end, reason.";
             return;
         }
-
+    
         $data = array(
             'timestamp_start' => $timestamp_start,
             'timestamp_end'   => $timestamp_end,
@@ -45,16 +47,16 @@ class Timecards_manual extends Home_Controller {
             'employee_id'     => $employee_id,
             'reason'          => $reason,
             'approved'        => 0,
-            'approved_by'     => NULL
+            'approved_by'     => NULL,
+            'date_added'      => get_user_datetime_only($user_id) // Add the new column here
         );
-
+    
         $this->db->insert('timecards_manual', $data);
-
-        echo ($this->db->affected_rows() > 0) 
-            ? "Timecard created successfully!" 
+    
+        echo ($this->db->affected_rows() > 0)
+            ? "Timecard created successfully!"
             : "Failed to create timecard.";
     }
-
     /**
      * Approve a manual timecard
      */
