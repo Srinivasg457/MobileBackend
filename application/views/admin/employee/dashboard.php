@@ -89,7 +89,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
-                                <h2 class="m-b-0"><?php echo $employee_activit['total_mouse_movements'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_mouse_movements'] ?></h2>
                             </div>
                         </div>
                     </div>
