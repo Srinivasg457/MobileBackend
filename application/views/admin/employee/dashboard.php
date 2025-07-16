@@ -103,7 +103,7 @@
                         <h3 class="box-title"><?php echo "Overall Productivity" ?></h3>
                     </div>
                     <div class="box-body">
-                    </div>
+                        </div>
                 </div>
             </div>
             <div class="col-sm-8">
@@ -112,11 +112,11 @@
                         <h3 class="box-title"><?php echo "Last 4 Weeks Report"  ?></h3>
                     </div>
                     <div class="box-body">
-                    </div>
+                            <canvas id="weeklyReportChart" style="height: 400px; width: 100%;"></canvas>
+                        </div>
                 </div>
             </div>
         </div>
-
         <div class="row mt-20">
             <div class="col-sm-6">
                 <div class="box">
@@ -147,3 +147,185 @@
                 });
             });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchWeeklyReports();
+    });
+
+    async function fetchWeeklyReports() {
+        try {
+            const url = "<?= base_url('admin/Time_logs/get_weekly_reports'); ?>";
+
+            const employeeId = 20; // Example employee ID
+            const userId = 6;      // Example user ID
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'employee_id': employeeId,
+                    'user_id': userId
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch data');
+            }
+
+            const data = await response.json();
+            console.log('API Response:', data);
+
+            if (data.status === 'success' && data.data) {
+                renderChart(data.data);
+            } else {
+                console.error('API returned an error or no data:', data.message);
+                alert('Error: ' + (data.message || 'Could not retrieve data.'));
+            }
+
+        } catch (error) {
+            console.error('Error fetching weekly reports:', error);
+            alert('Failed to load chart data: ' + error.message);
+        }
+    }
+
+    function renderChart(weeklyReportsData) {
+        const ctx = document.getElementById('weeklyReportChart').getContext('2d');
+
+        const labels = [];
+        const barData = [];
+        const lineData = [];
+        let maxBarValue = 0;
+
+        weeklyReportsData.sort((a, b) => {
+            const dateA = new Date(a.date_range.split(' to ')[0]);
+            const dateB = new Date(b.date_range.split(' to ')[0]);
+            return dateA - dateB;
+        });
+
+        weeklyReportsData.forEach(report => {
+            const timeParts = report.total_active_time.split(':');
+            const totalHours = parseInt(timeParts[0]) +
+                                parseInt(timeParts[1]) / 60 +
+                                parseInt(timeParts[2]) / 3600;
+
+            labels.push(report.week_name.replace('Week of ', 'Week '));
+            barData.push(totalHours);
+            lineData.push(totalHours * 1.05); // Adjust line data to be slightly above bar data
+
+            if (totalHours > maxBarValue) {
+                maxBarValue = totalHours;
+            }
+        });
+
+        // Calculate dynamic max for y-axis
+        const suggestedMaxY = Math.ceil((maxBarValue + 5) / 10) * 10;
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+            labels: labels,
+            datasets: [
+                {
+                label: 'Total Active Time (hr)',
+                data: barData,
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                order: 2,
+                barPercentage: 0.5,
+                categoryPercentage: 0.7
+                },
+                {
+                label: 'Trend (hr)',
+                data: lineData,
+                type: 'line',
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false,
+                tension: 0.3,
+                order: 1
+                }
+            ]
+            },
+        options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Hours (hr)',
+                            font: {
+                                size: 14,
+                                weight: 600 ,      // Added from file 2
+                                color: '#444'       // Added from file 2
+                            }
+                            
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value;
+                            },
+                            stepSize: 10,
+                            font: {
+                                size: 14,
+                                weight: 600 ,      // Added from file 2
+                                color: '#444'       // Added from file 2
+                            }
+                        },
+                        // Set dynamic max for y-axis
+                        max: suggestedMaxY
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Week',
+                            font: {
+                                size: 14,
+                                weight: 600 ,      // Added from file 2
+                                color: '#444'       // Added from file 2
+                            }
+                        },
+                        ticks: {
+                                font: {
+                                size: 14,
+                                weight: 600 ,      // Added from file 2
+                                color: '#444'       // Added from file 2
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + 'hr';
+                            }
+                        },
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'center',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 600 ,      // Added from file 2
+                                color: '#444'       // Added from file 2
+                            },
+                            padding: 20
+                        }
+                    },
+                }
+            }
+        });
+    }
+</script>
+           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
