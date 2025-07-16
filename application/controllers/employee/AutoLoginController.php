@@ -50,20 +50,21 @@ class AutoLoginController extends CI_Controller {
      */
     public function auto_login() {
         // Get token from URL query parameter
-        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMCIsImVtYWlsIjoidmVua3lhcnJ1cmlAZ21haWwuY29tIiwiaWF0IjoxNzUyNjYwOTY0LCJleHAiOjE3NTMyNjU3NjR9.Gd-9E0yBsKyt1_Rex3ZEjmI-fR3Ah--Uoj3Gc2VdzQs';
+        $token = $this->input->get('token')?? $this->input->get_request_header('user_id', TRUE);
+        
         // If no token provided, show regular login page
         if (!$token) {
             $this->load->view('login_view');
             return; // Exit the function early
         }
         
-     
+        try {
             // Verify and decode the token using our secret key
             $decoded = JWT::decode($token, new Key($this->jwt_key, 'HS256'));
             // Extract employee ID from token (subject claim)
-            $employee_id = 20;
+            $employee_id = $decoded->sub ?? null;
             // Extract email from token
-            $email = 6;
+            $email = $decoded->email ?? '';
             
             // Validate we got an employee ID
             if (!$employee_id) {
@@ -123,6 +124,30 @@ class AutoLoginController extends CI_Controller {
                 redirect('employee/dashboard');
             }
             
-       
+        } catch (Exception $e) {
+            // Log any errors that occur during the process
+            log_message('error', 'AutoLogin failed: ' . $e->getMessage());
+            
+            // Again check if this is an API request
+            $is_api_request = $this->input->is_ajax_request() || 
+                              !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || 
+                              strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
+            
+            // Handle error response differently for API vs web
+            if ($is_api_request) {
+                // Return JSON error for API
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(401)
+                    ->set_output(json_encode([
+                        'success' => false,
+                        'message' => 'Login failed: ' . $e->getMessage()
+                    ]));
+            } else {
+                // Set flash error message and redirect for web
+                $this->session->set_flashdata('error_message', 'Invalid or expired login link');
+                redirect('login');
+            }
+        }
     }
 }
