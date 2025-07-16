@@ -50,7 +50,7 @@ class AutoLoginController extends CI_Controller {
      */
     public function auto_login() {
         // Get token from URL query parameter
-        $token = 'https://work-room.io/employee/AutoLoginController/auto_login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMCIsImVtYWlsIjoidmVua3lhcnJ1cmlAZ21haWwuY29tIiwiaWF0IjoxNzUyNjYwOTY0LCJleHAiOjE3NTMyNjU3NjR9.Gd-9E0yBsKyt1_Rex3ZEjmI-fR3Ah--Uoj3Gc2VdzQs';
+        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMCIsImVtYWlsIjoidmVua3lhcnJ1cmlAZ21haWwuY29tIiwiaWF0IjoxNzUyNjYwOTY0LCJleHAiOjE3NTMyNjU3NjR9.Gd-9E0yBsKyt1_Rex3ZEjmI-fR3Ah--Uoj3Gc2VdzQs';
         // If no token provided, show regular login page
         if (!$token) {
             $this->load->view('login_view');
