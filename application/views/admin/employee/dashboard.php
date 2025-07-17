@@ -27,16 +27,19 @@
         gap: 20px;
         margin-top: 20px;
     }
+
     @media (max-width: 1200px) {
         .card-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
+
     @media (max-width: 768px) {
         .card-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
+
     @media (max-width: 480px) {
         .card-grid {
             grid-template-columns: 1fr;
@@ -82,7 +85,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Productive Hours" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['total_active'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_active'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -92,7 +95,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Unproductive Hours" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['total_idle'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_idle'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -102,7 +105,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Shift Time" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['shift_time'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['shift_time'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -112,7 +115,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['total_keystrokes'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_keystrokes'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -122,7 +125,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['total_mouse_movements'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_mouse_movements'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -180,112 +183,122 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     $(document).ready(function() {
-$('#dateRangeForm').on('submit', function(e) {
-    const fromDate = $('input[name="fromDate"]').val();
-    const toDate = $('input[name="toDate"]').val();
+        $('#dateRangeForm').on('submit', function(e) {
+            const fromDate = $('input[name="fromDate"]').val();
+            const toDate = $('input[name="toDate"]').val();
 
-    // Simple validation
-    if (!fromDate || !toDate) {
-        e.preventDefault();
-        showToast('Both From and To dates are required.', 'error');
-        return;
-    }
+            // Simple validation
+            if (!fromDate || !toDate) {
+                e.preventDefault();
+                showToast('Both From and To dates are required.', 'error');
+                return;
+            }
 
-    const from = new Date(fromDate);
-    const to = new Date(toDate);
+            const from = new Date(fromDate);
+            const to = new Date(toDate);
 
-    if (from > to) {
-        e.preventDefault();
-        showToast('"From Date" should not be after "To Date".', 'error');
-        return;
-    }
-});
+            if (from > to) {
+                e.preventDefault();
+                showToast('"From Date" should not be after "To Date".', 'error');
+                return;
+            }
+        });
 
-// Submit form on date change
-$(document).on('change', "#datePicker", function() {
-    $('.user_filter_form').submit();
-});
+        // Submit form on date change
+        $(document).on('change', "#datePicker", function() {
+            $('.user_filter_form').submit();
+        });
+        // Original PHP values
+        let manual = <?php echo $overall_productivity["manual_percentage"]; ?>;
+        let meeting = <?php echo $overall_productivity["meeting_percentage"]; ?>;
+        let idle = <?php echo $overall_productivity["idle_percentage"]; ?>;
+        let active = <?php echo $overall_productivity["active_percentage"]; ?>;
 
-// ✅ Doughnut Chart Data
-const doughnutData = {
-    labels: ['Manual Time', 'Meeting Time', 'Inactive Time', 'Active Time'],
-    datasets: [{
-        label: 'Time Breakdown',
-        data: [
-            <?php echo $overall_productivity["manual_percentage"]; ?>,
-            <?php echo $overall_productivity["meeting_percentage"]; ?>,
-            <?php echo $overall_productivity["idle_percentage"]; ?>,
-            <?php echo $overall_productivity["active_percentage"]; ?>
-        ],
-        backgroundColor: [
-            'rgb(75, 192, 192)', // Manual
-            'rgb(255, 99, 132)', // Meeting
-            'rgb(255, 205, 86)', // Inactive
-            'rgb(55, 175, 255)' // Active
-        ],
-        hoverOffset: 4
-    }]
-};
+        let chartData = [manual, meeting, idle, active];
+        const isAllZero = chartData.every(val => val === 0);
 
-// ✅ Doughnut Chart Config (No recalculation!)
-const doughnutConfig = {
-    type: 'doughnut',
-    data: doughnutData,
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                display: false // hide default legend
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const value = context.raw;
-                        return `${context.label}: ${value}%`;
+        // Force small non-zero values to render the chart
+        if (isAllZero) {
+            chartData = [0.0001, 0.0001, 0.0001, 0.0001];
+        }
+
+        const prod_labels = ['Manual Time', 'Meeting Time', 'Inactive Time', 'Active Time'];
+
+        const doughnutData = {
+            labels: prod_labels,
+            datasets: [{
+                label: 'Time Breakdown',
+                data: chartData,
+                backgroundColor: isAllZero ?
+                    ['#d3d3d3', '#d3d3d3', '#d3d3d3', '#d3d3d3'] :
+                    [
+                        'rgb(75, 192, 192)',
+                        'rgb(255, 99, 132)',
+                        'rgb(255, 205, 86)',
+                        'rgb(55, 175, 255)'
+                    ],
+                hoverOffset: 4
+            }]
+        };
+
+        const doughnutConfig = {
+            type: 'doughnut',
+            data: doughnutData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw ?? 0;
+                                return `${context.label}: ${isAllZero ? 0 : value}%`;
+                            }
+                        }
                     }
                 }
             }
+        };
+
+        const doughnutCtx = document.getElementById('ProductivityReportChart').getContext('2d');
+        const doughnutChart = new Chart(doughnutCtx, doughnutConfig);
+
+        // Custom Legend
+        function renderCustomLegend(chart, legendId) {
+            const container = document.getElementById(legendId);
+            container.innerHTML = '';
+
+            const labels = chart.data.labels;
+            const data = chart.data.datasets[0].data;
+            const colors = chart.data.datasets[0].backgroundColor;
+
+            labels.forEach((label, i) => {
+                const item = document.createElement('div');
+                item.classList.add('custom-legend-item');
+
+                const box = document.createElement('div');
+                box.classList.add('custom-legend-box');
+                box.style.backgroundColor = colors[i];
+
+                const text = document.createElement('span');
+                const value = isAllZero ? 0 : data[i];
+                text.innerText = `${label}: ${value}%`;
+
+                item.appendChild(box);
+                item.appendChild(text);
+                container.appendChild(item);
+            });
         }
-    }
-};
 
-// ✅ Render Chart
-const doughnutCtx = document.getElementById('ProductivityReportChart').getContext('2d');
-const doughnutChart = new Chart(doughnutCtx, doughnutConfig);
+        renderCustomLegend(doughnutChart, 'doughnutLegend');
 
-// ✅ Custom Legend Renderer (use raw value directly)
-function renderCustomLegend(chart, legendId) {
-    const container = document.getElementById(legendId);
-    container.innerHTML = '';
 
-    const labels = chart.data.labels;
-    const data = chart.data.datasets[0].data;
-    const colors = chart.data.datasets[0].backgroundColor;
 
-    labels.forEach((label, i) => {
-        const value = data[i];
-
-        const item = document.createElement('div');
-        item.classList.add('custom-legend-item');
-
-        const box = document.createElement('div');
-        box.classList.add('custom-legend-box');
-        box.style.backgroundColor = colors[i];
-
-        const text = document.createElement('span');
-        text.innerText = `${label}: ${value}%`;
-
-        item.appendChild(box);
-        item.appendChild(text);
-        container.appendChild(item);
-    });
-}
-
-renderCustomLegend(doughnutChart, 'doughnutLegend');
-
-// ✅ Weekly Chart (Bar + Line)
-const weeklyReportsData = <?php echo json_encode($weekly_report); ?>;
-const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
+        // ✅ Weekly Chart (Bar + Line)
+        const weeklyReportsData = <?php echo json_encode($weekly_report); ?>;
+        const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
 
 
         const labels = [];
@@ -300,12 +313,12 @@ const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
         weeklyReportsData.forEach(report => {
             const timeParts = report.total_active_time.split(':');
             const totalHours = parseInt(timeParts[0]) +
-parseInt(timeParts[1]) / 60 +
-parseInt(timeParts[2]) / 3600;
+                parseInt(timeParts[1]) / 60 +
+                parseInt(timeParts[2]) / 3600;
 
-labels.push(report.week_name);
-barData.push(totalHours);
-lineData.push((totalHours * 1.05).toFixed(2));
+            labels.push(report.week_name);
+            barData.push(totalHours);
+            lineData.push((totalHours * 1.05).toFixed(2));
 
             if (totalHours > maxBarValue) {
                 maxBarValue = totalHours;
