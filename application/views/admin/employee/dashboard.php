@@ -82,7 +82,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Productive Hours" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['total_active'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_active'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Unproductive Hours" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['total_idle'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_idle'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Shift Time" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['shift_time'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['shift_time'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['total_keystrokes'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_keystrokes'] ?></h2>
                             </div>
                         </div>
                     </div>
@@ -122,7 +122,7 @@
                         <div class="d-flex flex-row">
                             <div class="ml-20 align-self-center">
                                 <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
-                                <h2 class="m-b-0"><?php echo $chart_data['total_mouse_movements'] ?></h2>
+                                <h2 class="m-b-0"><?php echo $employee_activity['total_mouse_movements'] ?></h2>
                             </div>
                         </div>
                     </div>
