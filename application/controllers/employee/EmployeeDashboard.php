@@ -24,6 +24,7 @@ class EmployeeDashboard extends Home_Controller {
         $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
         $data['overall_productivity'] = $this->employee_overall_productivity($from_date,$to_date);
         $data['weekly_report'] = $this->get_weekly_report_data();
+        $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line    
         $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
@@ -295,6 +296,62 @@ private function get_weekly_report_data()
         return ($hours * 60) + $minutes;
     }
 
+    private function get_this_week_inactive_time_data()
+    {
+        $employee_id = $this->session->userdata('employee_id');
+        $user_id = $this->session->userdata('employee_org_id');
+    
+        if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+            return [];
+        }
+    
+        $today = new DateTime();
+        $monday = (clone $today)->modify('monday this week');
+    
+        $this->db->select('log_date, total_idle_time')
+            ->from('worksmart.time_logs')
+            ->where('employee_id', $employee_id)
+            ->where('user_id', $user_id)
+            ->where('log_date >=', $monday->format('Y-m-d'))
+            ->where('log_date <=', $today->format('Y-m-d'))
+            ->order_by('log_date', 'ASC');
+    
+        $query = $this->db->get();
+        $logs = $query->result_array();
+    
+        $total_seconds = 0;
+        $daily_hours = [];
+        $days_with_data = 0;
+    
+        foreach ($logs as $log) {
+            if (!isset($log['total_idle_time']) || empty($log['total_idle_time'])) continue;
+    
+            $parts = explode(':', $log['total_idle_time']);
+            if (count($parts) !== 3) continue;
+    
+            $hours = (int)$parts[0];
+            $minutes = (int)$parts[1];
+            $seconds = (int)$parts[2];
+    
+            $total_seconds += ($hours * 3600) + ($minutes * 60) + $seconds;
+            $daily_hours[$log['log_date']] = $log['total_idle_time'];
+            $days_with_data++;
+        }
+    
+        $hours = floor($total_seconds / 3600);
+        $minutes = floor(($total_seconds % 3600) / 60);
+        $seconds = $total_seconds % 60;
+    
+        return [
+            'week_name' => 'Current Week',
+            'date_range' => $monday->format('Y-m-d') . ' to ' . $today->format('Y-m-d'),
+            'total_idle_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds),
+            'days_with_data' => $days_with_data,
+            'total_days_in_week' => (new DateTime($today->format('Y-m-d')))->diff(new DateTime($monday->format('Y-m-d')))->days + 1,
+            'daily_breakdown' => $daily_hours
+        ];
+    }
+    
 
 
     // Add other methods for specific employee dashboard sections or functionalities
