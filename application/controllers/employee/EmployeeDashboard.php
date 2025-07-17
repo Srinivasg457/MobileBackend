@@ -139,46 +139,76 @@ private function get_weekly_report_data()
         $employee_id = $this->session->userdata('employee_id');
         $organization_id = $this->session->userdata('employee_org_id');
 
-        // Set default date
+        // Default to today's date if empty
         if (empty($from_date) || empty($to_date)) {
             $from_date = date('Y-m-d');
             $to_date = date('Y-m-d');
         }
 
-        // Fetch time log data
-        $this->db->select('
-        SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active, 
-        SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle, 
-        MIN(start_time) AS start_time, 
-        MAX(end_time) AS end_time
-    ');
+        // Fetch total active and idle time in seconds
+        $this->db->select("
+    SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS total_duration,
+    ");
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where("DATE(created_at) >=", $from_date);
-        $this->db->where("DATE(created_at) <=", $to_date);
+        $this->db->where_in("DATE(created_at)", [$from_date, $to_date]);
         $query = $this->db->get()->row();
 
-        // Convert times to seconds
-        $active_seconds = strtotime("1970-01-01 " . $query->total_active) - strtotime("1970-01-01 00:00:00");
-        $idle_seconds   = strtotime("1970-01-01 " . $query->total_idle) - strtotime("1970-01-01 00:00:00");
+        $this->db->select("
+    SEC_TO_TIME(SUM(CASE WHEN is_meeting = 1 THEN TIME_TO_SEC(TIMEDIFF(timestamp_end, timestamp_start)) ELSE 0 END)) AS meeting_time,
+    SEC_TO_TIME(SUM(CASE WHEN is_meeting = 0 THEN TIME_TO_SEC(TIMEDIFF(timestamp_end, timestamp_start)) ELSE 0 END)) AS manual_time
+");
+        $this->db->from('timecards_manual');
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('user_id', $organization_id);
+        $this->db->where_in("DATE(date_added)", [$from_date, $to_date]);
+        $query1 = $this->db->get()->row();
 
-        $shift_seconds = 0;
-        if (!empty($query->start_time) && !empty($query->end_time)) {
-            $shift_seconds = strtotime($query->end_time) - strtotime($query->start_time);
+
+        $formatted_total_active_temp = $this->formatToHoursMins($query->total_active);
+        $formatted_total_idle_temp = $this->formatToHoursMins($query->total_idle);
+        $formatted_total_shift_time_temp = $this->formatToHoursMins($query->total_duration);
+        $formatted_total_meeting_time_temp = $this->formatToHoursMins($query1->meeting_time);
+        $formatted_total_manual_time_temp = $this->formatToHoursMins($query1->manual_time);
+
+
+        $formatted_total_active = $this->convertTimeToMinutes($formatted_total_active_temp);
+        $formatted_total_idle = $this->convertTimeToMinutes($formatted_total_idle_temp);
+        $formatted_total_shift_time = $this->convertTimeToMinutes($formatted_total_shift_time_temp);
+        $formatted_total_meeting_time = $this->convertTimeToMinutes($formatted_total_meeting_time_temp);
+        $formatted_total_manual_time = $this->convertTimeToMinutes($formatted_total_manual_time_temp);
+
+
+
+        // Calculate percentages
+        $active_percent = 0;
+        $idle_percent = 0;
+
+        if ($formatted_total_shift_time > 0) {
+            $active_percent  = ($formatted_total_active > 0)  ? floor(($formatted_total_active / $formatted_total_shift_time) * 100)  : 0;
+            $idle_percent    = ($formatted_total_idle > 0)    ? floor(($formatted_total_idle / $formatted_total_shift_time) * 100)    : 0;
+            $meeting_percent = ($formatted_total_meeting_time > 0) ? floor(($formatted_total_meeting_time / $formatted_total_shift_time) * 100) : 0;
+            $manual_percent  = ($formatted_total_manual_time > 0)  ? floor(($formatted_total_manual_time / $formatted_total_shift_time) * 100)  : 0;
         }
 
-        $active_percentage = $shift_seconds > 0 ? round(($active_seconds / $shift_seconds) * 100, 1) : 0;
-        $idle_percentage   = $shift_seconds > 0 ? round(($idle_seconds / $shift_seconds) * 100, 1) : 0;
 
         return [
-            'active_time' => $query->total_active,
-            'idle_time' => $query->total_idle,
-            'shift_duration' => gmdate("H:i:s", $shift_seconds),
-            'active_percentage' => $active_percentage,
-            'idle_percentage' => $idle_percentage
+            'active_time' =>  $formatted_total_active_temp,
+            'idle_time' =>  $formatted_total_idle_temp,
+            'meeting_time' =>  $formatted_total_meeting_time_temp,
+            'manual_time' =>  $formatted_total_manual_time_temp,
+            'duration'  => $formatted_total_shift_time_temp,
+            'active_percentage' => $active_percent,
+            'idle_percentage' => $idle_percent,
+            'meeting_percentage' => $meeting_percent,
+            'manual_percentage' => $manual_percent
+
         ];
     }
+
 
 
     private function Employee_chart_Data($from_date, $to_date)
@@ -193,37 +223,25 @@ private function get_weekly_report_data()
         }
 
         // Fetch total active, idle, and shift from time_logs
-        $this->db->select('SUM(total_active_time) AS total_active, SUM(total_idle_time) AS total_idle, MIN(start_time) AS start_time, MAX(end_time) AS end_time');
+        $this->db->select('SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active, SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle, SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS total_duration');
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where("DATE(created_at) >=", $from_date);
-        $this->db->where("DATE(created_at) <=", $to_date);
+        $this->db->where_in("DATE(created_at)", [$from_date, $to_date]);
         $query = $this->db->get()->row();
 
         // Defaults
         $total_active = $query->total_active ?? "0h 0m";
         $total_idle = $query->total_idle ?? "0h 0m";
-        $shift_time = "0h 0m";
+        $shift_time = $query->total_duration?? "0h 0m";;
 
-        if (!empty($query->start_time) && !empty($query->end_time)) {
-            $start_time = strtotime($query->start_time);
-            $end_time = strtotime($query->end_time);
-            if ($end_time > $start_time) {
-                $shift_seconds = $end_time - $start_time;
-                $hours = floor($shift_seconds / 3600);
-                $minutes = floor(($shift_seconds % 3600) / 60);
-                $shift_time = "{$hours}h {$minutes}m";
-            }
-        }
 
         // Fetch total mouse and keystrokes
         $this->db->select('SUM(total_mouse_movement) AS total_mouse, SUM(total_keystrokes) AS total_keys');
         $this->db->from('Employee_Activity');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where("DATE(created_at) >=", $from_date);
-        $this->db->where("DATE(created_at) <=", $to_date);
+        $this->db->where_in("DATE(created_at)", [$from_date, $to_date]);
         $activity = $this->db->get()->row();
 
         // Format data
@@ -232,11 +250,13 @@ private function get_weekly_report_data()
 
         $formatted_total_active = $this->formatToHoursMins($total_active);
         $formatted_total_idle = $this->formatToHoursMins($total_idle);
+        $formatted_total_shift_time = $this->formatToHoursMins($shift_time);
+
 
         return [
             'total_active' => $formatted_total_active,
             'total_idle' => $formatted_total_idle,
-            'shift_time' => $shift_time,
+            'shift_time' => $formatted_total_shift_time,
             'total_mouse_movements' => $total_mouse,
             'total_keystrokes' => $total_keys,
             'from_date' => $from_date,
@@ -263,6 +283,17 @@ private function get_weekly_report_data()
     }
 
 
+    private function convertTimeToMinutes($timeStr)
+    {
+        // Extract hours and minutes using regex
+        preg_match('/(\d+)h\s*(\d+)m/', $timeStr, $matches);
+
+        // Convert to total minutes
+        $hours = isset($matches[1]) ? (int)$matches[1] : 0;
+        $minutes = isset($matches[2]) ? (int)$matches[2] : 0;
+
+        return ($hours * 60) + $minutes;
+    }
 
 
 
