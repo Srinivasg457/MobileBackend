@@ -14,128 +14,200 @@ class EmployeeDashboard extends Home_Controller {
         // $this->load->model('employee_model'); // Create a new model for employee-specific data
     }
 
-    public function index() {
+    // public function index() {
+    //     $data = array();
+    //     $data['page_title'] = 'Employee Dashboard';
+    //     $data['is_employee_admin'] = false;
+    //     $data['details'] = $this->session->userdata('employee_id');
+    //     $from_date = $this->input->post('fromDate', true);
+    //     $to_date = $this->input->post('toDate', true);
+    //     $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
+    //     $data['overall_productivity'] = $this->employee_overall_productivity($from_date,$to_date);
+    //     $data['weekly_report'] = $this->get_weekly_report_data();
+    //     $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line   
+    //     $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
+    //     $data['active_time_comparison'] = $this->compare_weekly_average_active_time();
+
+    //     $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
+    //     $this->load->view('admin/index', $data);
+    // }
+
+    public function index()
+    {
         $data = array();
         $data['page_title'] = 'Employee Dashboard';
         $data['is_employee_admin'] = false;
         $data['details'] = $this->session->userdata('employee_id');
+
+        $time_period = $this->input->post('Time_period', true);
         $from_date = $this->input->post('fromDate', true);
         $to_date = $this->input->post('toDate', true);
-        $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
-        $data['overall_productivity'] = $this->employee_overall_productivity($from_date,$to_date);
-        $data['weekly_report'] = $this->get_weekly_report_data();
+        $data['time_period'] = $time_period;
+        $data['from_date'] = $from_date;
+        $data['to_date'] = $to_date;
+
+        // If dropdown is selected and from/to date are empty, calculate from dropdown
+        if (!empty($time_period) && (empty($from_date) || empty($to_date))) {
+            $today = date('Y-m-d');
+
+            switch ($time_period) {
+                case 'today':
+                    $from_date = $to_date = $today;
+                    break;
+                case 'yesterday':
+                    $from_date = $to_date = date('Y-m-d', strtotime('-1 day'));
+                    break;
+                case 'last_7_days':
+                    $from_date = date('Y-m-d', strtotime('-6 days'));
+                    $to_date = $today;
+                    break;
+                case 'last_14_days':
+                    $from_date = date('Y-m-d', strtotime('-13 days'));
+                    $to_date = $today;
+                    break;
+                case 'last_21_days':
+                    $from_date = date('Y-m-d', strtotime('-20 days'));
+                    $to_date = $today;
+                    break;
+                case 'this_month':
+                    $from_date = date('Y-m-01');
+                    $to_date = $today;
+                    break;
+                case 'last_1_month':
+                    $from_date = date('Y-m-d', strtotime('-1 month'));
+                    $to_date = $today;
+                    break;
+                case 'last_2_months':
+                    $from_date = date('Y-m-d', strtotime('-2 months'));
+                    $to_date = $today;
+                    break;
+                case 'last_6_months':
+                    $from_date = date('Y-m-d', strtotime('-6 months'));
+                    $to_date = $today;
+                    break;
+                case 'this_year':
+                    $from_date = date('Y-01-01');
+                    $to_date = $today;
+                    break;
+            }
+        }
+
+        // Save values to pass to view
         $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line   
         $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
-        $data['active_time_comparison'] = $this->compare_weekly_average_active_time();
-
+        $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
+        $data['overall_productivity'] = $this->employee_overall_productivity($from_date, $to_date);
+        $data['weekly_report'] = $this->get_weekly_report_data();
+        $data['first_record_date'] = $this->get_user_oldest_activity_date();
         $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
 
-private function get_weekly_report_data()
-{
-    $employee_id = $this->session->userdata('employee_id');
-    $user_id = $this->session->userdata('employee_org_id');
 
-    if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
-        return []; // or throw exception if you want
-    }
+    private function get_weekly_report_data()
+    {
+        $employee_id = $this->session->userdata('employee_id');
+        $user_id = $this->session->userdata('employee_org_id');
 
-    $weekly_reports = [];
-    $weeks_to_include_raw = [];
+        if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+            return []; // or throw exception if you want
+        }
 
-    $today = new DateTime();
+        $weekly_reports = [];
+        $weeks_to_include_raw = [];
 
-    // Current week
-    $current_week_start = clone $today;
-    $current_week_start->modify('last sunday');
-    $current_week_end = clone $today;
+        $today = new DateTime();
 
-    $weeks_to_include_raw[] = [
-        'name_prefix' => 'Current Week',
-        'start_date' => $current_week_start->format('Y-m-d'),
-        'end_date' => $current_week_end->format('Y-m-d')
-    ];
-
-    // Previous 4 weeks
-    $week_counter = 1;
-    $prev_week_cursor_end = clone $current_week_start;
-
-    for ($i = 0; $i < 4; $i++) {
-        $prev_week_end = clone $prev_week_cursor_end;
-        $prev_week_end->modify('-1 day');
-
-        $prev_week_start = clone $prev_week_end;
-        $prev_week_start->modify('last sunday');
-
-        if ($prev_week_start > $today) break;
+        // Current week
+        $current_week_start = clone $today;
+        $current_week_start->modify('last sunday');
+        $current_week_end = clone $today;
 
         $weeks_to_include_raw[] = [
-            'name_prefix' => 'Week ' . $week_counter,
-            'start_date' => $prev_week_start->format('Y-m-d'),
-            'end_date' => $prev_week_end->format('Y-m-d')
+            'name_prefix' => 'Current Week',
+            'start_date' => $current_week_start->format('Y-m-d'),
+            'end_date' => $current_week_end->format('Y-m-d')
         ];
 
-        $prev_week_cursor_end = clone $prev_week_start;
-        $week_counter++;
-    }
+        // Previous 4 weeks
+        $week_counter = 1;
+        $prev_week_cursor_end = clone $current_week_start;
 
-    $weeks_to_process = array_reverse($weeks_to_include_raw);
+        for ($i = 0; $i < 4; $i++) {
+            $prev_week_end = clone $prev_week_cursor_end;
+            $prev_week_end->modify('-1 day');
 
-    foreach ($weeks_to_process as $week_data) {
-        $week_name = $week_data['name_prefix'];
+            $prev_week_start = clone $prev_week_end;
+            $prev_week_start->modify('last sunday');
 
-        $this->db->select('log_date, total_active_time')
-            ->from('time_logs')
-            ->where('employee_id', $employee_id)
-            ->where('user_id', $user_id)
-            ->where('log_date >=', $week_data['start_date'])
-            ->where('log_date <=', $week_data['end_date'])
-            ->order_by('log_date', 'ASC');
+            if ($prev_week_start > $today) break;
 
-        $query = $this->db->get();
-        $logs = $query->result_array();
-
-        $total_seconds = 0;
-        $daily_hours = [];
-        $days_with_data = 0;
-
-        foreach ($logs as $log) {
-            if (!isset($log['total_active_time']) || empty($log['total_active_time'])) continue;
-
-            $time_parts = explode(':', $log['total_active_time']);
-            if (count($time_parts) !== 3) continue;
-
-            $hours = (int)$time_parts[0];
-            $minutes = (int)$time_parts[1];
-            $seconds = (int)$time_parts[2];
-
-            $daily_seconds = ($hours * 3600) + ($minutes * 60) + $seconds;
-            $total_seconds += $daily_seconds;
-
-            $daily_hours[$log['log_date']] = $log['total_active_time'];
-            $days_with_data++;
-        }
-
-        $hours = floor($total_seconds / 3600);
-        $remaining_seconds = $total_seconds % 3600;
-        $minutes = floor($remaining_seconds / 60);
-        $seconds = $remaining_seconds % 60;
-
-        if ($days_with_data > 0) {
-            $weekly_reports[] = [
-                'week_name' => $week_name,
-                'date_range' => $week_data['start_date'] . ' to ' . $week_data['end_date'],
-                'total_active_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds),
-                'days_with_data' => $days_with_data,
-                'total_days_in_week' => (new DateTime($week_data['end_date']))->diff(new DateTime($week_data['start_date']))->days + 1,
-                'daily_breakdown' => $daily_hours
+            $weeks_to_include_raw[] = [
+                'name_prefix' => 'Week ' . $week_counter,
+                'start_date' => $prev_week_start->format('Y-m-d'),
+                'end_date' => $prev_week_end->format('Y-m-d')
             ];
-        }
-    }
 
-    return $weekly_reports;
-}
+            $prev_week_cursor_end = clone $prev_week_start;
+            $week_counter++;
+        }
+
+        $weeks_to_process = array_reverse($weeks_to_include_raw);
+
+        foreach ($weeks_to_process as $week_data) {
+            $week_name = $week_data['name_prefix'];
+
+            $this->db->select('log_date, total_active_time')
+                ->from('time_logs')
+                ->where('employee_id', $employee_id)
+                ->where('user_id', $user_id)
+                ->where('log_date >=', $week_data['start_date'])
+                ->where('log_date <=', $week_data['end_date'])
+                ->order_by('log_date', 'ASC');
+
+            $query = $this->db->get();
+            $logs = $query->result_array();
+
+            $total_seconds = 0;
+            $daily_hours = [];
+            $days_with_data = 0;
+
+            foreach ($logs as $log) {
+                if (!isset($log['total_active_time']) || empty($log['total_active_time'])) continue;
+
+                $time_parts = explode(':', $log['total_active_time']);
+                if (count($time_parts) !== 3) continue;
+
+                $hours = (int)$time_parts[0];
+                $minutes = (int)$time_parts[1];
+                $seconds = (int)$time_parts[2];
+
+                $daily_seconds = ($hours * 3600) + ($minutes * 60) + $seconds;
+                $total_seconds += $daily_seconds;
+
+                $daily_hours[$log['log_date']] = $log['total_active_time'];
+                $days_with_data++;
+            }
+
+            $hours = floor($total_seconds / 3600);
+            $remaining_seconds = $total_seconds % 3600;
+            $minutes = floor($remaining_seconds / 60);
+            $seconds = $remaining_seconds % 60;
+
+            if ($days_with_data > 0) {
+                $weekly_reports[] = [
+                    'week_name' => $week_name,
+                    'date_range' => $week_data['start_date'] . ' to ' . $week_data['end_date'],
+                    'total_active_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds),
+                    'days_with_data' => $days_with_data,
+                    'total_days_in_week' => (new DateTime($week_data['end_date']))->diff(new DateTime($week_data['start_date']))->days + 1,
+                    'daily_breakdown' => $daily_hours
+                ];
+            }
+        }
+
+        return $weekly_reports;
+    }
 
 
     private function employee_overall_productivity($from_date, $to_date)
@@ -151,10 +223,10 @@ private function get_weekly_report_data()
 
         // Fetch total active and idle time in seconds
         $this->db->select("
-    SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active,
-    SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle,
-    SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS total_duration,
-    ");
+            SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active,
+            SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle,
+            SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS total_duration,
+            ");
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
@@ -162,9 +234,9 @@ private function get_weekly_report_data()
         $query = $this->db->get()->row();
 
         $this->db->select("
-    SEC_TO_TIME(SUM(CASE WHEN is_meeting = 1 THEN TIME_TO_SEC(TIMEDIFF(timestamp_end, timestamp_start)) ELSE 0 END)) AS meeting_time,
-    SEC_TO_TIME(SUM(CASE WHEN is_meeting = 0 THEN TIME_TO_SEC(TIMEDIFF(timestamp_end, timestamp_start)) ELSE 0 END)) AS manual_time
-");
+                SEC_TO_TIME(SUM(CASE WHEN is_meeting = 1 THEN TIME_TO_SEC(TIMEDIFF(timestamp_end, timestamp_start)) ELSE 0 END)) AS meeting_time,
+                SEC_TO_TIME(SUM(CASE WHEN is_meeting = 0 THEN TIME_TO_SEC(TIMEDIFF(timestamp_end, timestamp_start)) ELSE 0 END)) AS manual_time
+            ");
         $this->db->from('timecards_manual');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
@@ -190,6 +262,8 @@ private function get_weekly_report_data()
         // Calculate percentages
         $active_percent = 0;
         $idle_percent = 0;
+        $meeting_percent = 0;
+        $manual_percent = 0;
 
         if ($formatted_total_shift_time > 0) {
             $active_percent  = ($formatted_total_active > 0)  ? floor(($formatted_total_active / $formatted_total_shift_time) * 100)  : 0;
@@ -237,7 +311,7 @@ private function get_weekly_report_data()
         // Defaults
         $total_active = $query->total_active ?? "0h 0m";
         $total_idle = $query->total_idle ?? "0h 0m";
-        $shift_time = $query->total_duration?? "0h 0m";;
+        $shift_time = $query->total_duration ?? "0h 0m";;
 
 
         // Fetch total mouse and keystrokes
@@ -263,8 +337,6 @@ private function get_weekly_report_data()
             'shift_time' => $formatted_total_shift_time,
             'total_mouse_movements' => $total_mouse,
             'total_keystrokes' => $total_keys,
-            'from_date' => $from_date,
-            'to_date' => $to_date
         ];
     }
 
@@ -297,6 +369,19 @@ private function get_weekly_report_data()
         $minutes = isset($matches[2]) ? (int)$matches[2] : 0;
 
         return ($hours * 60) + $minutes;
+    }
+
+    private function get_user_oldest_activity_date()
+    {
+        $employee_id = $this->session->userdata('employee_id');
+        $organization_id = $this->session->userdata('employee_org_id');
+        $this->db->select_min('log_date'); // Change to your date column name
+        $this->db->where('employee_id', $employee_id); // Change to your user column
+        $this->db->where('user_id', $organization_id);
+        $query = $this->db->get('time_logs'); // Change to your table name
+
+        $result = $query->row();
+        return $result ? $result->log_date : null;
     }
 
     private function get_this_week_inactive_time_data()
