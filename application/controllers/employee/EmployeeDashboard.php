@@ -309,7 +309,7 @@ private function get_weekly_report_data()
         $monday = (clone $today)->modify('monday this week');
     
         $this->db->select('log_date, total_idle_time')
-            ->from('worksmart.time_logs')
+            ->from('time_logs')
             ->where('employee_id', $employee_id)
             ->where('user_id', $user_id)
             ->where('log_date >=', $monday->format('Y-m-d'))
