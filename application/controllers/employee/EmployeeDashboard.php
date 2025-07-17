@@ -24,7 +24,10 @@ class EmployeeDashboard extends Home_Controller {
         $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
         $data['overall_productivity'] = $this->employee_overall_productivity($from_date,$to_date);
         $data['weekly_report'] = $this->get_weekly_report_data();
-        $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line    
+        $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line   
+        $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
+        $data['active_time_comparison'] = $this->compare_weekly_average_active_time();
+
         $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
@@ -345,7 +348,7 @@ private function get_weekly_report_data()
         return [
             'week_name' => 'Current Week',
             'date_range' => $monday->format('Y-m-d') . ' to ' . $today->format('Y-m-d'),
-            'total_idle_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds),
+            'total_idle_time' => sprintf('%02d:%02d', $hours, $minutes),
             'days_with_data' => $days_with_data,
             'total_days_in_week' => (new DateTime($today->format('Y-m-d')))->diff(new DateTime($monday->format('Y-m-d')))->days + 1,
             'daily_breakdown' => $daily_hours
@@ -353,7 +356,226 @@ private function get_weekly_report_data()
     }
     
 
+    private function get_this_week_avarage_time_data()
+{
+    $employee_id = $this->session->userdata('employee_id');
+    $user_id = $this->session->userdata('employee_org_id');
 
+    if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+        return [];
+    }
+
+    $today = new DateTime(); // Example: Thursday
+    $yesterday = (clone $today)->modify('-1 day'); // Wednesday
+    $monday = (clone $today)->modify('monday this week');
+
+    $this->db->select('log_date, total_idle_time, total_active_time')
+        ->from('time_logs')
+        ->where('employee_id', $employee_id)
+        ->where('user_id', $user_id)
+        ->where('log_date >=', $monday->format('Y-m-d'))
+        ->where('log_date <=', $yesterday->format('Y-m-d'))
+        ->order_by('log_date', 'ASC');
+
+    $query = $this->db->get();
+    $logs = $query->result_array();
+
+    $total_idle_seconds = 0;
+    $total_active_seconds = 0;
+    $daily_breakdown = [];
+    $days_count = 0;
+
+    foreach ($logs as $log) {
+        $idle_time = $log['total_idle_time'];
+        $active_time = $log['total_active_time'];
+
+        $idle_sec = $active_sec = 0;
+
+        if (!empty($idle_time)) {
+            $parts = explode(':', $idle_time);
+            if (count($parts) === 3) {
+                $idle_sec = ($parts[0] * 3600) + ($parts[1] * 60) + $parts[2];
+            }
+        }
+
+        if (!empty($active_time)) {
+            $parts = explode(':', $active_time);
+            if (count($parts) === 3) {
+                $active_sec = ($parts[0] * 3600) + ($parts[1] * 60) + $parts[2];
+            }
+        }
+
+        $total_idle_seconds += $idle_sec;
+        $total_active_seconds += $active_sec;
+        $daily_breakdown[$log['log_date']] = [
+            'idle' => gmdate('H:i:s', $idle_sec),
+            'active' => gmdate('H:i:s', $active_sec)
+        ];
+
+        $days_count++;
+    }
+
+    $format_time = function ($seconds) {
+        $h = floor($seconds / 3600);
+        $m = floor(($seconds % 3600) / 60);
+        $s = $seconds % 60;
+        return sprintf('%02d:%02d:%02d', $h, $m, $s);
+    };
+
+    // ✅ Return data as a variable
+    $avarage_data = [
+        'week_name' => 'Current Week',
+        'date_range' => $monday->format('Y-m-d') . ' to ' . $yesterday->format('Y-m-d'),
+        'days_count' => $days_count,
+        'total_idle_time' => $format_time($total_idle_seconds),
+        'total_active_time' => $format_time($total_active_seconds),
+       'average_idle_time' => $days_count > 0 ? gmdate('H:i', floor($total_idle_seconds / $days_count)) : '00:00',
+'average_active_time' => $days_count > 0 ? gmdate('H:i', floor($total_active_seconds / $days_count)) : '00:00',
+
+        'daily_breakdown' => $daily_breakdown
+    ];
+
+    return $avarage_data;
+}
+
+
+private function compare_weekly_average_active_time()
+{
+    $employee_id = $this->session->userdata('employee_id');
+    $user_id = $this->session->userdata('employee_org_id');
+
+    if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+        return [];
+    }
+
+    $today = new DateTime(); // Today
+    $this_monday = (clone $today)->modify('monday this week');
+    $yesterday = (clone $today)->modify('-1 day');
+
+    $last_week_monday = (clone $this_monday)->modify('-7 days');
+    $last_week_sunday = (clone $this_monday)->modify('-1 day');
+
+    // Helper function to calculate average active time (in seconds) for a date range
+    $get_average_active_seconds = function ($from_date, $to_date) use ($employee_id, $user_id) {
+        $this->db->select('total_active_time')
+            ->from('time_logs')
+            ->where('employee_id', $employee_id)
+            ->where('user_id', $user_id)
+            ->where('log_date >=', $from_date->format('Y-m-d'))
+            ->where('log_date <=', $to_date->format('Y-m-d'));
+
+        $query = $this->db->get();
+        $logs = $query->result_array();
+
+        $total_active_seconds = 0;
+        $days_count = 0;
+
+        foreach ($logs as $log) {
+            if (!empty($log['total_active_time'])) {
+                $parts = explode(':', $log['total_active_time']);
+                if (count($parts) === 3) {
+                    $active_sec = ($parts[0] * 3600) + ($parts[1] * 60) + $parts[2];
+                    $total_active_seconds += $active_sec;
+                    $days_count++;
+                }
+            }
+        }
+
+        return $days_count > 0 ? floor($total_active_seconds / $days_count) : 0;
+    };
+
+    $current_week_avg_sec = $get_average_active_seconds($this_monday, $yesterday);
+    $last_week_avg_sec = $get_average_active_seconds($last_week_monday, $last_week_sunday);
+
+    $format_time = function ($seconds) {
+        $h = floor($seconds / 3600);
+        $m = floor(($seconds % 3600) / 60);
+        return sprintf('%02d:%02d', $h, $m);
+    };
+
+    $percentage_change = 0;
+    $status = 'no change';
+
+    if ($last_week_avg_sec > 0) {
+        $percentage_change = (($current_week_avg_sec - $last_week_avg_sec) / $last_week_avg_sec) * 100;
+        $status = $percentage_change > 0 ? 'increased by' : 'decreased by';
+    }
+
+    return [
+        'current_week_avg_active_time' => $format_time($current_week_avg_sec),
+        'last_week_avg_active_time' => $format_time($last_week_avg_sec),
+        'change_percentage' => round(abs($percentage_change), 2),
+        'status' => $status,
+    ];
+}
+
+
+public function get_this_week_inactive_time()
+{
+    try {
+        $employee_id = $this->input->get_request_header('employee_id', TRUE);
+        $user_id = $this->input->get_request_header('user_id', TRUE);
+
+        // Calculate this week's Monday and today's date
+        $today = new DateTime();
+        $monday = (clone $today)->modify('monday this week');
+
+        // Query time_logs from Monday to today
+        $this->db->select('log_date, total_idle_time')
+            ->from('worksmart.time_logs')
+            ->where('employee_id', $employee_id)
+            ->where('user_id', $user_id)
+            ->where('log_date >=', $monday->format('Y-m-d'))
+            ->where('log_date <=', $today->format('Y-m-d'));
+
+        $query = $this->db->get();
+        $result = $query->result_array();
+
+        // Initialize total and daily breakdown
+        $total_seconds = 0;
+        $daily_breakdown = [];
+
+        foreach ($result as $row) {
+            $log_date = $row['log_date'];
+            $idle_time = $row['total_idle_time'];
+
+            // Convert HH:MM:SS to seconds
+            list($hours, $minutes, $seconds) = explode(':', $idle_time);
+            $seconds_today = ($hours * 3600) + ($minutes * 60) + $seconds;
+
+            $total_seconds += $seconds_today;
+
+            $daily_breakdown[] = [
+                'date' => $log_date,
+                'idle_time' => $idle_time
+            ];
+        }
+
+        // Convert total seconds to HH:MM:SS
+        $total_idle_time = gmdate('H:i:s', $total_seconds);
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'success',
+                'date_range' => $monday->format('Y-m-d') . ' to ' . $today->format('Y-m-d'),
+                'total_idle_time' => $total_idle_time,
+                'daily_breakdown' => $daily_breakdown
+            ]));
+
+    } catch (Exception $e) {
+        log_message('error', 'get_this_week_inactive_time failed: ' . $e->getMessage());
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+                'error_details' => $e->getMessage()
+            ]));
+    }
+}
     // Add other methods for specific employee dashboard sections or functionalities
     // e.g., public function tasks(), public function timesheets(), etc.
 }

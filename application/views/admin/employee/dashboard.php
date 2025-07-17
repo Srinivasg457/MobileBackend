@@ -171,12 +171,12 @@
 </div>
 
 <style>
-.focus-scroller {
+/* .focus-scroller {
     position: absolute;
     bottom: 0;
-    animation: scroll-up 8s linear infinite;
+    animation: scroll-up 5s linear infinite;
     width: 100%;
-}
+} */
 
 .focus-text {
     padding: 12px 16px;
@@ -215,13 +215,14 @@
         <div class="box-header with-border">
             <h3 class="box-title"><?php echo "Insights"; ?></h3>
         </div>
+
         <div class="box-body" style="height: 220px; overflow: hidden; position: relative; padding: 10px; background: linear-gradient(to top, #e0f7fa, #ffffff); border-radius: 8px;">
     <div class="insight-scroller">
         <div class="insight-text">🔔 You were inactive for <?= $inactive_data['total_idle_time']; ?> hours this week. Try taking short breaks to stay fresh!</div>
         <div class="insight-text">🌞 Your most productive time is [morning/afternoon]. Schedule important work then!</div>
         <div class="insight-text">🏆 Last week, you exceeded your target! Keep up the momentum.</div>
-        <div class="insight-text">⏱️ You were active for 6.2 hours/day this week, with 1.8 hours/day of inactivity.</div>
-        <div class="insight-text">📉 Your productivity dropped by 12% compared to last week</div>
+        <div class="insight-text">⏱️ You were active for <?= $avarage_data['average_active_time']; ?> hours/day this week, with <?= $avarage_data['average_active_time']; ?> hours/day of inactivity.</div>
+        <div class="insight-text">📉 Your productivity <span style="color: <?= $active_time_comparison['status'] == 'increased' ? 'green' : 'red' ?>"> <?= ucfirst($active_time_comparison['status']) ?>   </span><?= $active_time_comparison['change_percentage'] ?>% compared to last week</div>
         <div class="insight-text">🚀 Record focus streak: 4.5 hours without distractions! Reward yourself!</div>
     </div>
 </div>
@@ -233,7 +234,7 @@
 .insight-scroller {
     position: absolute;
     bottom: 0;
-    animation: scroll-up 14s linear infinite;
+    animation: scroll-up 10s linear infinite;
     width: 100%;
 }
 
