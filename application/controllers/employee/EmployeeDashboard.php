@@ -45,45 +45,89 @@ class EmployeeDashboard extends Home_Controller {
         $data['time_period'] = $time_period;
         $data['from_date'] = $from_date;
         $data['to_date'] = $to_date;
+        if (empty($time_period) && (empty($from_date) || empty($to_date))) {
+            $data['time_period'] = "current_week";
+        }
 
-        // If dropdown is selected and from/to date are empty, calculate from dropdown
-        if (!empty($time_period) && (empty($from_date) || empty($to_date))) {
+            // If dropdown is selected and from/to date are empty, calculate from dropdown
+            if (!empty($time_period) && (empty($from_date) || empty($to_date))) {
             $today = date('Y-m-d');
+
+            // switch ($time_period) {
+            //     case 'current_week':
+            //         $from_date = date('Y-m-d', strtotime('monday this week'));
+            //         $to_date = $today;
+            //         break;
+
+            //     case 'last_7_days':
+            //         $from_date = date('Y-m-d', strtotime('-6 days'));
+            //         $to_date = $today;
+            //         break;
+
+            //     case 'last_14_days':
+            //         $from_date = date('Y-m-d', strtotime('-13 days'));
+            //         $to_date = $today;
+            //         break;
+
+            //     case 'this_month':
+            //         $from_date = date('Y-m-01');
+            //         $to_date = $today;
+            //         break;
+
+            //     case 'last_1_month':
+            //         $from_date = date('Y-m-d', strtotime('-1 month'));
+            //         $to_date = $today;
+            //         break;
+
+            //     case 'last_6_months':
+            //         $from_date = date('Y-m-d', strtotime('-6 months'));
+            //         $to_date = $today;
+            //         break;
+
+            //     case 'this_year':
+            //         $from_date = date('Y-01-01');
+            //         $to_date = $today;
+            //         break;
+            // }
 
             switch ($time_period) {
                 case 'current_week':
                     $from_date = date('Y-m-d', strtotime('monday this week'));
-                    $to_date = $today;
+                    $to_date = date('Y-m-d', strtotime('sunday this week'));
                     break;
 
-                case 'last_7_days':
-                    $from_date = date('Y-m-d', strtotime('-6 days'));
-                    $to_date = $today;
+                case 'last_week':
+                    $from_date = date('Y-m-d', strtotime('monday last week'));
+                    $to_date = date('Y-m-d', strtotime('sunday last week'));
                     break;
 
-                case 'last_14_days':
-                    $from_date = date('Y-m-d', strtotime('-13 days'));
-                    $to_date = $today;
+                case 'two_week':
+                    $from_date = date('Y-m-d', strtotime('monday -2 weeks'));
+                    $to_date = date('Y-m-d', strtotime('sunday last week'));
                     break;
 
                 case 'this_month':
                     $from_date = date('Y-m-01');
-                    $to_date = $today;
+                    $to_date = date('Y-m-t');
                     break;
 
-                case 'last_1_month':
-                    $from_date = date('Y-m-d', strtotime('-1 month'));
-                    $to_date = $today;
+                case 'last_month':
+                    $from_date = date('Y-m-01', strtotime('first day of last month'));
+                    $to_date = date('Y-m-t', strtotime('last day of last month'));
                     break;
 
                 case 'last_6_months':
-                    $from_date = date('Y-m-d', strtotime('-6 months'));
-                    $to_date = $today;
+                    $from_date = date('Y-m-01', strtotime('-6 months'));
+                    $to_date = date('Y-m-t');
                     break;
 
                 case 'this_year':
                     $from_date = date('Y-01-01');
-                    $to_date = $today;
+                    $to_date = date('Y-12-31');
+                    break;
+
+                default:
+                    $from_date = $to_date = date('Y-m-d');
                     break;
             }
         }
@@ -101,26 +145,131 @@ class EmployeeDashboard extends Home_Controller {
     }
 
 
+    // private function get_weekly_report_data()
+    // {
+    //     $employee_id = $this->session->userdata('employee_id');
+    //     $user_id = $this->session->userdata('employee_org_id');
+
+    //     if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+    //         return []; // or throw exception if you want
+    //     }
+
+    //     $weekly_reports = [];
+    //     $weeks_to_include_raw = [];
+
+    //     $today = new DateTime();
+
+    //     // Current week
+    //     $current_week_start = clone $today;
+    //     $current_week_start->modify('last sunday');
+    //     $current_week_end = clone $today;
+
+    //     $weeks_to_include_raw[] = [
+    //         'name_prefix' => 'Current Week',
+    //         'start_date' => $current_week_start->format('Y-m-d'),
+    //         'end_date' => $current_week_end->format('Y-m-d')
+    //     ];
+
+    //     // Previous 4 weeks
+    //     $week_counter = 1;
+    //     $prev_week_cursor_end = clone $current_week_start;
+
+    //     for ($i = 0; $i < 4; $i++) {
+    //         $prev_week_end = clone $prev_week_cursor_end;
+    //         $prev_week_end->modify('-1 day');
+
+    //         $prev_week_start = clone $prev_week_end;
+    //         $prev_week_start->modify('last sunday');
+
+    //         if ($prev_week_start > $today) break;
+
+    //         $weeks_to_include_raw[] = [
+    //             'name_prefix' => 'Week ' . $week_counter,
+    //             'start_date' => $prev_week_start->format('Y-m-d'),
+    //             'end_date' => $prev_week_end->format('Y-m-d')
+    //         ];
+
+    //         $prev_week_cursor_end = clone $prev_week_start;
+    //         $week_counter++;
+    //     }
+
+    //     $weeks_to_process = array_reverse($weeks_to_include_raw);
+
+    //     foreach ($weeks_to_process as $week_data) {
+    //         $week_name = $week_data['name_prefix'];
+
+    //         $this->db->select('log_date, total_active_time')
+    //             ->from('time_logs')
+    //             ->where('employee_id', $employee_id)
+    //             ->where('user_id', $user_id)
+    //             ->where('log_date >=', $week_data['start_date'])
+    //             ->where('log_date <=', $week_data['end_date'])
+    //             ->order_by('log_date', 'ASC');
+
+    //         $query = $this->db->get();
+    //         $logs = $query->result_array();
+
+    //         $total_seconds = 0;
+    //         $daily_hours = [];
+    //         $days_with_data = 0;
+
+    //         foreach ($logs as $log) {
+    //             if (!isset($log['total_active_time']) || empty($log['total_active_time'])) continue;
+
+    //             $time_parts = explode(':', $log['total_active_time']);
+    //             if (count($time_parts) !== 3) continue;
+
+    //             $hours = (int)$time_parts[0];
+    //             $minutes = (int)$time_parts[1];
+    //             $seconds = (int)$time_parts[2];
+
+    //             $daily_seconds = ($hours * 3600) + ($minutes * 60) + $seconds;
+    //             $total_seconds += $daily_seconds;
+
+    //             $daily_hours[$log['log_date']] = $log['total_active_time'];
+    //             $days_with_data++;
+    //         }
+
+    //         $hours = floor($total_seconds / 3600);
+    //         $remaining_seconds = $total_seconds % 3600;
+    //         $minutes = floor($remaining_seconds / 60);
+    //         $seconds = $remaining_seconds % 60;
+
+    //         if ($days_with_data > 0) {
+    //             $weekly_reports[] = [
+    //                 'week_name' => $week_name,
+    //                 'date_range' => $week_data['start_date'] . ' to ' . $week_data['end_date'],
+    //                 'total_active_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds),
+    //                 'days_with_data' => $days_with_data,
+    //                 'total_days_in_week' => (new DateTime($week_data['end_date']))->diff(new DateTime($week_data['start_date']))->days + 1,
+    //                 'daily_breakdown' => $daily_hours
+    //             ];
+    //         }
+    //     }
+
+    //     return $weekly_reports;
+    // }
+
     private function get_weekly_report_data()
     {
         $employee_id = $this->session->userdata('employee_id');
-        $user_id = $this->session->userdata('employee_org_id');
+        $organization_id = $this->session->userdata('employee_org_id');
 
-        if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
-            return []; // or throw exception if you want
+        if (empty($employee_id) || empty($organization_id) || !is_numeric($employee_id) || !is_numeric($organization_id)) {
+            return [];
         }
 
         $weekly_reports = [];
-        $weeks_to_include_raw = [];
-
         $today = new DateTime();
 
         // Current week
         $current_week_start = clone $today;
-        $current_week_start->modify('last sunday');
+        $current_week_start->modify('last monday');
         $current_week_end = clone $today;
 
-        $weeks_to_include_raw[] = [
+        $weeks_to_include = [];
+
+        $weeks_to_include[] = [
             'name_prefix' => 'Current Week',
             'start_date' => $current_week_start->format('Y-m-d'),
             'end_date' => $current_week_end->format('Y-m-d')
@@ -135,11 +284,11 @@ class EmployeeDashboard extends Home_Controller {
             $prev_week_end->modify('-1 day');
 
             $prev_week_start = clone $prev_week_end;
-            $prev_week_start->modify('last sunday');
+            $prev_week_start->modify('last monday');
 
             if ($prev_week_start > $today) break;
 
-            $weeks_to_include_raw[] = [
+            $weeks_to_include[] = [
                 'name_prefix' => 'Week ' . $week_counter,
                 'start_date' => $prev_week_start->format('Y-m-d'),
                 'end_date' => $prev_week_end->format('Y-m-d')
@@ -149,62 +298,35 @@ class EmployeeDashboard extends Home_Controller {
             $week_counter++;
         }
 
-        $weeks_to_process = array_reverse($weeks_to_include_raw);
+        $weeks_to_include = array_reverse($weeks_to_include);
 
-        foreach ($weeks_to_process as $week_data) {
-            $week_name = $week_data['name_prefix'];
+        foreach ($weeks_to_include as $week) {
+            $from_date = $week['start_date'];
+            $to_date = $week['end_date'];
+            $week_name = $week['name_prefix'];
 
-            $this->db->select('log_date, total_active_time')
-                ->from('time_logs')
-                ->where('employee_id', $employee_id)
-                ->where('user_id', $user_id)
-                ->where('log_date >=', $week_data['start_date'])
-                ->where('log_date <=', $week_data['end_date'])
-                ->order_by('log_date', 'ASC');
+            // Fetch time logs summary
+            $this->db->select('
+            SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active,
+        ');
+            $this->db->from('time_logs');
+            $this->db->where('employee_id', $employee_id);
+            $this->db->where('user_id', $organization_id);
+            $this->db->where("DATE(created_at) >=", $from_date);
+            $this->db->where("DATE(created_at) <=", $to_date);
+            $time_data = $this->db->get()->row();
 
-            $query = $this->db->get();
-            $logs = $query->result_array();
 
-            $total_seconds = 0;
-            $daily_hours = [];
-            $days_with_data = 0;
-
-            foreach ($logs as $log) {
-                if (!isset($log['total_active_time']) || empty($log['total_active_time'])) continue;
-
-                $time_parts = explode(':', $log['total_active_time']);
-                if (count($time_parts) !== 3) continue;
-
-                $hours = (int)$time_parts[0];
-                $minutes = (int)$time_parts[1];
-                $seconds = (int)$time_parts[2];
-
-                $daily_seconds = ($hours * 3600) + ($minutes * 60) + $seconds;
-                $total_seconds += $daily_seconds;
-
-                $daily_hours[$log['log_date']] = $log['total_active_time'];
-                $days_with_data++;
-            }
-
-            $hours = floor($total_seconds / 3600);
-            $remaining_seconds = $total_seconds % 3600;
-            $minutes = floor($remaining_seconds / 60);
-            $seconds = $remaining_seconds % 60;
-
-            if ($days_with_data > 0) {
-                $weekly_reports[] = [
-                    'week_name' => $week_name,
-                    'date_range' => $week_data['start_date'] . ' to ' . $week_data['end_date'],
-                    'total_active_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds),
-                    'days_with_data' => $days_with_data,
-                    'total_days_in_week' => (new DateTime($week_data['end_date']))->diff(new DateTime($week_data['start_date']))->days + 1,
-                    'daily_breakdown' => $daily_hours
-                ];
-            }
+            $weekly_reports[] = [
+                'week_name' => $week_name,
+                'date_range' => "$from_date to $to_date",
+                'total_active' => $this->formatToHoursMins($time_data->total_active ?? '00:00:00'),
+            ];
         }
 
         return $weekly_reports;
     }
+
 
 
     private function employee_overall_productivity($from_date, $to_date)
