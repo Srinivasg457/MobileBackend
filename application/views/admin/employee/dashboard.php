@@ -117,10 +117,10 @@
                         ?>
                       <form id="dateRangeForm" class="user_filter_form" role="search" autocomplete="off" action="<?php echo base_url('employee/dashboard') ?>" method="post">
                           <div class="row my-0">
-                              <div class="col-lg-6 form-group my-0">
+                              <div class="col-lg-6 form-group my-0 mt-20">
                                   <h3 class="mb-0">Dashboard</h3>
                               </div>
-                              <div class="col-lg-6 form-group my-0">
+                              <div class="col-lg-6 form-group my-0 mt-20">
                                   <div class="row" id="predefined_filter_row" style="<?= $is_manual ? 'display: none;' : '' ?>">
 
                                       <div class="col-lg-6"></div>
@@ -129,14 +129,16 @@
                                           <!-- <label class="control-label" for="period_search">Time Period</label> -->
                                           <div class="input-group">
                                               <select name="Time_period" id="period_search" class="form-control">
+                                                  <option value="" <?= ($time_period == " ") ? 'selected' : ''; ?>>Select</option>
                                                   <option value="current_week" <?= ($time_period == 'current_week') ? 'selected' : ''; ?>>Current Week</option>
-                                                  <option value="last_7_days" <?= ($time_period == 'last_7_days') ? 'selected' : ''; ?>>Last 1 Week</option>
-                                                  <option value="last_14_days" <?= ($time_period == 'last_14_days') ? 'selected' : ''; ?>>Last 2 Weeks</option>
+                                                  <option value="last_week" <?= ($time_period == 'last_week') ? 'selected' : ''; ?>>Last Week</option>
+                                                  <option value="two_week" <?= ($time_period == 'two_week') ? 'selected' : ''; ?>>Two Week</option>
                                                   <option value="this_month" <?= ($time_period == 'this_month') ? 'selected' : ''; ?>>This Month</option>
-                                                  <option value="last_1_month" <?= ($time_period == 'last_1_month') ? 'selected' : ''; ?>>Last 1 Month</option>
+                                                  <option value="last_month" <?= ($time_period == 'last_month') ? 'selected' : ''; ?>>Last Month</option>
                                                   <option value="last_6_months" <?= ($time_period == 'last_6_months') ? 'selected' : ''; ?>>Last 6 Months</option>
                                                   <option value="this_year" <?= ($time_period == 'this_year') ? 'selected' : ''; ?>>This Year</option>
                                               </select>
+
 
                                               <span id="searchManually" class="input-group-addon btn btn-secondary align-content-center mx-5"><i class="fa fa-search"></i> Pick Dates</span>
 
@@ -339,11 +341,11 @@
                               return;
                           }
 
-                        //   if (from < first) {
-                        //       e.preventDefault();
-                        //       showToast(`Data available only from ${first}.`, 'error');
-                        //       return;
-                        //   }
+                          //   if (from < first) {
+                          //       e.preventDefault();
+                          //       showToast(`Data available only from ${first}.`, 'error');
+                          //       return;
+                          //   }
 
 
                           // Disable dropdown and submit form
@@ -417,12 +419,12 @@
                           calculatedFromDate.setHours(0, 0, 0, 0); // normalize
 
                           // Validate range
-                        //   if (calculatedFromDate < first) {
-                        //       e.preventDefault();
-                        //       showToast(`Data available only from ${firstRecordDate}.`, 'error');
-                        //       $(this).val(previousPeriodValue); // restore previous selection
-                        //       return;
-                        //   } 
+                          //   if (calculatedFromDate < first) {
+                          //       e.preventDefault();
+                          //       showToast(`Data available only from ${firstRecordDate}.`, 'error');
+                          //       $(this).val(previousPeriodValue); // restore previous selection
+                          //       return;
+                          //   } 
 
                           // Clear manual dates
                           $('input[name="fromDate"]').val('');
@@ -430,9 +432,285 @@
 
                           $('.user_filter_form').submit();
                       });
+                      render_employee_productivity_chart();
+                      render_fourWeek_report();
 
 
+                  });
 
+                  //   function render_fourWeek_report() {
+
+                  //       // ✅ Weekly Chart (Bar + Line)
+                  //       const weeklyReportsData = <?php echo json_encode($weekly_report); ?>;
+                  //       const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
+
+                  //       const labels = [];
+                  //       const barData = [];
+                  //       const lineData = [];
+                  //       let maxBarValue = 0;
+
+                  //       // Sort by week start date
+                  //       weeklyReportsData.sort((a, b) => {
+                  //           const dateA = new Date(a.date_range.split(' to ')[0]);
+                  //           const dateB = new Date(b.date_range.split(' to ')[0]);
+                  //           return dateA - dateB;
+                  //       });
+
+                  //       weeklyReportsData.forEach(report => {
+                  //           const timeParts = report.total_active_time.split(':');
+                  //           const hours = parseInt(timeParts[0] || 0);
+                  //           const minutes = parseInt(timeParts[1] || 0);
+                  //           const totalHours = hours + minutes / 60;
+
+                  //           labels.push(report.week_name);
+                  //           barData.push(parseFloat(totalHours.toFixed(2)));
+                  //           lineData.push((totalHours * 1.05).toFixed(2));
+
+                  //           if (totalHours > maxBarValue) {
+                  //               maxBarValue = totalHours;
+                  //           }
+                  //       });
+
+                  //       const suggestedMaxY = Math.ceil((maxBarValue + 5) / 10) * 10;
+
+                  //       new Chart(weeklyCtx, {
+                  //           type: 'bar',
+                  //           data: {
+                  //               labels: labels,
+                  //               datasets: [{
+                  //                       label: 'Total Active Time (hr)',
+                  //                       data: barData,
+                  //                       backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                  //                       borderColor: 'rgba(54, 162, 235, 1)',
+                  //                       borderWidth: 1,
+                  //                       order: 2,
+                  //                       barPercentage: 0.5,
+                  //                       categoryPercentage: 0.7
+                  //                   },
+                  //                   {
+                  //                       label: 'Trend (hr)',
+                  //                       data: lineData,
+                  //                       type: 'line',
+                  //                       borderColor: 'rgb(75, 192, 192)',
+                  //                       backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                  //                       fill: false,
+                  //                       tension: 0.3,
+                  //                       order: 1
+                  //                   }
+                  //               ]
+                  //           },
+                  //           options: {
+                  //               responsive: true,
+                  //               maintainAspectRatio: false,
+                  //               scales: {
+                  //                   y: {
+                  //                       beginAtZero: true,
+                  //                       max: suggestedMaxY,
+                  //                       title: {
+                  //                           display: true,
+                  //                           text: 'Hours (hr)',
+                  //                           font: {
+                  //                               size: 14,
+                  //                               weight: 600,
+                  //                               color: '#444'
+                  //                           }
+                  //                       },
+                  //                       ticks: {
+                  //                           stepSize: 1,
+                  //                           font: {
+                  //                               size: 14,
+                  //                               weight: 600,
+                  //                               color: '#444'
+                  //                           }
+                  //                       }
+                  //                   },
+                  //                   x: {
+                  //                       title: {
+                  //                           display: true,
+                  //                           text: 'Week',
+                  //                           font: {
+                  //                               size: 14,
+                  //                               weight: 600,
+                  //                               color: '#444'
+                  //                           }
+                  //                       },
+                  //                       ticks: {
+                  //                           font: {
+                  //                               size: 14,
+                  //                               weight: 600,
+                  //                               color: '#444'
+                  //                           }
+                  //                       }
+                  //                   }
+                  //               },
+                  //               plugins: {
+                  //                   tooltip: {
+                  //                       callbacks: {
+                  //                           label: function(context) {
+                  //                               const value = context.parsed.y;
+                  //                               const hrs = Math.floor(value);
+                  //                               const mins = Math.round((value - hrs) * 60);
+                  //                               return `${context.dataset.label}: ${hrs}h ${mins}m`;
+                  //                           }
+                  //                       }
+                  //                   },
+                  //                   legend: {
+                  //                       position: 'top',
+                  //                       labels: {
+                  //                           font: {
+                  //                               size: 14,
+                  //                               weight: 600,
+                  //                               color: '#444'
+                  //                           },
+                  //                           padding: 20
+                  //                       }
+                  //                   }
+                  //               }
+                  //           }
+                  //       });
+
+                  //   }
+
+                  function render_fourWeek_report() {
+                      const weeklyReportsData = <?php echo json_encode($weekly_report); ?>;
+                      const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
+
+                      const labels = [];
+                      const barData = [];
+                      const lineData = [];
+                      let maxBarValue = 0;
+
+                      // Sort by week start date (from date_range)
+                      weeklyReportsData.sort((a, b) => {
+                          const dateA = new Date(a.date_range.split(' to ')[0]);
+                          const dateB = new Date(b.date_range.split(' to ')[0]);
+                          return dateA - dateB;
+                      });
+
+                      weeklyReportsData.forEach(report => {
+                          // Parse "44h 48m" to hours
+                          const activeParts = report.total_active.match(/(\d+)h\s+(\d+)m/);
+                          const hours = parseInt(activeParts[1] || 0);
+                          const minutes = parseInt(activeParts[2] || 0);
+                          const totalHours = hours + (minutes / 60);
+
+                          const [startDateStr, endDateStr] = report.date_range.split(' to ');
+                          const options = {
+                              day: '2-digit',
+                              month: 'short'
+                          };
+                          const startFormatted = new Date(startDateStr).toLocaleDateString('en-US', options);
+                          const endFormatted = new Date(endDateStr).toLocaleDateString('en-US', options);
+                          labels.push([report.week_name, `(${startFormatted} to ${endFormatted})`]);
+                          barData.push(parseFloat(totalHours.toFixed(2)));
+                          lineData.push((totalHours * 1.05).toFixed(2));
+
+                          if (totalHours > maxBarValue) {
+                              maxBarValue = totalHours;
+                          }
+                      });
+
+                      const suggestedMaxY = Math.ceil((maxBarValue + 5) / 10) * 10;
+
+                      new Chart(weeklyCtx, {
+                          type: 'bar',
+                          data: {
+                              labels: labels,
+                              datasets: [{
+                                      label: 'Total Active Time (hr)',
+                                      data: barData,
+                                      backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                      borderColor: 'rgba(54, 162, 235, 1)',
+                                      borderWidth: 1,
+                                      order: 2,
+                                      barPercentage: 0.5,
+                                      categoryPercentage: 0.7
+                                  },
+                                  {
+                                      label: 'Trend (hr)',
+                                      data: lineData,
+                                      type: 'line',
+                                      borderColor: 'rgb(75, 192, 192)',
+                                      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                      fill: false,
+                                      tension: 0.3,
+                                      order: 1
+                                  }
+                              ]
+                          },
+                          options: {
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              scales: {
+                                  y: {
+                                      beginAtZero: true,
+                                      max: suggestedMaxY,
+                                      title: {
+                                          display: true,
+                                          text: 'Hours (hr)',
+                                          font: {
+                                              size: 14,
+                                              weight: 600,
+                                              color: '#444'
+                                          }
+                                      },
+                                      ticks: {
+                                          stepSize: 1,
+                                          font: {
+                                              size: 14,
+                                              weight: 600,
+                                              color: '#444'
+                                          }
+                                      }
+                                  },
+                                  x: {
+                                      title: {
+                                          display: false,
+                                          text: 'Week',
+                                          font: {
+                                              size: 14,
+                                              weight: 600,
+                                              color: '#444'
+                                          }
+                                      },
+                                      ticks: {
+                                          font: {
+                                              size: 14,
+                                              weight: 600,
+                                              color: '#444'
+                                          }
+                                      }
+                                  }
+                              },
+                              plugins: {
+                                  tooltip: {
+                                      callbacks: {
+                                          label: function(context) {
+                                              const value = context.parsed.y;
+                                              const hrs = Math.floor(value);
+                                              const mins = Math.round((value - hrs) * 60);
+                                              return `${context.dataset.label}: ${hrs}h ${mins}m`;
+                                          }
+                                      }
+                                  },
+                                  legend: {
+                                      position: 'top',
+                                      labels: {
+                                          font: {
+                                              size: 14,
+                                              weight: 600,
+                                              color: '#444'
+                                          },
+                                          padding: 20
+                                      }
+                                  }
+                              }
+                          }
+                      });
+                  }
+
+
+                  function render_employee_productivity_chart() {
 
                       // Original PHP values
                       let manual = <?php echo $overall_productivity["manual_percentage"]; ?>;
@@ -518,131 +796,5 @@
 
                       renderCustomLegend(doughnutChart, 'doughnutLegend');
 
-
-
-                      // ✅ Weekly Chart (Bar + Line)
-                      const weeklyReportsData = <?php echo json_encode($weekly_report); ?>;
-                      const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
-
-
-                      const labels = [];
-                      const barData = [];
-                      const lineData = [];
-                      let maxBarValue = 0;
-                      weeklyReportsData.sort((a, b) => {
-                          const dateA = new Date(a.date_range.split(' to ')[0]);
-                          const dateB = new Date(b.date_range.split(' to ')[0]);
-                          return dateA - dateB;
-                      });
-                      weeklyReportsData.forEach(report => {
-                          const timeParts = report.total_active_time.split(':');
-                          const totalHours = parseInt(timeParts[0]) +
-                              parseInt(timeParts[1]) / 60 +
-                              parseInt(timeParts[2]) / 3600;
-
-                          labels.push(report.week_name);
-                          barData.push(totalHours);
-                          lineData.push((totalHours * 1.05).toFixed(2));
-
-                          if (totalHours > maxBarValue) {
-                              maxBarValue = totalHours;
-                          }
-                      });
-
-                      const suggestedMaxY = Math.ceil((maxBarValue + 5) / 10) * 10;
-
-                      new Chart(weeklyCtx, {
-                          type: 'bar',
-                          data: {
-                              labels: labels,
-                              datasets: [{
-                                      label: 'Total Active Time (hr)',
-                                      data: barData,
-                                      backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                                      borderColor: 'rgba(54, 162, 235, 1)',
-                                      borderWidth: 1,
-                                      order: 2,
-                                      barPercentage: 0.5,
-                                      categoryPercentage: 0.7
-                                  },
-                                  {
-                                      label: 'Trend (hr)',
-                                      data: lineData,
-                                      type: 'line',
-                                      borderColor: 'rgb(75, 192, 192)',
-                                      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                      fill: false,
-                                      tension: 0.3,
-                                      order: 1
-                                  }
-                              ]
-                          },
-                          options: {
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              scales: {
-                                  y: {
-                                      beginAtZero: true,
-                                      max: suggestedMaxY,
-                                      title: {
-                                          display: true,
-                                          text: 'Hours (hr)',
-                                          font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
-                                          }
-                                      },
-                                      ticks: {
-                                          stepSize: 1,
-                                          font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
-                                          }
-                                      }
-                                  },
-                                  x: {
-                                      title: {
-                                          display: true,
-                                          text: 'Week',
-                                          font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
-                                          }
-                                      },
-                                      ticks: {
-                                          font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
-                                          }
-                                      }
-                                  }
-                              },
-                              plugins: {
-                                  tooltip: {
-                                      callbacks: {
-                                          label: function(context) {
-                                              return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' hr';
-                                          }
-                                      }
-                                  },
-                                  legend: {
-                                      position: 'top',
-                                      labels: {
-                                          font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
-
-                                          },
-                                          padding: 20
-                                      }
-                                  }
-                              }
-                          }
-                      });
-                  });
+                  }
               </script>
