@@ -121,27 +121,25 @@
                                   <h3 class="mb-0">Dashboard</h3>
                               </div>
                               <div class="col-lg-6 form-group my-0">
-                                  <div class="row position-relative" id="predefined_filter_row" style="<?= $is_manual ? 'display: none;' : '' ?>">
-                                      <div class="col-12 text-right">
-                                          <span id="searchManually" class="btn btn-secondary align-content-center mx-5"><i class="fa fa-search"></i> Pick Dates</span>
-                                      </div>
-                                      <div class="col-lg-5 form-group"></div>
-                                      <div class="col-lg-7 form-group">
+                                  <div class="row" id="predefined_filter_row" style="<?= $is_manual ? 'display: none;' : '' ?>">
+
+                                      <div class="col-lg-6"></div>
+                                      <div class="col-lg-6">
                                           <input type="hidden" id="first_record_date" value="<?php echo $first_record_date; ?>">
-                                          <label class="control-label" for="period_search">Time Period</label>
+                                          <!-- <label class="control-label" for="period_search">Time Period</label> -->
                                           <div class="input-group">
                                               <select name="Time_period" id="period_search" class="form-control">
-                                                  <option value="today" <?= ($time_period == 'today') ? 'selected' : ''; ?>>Today</option>
-                                                  <option value="yesterday" <?= ($time_period == 'yesterday') ? 'selected' : ''; ?>>Yesterday</option>
-                                                  <option value="last_7_days" <?= ($time_period == 'last_7_days') ? 'selected' : ''; ?>>Last 7 Days</option>
+                                                  <option value="current_week" <?= ($time_period == 'current_week') ? 'selected' : ''; ?>>Current Week</option>
+                                                  <option value="last_7_days" <?= ($time_period == 'last_7_days') ? 'selected' : ''; ?>>Last 1 Week</option>
                                                   <option value="last_14_days" <?= ($time_period == 'last_14_days') ? 'selected' : ''; ?>>Last 2 Weeks</option>
-                                                  <option value="last_21_days" <?= ($time_period == 'last_21_days') ? 'selected' : ''; ?>>Last 3 Weeks</option>
                                                   <option value="this_month" <?= ($time_period == 'this_month') ? 'selected' : ''; ?>>This Month</option>
                                                   <option value="last_1_month" <?= ($time_period == 'last_1_month') ? 'selected' : ''; ?>>Last 1 Month</option>
-                                                  <option value="last_2_months" <?= ($time_period == 'last_2_months') ? 'selected' : ''; ?>>Last 2 Months</option>
                                                   <option value="last_6_months" <?= ($time_period == 'last_6_months') ? 'selected' : ''; ?>>Last 6 Months</option>
                                                   <option value="this_year" <?= ($time_period == 'this_year') ? 'selected' : ''; ?>>This Year</option>
                                               </select>
+
+                                              <span id="searchManually" class="input-group-addon btn btn-secondary align-content-center mx-5"><i class="fa fa-search"></i> Pick Dates</span>
+
                                           </div>
                                       </div>
                                   </div>
@@ -181,7 +179,7 @@
                           </div>
                       </form>
 
-                      <div class=" mt-20">
+                      <div class="mt-20">
                           <div class="card-grid">
                               <div class="card counts">
                                   <div class="card-body">
@@ -341,11 +339,11 @@
                               return;
                           }
 
-                          if (from < first) {
-                              e.preventDefault();
-                              showToast(`Data available only from ${first}.`, 'error');
-                              return;
-                          }
+                        //   if (from < first) {
+                        //       e.preventDefault();
+                        //       showToast(`Data available only from ${first}.`, 'error');
+                        //       return;
+                        //   }
 
 
                           // Disable dropdown and submit form
@@ -419,12 +417,12 @@
                           calculatedFromDate.setHours(0, 0, 0, 0); // normalize
 
                           // Validate range
-                          if (calculatedFromDate < first) {
-                              e.preventDefault();
-                              showToast(`Data available only from ${firstRecordDate}.`, 'error');
-                              $(this).val(previousPeriodValue); // restore previous selection
-                              return;
-                          }
+                        //   if (calculatedFromDate < first) {
+                        //       e.preventDefault();
+                        //       showToast(`Data available only from ${firstRecordDate}.`, 'error');
+                        //       $(this).val(previousPeriodValue); // restore previous selection
+                        //       return;
+                        //   } 
 
                           // Clear manual dates
                           $('input[name="fromDate"]').val('');

@@ -51,46 +51,43 @@ class EmployeeDashboard extends Home_Controller {
             $today = date('Y-m-d');
 
             switch ($time_period) {
-                case 'today':
-                    $from_date = $to_date = $today;
+                case 'current_week':
+                    $from_date = date('Y-m-d', strtotime('monday this week'));
+                    $to_date = $today;
                     break;
-                case 'yesterday':
-                    $from_date = $to_date = date('Y-m-d', strtotime('-1 day'));
-                    break;
+
                 case 'last_7_days':
                     $from_date = date('Y-m-d', strtotime('-6 days'));
                     $to_date = $today;
                     break;
+
                 case 'last_14_days':
                     $from_date = date('Y-m-d', strtotime('-13 days'));
                     $to_date = $today;
                     break;
-                case 'last_21_days':
-                    $from_date = date('Y-m-d', strtotime('-20 days'));
-                    $to_date = $today;
-                    break;
+
                 case 'this_month':
                     $from_date = date('Y-m-01');
                     $to_date = $today;
                     break;
+
                 case 'last_1_month':
                     $from_date = date('Y-m-d', strtotime('-1 month'));
                     $to_date = $today;
                     break;
-                case 'last_2_months':
-                    $from_date = date('Y-m-d', strtotime('-2 months'));
-                    $to_date = $today;
-                    break;
+
                 case 'last_6_months':
                     $from_date = date('Y-m-d', strtotime('-6 months'));
                     $to_date = $today;
                     break;
+
                 case 'this_year':
                     $from_date = date('Y-01-01');
                     $to_date = $today;
                     break;
             }
         }
+
 
         // Save values to pass to view
         $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line   
@@ -217,7 +214,7 @@ class EmployeeDashboard extends Home_Controller {
 
         // Default to today's date if empty
         if (empty($from_date) || empty($to_date)) {
-            $from_date = date('Y-m-d');
+            $from_date = date('Y-m-d', strtotime('monday this week'));
             $to_date = date('Y-m-d');
         }
 
@@ -230,7 +227,8 @@ class EmployeeDashboard extends Home_Controller {
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where_in("DATE(created_at)", [$from_date, $to_date]);
+        $this->db->where("DATE(created_at) >=", $from_date);
+        $this->db->where("DATE(created_at) <=", $to_date);
         $query = $this->db->get()->row();
 
         $this->db->select("
@@ -240,7 +238,8 @@ class EmployeeDashboard extends Home_Controller {
         $this->db->from('timecards_manual');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where_in("DATE(date_added)", [$from_date, $to_date]);
+        $this->db->where("DATE(date_added) >=", $from_date);
+        $this->db->where("DATE(date_added) <=", $to_date);
         $query1 = $this->db->get()->row();
 
 
@@ -296,7 +295,7 @@ class EmployeeDashboard extends Home_Controller {
 
         // Set date range to today if empty
         if (empty($from_date) || empty($to_date)) {
-            $from_date = date('Y-m-d');
+            $from_date = date('Y-m-d', strtotime('monday this week'));
             $to_date = date('Y-m-d');
         }
 
@@ -305,7 +304,8 @@ class EmployeeDashboard extends Home_Controller {
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where_in("DATE(created_at)", [$from_date, $to_date]);
+        $this->db->where("DATE(created_at) >=", $from_date);
+        $this->db->where("DATE(created_at) <=", $to_date);
         $query = $this->db->get()->row();
 
         // Defaults
@@ -319,7 +319,8 @@ class EmployeeDashboard extends Home_Controller {
         $this->db->from('Employee_Activity');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where_in("DATE(created_at)", [$from_date, $to_date]);
+        $this->db->where("DATE(created_at) >=", $from_date);
+        $this->db->where("DATE(created_at) <=", $to_date);
         $activity = $this->db->get()->row();
 
         // Format data
