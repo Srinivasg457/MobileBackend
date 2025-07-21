@@ -131,10 +131,14 @@ class EmployeeDashboard extends Home_Controller {
                     break;
             }
         }
+        $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary();
 
+        $data['target_data'] = $this->get_this_week_target_time_data(); // 👈 Add this line   
 
-        // Save values to pass to view
         $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line   
+        $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
+        $data['active_time_comparison'] = $this->compare_weekly_average_active_time();
+
         $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
         $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
         $data['overall_productivity'] = $this->employee_overall_productivity($from_date, $to_date);
@@ -784,6 +788,174 @@ public function get_this_week_inactive_time()
             ]));
     }
 }
+
+public function get_this_week_target_time_data()
+{
+    $employee_id = $this->session->userdata('employee_id');
+    $user_id = $this->session->userdata('employee_org_id');
+
+    if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+        return [];
+    }
+
+    $today = new DateTime(); // Current date
+    $today_day = $today->format('l'); // Day name e.g. Thursday
+    $monday = (clone $today)->modify('monday this week');
+    $wednesday = (clone $monday)->modify('+2 days'); // Monday + 2 = Wednesday
+
+    $this->db->select('log_date, total_idle_time, total_active_time')
+        ->from('time_logs')
+        ->where('employee_id', $employee_id)
+        ->where('user_id', $user_id)
+        ->where('log_date >=', $monday->format('Y-m-d'))
+        ->where('log_date <=', $wednesday->format('Y-m-d')) // 👈 Only Mon–Wed
+        ->order_by('log_date', 'ASC');
+
+    $query = $this->db->get();
+    $logs = $query->result_array();
+
+    $total_idle_seconds = 0;
+    $total_active_seconds = 0;
+    $daily_breakdown = [];
+    $days_count = 0;
+
+    foreach ($logs as $log) {
+        $idle_time = $log['total_idle_time'];
+        $active_time = $log['total_active_time'];
+
+        $idle_sec = $active_sec = 0;
+
+        if (!empty($idle_time)) {
+            $parts = explode(':', $idle_time);
+            if (count($parts) === 3) {
+                $idle_sec = ($parts[0] * 3600) + ($parts[1] * 60) + $parts[2];
+            }
+        }
+
+        if (!empty($active_time)) {
+            $parts = explode(':', $active_time);
+            if (count($parts) === 3) {
+                $active_sec = ($parts[0] * 3600) + ($parts[1] * 60) + $parts[2];
+            }
+        }
+
+        $total_idle_seconds += $idle_sec;
+        $total_active_seconds += $active_sec;
+
+        $daily_breakdown[$log['log_date']] = [
+            'idle' => gmdate('H:i:s', $idle_sec),
+            'active' => gmdate('H:i:s', $active_sec)
+        ];
+
+        $days_count++;
+    }
+
+    $format_time = function ($seconds) {
+        $h = floor($seconds / 3600);
+        $m = floor(($seconds % 3600) / 60);
+        $s = $seconds % 60;
+        return sprintf('%02d:%02d:%02d', $h, $m, $s);
+    };
+
+    $target_data = [
+        'week_name' => 'Current Week',
+        'date_range' => $monday->format('Y-m-d') . ' to ' . $wednesday->format('Y-m-d'),
+        'days_count' => $days_count,
+        'total_idle_time' => $format_time($total_idle_seconds),
+        'total_active_time' => $format_time($total_active_seconds),
+        'average_idle_time' => $days_count > 0 ? gmdate('H:i', floor($total_idle_seconds / $days_count)) : '00:00',
+        'average_active_time' => $days_count > 0 ? gmdate('H:i', floor($total_active_seconds / $days_count)) : '00:00',
+        'daily_breakdown' => $daily_breakdown
+    ];
+
+    // Show remaining time from Monday onwards
+    $weekly_target_seconds = 47.5 * 3600;
+    $remaining_seconds = max(0, $weekly_target_seconds - $total_active_seconds);
+    $remaining_time = $format_time($remaining_seconds);
+
+    $target_data['weekly_target'] = '47:30:00';
+    $target_data['remaining_active_time'] = $remaining_time;
+    
+    // Calculate days remaining in the week (from today to Sunday)
+    $sunday = (clone $monday)->modify('+6 days');
+    $days_remaining = 0;
+    if ($today <= $sunday) {
+        $diff = $today->diff($sunday);
+        $days_remaining = $diff->days + 1; // +1 to include today if needed
+    }
+    $target_data['days_remaining'] = $days_remaining;
+
+    return $target_data;
+}
+
+private function get_yesterday_comparison_summary()
+{
+    $employee_id = $this->session->userdata('employee_id');
+    $user_id = $this->session->userdata('employee_org_id');
+
+    if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+        return null;
+    }
+
+    $today = new DateTime();
+    $yesterday = (clone $today)->modify('-1 day');
+
+    // Don't show on Monday (no previous Sunday to compare)
+    if ($yesterday->format('N') == 7) {
+        return null;
+    }
+
+    $last_week_same_day = (clone $yesterday)->modify('-7 days');
+
+    // Helper to get idle time in seconds
+    $get_idle_seconds = function ($date) use ($employee_id, $user_id) {
+        $this->db->select('total_idle_time')
+            ->from('time_logs')
+            ->where('employee_id', $employee_id)
+            ->where('user_id', $user_id)
+            ->where('log_date', $date->format('Y-m-d'));
+
+        $query = $this->db->get();
+        $row = $query->row_array();
+
+        if (!empty($row['total_idle_time'])) {
+            $parts = explode(':', $row['total_idle_time']);
+            if (count($parts) === 3) {
+                return ($parts[0] * 3600) + ($parts[1] * 60) + $parts[2];
+            }
+        }
+
+        return 0;
+    };
+
+    $format_time = function ($seconds) {
+        $h = floor($seconds / 3600);
+        $m = floor(($seconds % 3600) / 60);
+        return sprintf('%02d:%02d', $h, $m);
+    };
+
+    $this_week_idle = $get_idle_seconds($yesterday);
+    $last_week_idle = $get_idle_seconds($last_week_same_day);
+    $diff = $this_week_idle - $last_week_idle;
+
+    // Only return data if idle time increased
+    if ($diff <= 0) {
+        return null;
+    }
+
+    $day_name = $yesterday->format('l'); // e.g., Tuesday
+
+    return [
+        'day' => $day_name,
+        'this_week_idle' => $format_time($this_week_idle),
+        'last_week_idle' => $format_time($last_week_idle),
+        'idle_difference' => $format_time($diff),
+        'status' => 'increased',
+        'message' => "$day_name's idle time increased by " . $format_time($diff),
+    ];
+}
+
+
     // Add other methods for specific employee dashboard sections or functionalities
     // e.g., public function tasks(), public function timesheets(), etc.
 }

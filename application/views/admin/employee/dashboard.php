@@ -263,24 +263,41 @@
                       <div class="row mt-20">
                           <div class="col-sm-6">
                               <div class="box">
+          
+
                                   <div class="box-header with-border">
                                       <h3 class="box-title"><?php echo "Focus"; ?></h3>
                                   </div>
                                   <div class="box-body" style="height: 220px; overflow: hidden; position: relative; padding: 10px; background: linear-gradient(to top, #fff8e1, #ffffff); border-radius: 8px;">
                                       <div class="focus-scroller">
-                                          <div class="focus-text">⏳ Only [Y] hours left to reach your 47.5-hour goal. Focus on high-priority tasks!</div>
+                                          <div class="focus-text">⏳ Only  <span style="color: green; font-weight: bold;"><?= $target_data['remaining_active_time']; ?> </span> hours left to reach your 47.5-hour goal. Focus on high-priority tasks!</div>
                                           <div class="focus-text">📵 Long inactive periods detected. Set reminders to stay engaged.</div>
-                                          <div class="focus-text">🛋️ Your idle time rose this week. Try using mini-breaks intentionally, and avoid passive screen time.</div>
+                        <?php if (!empty($yesterday_idle_alert)): ?>
+    <div class="focus-text">
+        <?php 
+            $message = $yesterday_idle_alert['message'];
+            // Split the message to highlight just "increased"
+            $parts = explode('increased', $message);
+        ?>
+        <?= $parts[0]; ?>
+        <span style="color: red; font-weight: bold;">increased</span>
+        <?= $parts[1] ?? ''; ?>
+        .Try using mini-breaks intentionally, and avoid passive screen time.
+        <br>
+        
+    </div>
+<?php endif; ?>
                                       </div>
                                   </div>
                               </div>
                           </div>
+                          
                           <div class="col-sm-6">
                               <div class="box">
-                                  <div class="box">
                                       <div class="box-header with-border">
                                           <h3 class="box-title"><?php echo "Insights"; ?></h3>
                                       </div>
+                                    
 
                                       <div class="box-body" style="height: 220px; overflow: hidden; position: relative; padding: 10px; background: linear-gradient(to top, #e0f7fa, #ffffff); border-radius: 8px;">
                                           <div class="insight-scroller">
@@ -288,12 +305,11 @@
                                               <div class="insight-text">🌞 Your most productive time is [morning/afternoon]. Schedule important work then!</div>
                                               <div class="insight-text">🏆 Last week, you exceeded your target! Keep up the momentum.</div>
                                               <div class="insight-text">⏱️ You were active for <?= $avarage_data['average_active_time']; ?> hours/day this week, with <?= $avarage_data['average_active_time']; ?> hours/day of inactivity.</div>
-                                              <div class="insight-text">📉 Your productivity <span style="color: <?= $active_time_comparison['status'] == 'increased' ? 'green' : 'red' ?>"> <?= ucfirst($active_time_comparison['status']) ?> </span><?= $active_time_comparison['change_percentage'] ?>% compared to last week</div>
+                                              <div class="insight-text">📉 Your productivity <span style="color: <?= $active_time_comparison['status'] == 'increased by' ? 'green' : 'red' ?>"> <?= ucfirst($active_time_comparison['status']) ?> </span><?= $active_time_comparison['change_percentage'] ?>% compared to last week</div>
                                               <div class="insight-text">🚀 Record focus streak: 4.5 hours without distractions! Reward yourself!</div>
                                           </div>
                                       </div>
 
-                                  </div>
                               </div>
                           </div>
                   </section>
