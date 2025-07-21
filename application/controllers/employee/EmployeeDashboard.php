@@ -131,6 +131,7 @@ class EmployeeDashboard extends Home_Controller {
                     break;
             }
         }
+        $data['response_data'] = $this->get_last_week_total_active_hours(); // 👈 Add this line
         $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary();
 
         $data['target_data'] = $this->get_this_week_target_time_data(); // 👈 Add this line   
@@ -955,7 +956,92 @@ private function get_yesterday_comparison_summary()
     ];
 }
 
+public function get_last_week_total_active_hours()
+{
+    try {
+       $employee_id = $this->session->userdata('employee_id');
+    $user_id = $this->session->userdata('employee_org_id');
+
+    if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+        return null;
+    }
+        // Calculate last week's Monday and Sunday
+        $today = new DateTime();
+        $last_monday = (clone $today)->modify('monday last week');
+        $last_sunday = (clone $last_monday)->modify('+6 days');
+
+        // Query active time from the database
+        $this->db->select('total_active_time')
+            ->from('worksmart.time_logs')
+            ->where('employee_id', $employee_id)
+            ->where('user_id', $user_id)
+            ->where('log_date >=', $last_monday->format('Y-m-d'))
+            ->where('log_date <=', $last_sunday->format('Y-m-d'));
+
+        $query = $this->db->get();
+        $result = $query->result_array();
+
+        $total_seconds = 0;
+
+        // Sum all active time in seconds
+        foreach ($result as $row) {
+            $active_time = $row['total_active_time'];
+            list($hours, $minutes, $seconds) = explode(':', $active_time);
+            $total_seconds += ($hours * 3600) + ($minutes * 60) + $seconds;
+        }
+
+        // Convert total seconds to hours (decimal format)
+        $total_hours = round($total_seconds / 3600, 2); // 3600 seconds = 1 hour
+
+        // Store all values in variables
+        $status = 'success';
+        $message = 'Last week total active hours calculated successfully';
+        $date_range = $last_monday->format('Y-m-d') . ' to ' . $last_sunday->format('Y-m-d');
+        $response_data = [
+            'status' => $status,
+            'message' => $message,
+            'date_range' => $date_range,
+            'total_active_hours' => $total_hours
+        ];
+
+
+
+        return $response_data;
+
+    } catch (Exception $e) {
+        log_message('error', 'get_last_week_total_active_hours failed: ' . $e->getMessage());
+
+        // Store error values in variables
+        $error_status = 'error';
+        $error_message = 'Failed to calculate last week active hours';
+        $error_details = $e->getMessage();
+        $error_response = [
+            'status' => $error_status,
+            'message' => $error_message,
+            'error_details' => $error_details
+        ];
+
+        $error_output = $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode($error_response));
+
+        return $error_output;
+    }
+}
+
 
     // Add other methods for specific employee dashboard sections or functionalities
     // e.g., public function tasks(), public function timesheets(), etc.
+
+    
+          
+            
+    
+
+          
+        //   Expand Down
+    
+    
+  
 }
