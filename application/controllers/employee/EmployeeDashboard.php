@@ -735,7 +735,7 @@ public function get_this_week_inactive_time()
 
         // Query time_logs from Monday to today
         $this->db->select('log_date, total_idle_time')
-            ->from('worksmart.time_logs')
+            ->from('time_logs')
             ->where('employee_id', $employee_id)
             ->where('user_id', $user_id)
             ->where('log_date >=', $monday->format('Y-m-d'))
@@ -972,7 +972,7 @@ public function get_last_week_total_active_hours()
 
         // Query active time from the database
         $this->db->select('total_active_time')
-            ->from('worksmart.time_logs')
+            ->from('time_logs')
             ->where('employee_id', $employee_id)
             ->where('user_id', $user_id)
             ->where('log_date >=', $last_monday->format('Y-m-d'))
