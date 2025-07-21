@@ -307,11 +307,11 @@
                          <div class="insight-scroller">
 
 
+                             <?= $weekly_report['total_active']; ?>
 
+                             <div class="insight-text">🔔 You were inactive for <span style="color: red;"><?= $inactive_data['total_idle_time']; ?> </span> this week. Try taking short breaks to stay fresh!</div>
 
-                             <div class="insight-text">🔔 You were inactive for <?= $inactive_data['total_idle_time']; ?> hours this week. Try taking short breaks to stay fresh!</div>
-
-                             <div class="insight-text">🌞 Your most productive time is [morning/afternoon]. Schedule important work then!</div>
+                             <div class="insight-text">🌞 Your most productive time is morning. Schedule important work then!</div>
 
                              <div class="insight-text">🏆
 
@@ -327,8 +327,7 @@
                                      Last week you have only managed <span style="color: red;"><?= $response_data['total_active_hours']; ?> </span> hours. So, Focus on Your work <?php endif; ?>
 
                              </div>
-
-                             <div class="insight-text">⏱️ You were active for <?= $avarage_data['average_active_time']; ?> hours/day this week, with <?= $avarage_data['average_active_time']; ?> hours/day of inactivity.</div>
+                             <div class="insight-text">⏱️ You were active for <span style="color: green;"><?= $avarage_data['average_active_time']; ?> </span>day this week, with <span style="color: green;"><?= $avarage_data['average_idle_time']; ?> </span>day of inactivity.</div>
 
                              <div class="insight-text">📉 Your productivity <span style="color: <?= $active_time_comparison['status'] == 'increased by' ? 'green' : 'red' ?>"> <?= ucfirst($active_time_comparison['status']) ?> </span><?= $active_time_comparison['change_percentage'] ?>% compared to last week</div>
 
