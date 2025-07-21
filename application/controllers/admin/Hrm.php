@@ -698,8 +698,7 @@ public function employee_add()
     
                 foreach ($rows as $row) {
                     $employeeData = array_combine($header, $row);
-    
-                    $name = isset($employeeData['name']) ? trim($employeeData['name']) : '';
+                    $name = isset($employeeData['name']) ? substr(trim($employeeData['name']), 0, 60) : '';
                     $email = isset($employeeData['email']) ? strtolower(trim($employeeData['email'])) : '';
     
                     if (empty($name) || empty($email)) {
