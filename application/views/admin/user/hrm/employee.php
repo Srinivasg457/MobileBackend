@@ -49,9 +49,7 @@
             <div style="flex: 1;">
               <label class="col-sm-12 control-label p-0" for="example-input-normal" ><?php echo 'Role <span style="color:red">*</span>'; ?></label>
              
-            <select class="form-control single_select"name="role" id="role" required 
-                    oninvalid="this.setCustomValidity('Select a Role or create role in Roles and Permission')"
-                    oninput="this.setCustomValidity('')">
+            <select class="form-control single_select"name="role" id="role" required >
               <option value=""><?php echo trans('select'); ?></option>
               <?php if (!empty($roles)): ?>
                 <?php foreach ($roles as $role): ?>
@@ -66,7 +64,7 @@
             </div>
           </div>
           <label><?php echo trans('employee-name') ?> <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" required name="name" value="<?php echo html_escape($employee[0]['name']); ?>">
+          <input type="text" class="form-control" required name="name" maxlength="60" minlength="2" value="<?php echo html_escape($employee[0]['name']); ?>">
         </div>
 
         <div class="form-group">

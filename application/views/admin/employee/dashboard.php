@@ -455,8 +455,6 @@
                   });
 
                   //   function render_fourWeek_report() {
-
-                  //       // ✅ Weekly Chart (Bar + Line)
                   //       const weeklyReportsData = <?php echo json_encode($weekly_report); ?>;
                   //       const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
 
@@ -465,7 +463,7 @@
                   //       const lineData = [];
                   //       let maxBarValue = 0;
 
-                  //       // Sort by week start date
+                  //       // Sort by week start date (from date_range)
                   //       weeklyReportsData.sort((a, b) => {
                   //           const dateA = new Date(a.date_range.split(' to ')[0]);
                   //           const dateB = new Date(b.date_range.split(' to ')[0]);
@@ -473,12 +471,20 @@
                   //       });
 
                   //       weeklyReportsData.forEach(report => {
-                  //           const timeParts = report.total_active_time.split(':');
-                  //           const hours = parseInt(timeParts[0] || 0);
-                  //           const minutes = parseInt(timeParts[1] || 0);
-                  //           const totalHours = hours + minutes / 60;
+                  //           // Parse "44h 48m" to hours
+                  //           const activeParts = report.total_active.match(/(\d+)h\s+(\d+)m/);
+                  //           const hours = parseInt(activeParts[1] || 0);
+                  //           const minutes = parseInt(activeParts[2] || 0);
+                  //           const totalHours = hours + (minutes / 60);
 
-                  //           labels.push(report.week_name);
+                  //           const [startDateStr, endDateStr] = report.date_range.split(' to ');
+                  //           const options = {
+                  //               day: '2-digit',
+                  //               month: 'short'
+                  //           };
+                  //           const startFormatted = new Date(startDateStr).toLocaleDateString('en-US', options);
+                  //           const endFormatted = new Date(endDateStr).toLocaleDateString('en-US', options);
+                  //           labels.push([report.week_name, `(${startFormatted} to ${endFormatted})`]);
                   //           barData.push(parseFloat(totalHours.toFixed(2)));
                   //           lineData.push((totalHours * 1.05).toFixed(2));
 
@@ -542,7 +548,7 @@
                   //                   },
                   //                   x: {
                   //                       title: {
-                  //                           display: true,
+                  //                           display: false,
                   //                           text: 'Week',
                   //                           font: {
                   //                               size: 14,
@@ -604,20 +610,22 @@
                       });
 
                       weeklyReportsData.forEach(report => {
-                          // Parse "44h 48m" to hours
+                          // Parse "44h 48m" to total hours
                           const activeParts = report.total_active.match(/(\d+)h\s+(\d+)m/);
                           const hours = parseInt(activeParts[1] || 0);
                           const minutes = parseInt(activeParts[2] || 0);
                           const totalHours = hours + (minutes / 60);
 
+                          // Format label as: Week 4 (Mon to Sun)
                           const [startDateStr, endDateStr] = report.date_range.split(' to ');
-                          const options = {
-                              day: '2-digit',
-                              month: 'short'
-                          };
-                          const startFormatted = new Date(startDateStr).toLocaleDateString('en-US', options);
-                          const endFormatted = new Date(endDateStr).toLocaleDateString('en-US', options);
-                          labels.push([report.week_name, `(${startFormatted} to ${endFormatted})`]);
+                          const dayOptions = {
+                              weekday: 'short'
+                          }; // "Mon", "Sun"
+                          const startDay = new Date(startDateStr).toLocaleDateString('en-US', dayOptions);
+                          const endDay = new Date(endDateStr).toLocaleDateString('en-US', dayOptions);
+
+                          labels.push(`${report.week_name}\n(${startDay} to ${endDay})`);
+
                           barData.push(parseFloat(totalHours.toFixed(2)));
                           lineData.push((totalHours * 1.05).toFixed(2));
 
@@ -657,6 +665,14 @@
                           options: {
                               responsive: true,
                               maintainAspectRatio: false,
+                              layout: {
+                                  padding: {
+                                      left: 10,
+                                      right: 10,
+                                      top: 10,
+                                      bottom: 10
+                                  }
+                              },
                               scales: {
                                   y: {
                                       beginAtZero: true,
@@ -665,35 +681,28 @@
                                           display: true,
                                           text: 'Hours (hr)',
                                           font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
+                                              size: window.innerWidth < 600 ? 10 : 12,
+                                              weight: 'bold'
                                           }
                                       },
                                       ticks: {
                                           stepSize: 1,
                                           font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
+                                              size: window.innerWidth < 600 ? 10 : 12
                                           }
                                       }
                                   },
                                   x: {
                                       title: {
-                                          display: false,
-                                          text: 'Week',
-                                          font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
-                                          }
+                                          display: false
                                       },
                                       ticks: {
                                           font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
+                                              size: window.innerWidth < 600 ? 5 : 12
+                                          },
+                                          callback: function(val, index) {
+                                              const label = this.getLabelForValue(index);
+                                              return label.split('\n'); // wraps label for smaller screens
                                           }
                                       }
                                   }
@@ -713,11 +722,9 @@
                                       position: 'top',
                                       labels: {
                                           font: {
-                                              size: 14,
-                                              weight: 600,
-                                              color: '#444'
+                                              size: 12
                                           },
-                                          padding: 20
+                                          padding: 15
                                       }
                                   }
                               }
