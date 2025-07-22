@@ -215,11 +215,10 @@
                  </div>
                  <div class="card counts">
                      <div class="card-body">
-                         <div class="d-flex flex-row">
                              <div class="ml-20 align-self-center">
                                  <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
                                  <?php
-                                    $keystroke_percentage = $employee_activity['total_keystrokes'];
+                                    $keystroke_percentage = $output['keystroke_percentage'];
 
                                     // Determine color based on percentage
                                     if ($keystroke_percentage >= 70) {
@@ -231,6 +230,8 @@
                                     }
                                     ?>
                                  <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                                                               <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom"><?php echo $keystroke_percentage . "%"; ?></h2>
+
                                      <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
                                          <svg viewBox="0 0 36 36" width="40" height="40">
                                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
@@ -245,7 +246,7 @@
                                              data-toggle="tooltip" data-placement="bottom" title="<?php echo $keystroke_percentage; ?>">
                                              <?php echo $keystroke_percentage . "%"; ?>
                                          </div>
-                                     </div>
+
                                  </div>
 
                              </div>
@@ -254,22 +255,23 @@
                  </div>
                  <div class="card counts">
                      <div class="card-body">
-                         <div class="d-flex flex-row">
                              <div class="ml-20 align-self-center">
                                  <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
                                  <?php
-                                    $mouse_movement = $employee_activity['total_mouse_movements'];
+                                    $mouse_movement = $output['mouse_activity_percentage'];
 
                                     // Determine color based on percentage
-                                    if ($mouse_movement >= 70) {
+                                    if ($mouse_movement >= 60) {
                                         $stroke_color = "green";
-                                    } elseif ($mouse_movement >= 50) {
+                                    } elseif ($mouse_movement >= 30) {
                                         $stroke_color = "rgb(255, 205, 86)";
                                     } else {
                                         $stroke_color = "red";
                                     }
                                     ?>
                                  <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                        <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom"><?php echo $mouse_movement."%"; ?></h2>
+
                                      <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
                                          <svg viewBox="0 0 36 36" width="40" height="40">
                                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
@@ -284,7 +286,6 @@
                                              data-toggle="tooltip" data-placement="bottom" title="<?php echo $mouse_movement; ?>">
                                              <?php echo $mouse_movement . "%"; ?>
                                          </div>
-                                     </div>
                                  </div>
                              </div>
                          </div>
