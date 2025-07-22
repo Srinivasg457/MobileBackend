@@ -134,7 +134,7 @@ class EmployeeDashboard extends Home_Controller
             }
         }
         
-                $data['output'] = $this->get_this_week_work_time_data(); // 👈 Add this line
+        $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date); // 👈 Add this line
 
         $data['response_data'] = $this->get_last_week_total_active_hours(); // 👈 Add this line
         $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary();
@@ -1038,7 +1038,7 @@ class EmployeeDashboard extends Home_Controller
         }
     }
 
-private function get_this_week_work_time_data()
+private function get_this_week_work_time_data($from_date, $to_date)
 {
     $employee_id = $this->session->userdata('employee_id');
     $user_id = $this->session->userdata('employee_org_id');
@@ -1047,16 +1047,19 @@ private function get_this_week_work_time_data()
         return [];
     }
 
-    $today = new DateTime();
-    $monday = (clone $today)->modify('monday this week');
+        // Set date range to today if empty
+        if (empty($from_date) || empty($to_date)) {
+            $from_date = date('Y-m-d', strtotime('monday this week'));
+            $to_date = date('Y-m-d');
+        }
 
     // Get time logs for the week
     $this->db->select('log_date, start_time, end_time')
         ->from('time_logs')
         ->where('employee_id', $employee_id)
         ->where('user_id', $user_id)
-        ->where('log_date >=', $monday->format('Y-m-d'))
-        ->where('log_date <=', $today->format('Y-m-d'))
+        ->where('log_date >=', $from_date)
+        ->where('log_date <=', $to_date)
         ->order_by('log_date', 'ASC');
 
     $query = $this->db->get();
@@ -1098,8 +1101,8 @@ private function get_this_week_work_time_data()
         ->from('Employee_Activity')
         ->where('employee_id', $employee_id)
         ->where('user_id', $user_id)
-        ->where('DATE(created_at) >=', $monday->format('Y-m-d'))
-        ->where('DATE(created_at) <=', $today->format('Y-m-d'));
+        ->where('DATE(created_at) >=', $from_date)
+        ->where('DATE(created_at) <=', $to_date);
 
     $activity_result = $this->db->get()->row_array();
 
@@ -1111,7 +1114,7 @@ private function get_this_week_work_time_data()
     $mouse_activity_percentage = $estimated_mouse_activity > 0 ? round(($actual_mouse_activity / $estimated_mouse_activity) * 100, 2) : 0;
 
     $output = [
-        'date_range' => $monday->format('Y-m-d') . ' to ' . $today->format('Y-m-d'),
+        'date_range' => $from_date . ' to ' . $to_date,
         'total_work_time' => sprintf('%02d:%02d', $hours, $minutes),
 
         // Estimated values based on time
@@ -1127,7 +1130,7 @@ private function get_this_week_work_time_data()
         'mouse_activity_percentage' => $mouse_activity_percentage, // %
 
         'days_with_data' => $days_with_data,
-        'total_days_in_week' => (new DateTime($today->format('Y-m-d')))->diff(new DateTime($monday->format('Y-m-d')))->days + 1,
+        'total_days_in_week' => (new DateTime($to_date))->diff(new DateTime($from_date))->days + 1,
         'daily_breakdown' => $daily_hours
     ];
 
