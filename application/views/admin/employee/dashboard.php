@@ -62,12 +62,10 @@
 
      /* ===================== Custom Legend ===================== */
      .custom-legend {
-         display: flex;
-         flex-direction: column;
-         align-items: flex-start;
-         gap: 10px;
-         margin-top: 20px;
-         font-weight: bold;
+         display: grid;
+         grid-template-columns: repeat(2, 1fr);
+         gap: 20px;
+         margin: 37px 0px;
      }
 
      .custom-legend-item {
@@ -76,8 +74,8 @@
      }
 
      .custom-legend-box {
-         width: 16px;
-         height: 16px;
+         width: 12px;
+         height: 12px;
          margin-right: 8px;
          border-radius: 3px;
      }
@@ -130,17 +128,19 @@
                              <div class="input-group">
                                  <select name="Time_period" id="period_search" class="form-control">
                                      <option value="" <?= ($time_period == " ") ? 'selected' : ''; ?>>Select</option>
-                                     <option value="current_week" <?= ($time_period == 'current_week') ? 'selected' : ''; ?>>Current Week</option>
+                                     <option value="current_week" <?= ($time_period == 'current_week') ? 'selected' : ''; ?>>This Week</option>
                                      <option value="last_week" <?= ($time_period == 'last_week') ? 'selected' : ''; ?>>Last Week</option>
-                                     <option value="two_week" <?= ($time_period == 'two_week') ? 'selected' : ''; ?>>Two Week</option>
+                                     <option value="two_week" <?= ($time_period == 'two_week') ? 'selected' : ''; ?>>Last Two Week</option>
                                      <option value="this_month" <?= ($time_period == 'this_month') ? 'selected' : ''; ?>>This Month</option>
                                      <option value="last_month" <?= ($time_period == 'last_month') ? 'selected' : ''; ?>>Last Month</option>
                                      <option value="last_6_months" <?= ($time_period == 'last_6_months') ? 'selected' : ''; ?>>Last 6 Months</option>
                                      <option value="this_year" <?= ($time_period == 'this_year') ? 'selected' : ''; ?>>This Year</option>
+                                     <option value="manual" <?= ($time_period == 'manual') ? 'selected' : ''; ?>>Pick Dates</option>
+                                     </option>
                                  </select>
 
 
-                                 <span id="searchManually" class="input-group-addon btn btn-secondary align-content-center mx-5"><i class="fa fa-search"></i> Pick Dates</span>
+                                 <!-- <span id="searchManually" class="input-group-addon btn btn-secondary align-content-center mx-5"><i class="fa fa-search"></i> Pick Dates</span> -->
 
                              </div>
                          </div>
@@ -188,7 +188,7 @@
                          <div class="d-flex flex-row">
                              <div class="ml-20 align-self-center">
                                  <h4 class="text-muteds m-b-0"><?php echo "Active Hours" ?></h4>
-                                 <h2 class="m-b-0"><?php echo $employee_activity['total_active'] ?></h2>
+                                 <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom" title="<?php echo $employee_activity['total_active'] ?>"><?php echo $employee_activity['total_active'] ?></h2>
                              </div>
                          </div>
                      </div>
@@ -198,7 +198,7 @@
                          <div class="d-flex flex-row">
                              <div class="ml-20 align-self-center">
                                  <h4 class="text-muteds m-b-0"><?php echo "Inactive  Hours" ?></h4>
-                                 <h2 class="m-b-0"><?php echo $employee_activity['total_idle'] ?></h2>
+                                 <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom" title="<?php echo $employee_activity['total_idle'] ?>"><?php echo $employee_activity['total_idle'] ?></h2>
                              </div>
                          </div>
                      </div>
@@ -208,7 +208,7 @@
                          <div class="d-flex flex-row">
                              <div class="ml-20 align-self-center">
                                  <h4 class="text-muteds m-b-0"><?php echo "Total Hours" ?></h4>
-                                 <h2 class="m-b-0"><?php echo $employee_activity['shift_time'] ?></h2>
+                                 <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom" title="<?php echo $employee_activity['shift_time'] ?>"><?php echo $employee_activity['shift_time'] ?></h2>
                              </div>
                          </div>
                      </div>
@@ -218,7 +218,36 @@
                          <div class="d-flex flex-row">
                              <div class="ml-20 align-self-center">
                                  <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
-                                 <h2 class="m-b-0"><?php echo $employee_activity['total_keystrokes'] ?></h2>
+                                 <?php
+                                    $keystroke_percentage = $employee_activity['total_keystrokes'];
+
+                                    // Determine color based on percentage
+                                    if ($keystroke_percentage >= 70) {
+                                        $stroke_color = "green";
+                                    } elseif ($keystroke_percentage >= 50) {
+                                        $stroke_color = "rgb(255, 205, 86)";
+                                    } else {
+                                        $stroke_color = "red";
+                                    }
+                                    ?>
+                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                     <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                         <svg viewBox="0 0 36 36" width="40" height="40">
+                                             <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
+                                             <circle
+                                                 cx="18" cy="18" r="15.9155" fill="none"
+                                                 stroke="<?php echo $stroke_color; ?>" stroke-width="4"
+                                                 stroke-dasharray="<?php echo $keystroke_percentage . ' ' . (100 - $keystroke_percentage); ?>"
+                                                 stroke-dashoffset="25"
+                                                 transform="rotate(0 18 18)" />
+                                         </svg>
+                                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                             data-toggle="tooltip" data-placement="bottom" title="<?php echo $keystroke_percentage; ?>">
+                                             <?php echo $keystroke_percentage . "%"; ?>
+                                         </div>
+                                     </div>
+                                 </div>
+
                              </div>
                          </div>
                      </div>
@@ -228,7 +257,35 @@
                          <div class="d-flex flex-row">
                              <div class="ml-20 align-self-center">
                                  <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
-                                 <h2 class="m-b-0"><?php echo $employee_activity['total_mouse_movements'] ?></h2>
+                                 <?php
+                                    $mouse_movement = $employee_activity['total_mouse_movements'];
+
+                                    // Determine color based on percentage
+                                    if ($mouse_movement >= 70) {
+                                        $stroke_color = "green";
+                                    } elseif ($mouse_movement >= 50) {
+                                        $stroke_color = "rgb(255, 205, 86)";
+                                    } else {
+                                        $stroke_color = "red";
+                                    }
+                                    ?>
+                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                     <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                         <svg viewBox="0 0 36 36" width="40" height="40">
+                                             <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
+                                             <circle
+                                                 cx="18" cy="18" r="15.9155" fill="none"
+                                                 stroke="<?php echo $stroke_color; ?>" stroke-width="4"
+                                                 stroke-dasharray="<?php echo $mouse_movement . ' ' . (100 - $mouse_movement); ?>"
+                                                 stroke-dashoffset="25"
+                                                 transform="rotate(0 18 18)" />
+                                         </svg>
+                                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                             data-toggle="tooltip" data-placement="bottom" title="<?php echo $mouse_movement; ?>">
+                                             <?php echo $mouse_movement . "%"; ?>
+                                         </div>
+                                     </div>
+                                 </div>
                              </div>
                          </div>
                      </div>
@@ -242,10 +299,11 @@
                          <h3 class="box-title"><?php echo "Overall Productivity" ?></h3>
                      </div>
                      <div class="box-body">
+                         <div id="doughnutLegend" class="custom-legend"></div>
+
                          <div style="height:260px;text-align: center;justify-content: center;display: flex;">
                              <canvas id="ProductivityReportChart" style="height: 250px; width: 100%;"></canvas>
                          </div>
-                         <div id="doughnutLegend" class="custom-legend"></div>
                      </div>
                  </div>
              </div>
@@ -350,9 +408,13 @@
          $('#searchManually').on('click', function() {
              $('#predefined_filter_row').hide();
              $('#manual_filter_row').css('display', 'flex');
+
+             // Set the first option (index 0) as selected
+             $('#period_search').val('');
          });
 
          $('#cancelManualFilter').on('click', function() {
+
              $('#manual_filter_row').hide();
              $('#predefined_filter_row').css('display', 'flex');
          });
@@ -398,77 +460,21 @@
          });
 
 
-
-         // Submit form on date change
-         let previousPeriodValue = $('#period_search').val(); // Set initial value
-
-         $(document).on('focus', "#period_search", function() {
-             // Store old value on focus
-             previousPeriodValue = $(this).val();
-         });
-
          $(document).on('change', "#period_search", function(e) {
-             const firstRecordDate = $('#first_record_date').val(); // Already in 'YYYY-MM-DD'
-             const first = new Date(firstRecordDate);
-             first.setHours(0, 0, 0, 0);
-
-             const today = new Date();
-             today.setHours(0, 0, 0, 0);
-
              const selectedValue = $(this).val();
-             let calculatedFromDate;
 
-             switch (selectedValue) {
-                 case 'today':
-                     calculatedFromDate = new Date(today);
-                     break;
-                 case 'yesterday':
-                     calculatedFromDate = new Date(today);
-                     calculatedFromDate.setDate(today.getDate() - 1);
-                     break;
-                 case 'last_7_days':
-                     calculatedFromDate = new Date(today);
-                     calculatedFromDate.setDate(today.getDate() - 6);
-                     break;
-                 case 'last_14_days':
-                     calculatedFromDate = new Date(today);
-                     calculatedFromDate.setDate(today.getDate() - 13);
-                     break;
-                 case 'last_21_days':
-                     calculatedFromDate = new Date(today);
-                     calculatedFromDate.setDate(today.getDate() - 20);
-                     break;
-                 case 'this_month':
-                     calculatedFromDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                     break;
-                 case 'last_1_month':
-                     calculatedFromDate = new Date(today);
-                     calculatedFromDate.setMonth(today.getMonth() - 1);
-                     break;
-                 case 'last_2_months':
-                     calculatedFromDate = new Date(today);
-                     calculatedFromDate.setMonth(today.getMonth() - 2);
-                     break;
-                 case 'last_6_months':
-                     calculatedFromDate = new Date(today);
-                     calculatedFromDate.setMonth(today.getMonth() - 6);
-                     break;
-                 case 'this_year':
-                     calculatedFromDate = new Date(today.getFullYear(), 0, 1);
-                     break;
-                 default:
-                     calculatedFromDate = new Date(today);
+             if (selectedValue === 'manual') {
+                 // Set the first option (index 0) as selected
+                 $('#period_search').prop('selectedIndex', 0);
+                 // Show manual date filter row
+                 $('#manual_filter_row').css('display', 'flex');
+                 $('#predefined_filter_row').hide();
+                 return; // Do not submit form
              }
 
-             calculatedFromDate.setHours(0, 0, 0, 0); // normalize
-
-             // Validate range
-             //   if (calculatedFromDate < first) {
-             //       e.preventDefault();
-             //       showToast(`Data available only from ${firstRecordDate}.`, 'error');
-             //       $(this).val(previousPeriodValue); // restore previous selection
-             //       return;
-             //   } 
+             // Hide manual filter if any other option is selected
+             $('#manual_filter_row').hide();
+             $('#predefined_filter_row').show();
 
              // Clear manual dates
              $('input[name="fromDate"]').val('');
@@ -476,6 +482,7 @@
 
              $('.user_filter_form').submit();
          });
+
          render_employee_productivity_chart();
          render_fourWeek_report();
 
