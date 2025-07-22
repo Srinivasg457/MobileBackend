@@ -14,6 +14,15 @@ class Admin_model extends CI_Model {
         return;
     } 
 
+    // employee edit function
+    function edit_option_employee($action, $id, $user_id, $table)
+    {
+        $this->db->where('id', $id);
+        $this->db->where('user_id', $user_id);
+        $this->db->update($table, $action);
+        return;
+    }
+
     // edit function
     function edit_option_md5($action, $id, $table){
         $this->db->where('md5(id)', $id);
@@ -126,21 +135,95 @@ class Admin_model extends CI_Model {
     }
 
     // select by function
-    function get_by_user_status($table)
+    // function get_by_user_status($table)
+    // {
+    //     $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
+    //     $this->db->select();
+    //     $this->db->from($table);
+    //     $this->db->where('business_id', $this->business->uid);
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where('status', 1);
+    //     $this->db->order_by('id','DESC');
+    //     $query = $this->db->get();
+    //     $query = $query->result();  
+    //     return $query;
+    // }
+    public function get_by_user_status($table)
     {
+        // 1️⃣  Determine who is logged in
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
+        if (!$user_id) {
+            return [];                       // nothing to do
+        }
+
+        // 2️⃣  Find the business UID for that user
+        $business = $this->db->select('uid')
+            ->from('business')        // adjust table name if different
+            ->where('user_id', $user_id)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if (!$business) {
+            return [];                       // user owns no business
+        }
+
+        $business_uid = $business->uid;
+
+        // 3️⃣  Pull active rows for that business & user
+        $query = $this->db->select('*')
+            ->from($table)
+            ->where('business_id', $business_uid)
+            ->where('user_id',     $user_id)
+            ->where('status',      1)
+            ->order_by('id', 'ASC')
+            ->get();
+
+        return $query->result();
+    }
+    function get_role_by_user_status($table)
+    {
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
         $this->db->select();
         $this->db->from($table);
-        $this->db->where('business_id', $this->business->uid);
-        $this->db->where('user_id', $this->session->userdata('id'));
+        $this->db->where('user_id', $user_id);
         $this->db->where('status', 1);
-        $this->db->order_by('id','DESC');
+        $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
+    function get_department_id_by_role($role_id)
+    {
+        $this->db->select('department_id');
+        $this->db->from('employee_roles');
+        $this->db->where('id', $role_id);
+        $query = $this->db->get();
 
-        
+        if ($query->num_rows() > 0) {
+            return $query->row()->department_id;
+        }
+        return null; // or 0 if preferred
+    }
+
+    function get_department_id_by_role_id($role_id)
+    {
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
+        $this->db->select('id');
+        $this->db->from('employee_roles');
+        $this->db->where('role_id', $role_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->limit(1);
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return $query->row()->id;
+        }
+        return null; // or 0 if preferred
+    }
+
+
     // select by function
     function select_by_user($table)
     {
@@ -157,10 +240,11 @@ class Admin_model extends CI_Model {
     // select by function
     function get_by_user_and_type($table, $type)
     {
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
         $this->db->select();
         $this->db->from($table);
         $this->db->where('business_id', $this->business->uid);
-        $this->db->where('user_id', $this->session->userdata('id'));
+        $this->db->where('user_id', $user_id);
         if ($type == 'is_sell') {
             $this->db->where('is_sell', 1);
         } else {
@@ -404,8 +488,31 @@ class Admin_model extends CI_Model {
         $query = $this->db->get();
         $query = $query->result_array();  
         return $query;
-    } 
+    }
+    public function get_timezone_list()
+    {
+        try {
+            $timezones = $this->db
+                ->select('utc_offset, time_zone_names')
+                ->order_by('utc_offset', 'ASC')
+                ->get('world_time_zones')
+                ->result_array();
 
+            if (empty($timezones)) {
+                return []; // Return empty array if no timezones found
+            }
+
+            $formatted = [];
+            foreach ($timezones as $tz) {
+                $formatted[] = "{$tz['utc_offset']} / {$tz['time_zone_names']}";
+            }
+
+            return $formatted; // Return array directly
+
+        } catch (Exception $e) {
+            return []; // Return empty array on error
+        }
+    }
     // select by id
     function get_by_id($id,$table)
     {
@@ -415,7 +522,19 @@ class Admin_model extends CI_Model {
         $query = $this->db->get();
         $query = $query->row();  
         return $query;
-    } 
+    }
+    
+    // select by Employee id
+    function get_by_employeeId($id, $user_id, $table)
+    {
+        $this->db->select();
+        $this->db->from($table);
+        $this->db->where('id', $id);
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get();
+        $query = $query->row();
+        return $query;
+    }
 
     // select by id
     function get_by_md5_id($id,$table)
@@ -898,7 +1017,138 @@ class Admin_model extends CI_Model {
         return $query->row();
     }
 
+    public function intial_department_storing($user_id, $business_id)
+    {
+        // Fetch default departments
+        $default_departments = $this->admin_model->select_asc('default_departments');
 
+        // Loop through each default department and insert into departments table
+        if (!empty($default_departments)) {
+            foreach ($default_departments as $default) {
+                $data = [
+                    'department_id' => $default->id, // FK from default_departments
+                    'name' => $default->name, // Assuming default_departments has 'name' column
+                    'user_id' => $user_id,
+                    'business_id' => $business_id,
+                    'status' => 1,
+                    'created_at' => get_user_datetime_only($user_id)
+                ];
+
+                $this->admin_model->insert($data, 'departments');
+            }
+        }
+        $stored_departments = $this->db
+            ->get_where('departments', [
+                'user_id' => $user_id,
+                'status'  => 1          // if you only want active depts
+            ])
+            ->result();
+
+        foreach ($stored_departments as $dept) {
+
+            /* $dept->department_id == master department’s ID */
+            $default_roles = $this->db->get_where('default_roles', [
+                'department_id' => $dept->department_id
+            ])->result();
+
+            foreach ($default_roles as $role) {
+                /* insert into employee_roles (or whatever you need) */
+                $this->db->insert('employee_roles', [
+                    'user_id'       => $user_id,
+                    'department_id' => $dept->id,      // ← PK in *your* departments table
+                    'role_id'       => $role->id,      // ← FK to master role
+                    'role_name'     => $role->role_name,
+                    'status'        => 1,
+                    'created_at'    => get_user_datetime_only($user_id),
+                    'updated_at'    => get_user_datetime_only($user_id),
+                ]);
+            }
+        }
+        $this->grant_super_role_access($user_id);
+       
+    }
+    public function grant_super_role_access(int $user_id): void
+    {
+        /* ------------------------------------------------------------
+     * 1.  Find *new* employee_roles rows that need permissions
+     * ------------------------------------------------------------ */
+        $empRoles = $this->db->query(
+            "SELECT er.id, er.role_id
+           FROM employee_roles er
+          WHERE er.user_id = ?
+            AND er.role_id IN (1,2,3,4,5)
+            AND er.status  = 1
+            AND NOT EXISTS (
+                  SELECT 1
+                    FROM role_feature_access r
+                   WHERE r.role_id = er.id
+                     AND r.user_id = er.user_id
+                 )",
+            [$user_id]
+        )->result();
+
+        if (empty($empRoles)) {
+            return;                                // nothing new to insert
+        }
+
+        /* ------------------------------------------------------------
+     * 2.  Prepare one big insert batch
+     * ------------------------------------------------------------ */
+        $now   = get_user_datetime_only($user_id);
+        $batch = [];
+
+        foreach ($empRoles as $er) {
+            switch ((int) $er->role_id) {
+                case 1:  // fall‑through
+                case 2:  // full access
+                    $ids = $this->db->select('id')->from('app_features')
+                        ->get()->result_array();
+                    $featureIds = array_column($ids, 'id');
+                    break;
+
+                case 3:
+                    $featureIds = [6, 3, 9, 8, 1];
+                    break;
+
+                case 4:  // fall‑through
+                case 5:
+                    $featureIds = [3, 5, 10, 11, 12];
+                    break;
+
+                default:
+                    continue 2;                    // skip unknown role
+            }
+
+            foreach ($featureIds as $fid) {
+                $batch[] = [
+                    'role_id'    => $er->id,       // PK in employee_roles
+                    'user_id'    => $user_id,
+                    'feature_id' => $fid,
+                    'is_read'    => 1,
+                    'is_write'   => 1,
+                    'is_action'  => 1,
+                    'is_delete'  => 1,
+                    'status'     => 1,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        /* ------------------------------------------------------------
+     * 3.  Insert (duplicates impossible by design)
+     * ------------------------------------------------------------ */
+        if (!empty($batch)) {
+            $this->db->insert_batch('role_feature_access', $batch);
+
+            if ($this->db->error()['code']) {
+                log_message(
+                    'error',
+                    'grant_super_role_access(): ' . json_encode($this->db->error())
+                );
+            }
+        }
+    }
     //get product
     public function search_product($value, $type)
     {
@@ -1107,6 +1357,45 @@ class Admin_model extends CI_Model {
         $query = $query->result();
         return $query;
     }
+    function get_active_packages_for_subscription()
+    {
+        // Get current user's package ID
+        $currentPackage = $this->common_model->get_my_package();;
+        $minPackageId = isset($currentPackage->package) ? (int) $currentPackage->package : 0;
+
+        // Fetch all active packages with id >= current package id
+        return $this->db->select('*')
+            ->from('package p')
+            ->where('p.is_active', 1)
+            ->where('p.id >=', $minPackageId)
+            ->order_by('p.id', 'ASC')
+            ->get()
+            ->result();
+    }
+    function get_features_for_subscription()
+    {
+        // 1️⃣  All active packages ≥ current tier
+        $packages = $this->get_active_packages_for_subscription();
+
+        // 2️⃣  Pull their slugs (these map 1‑to‑1 with feature columns)
+        $slugs = array_column($packages, 'slug');          // e.g. ['basic', 'standard', 'premium']
+        if (empty($slugs)) {
+            return [];                                    // nothing to show
+        }
+
+        // 3️⃣  Build the SELECT list: id, name + every slug column
+        $selectCols = array_merge(['id', 'name'], $slugs);
+        $select     = implode(',', array_map(function ($c) {
+            return $this->db->protect_identifiers($c);    // safe back‑ticks
+        }, $selectCols));
+
+        // 4️⃣  Return CI result() in the same format as your package query
+        return $this->db->select($select)
+            ->from('package_features')
+            ->get()
+            ->result();                       // ← identical style
+    }
+
 
 
 

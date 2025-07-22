@@ -24,8 +24,12 @@ class Profile extends Home_Controller {
         }
         $data['countries'] = $this->admin_model->select('country');
         $data['fonts'] = $this->admin_model->select('google_fonts');
+        $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/user/profile', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
     }
 
     //switch business
@@ -52,7 +56,9 @@ class Profile extends Home_Controller {
                 'city' => $this->input->post('city', true),
                 'state' => $this->input->post('state', true),
                 'phone' => $this->input->post('phone', true),
-                'postcode' => $this->input->post('postcode', true)
+                'postcode' => $this->input->post('postcode', true),
+                'timezone' => $this->input->post('time_zone', true),
+
             );
             
            // insert photos

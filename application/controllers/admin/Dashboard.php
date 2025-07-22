@@ -12,6 +12,7 @@ class Dashboard extends Home_Controller {
         if (!is_admin()) {
             redirect(base_url());
         }
+       
         $data = array();
         $data['currency'] = currency_to_symbol(settings()->currency);
         for ($i = 1; $i <= 13; $i++) {
@@ -49,6 +50,7 @@ class Dashboard extends Home_Controller {
         
         //cron_recurring_payments();
         $data = array();
+        $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Dashboard';
         $data['currency'] = html_escape($this->business->currency_symbol);
         $data['settings'] = $this->admin_model->get('settings');
@@ -77,6 +79,9 @@ class Dashboard extends Home_Controller {
         $data['expense_data'] = json_encode(array_column($expenses, 'total'),JSON_NUMERIC_CHECK);
         $data['main_content'] = $this->load->view('admin/dash', $data, TRUE);
         $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
     }
 
 
@@ -97,21 +102,69 @@ class Dashboard extends Home_Controller {
         if($_POST){
             
             $id = user()->id;
-            $user = $this->admin_model->get_by_id($id, 'users');
 
-            if(password_verify($this->input->post('old_pass', true), $user->password)){
-                if ($this->input->post('new_pass', true) == $this->input->post('confirm_pass', true)) {
-                    $data=array(
-                        'password' => hash_password($this->input->post('new_pass', true))
-                    );
-                    $data = $this->security->xss_clean($data);
-                    $this->admin_model->edit_option($data, $id, 'users');
-                    echo json_encode(array('st'=>1));
+            if (is_employee()) {
+                // Employee user
+                $employee_id = $this->session->userdata('employee_id');
+                $user_id = $this->session->userdata('employee_org_id'); // assuming this is the user_id
+
+                $user = $this->admin_model->get_by_employeeId($employee_id, $user_id , 'employees');
+
+                if (password_verify($this->input->post('old_pass', true), $user->password)) {
+                    if ($this->input->post('new_pass', true) == $this->input->post('confirm_pass', true)) {
+                        $data = array(
+                            'password' => hash_password($this->input->post('new_pass', true))
+                        );
+                        $data = $this->security->xss_clean($data);
+                        $this->admin_model->edit_option_employee($data, $employee_id, $user_id, 'employees');
+                        echo json_encode(array('st' => 1)); // success
+                    } else {
+                        echo json_encode(array('st' => 2)); // password mismatch
+                    }
                 } else {
-                    echo json_encode(array('st'=>2));
+                    echo json_encode(array('st' => 0)); // old password incorrect
                 }
-            } else {
-                echo json_encode(array('st'=>0));
+            }
+            elseif($this->session->userdata('is_org_ceo')){
+                // CEO user
+                $employee_id = $this->session->userdata('ceo_id');
+                $user_id = $this->session->userdata('id'); // assuming this is the user_id
+
+                $user = $this->admin_model->get_by_employeeId($employee_id, $user_id, 'employees');
+
+                if (password_verify($this->input->post('old_pass', true), $user->password)) {
+                    if ($this->input->post('new_pass', true) == $this->input->post('confirm_pass', true)) {
+                        $data = array(
+                            'password' => hash_password($this->input->post('new_pass', true))
+                        );
+                        $data = $this->security->xss_clean($data);
+                        $this->admin_model->edit_option_employee($data, $employee_id, $user_id, 'employees');
+                        echo json_encode(array('st' => 1)); // success
+                    } else {
+                        echo json_encode(array('st' => 2)); // password mismatch
+                    }
+                } else {
+                    echo json_encode(array('st' => 0)); // old password incorrect
+                } 
+            } 
+            else {
+                // Admin user
+                $user = $this->admin_model->get_by_id($id, 'users');
+
+                if (password_verify($this->input->post('old_pass', true), $user->password)) {
+                    if ($this->input->post('new_pass', true) == $this->input->post('confirm_pass', true)) {
+                        $data = array(
+                            'password' => hash_password($this->input->post('new_pass', true))
+                        );
+                        $data = $this->security->xss_clean($data);
+                        $this->admin_model->edit_option($data, $id, 'users');
+                        echo json_encode(array('st' => 1));
+                    } else {
+                        echo json_encode(array('st' => 2));
+                    }
+                } else {
+                    echo json_encode(array('st' => 0));
+                }
             }
         }
     }

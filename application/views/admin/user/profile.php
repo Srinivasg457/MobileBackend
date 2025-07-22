@@ -31,33 +31,48 @@
                     </div>
 
                     <div class="form-group m-t-20">
-                        <label class="col-sm-4 control-label" for="example-input-normal"><?php echo trans('name') ?></label>
-                        <div class="col-sm-12">
-                            <input type="text" name="name" value="<?php echo html_escape($user->name); ?>" class="form-control" >
+                        <label class="control-label" for="example-input-normal"><?php echo trans('name') ?></label>
+                        <div class="">
+                            <input type="text" name="name" value="<?php echo html_escape($user->name); ?>" class="form-control">
                         </div>
                     </div>
 
                     <div class="form-group m-t-20">
-                        <label class="col-sm-4 control-label" for="example-input-normal"><?php echo trans('email') ?></label>
-                        <div class="col-sm-12">
-                            <input type="text" name="email" value="<?php echo html_escape($user->email); ?>" class="form-control" >
+                        <label class=" control-label" for="example-input-normal"><?php echo trans('email') ?></label>
+                        <div class="">
+                            <input type="text" name="email" value="<?php echo html_escape($user->email); ?>" class="form-control">
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label" for="example-input-normal"><?php echo trans('country') ?></label>
-                        <div class="col-sm-12">
-                            <select class="form-control single_select" name="country">
-                              <option value="0"><?php echo trans('select') ?></option>
-                              <?php foreach ($countries as $country): ?>
-                                  <option value="<?php echo html_escape($country->id); ?>" 
-                                    <?php echo ($user->country == $country->id) ? 'selected' : ''; ?>>
-                                    <?php echo html_escape($country->name); ?>
-                                  </option>
-                              <?php endforeach ?>
-                            </select>
+                    <?php if (isset($page_title) && $page_title != "Edit"): ?>
+    <div class="form-group">
+        <label><?php echo trans('country') ?></label>
+        <select class="selectfield textfield--grey single_select col-sm-12" name="country" id="country" style="width: 100%">
+            <option value=""><?php echo trans('select') ?></option>
+            <?php foreach ($countries as $country): ?>
+                <option value="<?php echo html_escape($country->id); ?>"
+                    <?php if (!empty($user) && $user->country == $country->id) echo 'selected'; ?>>
+                    <?php echo html_escape($country->name); ?>
+                </option>
+            <?php endforeach ?>
+        </select>
+    </div>
+
+                                <div class="form-group">
+
+                                    <label class="form-label">Timezone:</label>
+                                    <select name="time_zone" id="timezone_select" class="form-control single_select">
+                                        <?php if (isset($user->timezone)) : ?>
+                                            <option value="<?php echo isset($user->timezone) ? $user->timezone : ''; ?>"> <?php echo isset($user->timezone) ? $user->timezone : ''; ?>
+                                            </option>
+                                        <?php else: ?>
+                                            <option value="">Select</option>
+                                        <?php endif; ?>
+                                    </select>
+
+                                </div>
+                            <?php endif; ?>
                         </div>
-                    </div>
 
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="example-input-normal"><?php echo trans('city') ?></label>
@@ -103,3 +118,42 @@
     </form>
   </section>
 </div>
+<script>
+    $(document).ready(function() {
+        $('#country_select').on('change', function() {
+            var country_id = $(this).val();
+            console.log(country_id);
+            
+
+            // Clear existing timezones
+            $('#timezone').html('<option value="">Loading...</option>');
+
+            if (country_id) {
+                $.ajax({
+                    url: '<?= base_url('admin/organization_settings/get_timezones_by_country_id') ?>',
+                    type: 'GET',
+                    data: {
+                        country_id: country_id
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status) {
+                            let options = '<option value="">Select</option>';
+                            $.each(response.data, function(index, value) {
+                                options += '<option value="' + value + '">' + value + '</option>';
+                            });
+                            $('#timezone').html(options);
+                        } else {
+                            $('#timezone').html('<option value="">No timezones found</option>');
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#timezone').html('<option value="">Error fetching timezones</option>');
+                    }
+                });
+            } else {
+                $('#timezone').html('<option value="">Select</option>');
+            }
+        });
+    });
+</script>

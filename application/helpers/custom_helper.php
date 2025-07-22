@@ -11,6 +11,148 @@
 	    }
 	}
 
+//check employee
+if (!function_exists('is_employee')) {
+	function is_employee()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_employee();
+	}
+}
+
+if (!function_exists('is_subscribed')) {
+	function is_subscribed()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_subscribed();
+	}
+}
+//get date time
+if (!function_exists('get_user_datetime_only')) {
+	function get_user_datetime_only($user_id)
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->get_user_datetime_only($user_id);
+	}
+}
+
+if (!function_exists('check_department')) {
+	function check_department()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->check_department();
+	}
+}
+if (!function_exists('is_CEO')) {
+	function is_CEO($role_id)
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_CEO($role_id);
+	}
+}
+if (!function_exists('require_feature')) {
+	function require_feature($featureId)
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->require_feature($featureId);
+	}
+}
+if (!function_exists('is_user_ceo')) {
+	function is_user_ceo()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_user_ceo();
+	}
+}
+if (!function_exists('is_access_for_all_role')) {
+	function is_access_for_all_role()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_access_for_all_role();
+	}
+}
+
+if (!function_exists('get_allowed_feature_ids')) {
+	function get_allowed_feature_ids()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->get_allowed_feature_ids();
+	}
+}
+//get time
+if (!function_exists('get_user_time_value')) {
+	function get_user_time_value($user_id)
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->get_user_time_value($user_id);
+	}
+}
+
+//check pack
+if (!function_exists('is_pack_trial')) {
+	function is_pack_trial()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_pack_trial();
+	}
+}
+
+if (!function_exists('is_plan_basic')) {
+	function is_plan_basic()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_plan_basic();
+	}
+}
+
+
+
+if (!function_exists('is_plan_standard')) {
+	function is_plan_standard()
+	{
+		$ci = &get_instance();
+		return $ci->auth_model->is_plan_standard();
+	}
+}
+
+if (!function_exists('is_pack_premium')) {
+	function is_pack_premium()
+	{
+		$ci = &get_instance();
+		return $ci->auth_model->is_pack_premium();
+	}
+}
+
+if (!function_exists('is_pack_customization')) {
+	function is_pack_customization()
+	{
+		$ci = &get_instance();
+		return $ci->auth_model->is_pack_customization();
+	}
+}
+
+//check payment pending
+if (!function_exists('is_payment_pending')) {
+	function is_payment_pending()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_payment_pending();
+	}
+}
+
 	//check user
 	if (!function_exists('is_user')) 
 	{

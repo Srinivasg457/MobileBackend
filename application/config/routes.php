@@ -83,3 +83,39 @@ $route['payment-success/(:any)'] = 'auth/payment_success/$1';
 $route['payment-cancel/(:any)'] = 'auth/payment_cancel/$1';
 $route['setup'] = 'auth/setup';
 $route['change_password'] = 'admin/dashboard/change_password';
+
+//organization sites
+$route['admin/view_screenshots'] = 'admin/ScreenshotController';
+$route['admin/webcam_screenshots'] = 'admin/ScreenshotController/webcam';
+$route['admin/organization_settings'] = 'admin/Organization_settings/Organization_settings_edit';
+$route['admin/employee_settings'] = 'admin/Organization_settings/org_exception_settings';
+$route['admin/activity_logs'] = 'admin/Activity_logs';
+$route['admin/time_cards'] = 'admin/Activity_logs/Time_Cards';
+$route['admin/live_monitoring'] = 'admin/Monitoring_room';
+$route['admin/notification/webcam'] = 'admin/Notification';
+$route['admin/notification/desktop'] = 'admin/Notification/desktop';
+$route['admin/roles_permissions'] = 'employee/EmployeeRoles';
+$route['admin/roles_permissions/role_management'] = 'employee/EmployeeRoles/role';
+$route['admin/subscription/current_plan'] = 'admin/subscription/currentPlan';
+$route['admin/subscription/upgrade_plan'] = 'admin/subscription';
+
+
+
+
+
+
+
+
+//employee sites
+$route['accept-invitation'] = 'employee/Employee/accept_invitation';
+$route['complete-registration'] = 'employee/Employee/complete_registration';
+
+$route['employee/dashboard'] = 'employee/EmployeeDashboard';
+$route['employee/view_screenshots'] = 'employee/Employee/screenshot';
+$route['employee/webcam_screenshots'] = 'admin/ScreenshotController/Employeewebcam';
+$route['employee/activity_log'] = 'employee/Timecards_manual';
+
+
+$route['organization'] = 'admin/Organization_settings';
+
+$route['employee/report'] = 'employee/Report';

@@ -66,7 +66,7 @@ class Invoice extends Home_Controller {
         
         if (check_payment_status() == FALSE && settings()->enable_paypal == 1 && user()->user_type != 'trial'){
             $this->session->set_flashdata('error', 'Please complete your payment to unlock features'); 
-            redirect(base_url('admin/subscription'));
+            redirect(base_url('admin/subscription/upgrade_plan'));
         }
 
         $data = array();

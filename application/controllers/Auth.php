@@ -1,4 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Auth extends Home_Controller 
 {
@@ -58,6 +58,16 @@ class Auth extends Home_Controller
         $this->load->view('index', $data);
     }
 
+    // load employee register view Page
+    public function emp_register()
+    {
+        $data = array();
+        $data['page_title'] = 'Employee Register';
+        $data['page'] = 'Auth';
+        $data['main_content'] = $this->load->view('employee_register', $data, TRUE);
+        $this->load->view('index', $data);
+    }
+
     //register
     public function register()
     {   
@@ -82,100 +92,246 @@ class Auth extends Home_Controller
     }
 
 
-    // login
+    // // login
+    // public function log()
+    // {
+
+    //     if($_POST){ 
+ 
+    //         // check valid user 
+    //         $user = $this->auth_model->validate_user();
+
+
+    //         if (empty($user)) {
+    //             echo json_encode(array('st'=>0));
+    //             exit();
+    //         }
+    //         if (!empty($user) && $user->status == 0) {
+    //             // account pending
+    //             echo json_encode(array('st'=>2));
+    //             exit();
+    //         }
+    //         if (!empty($user) && $user->status == 2) {
+    //             // account suspend
+    //             echo json_encode(array('st'=>3));
+    //             exit();
+    //         }
+            
+            
+
+    //         if ($user->role == 'user') {
+    //             $diff = date_difference($user->created_at);
+    //             if (!empty($user) && $user->email_verified == 0 && $this->settings->enable_email_verify == 1 && $diff < 2) {
+
+    //                 if ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') {
+    //                     $user_id = $user->parent_id;
+    //                 }else{
+    //                     $user_id = $user->id;
+    //                 }
+                
+    //                 $data = array(
+    //                     'id' => $user_id,
+    //                     'name' => $user->name,
+    //                     'slug' => $user->slug,
+    //                     'thumb' => $user->thumb,
+    //                     'email' =>$user->email,
+    //                     'role' =>$user->role,
+    //                     'parent' =>$user->id,
+    //                     'logged_in' => TRUE
+    //                 );
+    //                 $data = $this->security->xss_clean($data);
+    //                 $this->session->set_userdata($data); 
+                
+    //                 // email verify
+    //                 echo json_encode(array('st'=>4));
+    //                 exit();
+    //             }
+    //         }
+
+
+    //         if ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') {
+    //             $user_id = $user->parent_id;
+    //         }else{
+    //             $user_id = $user->id;
+    //         }
+
+    //         // if valid
+    //         if(password_verify($this->input->post('password'), $user->password)){
+               
+    //             $data = array(
+    //                 'id' => $user_id,
+    //                 'name' => $user->name,
+    //                 'slug' => $user->slug,
+    //                 'thumb' => $user->thumb,
+    //                 'email' =>$user->email,
+    //                 'role' =>$user->role,
+    //                 'parent' =>$user->id,
+    //                 'logged_in' => TRUE
+    //             );
+    //             $data = $this->security->xss_clean($data);
+    //             $this->session->set_userdata($data); 
+
+    //             // success notification 
+    //             if ($user->role == 'admin') {
+    //                 $url = base_url('admin/dashboard');
+    //             } else {
+    //                 $url = base_url('admin/dashboard/business');
+    //             }
+                
+    //             echo json_encode(array('st'=>1,'url'=> $url));
+    //         }else{ 
+    //             // if not user not valid
+    //             echo json_encode(array('st'=>0));
+    //         }
+            
+    //     }else{
+    //         $this->load->view('auth',$data);
+    //     }
+    // }
     public function log()
     {
+        if($_POST){
 
-        if($_POST){ 
- 
-            // check valid user 
+            $email = $this->input->post('email');
+            $password = $this->input->post('password');
+            // $auth_code = $this->input->post('auth_code'); // Assuming you'll have an input field for this
+
+            // 1. Check valid user in 'users' table
             $user = $this->auth_model->validate_user();
 
+            if (!empty($user)) {
+                if ($user->status == 0) {
+                    echo json_encode(array('st'=>2)); // account pending
+                    exit();
+                }
+                if ($user->status == 2) {
+                    echo json_encode(array('st'=>3)); // account suspend
+                    exit();
+                }
 
-            if (empty($user)) {
-                echo json_encode(array('st'=>0));
-                exit();
-            }
-            if (!empty($user) && $user->status == 0) {
-                // account pending
-                echo json_encode(array('st'=>2));
-                exit();
-            }
-            if (!empty($user) && $user->status == 2) {
-                // account suspend
-                echo json_encode(array('st'=>3));
-                exit();
-            }
-            
-            
-
-            if ($user->role == 'user') {
-                $diff = date_difference($user->created_at);
-                if (!empty($user) && $user->email_verified == 0 && $this->settings->enable_email_verify == 1 && $diff < 2) {
-
-                    if ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') {
-                        $user_id = $user->parent_id;
-                    }else{
-                        $user_id = $user->id;
+                if ($user->role == 'user') {
+                    $diff = date_difference($user->created_at);
+                    if ($user->email_verified == 0 && $this->settings->enable_email_verify == 1 && $diff < 2) {
+                        $user_id = ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') ? $user->parent_id : $user->id;
+                        $session_data = array(
+                            'id' => $user_id,
+                            'name' => $user->name,
+                            'slug' => $user->slug,
+                            'thumb' => $user->thumb,
+                            'email' => $user->email,
+                            'role' => $user->role,
+                            'parent' => $user->id,
+                            'logged_in' => TRUE
+                        );
+                        $session_data = $this->security->xss_clean($session_data);
+                        $this->session->set_userdata($session_data);
+                        echo json_encode(array('st'=>4)); // email verify
+                        exit();
                     }
-                
-                    $data = array(
+                }
+
+                if(password_verify($password, $user->password)){
+                    $user_id = ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') ? $user->parent_id : $user->id;
+                    $session_data = array(
                         'id' => $user_id,
+                        'user_type'=>'org_user',
                         'name' => $user->name,
                         'slug' => $user->slug,
                         'thumb' => $user->thumb,
-                        'email' =>$user->email,
-                        'role' =>$user->role,
-                        'parent' =>$user->id,
-                        'logged_in' => TRUE
-                    );
-                    $data = $this->security->xss_clean($data);
-                    $this->session->set_userdata($data); 
-                
-                    // email verify
-                    echo json_encode(array('st'=>4));
+                        'email' => $user->email,
+                        'role' => $user->role,
+                        'parent' => $user->id,
+                        'logged_in' => TRUE,
+                        'is_org_admin'  => True
+                     );
+                    $session_data = $this->security->xss_clean($session_data);
+                    $this->session->set_userdata($session_data);
+
+                    $url = ($user->role == 'admin') ? base_url('admin/dashboard') : base_url('admin/dashboard/business');
+                    echo json_encode(array('st'=>1,'url'=> $url));
                     exit();
                 }
             }
 
+            /* ----------------------------------------------------------
+ * 2.  Employee table authentication
+ * ---------------------------------------------------------- */
+            $employee = $this->auth_model->validate_employee();   // returns row or null
 
-            if ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') {
-                $user_id = $user->parent_id;
-            }else{
-                $user_id = $user->id;
-            }
+            if (
+                !empty($employee) &&
+                $employee->is_registered == 1 &&
+                password_verify($password, $employee->password)
+            ) {
+                $is_ceo = $this->auth_model->is_CEO($employee->role_id);   // check CEO role
 
-            // if valid
-            if(password_verify($this->input->post('password'), $user->password)){
-               
-                $data = array(
-                    'id' => $user_id,
-                    'name' => $user->name,
-                    'slug' => $user->slug,
-                    'thumb' => $user->thumb,
-                    'email' =>$user->email,
-                    'role' =>$user->role,
-                    'parent' =>$user->id,
-                    'logged_in' => TRUE
-                );
-                $data = $this->security->xss_clean($data);
-                $this->session->set_userdata($data); 
+                /* ----------  CEO gets a regular org-user session  ---------- */
+                if ($is_ceo) {
+                    // Fetch organization owner info (from 'users' table)
+                    $orgUser = $this->auth_model->get_user_by_id($employee->user_id);
 
-                // success notification 
-                if ($user->role == 'admin') {
-                    $url = base_url('admin/dashboard');
-                } else {
-                    $url = base_url('admin/dashboard/business');
+                    $slug  = $orgUser ? $orgUser->slug  : '';
+                    $thumb = $orgUser ? $orgUser->thumb : '';
+                    $email = $orgUser ? $orgUser->email : $employee->email;
+
+                    $org_session = [
+                        'id'        => $orgUser ? $orgUser->id : $employee->user_id,
+                        'user_type' => 'org_user',
+                        'name'      => $employee->name,
+                        'slug'      => $slug,
+                        'thumb'     => $thumb,
+                        'email'     => $email,
+                        'role'      => 'user',        // 👈 treat CEO as regular org user
+                        'parent'    => $orgUser ? $orgUser->id : $employee->user_id,
+                        'logged_in' => TRUE,
+                        'is_org_ceo' => TRUE,
+                        'ceo_id'     => $employee->id
+                    ];
+
+                    $this->session->set_userdata($this->security->xss_clean($org_session));
+
+                    echo json_encode([
+                        'st'  => 1,
+                        'url' => base_url('admin/dashboard/business')   // 👈 user dashboard
+                    ]);
+                    exit();
                 }
-                
-                echo json_encode(array('st'=>1,'url'=> $url));
-            }else{ 
-                // if not user not valid
-                echo json_encode(array('st'=>0));
+
+                /* ----------  Non‑CEO employees ---------- */
+                if (! $this->auth_model->is_organization_subscribed($employee->user_id)) {
+                    echo json_encode(['st' => 5]);   // “upgrade your plan”
+                    exit();
+                }
+
+                $emp_session = [
+                    'employee_id'        => $employee->id,
+                    'user_type'          => 'employee_user',
+                    'employee_name'      => $employee->name,
+                    'employee_email'     => $employee->email,
+                    'business_id'        => $employee->business_id,
+                    'department_id'      => $employee->department_id,
+                    'role_id'            => $employee->role_id,
+                    'employee_org_id'    => $employee->user_id,
+                    'employee_logged_in' => TRUE,
+                    'is_employee'        => TRUE
+                ];
+                $this->session->set_userdata($this->security->xss_clean($emp_session));
+
+                echo json_encode([
+                    'st'  => 1,
+                    'url' => base_url('employee/dashboard')
+                ]);
+                exit();
             }
-            
-        }else{
-            $this->load->view('auth',$data);
+
+            /* ----------------------------------------------------------
+ * 3.  Unknown user or bad password
+ * ---------------------------------------------------------- */
+            echo json_encode(['st' => 0]);    // Invalid credentials
+            exit();
+
+        } else {
+            $this->load->view('auth'); // Assuming your login view is named 'login'
         }
     }
 
@@ -201,19 +357,23 @@ class Auth extends Home_Controller
             }else{
 
                 $mail =  strtolower(trim($this->input->post('email', true)));
-                $email = $this->auth_model->check_email($mail);
-                
+                $exists_in_users = $this->auth_model->check_email($mail);
+
+                $this->db->where('LOWER(email)', $mail);
+                $exists_in_employees = $this->db->get('employees')->row();
+
+                // Determine user type
                 if ($this->session->userdata('trial') == 'trial') {
                     $user_type = 'trial';
-                    $trial_expire = date('Y-m-d', strtotime('+'.$this->settings->trial_days .' days'));
-                }else{
+                    $trial_expire = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
+                } else {
                     $user_type = 'registered';
                     $trial_expire = date('Y-m-d');
                 }
 
-                // if email already exist
-                if ($email){
-                    echo json_encode(array('st'=>2));
+                // If email exists in either table
+                if ($exists_in_users || $exists_in_employees) {
+                    echo json_encode(['st' => 2]); // 2 means email already exists
                     exit();
                 } else {
 
@@ -251,7 +411,8 @@ class Auth extends Home_Controller
                             'role' => $user->role,
                             'thumb' =>$user->thumb,
                             'email' => $user->email,
-                            'logged_in' => true
+                            'logged_in' => true,
+                            'is_org_admin' => true
                         );
                         $this->session->set_userdata($data);
 
@@ -259,7 +420,7 @@ class Auth extends Home_Controller
                         $billing = $this->input->post('billing', true);
                         $this->add_package($plan, $billing);
 
-
+                        $this->add_trial_user_settings($user->id, "");
                         //send email verify link
                         if ($this->settings->enable_email_verify == 1) {
                             $link = base_url('verify?code='.$hash.'&user='.md5($id));
@@ -284,50 +445,145 @@ class Auth extends Home_Controller
     }
 
     //register business
+    // public function register_business()
+    // {
+    //     if($_POST){
+
+    //         $this->load->library('form_validation');
+    //         $this->form_validation->set_rules('name', "Business Name", 'required');
+    //         $this->form_validation->set_rules('country', "Country", 'required');
+
+    //         if (settings()->enable_email_verify == 1) {
+    //             $status = 4;
+    //         }else{
+    //             $status = 3;
+    //         }
+
+    //         // If validation false show error message using ajax
+    //         if($this->form_validation->run() == FALSE){
+    //             $data = array();
+    //             $data['errors'] = validation_errors();
+    //             $str = $data['errors'];
+    //             echo json_encode(array('st'=>0,'msg'=>$str));
+    //             exit();
+    //         }else{
+    //             $rand_uid = substr(random_string('numeric', 5).mt_rand(), 0, 8);
+    //             $uid = ltrim($rand_uid, '0');
+
+    //             $data=array(
+    //                 'user_id' => user()->id,
+    //                 'uid' => $uid,
+    //                 'is_autoload_amount' => 0,
+    //                 'enable_stock' => 0,
+    //                 'name' => $this->input->post('name', true),
+    //                 'slug' => str_slug($this->input->post('name', true)),
+    //                 'country' => $this->input->post('country', true),
+    //                 'category' => $this->input->post('category', true),
+    //                 'is_primary' => 1
+    //             );
+    //             $data = $this->security->xss_clean($data);
+    //             $this->common_model->insert($data, 'business');
+    //             $this->add_trial_user_settings(user()->id, $this->input->post('time_zone', true));
+    //             echo json_encode(array('st'=> $status));
+    //             exit();
+    //         }
+    //     }
+    // }
     public function register_business()
     {
-        if($_POST){
+        if ($_POST) {
 
             $this->load->library('form_validation');
             $this->form_validation->set_rules('name', "Business Name", 'required');
             $this->form_validation->set_rules('country', "Country", 'required');
-            
+
             if (settings()->enable_email_verify == 1) {
                 $status = 4;
-            }else{
+            } else {
                 $status = 3;
             }
 
             // If validation false show error message using ajax
-            if($this->form_validation->run() == FALSE){
+            if ($this->form_validation->run() == FALSE) {
                 $data = array();
                 $data['errors'] = validation_errors();
                 $str = $data['errors'];
-                echo json_encode(array('st'=>0,'msg'=>$str));
+                echo json_encode(array('st' => 0, 'msg' => $str));
                 exit();
-            }else{
-                $rand_uid = substr(random_string('numeric', 5).mt_rand(), 0, 8);
+            } else {
+                $rand_uid = substr(random_string('numeric', 5) . mt_rand(), 0, 8);
                 $uid = ltrim($rand_uid, '0');
 
-                $data=array(
+                $country = $this->input->post('country', true);
+                $time_zone = $this->input->post('time_zone', true);
+
+                $data = array(
                     'user_id' => user()->id,
                     'uid' => $uid,
                     'is_autoload_amount' => 0,
                     'enable_stock' => 0,
                     'name' => $this->input->post('name', true),
                     'slug' => str_slug($this->input->post('name', true)),
-                    'country' => $this->input->post('country', true),
+                    'country' => $country,
                     'category' => $this->input->post('category', true),
                     'is_primary' => 1
                 );
                 $data = $this->security->xss_clean($data);
                 $this->common_model->insert($data, 'business');
-                echo json_encode(array('st'=> $status));
+
+                // ✅ Update the user's country and timezone
+                $update_user = array(
+                    'country' => $country,
+                    'timezone' => $time_zone
+                );
+                $update_user = $this->security->xss_clean($update_user);
+                $this->common_model->update($update_user, user()->id, 'users');
+
+                // ✅ Add trial user settings if needed
+                $this->add_trial_user_settings(user()->id, $time_zone);
+                $this->admin_model->intial_department_storing(user()->id, $uid);
+                echo json_encode(array('st' => $status));
                 exit();
             }
         }
     }
 
+
+    public function add_trial_user_settings($user_id, $time_zone)
+    {
+        // Check if the user already has settings
+        $existing_settings = $this->db->get_where('org_settings', ['user_id' => $user_id])->row();
+
+        if (empty($existing_settings)) {
+            // Insert default trial settings
+            $data = [
+                'user_id' => $user_id,
+                'screenshot_flag' => 1,
+                'screenshot_time_interval' => 5,
+                'webcam_flag' => 1,
+                'webcam_time_interval' => 5,
+                'mouse_move_flag' => 1,
+                'mouse_move_threshold' => 20,
+                'key_stroke_flag' => 1,
+                'key_stroke_threshold' => 40,
+                'idle_time_flag' => 1,
+                'timecards_time_interval' => 5,
+                'time_zone' => 'UTC',
+                'created_at' => my_date_now(),
+                'updated_at' => my_date_now()
+            ];
+
+            $this->db->insert('org_settings', $data);
+            return $this->db->insert_id();
+        } else {
+            // Update only the timezone and updated_at
+            $this->db->where('user_id', $user_id)->update('org_settings', [
+                'time_zone' => $time_zone ?? 'UTC'
+            ]);
+
+            return true;
+        }
+    }
 
 
     //add package
@@ -335,22 +591,47 @@ class Auth extends Home_Controller
     {
         $package = $this->common_model->get_by_slug($slug, 'package');
         $uid = random_string('numeric',5);
-        
-        if($billing_type =='monthly'):
-            if (settings()->enable_discount == 1){
-                $amount = get_discount($package->monthly_price, $package->dis_month); 
-            }else{
-                $amount = round($package->monthly_price); 
+
+        // if($billing_type =='monthly'):
+        //     if (settings()->enable_discount == 1){
+        //         $amount = get_discount($package->monthly_price, $package->dis_month); 
+        //     }else{
+        //         $amount = round($package->monthly_price); 
+        //     }
+        //     $expire_on = date('Y-m-d', strtotime('+1 month'));
+        // else:
+        //     if (settings()->enable_discount == 1){
+        //         $amount = get_discount($package->price, $package->dis_year); 
+        //     }else{
+        //         $amount = round($package->price); 
+        //     }
+        //     $expire_on = date('Y-m-d', strtotime('+12 month'));
+        // endif;
+        if ($billing_type == 'week'):
+            if (settings()->enable_discount == 1) {
+                $amount = get_discount($package->weekly_price, $package->dis_week);
+            } else {
+                $amount = round($package->weekly_price);
+            }
+            $expire_on = date('Y-m-d', strtotime('+1 week'));
+
+        elseif ($billing_type == 'monthly'):
+            if (settings()->enable_discount == 1) {
+                $amount = get_discount($package->monthly_price, $package->dis_month);
+            } else {
+                $amount = round($package->monthly_price);
             }
             $expire_on = date('Y-m-d', strtotime('+1 month'));
-        else:
-            if (settings()->enable_discount == 1){
-                $amount = get_discount($package->price, $package->dis_year); 
-            }else{
-                $amount = round($package->price); 
+
+        else: // yearly
+            if (settings()->enable_discount == 1) {
+                $amount = get_discount($package->price, $package->dis_year);
+            } else {
+                $amount = round($package->price);
             }
             $expire_on = date('Y-m-d', strtotime('+12 month'));
         endif;
+
 
         if (number_format($amount, 0) == 0):
             $status = 'verified';
@@ -649,31 +930,59 @@ class Auth extends Home_Controller
             redirect(base_url());
         }
 
-        $mail =  strtolower(trim($this->input->post('email',true))); 
-        $valid = $this->auth_model->check_email($mail);
-        $random_number = random_string('numeric',4);
+        $mail = strtolower(trim($this->input->post('email', true)));
+        $random_number = random_string('numeric', 4);
         $random_pass = hash_password($random_number);
+
+        // Step 1: Check in employees table
+        $valid = $this->auth_model->check_emloyee_email($mail);
+
         if ($valid) {
-           
-           foreach($valid as $row){
+            foreach ($valid as $row) {
                 $data['email'] = $row->email;
                 $data['name'] = $row->name;
                 $data['password'] = $random_number;
                 $user_id = $row->id;
+                if (!$this->auth_model->is_organization_subscribed($row->user_id)) {
+                    echo json_encode(array('st' => 2));
+                    exit();
+                }
+                $this->send_recovery_mail($data);
+
+                $user_data = array('password' => $random_pass);
+                $this->common_model->edit_option($user_data, $user_id, 'employees');
+
+                $url = base_url('login');
+                echo json_encode(array('st' => 1, 'url' => $url));
+                return; // exit after processing employee
+            }
+        }
+
+        // Step 2: If not found in employees, check in users table
+        $valid = $this->auth_model->check_email($mail);
+
+        if ($valid) {
+            foreach ($valid as $row) {
+                $data['email'] = $row->email;
+                $data['name'] = $row->name;
+                $data['password'] = $random_number;
+                $user_id = $row->id;
+
                 $this->send_recovery_mail($data);
 
                 $user_data = array('password' => $random_pass);
                 $this->common_model->edit_option($user_data, $user_id, 'users');
-                
-                $url = base_url('login');
-                echo json_encode(array('st'=>1, 'url' => $url));
-            }
 
-        } else {
-            echo json_encode(array('st'=>2));
+                $url = base_url('login');
+                echo json_encode(array('st' => 1, 'url' => $url));
+                return; // exit after processing user
+            }
         }
-        
+
+        // Step 3: If email not found in either table
+        echo json_encode(array('st' => 3));
     }
+
 
     //send reset code to user email
     public function send_recovery_mail($user)
@@ -683,7 +992,14 @@ class Auth extends Home_Controller
         $data['password'] = $user['password'];
         $data['email'] = $user['email'];
         $subject = 'Password Recovery';
-        $msg = 'Hello '.$user['name'].'<br> We have reset your password, Please use this <b>'.$user['password'].'</b> code to login your account';
+        $logo = '<img width="100" src="' . base_url('uploads/thumbnail/2_thumb-100x100.png') . '" alt="Workroom" style="display:block; margin:0 auto;width: 150px;">';
+
+        $msg = $logo;
+        $msg .= '<br><br>';
+        $msg .= 'Hello ' . $user['name'] . ',<br>';
+        $msg .= 'We have reset your password. Please use this <b>' . $user['password'] . '</b> code to login to your account.';
+
+        // $msg = 'Hello '.$user['name'].'<br> We have reset your password, Please use this <b>'.$user['password'].'</b> code to login your account';
         $this->email_model->send_email($user['email'], $subject, $msg);
     }
 

@@ -1,0 +1,31 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+
+ERROR - 2025-04-10 12:36:07 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:36:08 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:36:08 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:36:08 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:36:08 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:36:09 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:36:11 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:37:44 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:13 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:14 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:15 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:15 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:15 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:15 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:16 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:16 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:16 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:17 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:40:17 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:15 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:15 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:42 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:44 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:44 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:44 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:44 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:44 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:45 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-04-10 12:47:45 --> Severity: error --> Exception: Table 'workroom.settings' doesn't exist C:\xampp\htdocs\work-room\system\database\drivers\mysqli\mysqli_driver.php 307

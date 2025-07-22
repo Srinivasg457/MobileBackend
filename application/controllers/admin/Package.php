@@ -23,6 +23,17 @@ class Package extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/package',$data,TRUE);
         $this->load->view('admin/index',$data);
     }
+    public function app_pack()
+    {
+        $data = array();
+        $data['page_title'] = 'App-Package';
+        $data['page'] = 'Package';
+        $data['package'] = FALSE;
+        $data['packages'] = $this->admin_model->select_asc('app_package');
+        $data['features'] = $this->admin_model->select_asc('app_package_feature');
+        $data['main_content'] = $this->load->view('admin/app_package', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
 
 
     public function update($id)
@@ -44,6 +55,28 @@ class Package extends Home_Controller {
             redirect($_SERVER['HTTP_REFERER']);
         }  
     }
+    public function app_update($id)
+    {
+        check_status();
+
+        if ($_POST) {
+            if (!empty($this->input->post('is_special', true))) {
+                $special = 1;
+            } else {
+                $special = 0;
+            };
+            $data = array(
+                'name' => $this->input->post('name', true),
+                'monthly_price' => $this->input->post('monthly_price', true),
+                'yearly_price' => $this->input->post('yearly_price', true),
+                'is_special' => $special
+            );
+            $data = $this->security->xss_clean($data);
+            $this->admin_model->edit_option($data, $id, 'app_package');
+            $this->session->set_flashdata('msg', trans('msg-updated'));
+            redirect($_SERVER['HTTP_REFERER']);
+        }
+    }
 
 
     public function update_status($id, $status)
@@ -57,6 +90,18 @@ class Package extends Home_Controller {
         $this->session->set_flashdata('msg', trans('msg-updated'));
         redirect($_SERVER['HTTP_REFERER']);
         
+    }
+
+    public function app_update_status($id, $status)
+    {
+        check_status();
+        $data = array(
+            'is_active' => $status
+        );
+        $data = $this->security->xss_clean($data);
+        $this->admin_model->edit_option($data, $id, 'app_package');
+        $this->session->set_flashdata('msg', trans('msg-updated'));
+        redirect($_SERVER['HTTP_REFERER']);
     }
 
     public function update_features($id)

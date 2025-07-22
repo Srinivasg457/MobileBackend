@@ -508,38 +508,93 @@
     });
     
 
-    $(function(){
-      $(document).on('submit', "#cahage_pass_form", function() {
-        $.post($('#cahage_pass_form').attr('action'), $('#cahage_pass_form').serialize(), function(json){
+  $(function () {
 
-          if (json.st == 1) {
-            $('#cahage_pass_form')[0].reset();
-            swal({
-              title: msg_congratulations,
-              text: msg_password_reset_success_msg,
-              type: "success",
-              showConfirmButton: true
-            });
-          }else if (json.st == 2) {
-            $('#cahage_pass_form')[0].reset();
-            swal({
-              title: msg_opps,
-              text: msg_confirm_pass_not_match_msg,
-              type: "error",
-              showConfirmButton: true
-            });
-          }else {
-            $('#cahage_pass_form')[0].reset();
-            swal({
-              title: msg_error,
-              text: msg_old_password_doesnt_match,
-              type: "error",
-              showConfirmButton: true
-            });
-          }
-        },'json');
+      $(document).on('click', '.toggle-password', function() {
+    const inputId = $(this).data('target');
+    const input = $('#' + inputId);
+    const icon = $(this).find('i');
+
+    if (input.attr('type') === 'password') {
+        input.attr('type', 'text');
+        icon.removeClass('bi-eye-slash-fill').addClass('bi-eye');
+    } else {
+        input.attr('type', 'password');
+        icon.removeClass('bi-eye').addClass('bi-eye-slash-fill');
+    }
+});
+
+    $(document).on('submit', "#cahage_pass_form", function(e) {
+      e.preventDefault();
+      
+    const oldPass = $('input[name="old_pass"]').val().trim();
+    const newPass = $('input[name="new_pass"]').val().trim();
+    const confirmPass = $('input[name="confirm_pass"]').val().trim();
+
+    // Check if any field is empty
+    if (newPass.length < 1 || confirmPass.length < 1) {
+        swal({
+            title: "Validation Error",
+            text: "password fields must contain at least one character.",
+            type: "warning",
+            showConfirmButton: true
+        });
         return false;
-      });
+    }
+        // Check if new password and confirm password match
+    if (newPass !== confirmPass) {
+        swal({
+            title: "Validation Error",
+            text: "New Password and Confirm Password do not match.",
+            type: "error",
+            showConfirmButton: true
+        });
+        return false;
+    }
+      
+    // Check if new password is the same as the old password
+    if (oldPass === newPass) {
+        swal({
+            title: "Validation Error",
+            text: "New Password must be different from the Old Password.",
+            type: "warning",
+            showConfirmButton: true
+        });
+        return false;
+    }
+
+
+    // Proceed with AJAX if validation passes
+    $.post($('#cahage_pass_form').attr('action'), $('#cahage_pass_form').serialize(), function(json) {
+        $('#cahage_pass_form')[0].reset();
+
+        if (json.st == 1) {
+            swal({
+                title: msg_congratulations,
+                text: msg_password_reset_success_msg,
+                type: "success",
+                showConfirmButton: true
+            });
+        } else if (json.st == 2) {
+            swal({
+                title: msg_opps,
+                text: msg_confirm_pass_not_match_msg,
+                type: "error",
+                showConfirmButton: true
+            });
+        } else {
+            swal({
+                title: msg_error,
+                text: msg_old_password_doesnt_match,
+                type: "error",
+                showConfirmButton: true
+            });
+        }
+    }, 'json');
+
+    return false;
+});
+
     });
 
 
@@ -1278,6 +1333,13 @@
               showCancelButton: false
             }),                
             $("#row_"+itemId).slideUp();
+          } else {
+              swal({
+                title: "Cannot delete!",
+                text: "This department is assigned to one or more employee.",
+                type: "error",
+                showCancelButton: false
+              })
           }
         },'json');
 

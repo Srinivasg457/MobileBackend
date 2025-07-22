@@ -8,6 +8,6 @@
 		  </div><br>
 		    <div class="clearfix"></div>
 		</div>
-		<a href="<?php echo base_url('admin/subscription') ?>" class="btn btn-info rounded"><?php echo trans('upgrade-your-plan') ?></a>
+		<a href="<?php echo base_url('admin/subscription/upgrade_plan') ?>" class="btn btn-info rounded"><?php echo trans('upgrade-your-plan') ?></a>
 	</div>
 </div>

@@ -660,10 +660,11 @@ class Common_model extends CI_Model {
     // get_payment
     function get_my_package()
     {
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
         $this->db->select('p.*, k.name as package_name, k.slug');
         $this->db->from('payment p');
         $this->db->join('package k', 'k.id = p.package', 'LEFT');
-        $this->db->where('p.user_id', $this->session->userdata('id'));
+        $this->db->where('p.user_id', $user_id);
         $this->db->order_by('p.id', 'DESC');
         $query = $this->db->get();
         $query = $query->row();  

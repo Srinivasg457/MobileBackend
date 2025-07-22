@@ -83,3 +83,25 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+/*
+|--------------------------------------------------------------------------
+| Application Feature Constants
+|--------------------------------------------------------------------------
+|
+| These constants define the unique feature identifiers (slugs) used
+| across the application to manage Role-Based Access Control (RBAC).
+| These values correspond to entries in the `app_feature` table and 
+| are used to check access permissions for employees based on their
+| assigned roles and departments.
+|
+| Use these constants wherever access control logic is applied,
+| instead of hardcoded strings, to ensure consistency and prevent
+| typos throughout the application.
+|
+*/
+define('FEATURE_EMPLOYEE_SETTINGS', 'employee_settings');
+define('FEATURE_EMPLOYEES', 'employees');
+define('FEATURE_ORGANIZATION_SETTING', 'organization_setting');
+define('FEATURE_SCREENSHOT', 'screenshot');
+define('FEATURE_TIMECARDS', 'timecards');
+define('FEATURE_TIMECARDS_MANUAL', 'timecards_manual');
