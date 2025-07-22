@@ -133,6 +133,9 @@ class EmployeeDashboard extends Home_Controller
                     break;
             }
         }
+        
+                $data['output'] = $this->get_this_week_work_time_data(); // 👈 Add this line
+
         $data['response_data'] = $this->get_last_week_total_active_hours(); // 👈 Add this line
         $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary();
 
@@ -1035,17 +1038,102 @@ class EmployeeDashboard extends Home_Controller
         }
     }
 
+private function get_this_week_work_time_data()
+{
+    $employee_id = $this->session->userdata('employee_id');
+    $user_id = $this->session->userdata('employee_org_id');
 
-    // Add other methods for specific employee dashboard sections or functionalities
-    // e.g., public function tasks(), public function timesheets(), etc.
+    if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+        return [];
+    }
 
+    $today = new DateTime();
+    $monday = (clone $today)->modify('monday this week');
 
+    // Get time logs for the week
+    $this->db->select('log_date, start_time, end_time')
+        ->from('time_logs')
+        ->where('employee_id', $employee_id)
+        ->where('user_id', $user_id)
+        ->where('log_date >=', $monday->format('Y-m-d'))
+        ->where('log_date <=', $today->format('Y-m-d'))
+        ->order_by('log_date', 'ASC');
 
+    $query = $this->db->get();
+    $logs = $query->result_array();
 
+    $total_seconds = 0;
+    $daily_hours = [];
+    $days_with_data = 0;
 
+    foreach ($logs as $log) {
+        if (!isset($log['start_time'], $log['end_time']) || empty($log['start_time']) || empty($log['end_time'])) {
+            continue;
+        }
 
+        $start = new DateTime($log['start_time']);
+        $end = new DateTime($log['end_time']);
 
-    //   Expand Down
+        $interval = $start->diff($end);
+        $seconds = ($interval->h * 3600) + ($interval->i * 60) + $interval->s;
+
+        $total_seconds += $seconds;
+        $daily_hours[$log['log_date']] = sprintf('%02d:%02d', floor($seconds / 3600), floor(($seconds % 3600) / 60));
+        $days_with_data++;
+    }
+
+    // Total work time in hours and minutes
+    $hours = floor($total_seconds / 3600);
+    $minutes = floor(($total_seconds % 3600) / 60);
+
+    // Convert total work time to minutes
+    $total_minutes = floor($total_seconds / 60);
+
+    // Estimated keystrokes and mouse activity
+    $estimated_keystrokes = $total_minutes * 40;
+    $estimated_mouse_activity = $total_minutes * 20;
+
+    // Fetch actual keystroke and mouse movement from employee_activity
+    $this->db->select('SUM(total_keystrokes) AS sum_keystrokes, SUM(total_mouse_movement) AS sum_mouse')
+        ->from('Employee_Activity')
+        ->where('employee_id', $employee_id)
+        ->where('user_id', $user_id)
+        ->where('DATE(created_at) >=', $monday->format('Y-m-d'))
+        ->where('DATE(created_at) <=', $today->format('Y-m-d'));
+
+    $activity_result = $this->db->get()->row_array();
+
+    $actual_keystrokes = isset($activity_result['sum_keystrokes']) ? (int)$activity_result['sum_keystrokes'] : 0;
+    $actual_mouse_activity = isset($activity_result['sum_mouse']) ? (int)$activity_result['sum_mouse'] : 0;
+
+    // Percentage calculations
+    $keystroke_percentage = $estimated_keystrokes > 0 ? round(($actual_keystrokes / $estimated_keystrokes) * 100, 2) : 0;
+    $mouse_activity_percentage = $estimated_mouse_activity > 0 ? round(($actual_mouse_activity / $estimated_mouse_activity) * 100, 2) : 0;
+
+    $output = [
+        'date_range' => $monday->format('Y-m-d') . ' to ' . $today->format('Y-m-d'),
+        'total_work_time' => sprintf('%02d:%02d', $hours, $minutes),
+
+        // Estimated values based on time
+        'estimated_keystrokes_in_the_period' => $estimated_keystrokes,
+        'estimated_mouse_activity_in_the_period' => $estimated_mouse_activity,
+
+        // Actual values from employee_activity table
+        'actual_keystrokes_in_the_period' => $actual_keystrokes,
+        'actual_mouse_activity_in_the_period' => $actual_mouse_activity,
+
+        // Percentages
+        'keystroke_percentage' => $keystroke_percentage, // %
+        'mouse_activity_percentage' => $mouse_activity_percentage, // %
+
+        'days_with_data' => $days_with_data,
+        'total_days_in_week' => (new DateTime($today->format('Y-m-d')))->diff(new DateTime($monday->format('Y-m-d')))->days + 1,
+        'daily_breakdown' => $daily_hours
+    ];
+
+    return $output;
+}
+
 
 
 
