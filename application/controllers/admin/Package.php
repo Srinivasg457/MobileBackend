@@ -45,7 +45,7 @@ class Package extends Home_Controller {
             if(!empty($this->input->post('is_special', true))){$special = 1;}else{$special = 0;};
             $data=array(
                 'name' => $this->input->post('name', true),
-                'price' => $this->input->post('price', true),
+                'yearly_price' => $this->input->post('yearly_price', true),
                 'monthly_price' => $this->input->post('monthly_price', true),
                 'is_special' => $special
             );

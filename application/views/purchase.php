@@ -39,9 +39,9 @@
                         <?php else: ?>
                             <?php 
                                 if (settings()->enable_discount == 1){
-                                    $price = get_discount($package->price, $package->dis_year); 
+                                    $price = get_discount($package->yearly_price, $package->dis_year); 
                                 }else{
-                                    $price = round($package->price); 
+                                    $price = round($package->yearly_price); 
                                 }
                                 $frequency = trans('per-year');
                                 $billing_type = 'yearly';
