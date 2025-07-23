@@ -227,7 +227,7 @@
                 <select class="form-control single_select" name="package" required>
                     <option value=""><?php echo trans('select-package') ?></option>
                     <?php foreach ($packages as $package): ?>
-                      <option value="<?php echo html_escape($package->id) ?>"> <?php echo html_escape($package->name).' (Monthly: '.' '.price_formatted($package->monthly_price, 'site').' Yearly: '.' '.price_formatted($package->price, 'site').')' ?> </option>
+                      <option value="<?php echo html_escape($package->id) ?>"> <?php echo html_escape($package->name).' (Monthly: '.' '.price_formatted($package->monthly_price, 'site').' Yearly: '.' '.price_formatted($package->yearly_price, 'site').')' ?> </option>
                     <?php endforeach ?>
                 </select>
             </div>

@@ -175,13 +175,13 @@
                                                     </div>
                                                     <?php if (settings()->enable_discount == 1): ?>
                                                       <h4>
-                                                        <?php if ($package->dis_month != 0 && $package->price != 0): ?>
+                                                        <?php if ($package->dis_month != 0 && $package->yearly_price != 0): ?>
                                                           <span class="monthly_show soft-blue" style="display: none;">
                                                               <?php echo html_escape($package->dis_month); ?>% <?php echo trans('off') ?>
                                                           </span>
                                                         <?php endif ?>
                                                         
-                                                        <?php if ($package->dis_year != 0 && $package->price != 0): ?>
+                                                        <?php if ($package->dis_year != 0 && $package->yearly_price != 0): ?>
                                                           <span class="yearly_show soft-blue">
                                                               <?php echo html_escape($package->dis_year); ?>% <?php echo trans('off') ?>
                                                           </span>
@@ -201,21 +201,21 @@
                                                 <div class="theader <?php if($a==2){echo"colm_2";} ?>">
                                                     <div class="price mb-5 <?php if($a==2){echo"colm_2";} ?>">
                                                  
-                                                        <span class="price_year <?php if(settings()->enable_discount == 1 && $package->dis_year != 0 && $package->price != 0){echo"price-off";} ?>">
-                                                          <?php echo currency_to_symbol(settings()->currency); ?><?php echo round($package->price); ?>
+                                                        <span class="price_year <?php if(settings()->enable_discount == 1 && $package->dis_year != 0 && $package->yearly_price != 0){echo"price-off";} ?>">
+                                                          <?php echo currency_to_symbol(settings()->currency); ?><?php echo round($package->yearly_price); ?>
                                                         </span>  
 
-                                                        <?php if(settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0): ?>
+                                                        <?php if(settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0): ?>
                                                           <span class="price_year">
-                                                          <?php echo currency_to_symbol(settings()->currency); ?><?php echo get_discount($package->price, $package->dis_year) ?>
+                                                          <?php echo currency_to_symbol(settings()->currency); ?><?php echo get_discount($package->yearly_price, $package->dis_year) ?>
                                                           </span>
                                                         <?php endif ?>
 
-                                                        <span class="price_month <?php if(settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0){echo"price-off";} ?>" style="display: none;">
+                                                        <span class="price_month <?php if(settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0){echo"price-off";} ?>" style="display: none;">
                                                           <?php echo currency_to_symbol(settings()->currency); ?><?php echo round($package->monthly_price); ?> 
                                                         </span>
 
-                                                        <?php if(settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0): ?>
+                                                        <?php if(settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0): ?>
                                                         <span class="price_month" style="display: none;">
                                                           <?php echo currency_to_symbol(settings()->currency); ?><?php echo get_discount($package->monthly_price, $package->dis_month) ?>
                                                         </span>

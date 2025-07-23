@@ -36,7 +36,7 @@
                                                 </a>
 
                                                 <h2 class="mt-10"><span class="label label-primary"><?php echo html_escape($package->name); ?></span> </h2>
-                                                <p class="mb-15"><?php echo price_formatted($package->price, 'site'); ?> <span class="fs-14"><?php echo trans('per-year') ?></span> <br> <?php echo price_formatted($package->monthly_price, 'site'); ?> <span class="fs-14"> <?php echo trans('per-month') ?></p>
+                                                <p class="mb-15"><?php echo price_formatted($package->yearly_price, 'site'); ?> <span class="fs-14"><?php echo trans('per-year') ?></span> <br> <?php echo price_formatted($package->monthly_price, 'site'); ?> <span class="fs-14"> <?php echo trans('per-month') ?></p>
 
                                                 <a href="#packageModal_<?php echo html_escape($package->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-package') ?></a>
                                             </td>

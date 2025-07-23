@@ -71,9 +71,9 @@ class Paystack extends Home_Controller
                             $expire_on = date('Y-m-d', strtotime('+1 month'));
                         else:
                             if (settings()->enable_discount == 1){
-                                $amount = get_discount($package->price, $package->dis_year); 
+                                $amount = get_discount($package->yearly_price, $package->dis_year); 
                             }else{
-                                $amount = round($package->price); 
+                                $amount = round($package->yearly_price); 
                             }
                             $expire_on = date('Y-m-d', strtotime('+12 month'));
                         endif;

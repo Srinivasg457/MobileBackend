@@ -78,7 +78,7 @@ class Subscription extends Home_Controller
                 $amount = $package->monthly_price;
                 $expire_on = date('Y-m-d', strtotime('+1 month'));
             else:
-                $amount = $package->price;
+                $amount = $package->yearly_price;
                 $expire_on = date('Y-m-d', strtotime('+12 month'));
             endif;
 
@@ -159,7 +159,7 @@ class Subscription extends Home_Controller
             $amount = $package->monthly_price;
             $expire_on = date('Y-m-d', strtotime('+1 month'));
         else:
-            $amount = $package->price;
+            $amount = $package->yearly_price;
             $expire_on = date('Y-m-d', strtotime('+12 month'));
         endif;
 
