@@ -323,7 +323,6 @@
              <div class="col-sm-6">
                  <div class="box">
                     
- <?php echo json_encode($weekly_reports); ?>
                      <div class="box-header with-border">
                          <h3 class="box-title"><?php echo "Focus"; ?></h3>
                      </div>
@@ -772,10 +771,6 @@ case 'last_6_months': {
 
     break;
 }
-
-        case 'this_month':
-        case 'last_month':
-        case 'last_6_months':
         case '':
         default:
             filteredData = weeklyReportsData;
@@ -911,11 +906,6 @@ const suggestedMaxY = Math.ceil((maxBarValue * 1.25) / 10) * 10;
         }
     });
 }
-
-
-
-
-
 
 
      function render_employee_productivity_chart() {
