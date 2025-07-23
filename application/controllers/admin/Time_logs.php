@@ -931,5 +931,87 @@ public function get_weekly_reports()
             ]));
     }
 }
+  public function generate_last_two_months_logs()
+    {
+        $timezone = new DateTimeZone('UTC');
+        $user_id = $this->session->userdata('employee_org_id');
+        $id = $this->session->userdata('employee_id');
+ 
+        // Date range: last 2 months
+        $endDate = new DateTime('now', $timezone);
+        $startDate = (clone $endDate)->sub(new DateInterval('P2M'));
+ 
+        $data = [];
+        $interval = new DateInterval('P1D');
+        $dateRange = new DatePeriod($startDate, $interval, $endDate);
+ 
+        foreach ($dateRange as $date) {
+            $logDate = $date->format('Y-m-d');
+ 
+            // Random start and end time
+            $startHour = rand(8, 9);
+            $startMin = rand(0, 59);
+            $startSec = rand(0, 59);
+            $endHour = rand(16, 18);
+            $endMin = rand(0, 59);
+            $endSec = rand(0, 59);
+ 
+            $startTime = (clone $date)->setTime($startHour, $startMin, $startSec);
+            $endTime = (clone $date)->setTime($endHour, $endMin, $endSec);
+ 
+            // Duration in seconds
+            $totalSeconds = $endTime->getTimestamp() - $startTime->getTimestamp();
+ 
+            // Active and idle split
+            $activeSeconds = rand((int)($totalSeconds * 0.6), (int)($totalSeconds * 0.9));
+            $idleSeconds = $totalSeconds - $activeSeconds;
+ 
+            $totalActiveTime = gmdate('H:i:s', $activeSeconds);
+            $totalIdleTime = gmdate('H:i:s', $idleSeconds);
+ 
+            // Estimate keystrokes and mouse movements from active seconds
+            $activeMinutes = floor($activeSeconds / 60);
+            $estimated_keystrokes = $activeMinutes * 40;
+            $estimated_mouse = $activeMinutes * 20;
+ 
+            // Insert into time_logs
+            $log = [
+                'employee_id' => $id,
+                'user_id' => $user_id,
+                'log_date' => $logDate,
+                'start_time' => $startTime->format('Y-m-d H:i:s'),
+                'end_time' => $endTime->format('Y-m-d H:i:s'),
+                'total_active_time' => $totalActiveTime,
+                'total_idle_time' => $totalIdleTime,
+                'created_at' => $startTime->format('Y-m-d H:i:s'),
+                'updated_at' => $startTime->format('Y-m-d H:i:s')
+            ];
+            $this->db->insert('time_logs', $log);
+ 
+            // Insert into Employee_Activity
+            $activity = [
+                'employee_id' => $id,
+                'user_id' => $user_id,
+                'total_mouse_movement' => $estimated_mouse,
+                'total_keystrokes' => $estimated_keystrokes,
+                'created_at' => $startTime->format('Y-m-d H:i:s')
+            ];
+            $this->db->insert('Employee_Activity', $activity);
+ 
+            // For return/debug
+            $data[] = [
+                'log' => $log,
+                'activity' => $activity
+            ];
+        }
+ 
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'success',
+                'count' => count($data),
+                'data' => $data
+            ]));
+    }
 }
 ?>

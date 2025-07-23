@@ -30,15 +30,20 @@
                           $status = "1";
                         }; ?>
                         <a href="<?php echo base_url('admin/package/update_status/' . $package->id . '/' . $status) ?>" class="package_status_btn btn btn-sm btn-toggle <?php if ($package->is_active == 1) {
-                                                                                                                                                                              echo "active";
-                                                                                                                                                                            } ?>" data-toggle="button" aria-pressed="false" autocomplete="off">
+                                                                                                                                                                          echo "active";
+                                                                                                                                                                        } ?>" data-toggle="button" aria-pressed="false" autocomplete="off">
                           <div class="handle"></div>
                         </a>
 
                         <h2 class="mt-10"><span class="label label-primary"><?php echo html_escape($package->name); ?></span> </h2>
-                        <p class="mb-15"><?php echo price_formatted($package->price, 'site'); ?> <span class="fs-14"><?php echo trans('per-year') ?></span> <br> <?php echo price_formatted($package->monthly_price, 'site'); ?> <span class="fs-14"> <?php echo trans('per-month') ?></p>
 
-                        <a href="#packageModal_<?php echo html_escape($package->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-package') ?></a>
+                        <?php if ($package->slug == "trial") { ?>
+                          <p class="mb-15"><?php echo "USD 0.00" ?><span class="fs-14"><?php echo " week" ?></span> <br> <span class="fs-14"></p>
+                          <a style="visibility: hidden;" href="#packageModal_<?php echo html_escape($package->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-package') ?></a>
+                        <?php } else { ?>
+                          <p class="mb-15"><?php echo price_formatted($package->yearly_price, 'site'); ?> <span class="fs-14"><?php echo trans('per-year') ?></span> <br> <?php echo price_formatted($package->monthly_price, 'site'); ?> <span class="fs-14"> <?php echo trans('per-month') ?></p>
+                          <a href="#packageModal_<?php echo html_escape($package->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-package') ?></a>
+                        <?php   }; ?>
                       </td>
                     <?php $i++;
                     endforeach; ?>
@@ -250,7 +255,7 @@
             <div class="form-group row">
               <label class="col-sm-12 text-left control-label col-form-label"><?php echo trans('yearly-price') ?></label>
               <div class="col-sm-12">
-                <input type="text" class="form-control" name="price" value="<?php echo html_escape($package->price) ?>">
+                <input type="text" class="form-control" name="yearly_price" value="<?php echo html_escape($package->yearly_price) ?>">
               </div>
             </div>
 

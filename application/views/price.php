@@ -57,18 +57,18 @@
                     <span class="price text-dark">
                       <span class="price_year bold fs-40 <?php if ($i % 2 == 0) {
                                                             echo "text-light";
-                                                          } ?> <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->price != 0) {
+                                                          } ?> <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->yearly_price != 0) {
                                                                   echo "price-off";
                                                                 } ?>" style="display:none">
-                        <?php echo price_formatted($package->price, 'site'); ?> <br>
+                        <?php echo price_formatted($package->yearly_price, 'site'); ?> <br>
                       </span>
 
-                      <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->price != 0): ?>
+                      <?php if (settings()->enable_discount == 1 && $package->dis_year != 0 && $package->yearly_price != 0): ?>
                         <span class="h2 <?php if ($i % 2 == 0) {
                                           echo "text-light";
                                         } ?> semi-bold price_year fs-40 bold" style="display:none">
                           <?php
-                          $discount_price = get_discount($package->price, $package->dis_year);
+                          $discount_price = get_discount($package->yearly_price, $package->dis_year);
                           echo price_formatted($discount_price, 'site');
                           ?>
                         </span>
@@ -76,7 +76,7 @@
 
                       <span class="price_month fs-40 bold <?php if ($i % 2 == 0) {
                                                             echo "text-light";
-                                                          } ?> <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0) {
+                                                          } ?> <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0) {
                                                                   echo "price-off";
                                                                 } ?>">
                         <?php
@@ -84,7 +84,7 @@
                         ?> <br>
                       </span>
 
-                      <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->price != 0): ?>
+                      <?php if (settings()->enable_discount == 1 && $package->dis_month != 0 && $package->yearly_price != 0): ?>
                         <span class="h2 <?php if ($i % 2 == 0) {
                                           echo "text-light";
                                         } ?> semi-bold price_month fs-40 bold">
@@ -104,7 +104,7 @@
                   <p class="m-0">
                     <?php if (settings()->enable_discount == 1): ?>
 
-                      <?php if ($package->dis_month != 0 && $package->price != 0): ?>
+                      <?php if ($package->dis_month != 0 && $package->yearly_price != 0): ?>
                         <span class="monthly_show price-dis <?php if ($i % 2 == 0) {
                                                               echo "text-light";
                                                             } else {
@@ -114,7 +114,7 @@
                         </span>
                       <?php endif ?>
 
-                      <?php if ($package->dis_year != 0 && $package->price != 0): ?>
+                      <?php if ($package->dis_year != 0 && $package->yearly_price != 0): ?>
                         <span class="yearly_show price-dis <?php if ($i % 2 == 0) {
                                                               echo "text-light";
                                                             } else {
