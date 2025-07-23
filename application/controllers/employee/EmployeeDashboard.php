@@ -449,8 +449,8 @@ class EmployeeDashboard extends Home_Controller
         $this->db->from('Employee_Activity');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where("DATE(log_date) >=", $from_date);
-        $this->db->where("DATE(log_date) <=", $to_date);
+        $this->db->where("DATE(created_at) >=", $from_date);
+        $this->db->where("DATE(created_at) <=", $to_date);
         $activity = $this->db->get()->row();
 
         // Format data
