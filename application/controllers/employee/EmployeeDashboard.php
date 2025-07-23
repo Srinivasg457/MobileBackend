@@ -320,8 +320,8 @@ class EmployeeDashboard extends Home_Controller
             $this->db->from('time_logs');
             $this->db->where('employee_id', $employee_id);
             $this->db->where('user_id', $organization_id);
-            $this->db->where("DATE(created_at) >=", $from_date);
-            $this->db->where("DATE(created_at) <=", $to_date);
+            $this->db->where("DATE(log_date) >=", $from_date);
+            $this->db->where("DATE(log_date) <=", $to_date);
             $time_data = $this->db->get()->row();
 
             $weekly_reports[] = [
@@ -357,8 +357,8 @@ class EmployeeDashboard extends Home_Controller
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where("DATE(created_at) >=", $from_date);
-        $this->db->where("DATE(created_at) <=", $to_date);
+        $this->db->where("DATE(log_date) >=", $from_date);
+        $this->db->where("DATE(log_date) <=", $to_date);
         $query = $this->db->get()->row();
 
         $this->db->select("
@@ -434,8 +434,8 @@ class EmployeeDashboard extends Home_Controller
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where("DATE(created_at) >=", $from_date);
-        $this->db->where("DATE(created_at) <=", $to_date);
+        $this->db->where("DATE(log_date) >=", $from_date);
+        $this->db->where("DATE(log_date) <=", $to_date);
         $query = $this->db->get()->row();
 
         // Defaults
@@ -449,8 +449,8 @@ class EmployeeDashboard extends Home_Controller
         $this->db->from('Employee_Activity');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
-        $this->db->where("DATE(created_at) >=", $from_date);
-        $this->db->where("DATE(created_at) <=", $to_date);
+        $this->db->where("DATE(log_date) >=", $from_date);
+        $this->db->where("DATE(log_date) <=", $to_date);
         $activity = $this->db->get()->row();
 
         // Format data
