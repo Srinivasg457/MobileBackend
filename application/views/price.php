@@ -28,7 +28,7 @@
               <?php endif ?>
 
               <div class="btn-group btn-group-toggle mt-3 pricing-table-basis" data-toggle="buttons">
-                <input type="radio" class="btn-check switch_price" name="payment_type" id="trail-1" value="trail" autocomplete="off">
+                <input type="radio" class="btn-check switch_price" name="payment_type" id="trail-1" value="trial" autocomplete="off">
                 <label class="btn btn-outline-primary custom-btngp" for="trail-1"><?php echo "Trial" ?></label>
 
                 <input type="radio" class="btn-check switch_price" name="payment_type" id="monthly-1" value="monthly" autocomplete="off" checked>
@@ -215,13 +215,23 @@
                 <input type="hidden" name="billing_type" value="yearly" class="billing_type">
 
                 <div class="card-body pb-5">
-                  <a href="<?php echo base_url('register?plan=' . $package->slug) ?><?php if (settings()->trial_days != 0) {
-                                                                                      echo '&trial=start';
-                                                                                    } ?>" class="btn btn-block  <?php if ($i % 2 == 1) {
-                                                                                                                  echo "btn-outline-primary";
-                                                                                                                } else {
-                                                                                                                  echo "btn-outline-light";
-                                                                                                                } ?>"><?php echo trans('get-started') ?> </a>
+                  <?php
+                  $url = base_url('register?plan=' . $package->slug);
+
+                  if ($package->slug == 'trial') {
+                    $url .= '&billing=week';
+                  } else {
+                    $url .= '&billing=monthly';
+                  }
+
+                  if (settings()->trial_days != 0) {
+                    $url .= '&trial=start';
+                  }
+                  ?>
+                  <a href="<?php echo $url; ?>"
+                    class="btn btn-block <?php echo ($i % 2 == 1) ? 'btn-outline-primary' : 'btn-outline-light'; ?>">
+                    <?php echo trans('get-started'); ?>
+                  </a>
                 </div>
 
               </div>

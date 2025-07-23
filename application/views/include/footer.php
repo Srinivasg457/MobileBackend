@@ -224,7 +224,7 @@
 <script type="text/javascript">
     $(".switch_price").on('click', function() {
         var priceVal = $(this).val();
-        if (priceVal == 'trail') {
+        if (priceVal == 'trial') {
             $('.trial-plan').show();
             $('.paid-plan').hide();
             // $('.trail-plan').hide();
