@@ -275,27 +275,27 @@ class EmployeeDashboard extends Home_Controller
         $current_monday = clone $today;
         $current_monday->modify('monday this week');
 
-        // Get upcoming Sunday for current week
+        // Get current week's Sunday
         $current_sunday = clone $current_monday;
         $current_sunday->modify('sunday this week');
 
         $weeks_to_include = [];
 
-        // Current week: Monday to upcoming Sunday
+        // Current week
         $weeks_to_include[] = [
             'name_prefix' => 'Current Week',
             'start_date' => $current_monday->format('Y-m-d'),
             'end_date' => $current_sunday->format('Y-m-d')
         ];
 
-        // Previous 4 weeks: last Monday to last Sunday, then step back
+        // Previous 4 weeks
         $week_counter = 1;
         $prev_sunday = clone $current_monday;
-        $prev_sunday->modify('-1 day'); // Yesterday (i.e., last week's Sunday)
+        $prev_sunday->modify('-1 day');
 
         for ($i = 0; $i < 4; $i++) {
             $prev_monday = clone $prev_sunday;
-            $prev_monday->modify('monday this week'); // Moves to last Monday
+            $prev_monday->modify('monday this week');
 
             $weeks_to_include[] = [
                 'name_prefix' => 'Week ' . $week_counter,
@@ -303,14 +303,12 @@ class EmployeeDashboard extends Home_Controller
                 'end_date' => $prev_sunday->format('Y-m-d')
             ];
 
-            // Set for next iteration
             $prev_sunday = clone $prev_monday;
             $prev_sunday->modify('-1 day');
-
             $week_counter++;
         }
 
-        // Reverse so that oldest week is first
+        // Reverse weeks for chronological order
         $weeks_to_include = array_reverse($weeks_to_include);
 
         foreach ($weeks_to_include as $week) {
@@ -318,7 +316,7 @@ class EmployeeDashboard extends Home_Controller
             $to_date = $week['end_date'];
             $week_name = $week['name_prefix'];
 
-            // Fetch time logs summary
+            // Weekly total
             $this->db->select('SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active');
             $this->db->from('time_logs');
             $this->db->where('employee_id', $employee_id);
@@ -327,10 +325,33 @@ class EmployeeDashboard extends Home_Controller
             $this->db->where("DATE(log_date) <=", $to_date);
             $time_data = $this->db->get()->row();
 
+            $daily_breakdown = [];
+
+            // Loop through each day of the week
+            $start = new DateTime($from_date);
+            $end = new DateTime($to_date);
+
+            while ($start <= $end) {
+                $day_name = $start->format('l'); // Monday, Tuesday, etc.
+                $date_str = $start->format('Y-m-d');
+
+                $this->db->select('SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active');
+                $this->db->from('time_logs');
+                $this->db->where('employee_id', $employee_id);
+                $this->db->where('user_id', $organization_id);
+                $this->db->where("DATE(log_date)", $date_str);
+                $day_data = $this->db->get()->row();
+
+                $daily_breakdown[$day_name] = $this->formatToHoursMins($day_data->total_active ?? '00:00:00');
+
+                $start->modify('+1 day');
+            }
+
             $weekly_reports[] = [
                 'week_name' => $week_name,
                 'date_range' => "$from_date to $to_date",
                 'total_active' => $this->formatToHoursMins($time_data->total_active ?? '00:00:00'),
+                'daily_breakdown' => $daily_breakdown
             ];
         }
 
