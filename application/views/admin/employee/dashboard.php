@@ -215,7 +215,7 @@
                  </div>
                  <div class="card counts">
                      <div class="card-body">
-                             <div class="ml-20 align-self-center">
+                         <div class="ml-20 align-self-center">
                                  <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
                                  <?php
                                     $keystroke_percentage = $output['keystroke_percentage'];
@@ -311,7 +311,7 @@
              <div class="col-sm-8">
                  <div class="box">
                      <div class="box-header with-border">
-                         <h3 class="box-title"><?php echo "Last 4 Weeks Report"  ?></h3>
+                         <h3 class="box-title"><?php echo  $date_range ?></h3>
                      </div>
                      <div class="box-body">
                          <canvas id="weeklyReportChart" style="height: 400px; width: 100%;"></canvas>
@@ -484,10 +484,159 @@
          });
 
          render_employee_productivity_chart();
-         render_fourWeek_report();
+         const is_manual = <?= $is_manual ? 1 : 0 ?>;
+         if (is_manual) {
+             console.log("is_manual");
+
+             render_custom_date_report()
+         } else {
+             render_fourWeek_report();
+         }
 
 
      });
+
+     function render_custom_date_report() {
+         const customData = <?php echo json_encode($custom_date_chart_data); ?>; // Example: ["Jul 2025" => "12h 30m", ...]
+         console.log(customData);
+         const ctx = document.getElementById('weeklyReportChart').getContext('2d');
+
+         const labels = [];
+         const barData = [];
+         const lineData = [];
+         let maxBarValue = 0;
+         let hasNonZeroData = false;
+
+         Object.entries(customData).forEach(([label, time]) => {
+             const match = time.match(/(\d+)h\s*(\d+)m/);
+             const hours = parseInt(match?.[1] || 0);
+             const minutes = parseInt(match?.[2] || 0);
+             const totalHours = hours + (minutes / 60);
+
+             labels.push(label);
+             barData.push(parseFloat(totalHours.toFixed(2)));
+             lineData.push((totalHours * 1.05).toFixed(2));
+
+             if (totalHours > maxBarValue) {
+                 maxBarValue = totalHours;
+             }
+
+             if (totalHours > 0) {
+                 hasNonZeroData = true;
+             }
+         });
+
+         // ✅ If all data is zero (e.g., all "0h 0m"), make sure line chart still shows
+         if (!hasNonZeroData) {
+             // keep labels/barData/lineData as 0, just ensure chart renders with default maxY
+             maxBarValue = 2;
+         }
+
+
+
+         const suggestedMaxY = Math.ceil((maxBarValue * 1.25) / 10) * 10;
+
+         if (window.weeklyChartInstance) {
+             window.weeklyChartInstance.destroy();
+         }
+
+         window.weeklyChartInstance = new Chart(ctx, {
+             type: 'bar',
+             data: {
+                 labels: labels,
+                 datasets: [{
+                     label: 'Active Time (hr)',
+                     data: barData,
+                     backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                     borderColor: 'rgba(54, 162, 235, 1)',
+                     borderWidth: 1,
+                     barPercentage: 0.4,
+                     categoryPercentage: 0.7,
+                     order: 2
+                 }, {
+                     label: 'Trend (hr)',
+                     data: lineData,
+                     type: 'line',
+                     borderColor: 'rgb(75, 192, 192)',
+                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                     fill: false,
+                     tension: 0.3,
+                     order: 1
+                 }]
+             },
+             options: {
+                 responsive: true,
+                 maintainAspectRatio: false,
+                 layout: {
+                     padding: {
+                         top: 10,
+                         bottom: 10,
+                         left: 10,
+                         right: 10
+                     }
+                 },
+                 scales: {
+                     y: {
+                         beginAtZero: true,
+                         max: suggestedMaxY,
+                         title: {
+                             display: true,
+                             text: 'Hours (hr)',
+                             font: {
+                                 size: 12,
+                                 weight: 'bold'
+                             }
+                         },
+                         ticks: {
+                             stepSize: 2,
+                             font: {
+                                 size: 12
+                             }
+                         }
+                     },
+                     x: {
+                         title: {
+                             display: true,
+                             text: 'Date Group',
+                             font: {
+                                 size: window.innerWidth < 600 ? 10 : 12,
+                                 weight: 'bold'
+                             }
+                         },
+                         ticks: {
+                             font: {
+                                 size: 12
+                             }
+                         }
+                     }
+                 },
+                 plugins: {
+                     tooltip: {
+                         callbacks: {
+                             label: function(context) {
+                                 const value = context.parsed.y;
+                                 const hrs = Math.floor(value);
+                                 const mins = Math.round((value - hrs) * 60);
+                                 return `${context.dataset.label}: ${hrs}h ${mins}m`;
+                             }
+                         }
+                     },
+                     legend: {
+                         position: 'top',
+                         labels: {
+                             font: {
+                                 size: 12
+                             },
+                             padding: 15
+                         }
+                     }
+                 }
+             }
+         });
+     }
+
+
+
 function render_fourWeek_report() {
     const weeklyReportsData = <?php echo json_encode($weekly_reports); ?>;
     const selectedPeriod = $('#period_search').val();
