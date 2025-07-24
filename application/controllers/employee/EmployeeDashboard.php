@@ -98,24 +98,129 @@ class EmployeeDashboard extends Home_Controller
         }
         
         $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date); // 👈 Add this line
-
         $data['response_data'] = $this->get_last_week_total_active_hours(); // 👈 Add this line
         $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary();
-
         $data['target_data'] = $this->get_this_week_target_time_data(); // 👈 Add this line   
-
         $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line   
         $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
         $data['active_time_comparison'] = $this->compare_weekly_average_active_time();
         $data['weekly_reports'] = $this->get_weekly_report_data();
-
         $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
         $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
         $data['overall_productivity'] = $this->employee_overall_productivity($from_date, $to_date);
+        $data['custom_date_chart_data'] = $this->get_custom_date_chart_data($from_date, $to_date); // 👈 Add this line   
+        $data['date_range'] = $this->get_date_range($from_date, $to_date); // 👈 Add this line    
         // $data['weekly_report'] = $this->get_weekly_report_data();
         $data['first_record_date'] = $this->get_user_oldest_activity_date();
         $data['main_content'] = $this->load->view('admin/employee/dashboard', $data, TRUE);
         $this->load->view('admin/index', $data);
+    }
+
+
+    private function get_date_range($from_date, $to_date){
+        $start = new DateTime($from_date);
+        $end = new DateTime($to_date);
+        $interval_days = $start->diff($end)->days + 1;
+        $reportRange = "";
+
+        if ($interval_days <= 14) {
+            $reportRange = "Daily Report";
+        } elseif ($interval_days <= 31) {
+            $reportRange = "Weekly Report";
+        } elseif ($interval_days <= 365) {
+            $reportRange = "Monthly Report";
+        } else {
+            $reportRange = "Yearly Report";
+        }
+
+        return $reportRange;
+    }
+
+    private function get_custom_date_chart_data($from_date, $to_date)
+    {
+        $employee_id = $this->session->userdata('employee_id');
+        $organization_id = $this->session->userdata('employee_org_id');
+
+        $start = new DateTime($from_date);
+        $end = new DateTime($to_date);
+        $interval_days = $start->diff($end)->days + 1;
+        $result = [];
+
+        if ($interval_days <= 14) {
+            // Group by Day
+            $period = new DatePeriod($start, new DateInterval('P1D'), $end->modify('+1 day'));
+            foreach ($period as $date) {
+                $label = $date->format('D (M j)');
+                $result[$label] = $this->get_total_active_time($employee_id, $organization_id, $date->format('Y-m-d'), $date->format('Y-m-d'));
+            }
+        } elseif ($interval_days <= 31) {
+            // Group by Week
+            $week_start = clone $start;
+            $week_number = 1;
+
+            while ($week_start <= $end) {
+                $week_end = clone $week_start;
+                $week_end->modify('+6 days');
+                if ($week_end > $end) $week_end = $end;
+
+                $label = "Week {$week_number} (" . $week_start->format('M j') . " - " . $week_end->format('M j') . ")";
+                $result[$label] = $this->get_total_active_time($employee_id, $organization_id, $week_start->format('Y-m-d'), $week_end->format('Y-m-d'));
+
+                $week_start->modify('+7 days');
+                $week_number++;
+            }
+        } elseif ($interval_days <= 365) {
+            // Group by Month
+            // Group by Month (within custom date range)
+            $current = clone $start;
+
+            while ($current <= $end) {
+                $month_start = new DateTime($current->format('Y-m-01'));
+                $month_end = (clone $month_start)->modify('last day of this month');
+
+                // Adjust based on user-specified date range
+                $range_start = ($month_start < $start) ? clone $start : $month_start;
+                $range_end = ($month_end > $end) ? clone $end : $month_end;
+
+                $label = $range_start->format('M Y'); // Example: Jul 2025
+                $result[$label] = $this->get_total_active_time(
+                    $employee_id,
+                    $organization_id,
+                    $range_start->format('Y-m-d'),
+                    $range_end->format('Y-m-d')
+                );
+
+                $current = $month_end->modify('+1 day');
+            }
+        } else {
+            // Group by Year
+            $current = clone $start;
+            while ($current <= $end) {
+                $year_start = new DateTime($current->format('Y-01-01'));
+                $year_end = new DateTime($current->format('Y-12-31'));
+                if ($year_end > $end) $year_end = $end;
+
+                $label = $year_start->format('Y');
+                $result[$label] = $this->get_total_active_time($employee_id, $organization_id, $year_start->format('Y-m-d'), $year_end->format('Y-m-d'));
+
+                $current = $year_end->modify('+1 day');
+            }
+        }
+
+        return $result;
+    } 
+    private function get_total_active_time($employee_id, $organization_id, $from_date, $to_date)
+    {
+        $this->db->select('SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active');
+        $this->db->from('time_logs');
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('user_id', $organization_id);
+        $this->db->where("DATE(log_date) >=", $from_date);
+        $this->db->where("DATE(log_date) <=", $to_date);
+        $row = $this->db->get()->row();
+        $total_active = $row && $row->total_active ? $this->formatToHoursMins($row->total_active) : '0h 0m';
+
+        return $total_active;
     }
 
 
