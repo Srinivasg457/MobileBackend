@@ -5,7 +5,7 @@
             <!-- <h2 class="mb-5">Roles & Permissions</h2> -->
             <!-- Feature Details Modal -->
             <div class="modal fade" id="featureDetailsModal" tabindex="-1" aria-labelledby="featureDetailsModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-zoom">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="featureDetailsModalLabel">Feature Details</h5>
@@ -300,7 +300,7 @@
                     if ($('#permissionsModal').length === 0) {
                         $('body').append(`
             <div class="modal fade" id="permissionsModal" tabindex="-1" role="dialog" aria-labelledby="permissionsModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-dialog modal-lg modal-dialog-zoom" role="document">
                     <div class="modal-content" style="margin-top: 10% !important">
                         <div class="modal-header">
                             <h5 class="modal-title" id="permissionsModalLabel">Role Permissions</h5>

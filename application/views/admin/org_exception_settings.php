@@ -202,7 +202,7 @@
 
 <!-- Bootstrap Timezone Modal with Steps -->
 <div class="modal fade" id="timezoneModal" tabindex="-1" role="dialog" aria-labelledby="timezoneModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-zoom" role="document">
         <div class="modal-content" style="margin-top: 10% !important">
             <div class="modal-header">
                 <h5 class="modal-title" id="timezoneModalLabel">Edit Timezone</h5>
