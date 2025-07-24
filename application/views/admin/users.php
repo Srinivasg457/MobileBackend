@@ -41,10 +41,13 @@
 
                   <div class="form-group">
                     <label> <?php echo trans('email') ?> <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" required name="email" value="<?php echo html_escape($user[0]['email']); ?>">
+                    <input type="email" class="form-control" name="email"
+                      value="<?php echo html_escape($user[0]['email']); ?>"
+                      <?php if (isset($page_title) && $page_title == "Edit"): ?>readonly<?php endif; ?>
+                      required>
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group <?php if (isset($page_title) && $page_title == "Edit"): ?>hide<?php endif; ?>">
                     <label><?php echo trans('password') ?> <span class="text-danger">*</span></label>
                     <input type="password" class="form-control" name="password" placeholder="<?php echo trans('set-or-reset-password') ?>" value="">
                   </div>
