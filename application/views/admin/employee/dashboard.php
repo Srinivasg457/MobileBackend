@@ -172,6 +172,7 @@
                                  <!-- <span class="input-group-addon"><i class="fa fa-calendar"></i></span> -->
                                  <span class="input-group-addon btn btn-secondary align-content-center" id="search_date"><i class="fa fa-search"></i></span>
                              </div>
+                             <span class="text-danger small pl-5" id="error"></span>
                          </div>
                      </div>
 
@@ -216,36 +217,36 @@
                  <div class="card counts">
                      <div class="card-body">
                          <div class="ml-20 align-self-center">
-                                 <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
-                                 <?php
-                                    $keystroke_percentage = $output['keystroke_percentage'];
+                             <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
+                             <?php
+                                $keystroke_percentage = $output['keystroke_percentage'];
 
-                                    // Determine color based on percentage
-                                    if ($keystroke_percentage >= 70) {
-                                        $stroke_color = "green";
-                                    } elseif ($keystroke_percentage >= 50) {
-                                        $stroke_color = "rgb(255, 205, 86)";
-                                    } else {
-                                        $stroke_color = "red";
-                                    }
-                                    ?>
-                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                                                               <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom"><?php echo $keystroke_percentage . "%"; ?></h2>
+                                // Determine color based on percentage
+                                if ($keystroke_percentage >= 70) {
+                                    $stroke_color = "green";
+                                } elseif ($keystroke_percentage >= 50) {
+                                    $stroke_color = "rgb(255, 205, 86)";
+                                } else {
+                                    $stroke_color = "red";
+                                }
+                                ?>
+                             <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                 <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom"><?php echo $keystroke_percentage . "%"; ?></h2>
 
-                                     <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                                         <svg viewBox="0 0 36 36" width="40" height="40">
-                                             <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
-                                             <circle
-                                                 cx="18" cy="18" r="15.9155" fill="none"
-                                                 stroke="<?php echo $stroke_color; ?>" stroke-width="4"
-                                                 stroke-dasharray="<?php echo $keystroke_percentage . ' ' . (100 - $keystroke_percentage); ?>"
-                                                 stroke-dashoffset="25"
-                                                 transform="rotate(0 18 18)" />
-                                         </svg>
-                                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
-                                             data-toggle="tooltip" data-placement="bottom" title="<?php echo $keystroke_percentage; ?>">
-                                             <?php echo $keystroke_percentage . "%"; ?>
-                                         </div>
+                                 <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                     <svg viewBox="0 0 36 36" width="40" height="40">
+                                         <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
+                                         <circle
+                                             cx="18" cy="18" r="15.9155" fill="none"
+                                             stroke="<?php echo $stroke_color; ?>" stroke-width="4"
+                                             stroke-dasharray="<?php echo $keystroke_percentage . ' ' . (100 - $keystroke_percentage); ?>"
+                                             stroke-dashoffset="25"
+                                             transform="rotate(0 18 18)" />
+                                     </svg>
+                                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                         data-toggle="tooltip" data-placement="bottom" title="<?php echo $keystroke_percentage; ?>">
+                                         <?php echo $keystroke_percentage . "%"; ?>
+                                     </div>
 
                                  </div>
 
@@ -255,37 +256,37 @@
                  </div>
                  <div class="card counts">
                      <div class="card-body">
-                             <div class="ml-20 align-self-center">
-                                 <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
-                                 <?php
-                                    $mouse_movement = $output['mouse_activity_percentage'];
+                         <div class="ml-20 align-self-center">
+                             <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
+                             <?php
+                                $mouse_movement = $output['mouse_activity_percentage'];
 
-                                    // Determine color based on percentage
-                                    if ($mouse_movement >= 60) {
-                                        $stroke_color = "green";
-                                    } elseif ($mouse_movement >= 30) {
-                                        $stroke_color = "rgb(255, 205, 86)";
-                                    } else {
-                                        $stroke_color = "red";
-                                    }
-                                    ?>
-                                 <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                        <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom"><?php echo $mouse_movement."%"; ?></h2>
+                                // Determine color based on percentage
+                                if ($mouse_movement >= 60) {
+                                    $stroke_color = "green";
+                                } elseif ($mouse_movement >= 30) {
+                                    $stroke_color = "rgb(255, 205, 86)";
+                                } else {
+                                    $stroke_color = "red";
+                                }
+                                ?>
+                             <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                 <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom"><?php echo $mouse_movement . "%"; ?></h2>
 
-                                     <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                                         <svg viewBox="0 0 36 36" width="40" height="40">
-                                             <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
-                                             <circle
-                                                 cx="18" cy="18" r="15.9155" fill="none"
-                                                 stroke="<?php echo $stroke_color; ?>" stroke-width="4"
-                                                 stroke-dasharray="<?php echo $mouse_movement . ' ' . (100 - $mouse_movement); ?>"
-                                                 stroke-dashoffset="25"
-                                                 transform="rotate(0 18 18)" />
-                                         </svg>
-                                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
-                                             data-toggle="tooltip" data-placement="bottom" title="<?php echo $mouse_movement; ?>">
-                                             <?php echo $mouse_movement . "%"; ?>
-                                         </div>
+                                 <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                     <svg viewBox="0 0 36 36" width="40" height="40">
+                                         <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
+                                         <circle
+                                             cx="18" cy="18" r="15.9155" fill="none"
+                                             stroke="<?php echo $stroke_color; ?>" stroke-width="4"
+                                             stroke-dasharray="<?php echo $mouse_movement . ' ' . (100 - $mouse_movement); ?>"
+                                             stroke-dashoffset="25"
+                                             transform="rotate(0 18 18)" />
+                                     </svg>
+                                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                         data-toggle="tooltip" data-placement="bottom" title="<?php echo $mouse_movement; ?>">
+                                         <?php echo $mouse_movement . "%"; ?>
+                                     </div>
                                  </div>
                              </div>
                          </div>
@@ -303,7 +304,7 @@
                          <div id="doughnutLegend" class="custom-legend"></div>
 
                          <div style="height:260px;text-align: center;justify-content: center;display: flex;">
-                             <canvas id="ProductivityReportChart" style="height: 250px; width: 100%;"></canvas>
+                             <canvas id="ProductivityReportChart" style="max-height: 250px; width: 100%;"></canvas>
                          </div>
                      </div>
                  </div>
@@ -322,7 +323,7 @@
          <div class="row mt-20">
              <div class="col-sm-6">
                  <div class="box">
-                    
+
                      <div class="box-header with-border">
                          <h3 class="box-title"><?php echo "Focus"; ?></h3>
                      </div>
@@ -405,6 +406,12 @@
  <script>
      $(document).ready(function() {
 
+         $('input[name="fromDate"], input[name="toDate"]').on('focus click', function() {
+             $('#error').text(''); // Clears the error message
+             //  $('#error').fadeOut();
+
+         });
+
          $('#searchManually').on('click', function() {
              $('#predefined_filter_row').hide();
              $('#manual_filter_row').css('display', 'flex');
@@ -428,11 +435,12 @@
              const fromDate = $('input[name="fromDate"]').val();
              const toDate = $('input[name="toDate"]').val();
              const firstRecordDate = $('#first_record_date').val();
+             const error_msg = $('#error');
 
              // Simple validation
              if (!fromDate || !toDate) {
                  e.preventDefault();
-                 showToast('Both From and To dates are required.', 'error');
+                 error_msg.text("Both From and To dates are required.");
                  return;
              }
 
@@ -443,7 +451,8 @@
              console.log(from);
              if (from > to) {
                  e.preventDefault();
-                 showToast('"From Date" should not be after "To Date".', 'error');
+                 //  showToast('"From Date" should not be after "To Date".', 'error');
+                 error_msg.text("Invalid range: From Date is after To Date.");
                  return;
              }
 
@@ -637,424 +646,451 @@
 
 
 
-function render_fourWeek_report() {
-    const weeklyReportsData = <?php echo json_encode($weekly_reports); ?>;
-    const selectedPeriod = $('#period_search').val();
-    const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
+     function render_fourWeek_report() {
+         const weeklyReportsData = <?php echo json_encode($weekly_reports); ?>;
+         const selectedPeriod = $('#period_search').val();
+         const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
 
-    const labels = [];
-    const barData = [];
-    const lineData = [];
-    let maxBarValue = 0;
+         const labels = [];
+         const barData = [];
+         const lineData = [];
+         let maxBarValue = 0;
 
-    let filteredData = [];
-    let showDailyBreakdown = false;
-    let weekToShow = null;
+         let filteredData = [];
+         let showDailyBreakdown = false;
+         let weekToShow = null;
 
-    switch (selectedPeriod) {
-        case 'current_week':
-            filteredData = weeklyReportsData.filter(item => item.week_name === 'Current Week');
-            showDailyBreakdown = true;
-            weekToShow = 'Current Week';
-            break;
-        case 'last_week':
-            filteredData = weeklyReportsData.filter(item => item.week_name === 'Week 1');
-            showDailyBreakdown = true;
-            weekToShow = 'Week 1';
-            break;
-       case 'two_week':
-    const weeksToCompare = ['Week 2', 'Week 1']; // Show Week 2 first
-    showDailyBreakdown = false;
+         switch (selectedPeriod) {
+             case 'current_week':
+                 filteredData = weeklyReportsData.filter(item => item.week_name === 'Current Week');
+                 showDailyBreakdown = true;
+                 weekToShow = 'Current Week';
+                 break;
+             case 'last_week':
+                 filteredData = weeklyReportsData.filter(item => item.week_name === 'Week 1');
+                 showDailyBreakdown = true;
+                 weekToShow = 'Week 1';
+                 break;
+             case 'two_week':
+                 const weeksToCompare = ['Week 2', 'Week 1']; // Show Week 2 first
+                 showDailyBreakdown = false;
 
-    filteredData = weeklyReportsData.filter(item =>
-        weeksToCompare.includes(item.week_name)
-    );
+                 filteredData = weeklyReportsData.filter(item =>
+                     weeksToCompare.includes(item.week_name)
+                 );
 
-    const weekMap = {};
-    filteredData.forEach(item => {
-        const startDateStr = item.date_range?.split(' to ')[0];
-        item.startDate = new Date(startDateStr);
-        weekMap[item.week_name] = item;
-    });
+                 const weekMap = {};
+                 filteredData.forEach(item => {
+                     const startDateStr = item.date_range?.split(' to ')[0];
+                     item.startDate = new Date(startDateStr);
+                     weekMap[item.week_name] = item;
+                 });
 
-    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    weeksToCompare.forEach(week => {
-        const weekData = weekMap[week];
-        if (!weekData) return;
+                 weeksToCompare.forEach(week => {
+                     const weekData = weekMap[week];
+                     if (!weekData) return;
 
-        daysOfWeek.forEach((day, index) => {
-            const currentDate = new Date(weekData.startDate);
-            currentDate.setDate(currentDate.getDate() + index); // Calculate day offset
+                     daysOfWeek.forEach((day, index) => {
+                         const currentDate = new Date(weekData.startDate);
+                         currentDate.setDate(currentDate.getDate() + index); // Calculate day offset
 
-            const formattedDate = currentDate.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-            }); // Example: Jul 2
+                         const formattedDate = currentDate.toLocaleDateString('en-US', {
+                             month: 'short',
+                             day: 'numeric'
+                         }); // Example: Jul 2
 
-            const label = `${day} (${formattedDate})`;
+                         const label = `${day} (${formattedDate})`;
 
-            const dayTime = weekData.daily_breakdown?.[day] || "0h 0m";
-            const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
-            const hours = parseInt(activeParts?.[1] || 0);
-            const minutes = parseInt(activeParts?.[2] || 0);
-            const totalHours = hours + (minutes / 60);
+                         const dayTime = weekData.daily_breakdown?.[day] || "0h 0m";
+                         const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
+                         const hours = parseInt(activeParts?.[1] || 0);
+                         const minutes = parseInt(activeParts?.[2] || 0);
+                         const totalHours = hours + (minutes / 60);
 
-            labels.push(label);
-            barData.push(parseFloat(totalHours.toFixed(2)));
-            lineData.push((totalHours * 1.05).toFixed(2));
-            if (totalHours > maxBarValue) {
-                maxBarValue = totalHours;
-            }
-        });
-    });
-    break;
-case 'this_month': {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = now;
+                         labels.push(label);
+                         barData.push(parseFloat(totalHours.toFixed(2)));
+                         lineData.push((totalHours * 1.05).toFixed(2));
+                         if (totalHours > maxBarValue) {
+                             maxBarValue = totalHours;
+                         }
+                     });
+                 });
+                 break;
+             case 'this_month': {
+                 const now = new Date();
+                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                 const endOfMonth = now;
 
-    labels.length = 0;
-    barData.length = 0;
-    lineData.length = 0;
+                 labels.length = 0;
+                 barData.length = 0;
+                 lineData.length = 0;
 
-    const daysInWeek = 7;
-    const weekMap = {};
+                 const daysInWeek = 7;
+                 const weekMap = {};
 
-    // Iterate through all weeks in the report
-    weeklyReportsData.forEach(weekData => {
-        const startDateStr = weekData.date_range?.split(' to ')[0];
-        const weekStartDate = new Date(startDateStr);
+                 // Iterate through all weeks in the report
+                 weeklyReportsData.forEach(weekData => {
+                     const startDateStr = weekData.date_range?.split(' to ')[0];
+                     const weekStartDate = new Date(startDateStr);
 
-        let weeklyTotal = 0;
-        let weekStartLabel = null;
-        let weekEndLabel = null;
+                     let weeklyTotal = 0;
+                     let weekStartLabel = null;
+                     let weekEndLabel = null;
 
-        for (let i = 0; i < 7; i++) {
-            const currentDate = new Date(weekStartDate);
-            currentDate.setDate(currentDate.getDate() + i);
+                     for (let i = 0; i < 7; i++) {
+                         const currentDate = new Date(weekStartDate);
+                         currentDate.setDate(currentDate.getDate() + i);
 
-            if (currentDate >= startOfMonth && currentDate <= endOfMonth) {
-                const dayOfWeek = currentDate.toLocaleString('en-US', { weekday: 'long' });
-                const dayTime = weekData.daily_breakdown?.[dayOfWeek] || "0h 0m";
-                const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
-                const hours = parseInt(activeParts?.[1] || 0);
-                const minutes = parseInt(activeParts?.[2] || 0);
-                const totalHours = hours + (minutes / 60);
+                         if (currentDate >= startOfMonth && currentDate <= endOfMonth) {
+                             const dayOfWeek = currentDate.toLocaleString('en-US', {
+                                 weekday: 'long'
+                             });
+                             const dayTime = weekData.daily_breakdown?.[dayOfWeek] || "0h 0m";
+                             const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
+                             const hours = parseInt(activeParts?.[1] || 0);
+                             const minutes = parseInt(activeParts?.[2] || 0);
+                             const totalHours = hours + (minutes / 60);
 
-                weeklyTotal += totalHours;
+                             weeklyTotal += totalHours;
 
-                // Build week label
-                const formattedDate = currentDate.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
-                });
+                             // Build week label
+                             const formattedDate = currentDate.toLocaleDateString('en-US', {
+                                 month: 'short',
+                                 day: 'numeric'
+                             });
 
-                if (!weekStartLabel) weekStartLabel = formattedDate;
-                weekEndLabel = formattedDate;
-            }
-        }
+                             if (!weekStartLabel) weekStartLabel = formattedDate;
+                             weekEndLabel = formattedDate;
+                         }
+                     }
 
-        if (weeklyTotal > 0) {
-            const label = `${weekData.week_name} (${weekStartLabel}–${weekEndLabel})`;
-            labels.push(label);
-            const roundedTotal = parseFloat(weeklyTotal.toFixed(2));
-            barData.push(roundedTotal);
-            lineData.push((roundedTotal * 1.05).toFixed(2));
-            if (roundedTotal > maxBarValue) {
-                maxBarValue = roundedTotal;
-            }
-        }
-    });
+                     if (weeklyTotal > 0) {
+                         const label = `${weekData.week_name} (${weekStartLabel}–${weekEndLabel})`;
+                         labels.push(label);
+                         const roundedTotal = parseFloat(weeklyTotal.toFixed(2));
+                         barData.push(roundedTotal);
+                         lineData.push((roundedTotal * 1.05).toFixed(2));
+                         if (roundedTotal > maxBarValue) {
+                             maxBarValue = roundedTotal;
+                         }
+                     }
+                 });
 
-    break;
-}
-case 'last_month': {
-    const now = new Date();
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // last day of previous month
+                 break;
+             }
+             case 'last_month': {
+                 const now = new Date();
+                 const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                 const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // last day of previous month
 
-    labels.length = 0;
-    barData.length = 0;
-    lineData.length = 0;
+                 labels.length = 0;
+                 barData.length = 0;
+                 lineData.length = 0;
 
-    const weekMap = {};
+                 const weekMap = {};
 
-    weeklyReportsData.forEach(weekData => {
-        const startDateStr = weekData.date_range?.split(' to ')[0];
-        const weekStartDate = new Date(startDateStr);
+                 weeklyReportsData.forEach(weekData => {
+                     const startDateStr = weekData.date_range?.split(' to ')[0];
+                     const weekStartDate = new Date(startDateStr);
 
-        let weeklyTotal = 0;
-        let weekStartLabel = null;
-        let weekEndLabel = null;
+                     let weeklyTotal = 0;
+                     let weekStartLabel = null;
+                     let weekEndLabel = null;
 
-        for (let i = 0; i < 7; i++) {
-            const currentDate = new Date(weekStartDate);
-            currentDate.setDate(currentDate.getDate() + i);
+                     for (let i = 0; i < 7; i++) {
+                         const currentDate = new Date(weekStartDate);
+                         currentDate.setDate(currentDate.getDate() + i);
 
-            if (currentDate >= startOfLastMonth && currentDate <= endOfLastMonth) {
-                const dayOfWeek = currentDate.toLocaleString('en-US', { weekday: 'long' });
-                const dayTime = weekData.daily_breakdown?.[dayOfWeek] || "0h 0m";
-                const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
-                const hours = parseInt(activeParts?.[1] || 0);
-                const minutes = parseInt(activeParts?.[2] || 0);
-                const totalHours = hours + (minutes / 60);
+                         if (currentDate >= startOfLastMonth && currentDate <= endOfLastMonth) {
+                             const dayOfWeek = currentDate.toLocaleString('en-US', {
+                                 weekday: 'long'
+                             });
+                             const dayTime = weekData.daily_breakdown?.[dayOfWeek] || "0h 0m";
+                             const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
+                             const hours = parseInt(activeParts?.[1] || 0);
+                             const minutes = parseInt(activeParts?.[2] || 0);
+                             const totalHours = hours + (minutes / 60);
 
-                weeklyTotal += totalHours;
+                             weeklyTotal += totalHours;
 
-                const formattedDate = currentDate.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
-                });
+                             const formattedDate = currentDate.toLocaleDateString('en-US', {
+                                 month: 'short',
+                                 day: 'numeric'
+                             });
 
-                if (!weekStartLabel) weekStartLabel = formattedDate;
-                weekEndLabel = formattedDate;
-            }
-        }
+                             if (!weekStartLabel) weekStartLabel = formattedDate;
+                             weekEndLabel = formattedDate;
+                         }
+                     }
 
-        if (weeklyTotal > 0) {
-            const label = `${weekData.week_name} (${weekStartLabel}–${weekEndLabel})`;
-            labels.push(label);
-            const roundedTotal = parseFloat(weeklyTotal.toFixed(2));
-            barData.push(roundedTotal);
-            lineData.push((roundedTotal * 1.05).toFixed(2));
-            if (roundedTotal > maxBarValue) {
-                maxBarValue = roundedTotal;
-            }
-        }
-    });
-    break;
-}
-case 'last_6_months': {
-    const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1); // 5 months ago
-    const endDate = now;
+                     if (weeklyTotal > 0) {
+                         const label = `${weekData.week_name} (${weekStartLabel}–${weekEndLabel})`;
+                         labels.push(label);
+                         const roundedTotal = parseFloat(weeklyTotal.toFixed(2));
+                         barData.push(roundedTotal);
+                         lineData.push((roundedTotal * 1.05).toFixed(2));
+                         if (roundedTotal > maxBarValue) {
+                             maxBarValue = roundedTotal;
+                         }
+                     }
+                 });
+                 break;
+             }
+             case 'last_6_months': {
+                 const now = new Date();
+                 const startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1); // 5 months ago
+                 const endDate = now;
 
-    const monthGroups = {};
-    const monthKeys = [];
+                 const monthGroups = {};
+                 const monthKeys = [];
 
-    // Initialize past 6 months with 0 hours
-    for (let i = 5; i >= 0; i--) {
-        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const key = date.toLocaleString('default', { month: 'short', year: 'numeric' }); // e.g. "Mar 2025"
-        monthGroups[key] = 0;
-        monthKeys.push(key);
-    }
+                 // Initialize past 6 months with 0 hours
+                 for (let i = 5; i >= 0; i--) {
+                     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                     const key = date.toLocaleString('default', {
+                         month: 'short',
+                         year: 'numeric'
+                     }); // e.g. "Mar 2025"
+                     monthGroups[key] = 0;
+                     monthKeys.push(key);
+                 }
 
-    // Aggregate data
-    weeklyReportsData.forEach(item => {
-        const startDateStr = item.date_range?.split(' to ')[0];
-        const reportDate = new Date(startDateStr);
+                 // Aggregate data
+                 weeklyReportsData.forEach(item => {
+                     const startDateStr = item.date_range?.split(' to ')[0];
+                     const reportDate = new Date(startDateStr);
 
-        if (reportDate >= startDate && reportDate <= endDate) {
-            const key = reportDate.toLocaleString('default', { month: 'short', year: 'numeric' });
-            if (!monthGroups[key]) {
-                monthGroups[key] = 0;
-            }
+                     if (reportDate >= startDate && reportDate <= endDate) {
+                         const key = reportDate.toLocaleString('default', {
+                             month: 'short',
+                             year: 'numeric'
+                         });
+                         if (!monthGroups[key]) {
+                             monthGroups[key] = 0;
+                         }
 
-            const activeParts = item.total_active.match(/(\d+)h\s+(\d+)m/);
-            const hours = parseInt(activeParts?.[1] || 0);
-            const minutes = parseInt(activeParts?.[2] || 0);
-            const totalHours = hours + (minutes / 60);
-            monthGroups[key] += totalHours;
-        }
-    });
+                         const activeParts = item.total_active.match(/(\d+)h\s+(\d+)m/);
+                         const hours = parseInt(activeParts?.[1] || 0);
+                         const minutes = parseInt(activeParts?.[2] || 0);
+                         const totalHours = hours + (minutes / 60);
+                         monthGroups[key] += totalHours;
+                     }
+                 });
 
-    // Render labels in chronological order
-    monthKeys.forEach(monthKey => {
-        const totalHours = monthGroups[monthKey];
-        labels.push(monthKey);
-        barData.push(parseFloat(totalHours.toFixed(2)));
-        lineData.push((totalHours * 1.05).toFixed(2));
-        if (totalHours > maxBarValue) {
-            maxBarValue = totalHours;
-        }
-    });
+                 // Render labels in chronological order
+                 monthKeys.forEach(monthKey => {
+                     const totalHours = monthGroups[monthKey];
+                     labels.push(monthKey);
+                     barData.push(parseFloat(totalHours.toFixed(2)));
+                     lineData.push((totalHours * 1.05).toFixed(2));
+                     if (totalHours > maxBarValue) {
+                         maxBarValue = totalHours;
+                     }
+                 });
 
-    break;
-}
+                 break;
+             }
 
 
-       case 'this_year': {
-    const now = new Date();
-    const currentYear = now.getFullYear();
+             case 'this_year': {
+                 const now = new Date();
+                 const currentYear = now.getFullYear();
 
-    const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const monthGroups = {};
+                 const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                 const monthGroups = {};
 
-    // Step 1: Initialize all months with 0
-    monthOrder.forEach(month => {
-        monthGroups[month] = 0;
-    });
+                 // Step 1: Initialize all months with 0
+                 monthOrder.forEach(month => {
+                     monthGroups[month] = 0;
+                 });
 
-    // Step 2: Fill in available data
-    weeklyReportsData.forEach(item => {
-        const date = new Date(item.date_range.split(' to ')[0]);
-        const year = date.getFullYear();
+                 // Step 2: Fill in available data
+                 weeklyReportsData.forEach(item => {
+                     const date = new Date(item.date_range.split(' to ')[0]);
+                     const year = date.getFullYear();
 
-        if (year === currentYear) {
-            const monthKey = date.toLocaleString('default', { month: 'short' });
-            if (!monthGroups[monthKey]) {
-                monthGroups[monthKey] = 0;
-            }
+                     if (year === currentYear) {
+                         const monthKey = date.toLocaleString('default', {
+                             month: 'short'
+                         });
+                         if (!monthGroups[monthKey]) {
+                             monthGroups[monthKey] = 0;
+                         }
 
-            const activeParts = item.total_active.match(/(\d+)h\s+(\d+)m/);
-            const hours = parseInt(activeParts?.[1] || 0);
-            const minutes = parseInt(activeParts?.[2] || 0);
-            const totalHours = hours + (minutes / 60);
+                         const activeParts = item.total_active.match(/(\d+)h\s+(\d+)m/);
+                         const hours = parseInt(activeParts?.[1] || 0);
+                         const minutes = parseInt(activeParts?.[2] || 0);
+                         const totalHours = hours + (minutes / 60);
 
-            monthGroups[monthKey] += totalHours;
-        }
-    });
+                         monthGroups[monthKey] += totalHours;
+                     }
+                 });
 
-    // Step 3: Render in correct month order
-    monthOrder.forEach(month => {
-        const totalHours = monthGroups[month];
-        labels.push(month);
-        barData.push(parseFloat(totalHours.toFixed(2)));
-        lineData.push((totalHours * 1.05).toFixed(2));
-        if (totalHours > maxBarValue) {
-            maxBarValue = totalHours;
-        }
-    });
+                 // Step 3: Render in correct month order
+                 monthOrder.forEach(month => {
+                     const totalHours = monthGroups[month];
+                     labels.push(month);
+                     barData.push(parseFloat(totalHours.toFixed(2)));
+                     lineData.push((totalHours * 1.05).toFixed(2));
+                     if (totalHours > maxBarValue) {
+                         maxBarValue = totalHours;
+                     }
+                 });
 
-    break;
-}
-        case '':
-        default:
-            filteredData = weeklyReportsData;
-    }
+                 break;
+             }
+             case '':
+             default:
+                 filteredData = weeklyReportsData;
+         }
 
-    if (!showDailyBreakdown && selectedPeriod !== 'this_year' && selectedPeriod !== 'two_week') {
-        filteredData.sort((a, b) => {
-            const dateA = new Date(a.date_range.split(' to ')[0]);
-            const dateB = new Date(b.date_range.split(' to ')[0]);
-            return dateA - dateB;
-        });
+         if (!showDailyBreakdown && selectedPeriod !== 'this_year' && selectedPeriod !== 'two_week') {
+             filteredData.sort((a, b) => {
+                 const dateA = new Date(a.date_range.split(' to ')[0]);
+                 const dateB = new Date(b.date_range.split(' to ')[0]);
+                 return dateA - dateB;
+             });
 
-        filteredData.forEach(report => {
-            const activeParts = report.total_active.match(/(\d+)h\s+(\d+)m/);
-            const hours = parseInt(activeParts[1] || 0);
-            const minutes = parseInt(activeParts[2] || 0);
-            const totalHours = hours + (minutes / 60);
+             filteredData.forEach(report => {
+                 const activeParts = report.total_active.match(/(\d+)h\s+(\d+)m/);
+                 const hours = parseInt(activeParts[1] || 0);
+                 const minutes = parseInt(activeParts[2] || 0);
+                 const totalHours = hours + (minutes / 60);
 
-            labels.push(`${report.week_name} (Mon to Sun)`);
-            barData.push(parseFloat(totalHours.toFixed(2)));
-            lineData.push((totalHours * 1.05).toFixed(2));
-            if (totalHours > maxBarValue) {
-                maxBarValue = totalHours;
-            }
-        });
-    }
+                 labels.push(`${report.week_name} (Mon to Sun)`);
+                 barData.push(parseFloat(totalHours.toFixed(2)));
+                 lineData.push((totalHours * 1.05).toFixed(2));
+                 if (totalHours > maxBarValue) {
+                     maxBarValue = totalHours;
+                 }
+             });
+         }
 
-    if (showDailyBreakdown && weekToShow) {
-        const weekData = weeklyReportsData.find(item => item.week_name === weekToShow);
-        if (weekData) {
-            const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+         if (showDailyBreakdown && weekToShow) {
+             const weekData = weeklyReportsData.find(item => item.week_name === weekToShow);
+             if (weekData) {
+                 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-            daysOfWeek.forEach(day => {
-                const dayTime = weekData.daily_breakdown[day] || "0h 0m";
-                const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
-                const hours = parseInt(activeParts[1] || 0);
-                const minutes = parseInt(activeParts[2] || 0);
-                const totalHours = hours + (minutes / 60);
+                 daysOfWeek.forEach(day => {
+                     const dayTime = weekData.daily_breakdown[day] || "0h 0m";
+                     const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
+                     const hours = parseInt(activeParts[1] || 0);
+                     const minutes = parseInt(activeParts[2] || 0);
+                     const totalHours = hours + (minutes / 60);
 
-                labels.push(day);
-                barData.push(parseFloat(totalHours.toFixed(2)));
-                lineData.push((totalHours * 1.05).toFixed(2));
-                if (totalHours > maxBarValue) {
-                    maxBarValue = totalHours;
-                }
-            });
-        }
-    }
+                     labels.push(day);
+                     barData.push(parseFloat(totalHours.toFixed(2)));
+                     lineData.push((totalHours * 1.05).toFixed(2));
+                     if (totalHours > maxBarValue) {
+                         maxBarValue = totalHours;
+                     }
+                 });
+             }
+         }
 
-const suggestedMaxY = Math.ceil((maxBarValue * 1.25) / 10) * 10;
+         const suggestedMaxY = Math.ceil((maxBarValue * 1.25) / 10) * 10;
 
-    if (window.weeklyChartInstance) {
-        window.weeklyChartInstance.destroy();
-    }
+         if (window.weeklyChartInstance) {
+             window.weeklyChartInstance.destroy();
+         }
 
-    window.weeklyChartInstance = new Chart(weeklyCtx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: (showDailyBreakdown || selectedPeriod === 'two_week') ? 'Daily Active Time (hr)' :
-                       selectedPeriod === 'this_year' ? 'Monthly Active Time (hr)' :
-                       'Total Active Time (hr)',
-                data: barData,
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                order: 2,
-                barPercentage: 0.4,
-                categoryPercentage: 0.7
-            }, {
-                label: 'Trend (hr)',
-                data: lineData,
-                type: 'line',
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
-                tension: 0.3,
-                order: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-                padding: { left: 10, right: 10, top: 10, bottom: 10 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: suggestedMaxY,
-                    title: {
-                        display: true,
-                        text: 'Hours (hr)',
-                        font: { size: window.innerWidth < 600 ? 10 : 12, weight: 'bold' }
-                    },
-                    ticks: {
-                        stepSize: showDailyBreakdown || selectedPeriod === 'two_week' ? 1 : 2,
-                        font: { size: window.innerWidth < 600 ? 10 : 12 }
-                    }
-                },
-                x: {
-                    title: {
-                        display: showDailyBreakdown || selectedPeriod === 'two_week',
-                        text: (showDailyBreakdown || selectedPeriod === 'two_week') ? 'Days of Week' : '',
-                        font: { size: window.innerWidth < 600 ? 10 : 12, weight: 'bold' }
-                    },
-                    ticks: {
-                        font: { size: window.innerWidth < 600 ? 8 : 12 }
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const value = context.parsed.y;
-                            const hrs = Math.floor(value);
-                            const mins = Math.round((value - hrs) * 60);
-                            return `${context.dataset.label}: ${hrs}h ${mins}m`;
-                        }
-                    }
-                },
-                legend: {
-                    position: 'top',
-                    labels: {
-                        font: { size: 12 },
-                        padding: 15
-                    }
-                },
+         window.weeklyChartInstance = new Chart(weeklyCtx, {
+             type: 'bar',
+             data: {
+                 labels: labels,
+                 datasets: [{
+                     label: (showDailyBreakdown || selectedPeriod === 'two_week') ? 'Daily Active Time (hr)' : selectedPeriod === 'this_year' ? 'Monthly Active Time (hr)' : 'Total Active Time (hr)',
+                     data: barData,
+                     backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                     borderColor: 'rgba(54, 162, 235, 1)',
+                     borderWidth: 1,
+                     order: 2,
+                     barPercentage: 0.4,
+                     categoryPercentage: 0.7
+                 }, {
+                     label: 'Trend (hr)',
+                     data: lineData,
+                     type: 'line',
+                     borderColor: 'rgb(75, 192, 192)',
+                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                     fill: false,
+                     tension: 0.3,
+                     order: 1
+                 }]
+             },
+             options: {
+                 responsive: true,
+                 maintainAspectRatio: false,
+                 layout: {
+                     padding: {
+                         left: 10,
+                         right: 10,
+                         top: 10,
+                         bottom: 10
+                     }
+                 },
+                 scales: {
+                     y: {
+                         beginAtZero: true,
+                         max: suggestedMaxY,
+                         title: {
+                             display: true,
+                             text: 'Hours (hr)',
+                             font: {
+                                 size: window.innerWidth < 600 ? 10 : 12,
+                                 weight: 'bold'
+                             }
+                         },
+                         ticks: {
+                             stepSize: showDailyBreakdown || selectedPeriod === 'two_week' ? 1 : 2,
+                             font: {
+                                 size: window.innerWidth < 600 ? 10 : 12
+                             }
+                         }
+                     },
+                     x: {
+                         title: {
+                             display: showDailyBreakdown || selectedPeriod === 'two_week',
+                             text: (showDailyBreakdown || selectedPeriod === 'two_week') ? 'Days of Week' : '',
+                             font: {
+                                 size: window.innerWidth < 600 ? 10 : 12,
+                                 weight: 'bold'
+                             }
+                         },
+                         ticks: {
+                             font: {
+                                 size: window.innerWidth < 600 ? 8 : 12
+                             }
+                         }
+                     }
+                 },
+                 plugins: {
+                     tooltip: {
+                         callbacks: {
+                             label: function(context) {
+                                 const value = context.parsed.y;
+                                 const hrs = Math.floor(value);
+                                 const mins = Math.round((value - hrs) * 60);
+                                 return `${context.dataset.label}: ${hrs}h ${mins}m`;
+                             }
+                         }
+                     },
+                     legend: {
+                         position: 'top',
+                         labels: {
+                             font: {
+                                 size: 12
+                             },
+                             padding: 15
+                         }
+                     },
 
-            }
-        }
-    });
-}
+                 }
+             }
+         });
+     }
 
 
      function render_employee_productivity_chart() {
