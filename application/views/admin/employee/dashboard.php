@@ -991,7 +991,16 @@
          }
 
          const suggestedMaxY = Math.ceil((maxBarValue * 1.25) / 10) * 10;
+         const isNoData = weeklyReportsData.every(item => {
+             const breakdown = item.daily_breakdown;
+             return Object.values(breakdown).every(val => val.trim() === '0h 0m');
+         });
 
+         if (isNoData) {
+             labels.push('No Data');
+             barData.push(0);
+             lineData.push(0);
+         }
          if (window.weeklyChartInstance) {
              window.weeklyChartInstance.destroy();
          }

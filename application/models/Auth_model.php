@@ -759,7 +759,7 @@ public function is_plan_standard()
 
         // Flatten to a simple int array
         return array_map('intval', array_column($rows, 'feature_id'));
-    }
+    }                                      
 
     public function is_access_for_all_role()
     {
