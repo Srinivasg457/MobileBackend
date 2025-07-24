@@ -462,24 +462,22 @@ public function employee_add()
             redirect('/admin/subscription/upgrade_plan');
         }
 
-            $role_id = $this->input->post('role', true);
-
-            // ✅ Get department_id from role_id
-            $department_id = $this->admin_model->get_department_id_by_role($role_id);
+        $role_id = $this->input->post('role', true);
+        $department_id = $this->admin_model->get_department_id_by_role($role_id);
 
         $data = array(
-            'user_id' => user()->id,
-            'business_id' => $this->business->uid,
-            'name' => $this->input->post('name', true),
+            'user_id'       => user()->id,
+            'business_id'   => $this->business->uid,
+            'name'          => $this->input->post('name', true),
             'role_id'       => $role_id,
             'department_id' => $department_id,
-            'email' => $email,
-            'phone' => $this->input->post('phone', true),
-            'address' => $this->input->post('address', true),
-            'city' => $this->input->post('city', true),
-            'country' => $this->input->post('country', true),
-            'status' => $this->input->post('status', true),
-            'created_at' => get_user_datetime_only(user()->id)
+            'email'         => $email,
+            'phone'         => $this->input->post('phone', true),
+            'address'       => $this->input->post('address', true),
+            'city'          => $this->input->post('city', true),
+            'country'       => $this->input->post('country', true),
+            'status'        => $this->input->post('status', true),
+            'created_at'    => get_user_datetime_only(user()->id)
         );
 
         $data = $this->security->xss_clean($data);
@@ -501,28 +499,32 @@ public function employee_add()
                 if ($employee_count >= 2) {
                     $this->session->set_flashdata('error', 'Trial users can add a maximum of 2 employees only.');
                     redirect(base_url('admin/hrm/employees'));
-                    exit; // Stop execution
+                    exit;
                 }
             }
 
-                // Check if email exists in employees
-                $this->db->where('LOWER(email)', strtolower($email));
-                $exists_in_employees = $this->db->get('employees')->row();
+            // Check if email exists in employees
+            $this->db->where('LOWER(email)', strtolower($email));
+            $exists_in_employees = $this->db->get('employees')->row();
 
-                // Check if email exists in users
-                $this->db->where('LOWER(email)', strtolower($email));
-                $exists_in_users = $this->db->get('users')->row();
+            // Check if email exists in users
+            $this->db->where('LOWER(email)', strtolower($email));
+            $exists_in_users = $this->db->get('users')->row();
 
-                if ($exists_in_employees || $exists_in_users) {
-                    $this->session->set_flashdata('error', 'Email address already exists in the system.');
-                    redirect(base_url('admin/hrm/employees'));
-                    exit;
-                }
+            if ($exists_in_employees || $exists_in_users) {
+                $this->session->set_flashdata('error', 'Email address already exists in the system.');
+                redirect(base_url('admin/hrm/employees'));
+                exit;
+            }
 
-
-                // Insert new employee
-                $this->db->insert('employees', $data);
+            // Insert new employee
+            $this->db->insert('employees', $data);
             $id = $this->db->insert_id();
+
+            // ✅ Generate and save secret_key
+         $secret_key = substr(bin2hex(random_bytes(8)), 0, 16); // 16 characters
+         $this->db->where('id', $id)->update('employees', ['secret_key' => $secret_key]);
+
 
             // Generate and save invitation token
             $token = uniqid();
@@ -547,8 +549,8 @@ public function employee_add()
                             <td align="center" style="background-color: #4CAF50; padding: 20px;">
                             <img width="100" src="' . base_url('uploads/thumbnail/2_thumb-100x100.png') . '" alt="Workroom" style="display:block; margin:0 auto;">
                             </td>
-                            </tr>
-                            <tr>
+                        </tr>
+                        <tr>
                             <td style="padding: 30px; font-family: Arial, sans-serif;">
                             <p style="font-size: 16px; color: #333;">Hello ' . $data['name'] . ',</p>
                             <p style="font-size: 16px; color: #333;">
@@ -600,6 +602,8 @@ public function employee_add()
         exit;
     }
 }
+
+
 
     public function employee_edit($id)
     {  
