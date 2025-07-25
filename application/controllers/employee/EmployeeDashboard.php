@@ -104,7 +104,7 @@ class EmployeeDashboard extends Home_Controller
         $data['inactive_data'] = $this->get_this_week_inactive_time_data(); // 👈 Add this line   
         $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
         $data['active_time_comparison'] = $this->compare_weekly_average_active_time();
-        $data['weekly_reports'] = $this->get_weekly_report_data();
+        // $data['weekly_reports'] = $this->get_weekly_report_data();
         $data['avarage_data'] = $this->get_this_week_avarage_time_data(); // 👈 Add this line    
         $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date);
         $data['overall_productivity'] = $this->employee_overall_productivity($from_date, $to_date);
@@ -138,6 +138,11 @@ class EmployeeDashboard extends Home_Controller
 
     private function get_custom_date_chart_data($from_date, $to_date)
     {
+        // Default to today's date if empty
+        if (empty($from_date) || empty($to_date)) {
+            $from_date = date('Y-m-d', strtotime('monday this week'));
+            $to_date = date('Y-m-d');
+        }
         $employee_id = $this->session->userdata('employee_id');
         $organization_id = $this->session->userdata('employee_org_id');
 

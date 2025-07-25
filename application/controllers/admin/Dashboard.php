@@ -316,6 +316,11 @@ class Dashboard extends Home_Controller {
 
     private function get_custom_date_chart_data($from_date, $to_date, $organization_id, $employee_id)
     {
+        // Default to today's date if empty
+        if (empty($from_date) || empty($to_date)) {
+            $from_date = date('Y-m-d', strtotime('monday this week'));
+            $to_date = date('Y-m-d');
+        }
         $start = new DateTime($from_date);
         $end = new DateTime($to_date);
         $interval_days = $start->diff($end)->days + 1;
