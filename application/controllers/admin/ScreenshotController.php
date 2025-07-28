@@ -758,7 +758,6 @@ public function get_last_screenshot()
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $user_id);
         $this->db->where('DATE(created_at)', date('Y-m-d'));
-        $this->db->where_in('status', 6); // ✅ Matches subquery filter
         $this->db->order_by('created_at', 'DESC');
         $this->db->limit(1);
         $notif = $this->db->get()->row_array();
