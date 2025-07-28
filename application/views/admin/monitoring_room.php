@@ -41,7 +41,7 @@
             <div class="modal-header">
               <div>
                 <label class="modal-title textwhite my-2" id="modalEmployeeName"></label>
-                <p class="modal-subtitle" id="modalEmployeeId"></p>
+                <p class="modal-subtitle hide" id="modalEmployeeId"></p>
               </div>
               <button type="button" class="btn" onclick="closeVideoModal()" style="background-color: white; border: none;">
                 <i class="fa fa-times" style="color: black;"></i>
@@ -50,13 +50,13 @@
             <div class="modal-body">
               <img id="modalScreen" class="modal-screen" autoplay playsinline>
             </div>
-            <!-- <div class="modal-footer">
+            <div class="modal-footer" style="display: none;">
                 <div class="connection-status">
                   <span class="status-indicator"></span>
                   <span>Connected</span>
                 </div>
                 <div class="timestamp" id="modalTimestamp"></div>
-              </div> -->
+              </div>
           </div>
         </div>
       </div>
@@ -267,6 +267,7 @@
         employee_id: currentEmployeeId
       },
       success: function(response) {
+        console.log(response);
         const thumbnail = $(`#screenshot-${currentEmployeeId}`);
         const container = thumbnail.parent();
 
@@ -300,7 +301,9 @@
             });
         }
       },
-      error: function() {
+      error: function(msg) {
+        console.log(msg);
+        
         const container = $(`#screenshot-${currentEmployeeId}`).parent();
         container.addClass('blank-screen')
           .removeAttr('onclick') // Disable click
