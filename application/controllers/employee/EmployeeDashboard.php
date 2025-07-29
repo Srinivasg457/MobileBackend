@@ -53,7 +53,6 @@ class EmployeeDashboard extends Home_Controller
 
         // If dropdown is selected and from/to date are empty, calculate from dropdown
         if (!empty($time_period) && (empty($from_date) || empty($to_date))) {
-            $today = date('Y-m-d');
 
             switch ($time_period) {
                 case 'current_week':
@@ -141,7 +140,7 @@ class EmployeeDashboard extends Home_Controller
         // Default to today's date if empty
         if (empty($from_date) || empty($to_date)) {
             $from_date = date('Y-m-d', strtotime('monday this week'));
-            $to_date = date('Y-m-d');
+            $to_date = date('Y-m-d', strtotime('sunday this week'));
         }
         $employee_id = $this->session->userdata('employee_id');
         $organization_id = $this->session->userdata('employee_org_id');
@@ -341,7 +340,7 @@ class EmployeeDashboard extends Home_Controller
         // Default to today's date if empty
         if (empty($from_date) || empty($to_date)) {
             $from_date = date('Y-m-d', strtotime('monday this week'));
-            $to_date = date('Y-m-d');
+            $to_date = date('Y-m-d', strtotime('sunday this week'));
         }
 
         // Fetch total active and idle time in seconds
@@ -422,7 +421,7 @@ class EmployeeDashboard extends Home_Controller
         // Set date range to today if empty
         if (empty($from_date) || empty($to_date)) {
             $from_date = date('Y-m-d', strtotime('monday this week'));
-            $to_date = date('Y-m-d');
+            $to_date = date('Y-m-d', strtotime('sunday this week'));
         }
 
         // Fetch total active, idle, and shift from time_logs
@@ -1043,7 +1042,7 @@ private function get_this_week_work_time_data($from_date, $to_date)
         // Set date range to today if empty
         if (empty($from_date) || empty($to_date)) {
             $from_date = date('Y-m-d', strtotime('monday this week'));
-            $to_date = date('Y-m-d');
+            $to_date = date('Y-m-d', strtotime('sunday this week'));
         }
 
     // Get time logs for the week
