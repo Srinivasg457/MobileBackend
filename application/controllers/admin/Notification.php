@@ -120,7 +120,10 @@ class Notification extends Home_Controller {
                 'employee_name'   => $emp['name'],
             ];
         }
-
+        // 6. Sort all notifications by created_at ascending
+        usort($notifications, function ($a, $b) {
+            return strtotime($a['created_at']) - strtotime($b['created_at']);
+        });
         return $notifications;
     }
 
