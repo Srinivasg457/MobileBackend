@@ -7,12 +7,49 @@
     5 => 'Webcam is live, but the user is offline',
     6 => 'User sign off',
     7 => 'User is inactive for a while',
-    8 => 'User is active now'
-]; ?>
+    8 => 'User is active now',
+    9 => 'User not yet logged into Workroom Application'
+];
+function time_ago($datetime, $status, $full = false)
+{
+    // If status is 8, return "just now" directly
+    if (!in_array($status, [6,9])) {
+        return ' just now ';
+    }
+    $now = new DateTime(get_user_datetime_only("")); // Convert to DateTime
+    $ago = new DateTime($datetime);                   // Convert to DateTime
+
+    $diff = $now->diff($ago);
+
+    $diff->w = floor($diff->d / 7);
+    $diff->d -= $diff->w * 7;
+
+    $string = [
+        'y' => 'year',
+        'm' => 'month',
+        'w' => 'week',
+        'd' => 'day',
+        'h' => 'hr',
+        'i' => 'min',
+        's' => 'sec',
+    ];
+    foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+        } else {
+            unset($string[$k]);
+        }
+    }
+
+    if (!$full) $string = array_slice($string, 0, 1);
+    return $string ? implode(', ', $string) . ' ago' : 'just now';
+}
+
+?>
 <div class="content-wrapper notificaion_style">
     <section class="content">
         <div class="list_area container">
-            <h3><?php echo 'Notification' ?>
+            <h3><?php echo 'Notification';?>
             </h3>
             <div class="container mt-50">
                 <div class="row">
@@ -38,31 +75,8 @@
 
                         </div>
                     </div>
-                    <!-- <div class="col-sm-6">
-                        <div class="row">
-                            <div class="form-group col-lg-2  my-3">
-                            </div>
-                            <div class="form-group col-lg-6  my-3">
-                                <div class="input-group">
-                                    <input type="text" class="search-input form-control" placeholder="Search employees...">
-                                </div>
-                            </div>
-                            <div class="form-group col-lg-4 my-3">
-                                <div class="input-group">
-                                    <select class="form-control single_select" id="sortSelect">
-                                        <option value="employeeName">sort by</option>
-                                        <option value="active">Active Hours</option>
-                                        <option value="inactive">Inactive Hours</option>
-                                    </select>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
             </div>
-            <!-- <div class="row m-5 mt-20">
-                        <div class="col-md-8 box"> -->
             <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive p-0 ">
                 <table class="table table-hover cushover mt-0 <?php if (count($notifications) > 10) {
                                                                     echo "datatable";
@@ -90,7 +104,9 @@
                                     <td> <img src="<?php echo base_url("assets/images/avatar.png") ?>" style="border-radius: 50px; height: 50px; width: 50px;">
                                     </td>
                                     <td>
-                                        <p class="mb-0"><?php echo $notification['employee_name']; ?></p>
+                                        <p class="my-3"><?php echo $notification['employee_name']; ?>
+                                            <span class="mb-0 text-muted"> (<?php echo time_ago($notification['created_at'], $notification['status']); ?>)</span>
+                                        </p>
                                         <p class="mb-0 text-muted"><?php echo $notification['description']; ?></p>
                                     </td>
                                     <td class="text-center">
@@ -101,7 +117,7 @@
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php if (in_array($notification['status'], [0, 1, 2, 3, 5, 6, 7])): ?>
+                                        <?php if (in_array($notification['status'], [0, 1, 2, 3, 5, 6, 7, 9])): ?>
                                             <?php if ($can_edit): ?>
                                                 <button class="send-email btn btn-default btn-sm rounded" data-id="<?php echo $notification['employee_id']; ?>" data-name="<?php echo $notification['employee_name']; ?>" data-email="<?php echo $notification['email']; ?>" data-description="<?php echo $notification['description']; ?>" style="margin-top:5px;"><i class="fa fa-envelope-o"></i> Send Email</button>
                                             <?php else: ?>
