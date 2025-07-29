@@ -282,14 +282,24 @@ public function get_activity()
     $query = $this->db->get();
     $result = $query->result_array();
 
-    // Return response
-    return $this->output
-        ->set_content_type('application/json')
-        ->set_output(json_encode([
-            'status' => true,
-            'data' => $result
-        ]));
-}
+        $filtered_result = [];
+        $previous_status = null;
+
+        foreach ($result as $row) {
+            if ($row['is_active'] !== $previous_status) {
+                $filtered_result[] = $row;
+                $previous_status = $row['is_active'];
+            }
+        }
+
+        // Return response
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => true,
+                'data' => $filtered_result
+            ]));
+    }
 
 public function get_employee_activity()
 {
