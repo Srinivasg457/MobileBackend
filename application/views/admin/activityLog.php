@@ -252,67 +252,62 @@
                             .appendTo(timelineTrack);
                     }
 
-                    if (hasActivities) {
-                        // Process each activity
-                        response.data.forEach(function(item) {
-                            const createdAt = new Date(item.created_at);
-                            const hour = createdAt.getHours();
-                            const minutes = createdAt.getMinutes();
-                            const totalTimeInMinutes = (hour * 60 + minutes) - (startHour * 60);
+                  if (hasActivities) {
+    response.data.forEach(function(item, index) {
+        const createdAt = new Date(item.created_at);
+        const nextItem = response.data[index + 1];
+        const nextCreatedAt = nextItem ? new Date(nextItem.created_at) : new Date(createdAt.getTime() + 5 * 60000); // fallback to +5 min if no next item
 
-                            // Skip if outside our dynamic range
-                            if (totalTimeInMinutes < 0 || totalTimeInMinutes > totalMinutes) return;
+        const hour = createdAt.getHours();
+        const minutes = createdAt.getMinutes();
+        const totalTimeInMinutes = (hour * 60 + minutes) - (startHour * 60);
 
-                            let blockColorClass = '';
-                            if (item.is_active == '1') {
-                                blockColorClass = 'bg-yellow';
-                            } else if (item.is_active == '2') {
-                                blockColorClass = 'bg-green';
-                            } else if (item.is_active == '3') {
-                                blockColorClass = 'bg-green';
-                            } else {
-                                blockColorClass = 'bg-red';
-                            }
+        // Skip if outside our dynamic range
+        if (totalTimeInMinutes < 0 || totalTimeInMinutes > totalMinutes) return;
 
-                            const blockWidthPercent = (5 / totalMinutes) * 100;
-                            const leftPositionPercent = (totalTimeInMinutes / totalMinutes) * 100;
+        let blockColorClass = '';
+        if (item.is_active == '1') {
+            blockColorClass = 'bg-yellow';
+        } else if (item.is_active == '2' || item.is_active == '3') {
+            blockColorClass = 'bg-green';
+        } else {
+            blockColorClass = 'bg-red';
+        }
 
-                            // Calculate end time by adding 5 minutes
-                            const endAt = new Date(createdAt.getTime() + 5 * 60000);
+        const blockStartMinutes = totalTimeInMinutes;
+        const blockEndMinutes = ((nextCreatedAt.getHours() * 60 + nextCreatedAt.getMinutes()) - (startHour * 60));
+        const blockWidthPercent = ((blockEndMinutes - blockStartMinutes) / totalMinutes) * 100;
+        const leftPositionPercent = (blockStartMinutes / totalMinutes) * 100;
 
-                            // Format time as HH:MM AM/PM
-                            const formatTime = date =>
-                                date.toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
+        // Format time range for tooltip
+        const formatTime = date => date.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
 
-                            const timeLabel = `${formatTime(createdAt)} to ${formatTime(endAt)}`;
-                            const tooltip = $('<div></div>')
-                                .addClass('custom-tooltip')
-                                .text(timeLabel)
-                                .hide();
+        const timeLabel = `${formatTime(createdAt)} to ${formatTime(nextCreatedAt)}`;
+        const tooltip = $('<div></div>')
+            .addClass('custom-tooltip')
+            .text(timeLabel)
+            .hide();
 
-                            const block = $('<div></div>')
-                                .addClass('activity-block')
-                                .addClass(blockColorClass)
-                                .css({
-                                    'position': 'absolute',
-                                    'left': leftPositionPercent + '%',
-                                    'width': blockWidthPercent + '%',
-                                    'height': '100%'
-                                }).append(tooltip).hover(
-                                    function() {
-                                        tooltip.show();
-                                    },
-                                    function() {
-                                        tooltip.hide();
-                                    }
-                                );
+        const block = $('<div></div>')
+            .addClass('activity-block')
+            .addClass(blockColorClass)
+            .css({
+                'position': 'absolute',
+                'left': leftPositionPercent + '%',
+                'width': blockWidthPercent + '%',
+                'height': '100%'
+            }).append(tooltip).hover(
+                function() { tooltip.show(); },
+                function() { tooltip.hide(); }
+            );
 
-                            timelineTrack.append(block);
-                        });
-                    }
+        timelineTrack.append(block);
+    });
+}
+
                 },
                 error: function(xhr, status, error) {
                     console.error('AJAX Error:', status, error);
