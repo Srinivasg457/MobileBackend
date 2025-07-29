@@ -10767,6 +10767,15 @@ li.prev:hover {
     float: right;
 	padding-top: 5px;
 }
+.dataTables_filter label{
+  font-weight: 500 !important;
+}
+div.dataTables_length label {
+	font-weight: normal;
+	text-align: left;
+	white-space: nowrap;
+  font-weight: 500;
+}
 .dataTables_filter input {
     border: 1px solid #d9d9d9;
     margin-left: 5px;

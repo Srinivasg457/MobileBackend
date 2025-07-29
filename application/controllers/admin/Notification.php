@@ -43,65 +43,177 @@ class Notification extends Home_Controller {
         }
     }
 
+    // public function desktop_notifications()
+    // {
+    //     $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+
+    //     // Subquery: only get the latest notification per employee with status 6–8
+    //     $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
+    //         ->from('notifications')
+    //         ->where('user_id', $user_id)
+    //         ->where_in('status', [6, 7, 8]) // ✅ Only consider valid statuses here
+    //         ->group_by('employee_id')
+    //         ->get_compiled_select();
+
+    //     // Main query: join on filtered latest notifications
+    //     $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.email, e.name as employee_name');
+    //     $this->db->from('notifications n');
+    //     $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
+    //     $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+    //     $this->db->where('n.user_id', $user_id);
+    //     $this->db->where_in('n.status', [6, 7, 8]); // ✅ Matches subquery filter
+    //     $this->db->where('DATE(n.created_at)', date('Y-m-d'));
+
+
+    //     // Order: status first, then time
+    //     $this->db->order_by('n.status', 'ASC');
+    //     $this->db->order_by('n.created_at', 'ASC');
+
+    //     $query = $this->db->get();
+    //     return $query->result_array();
+    // }
     public function desktop_notifications()
     {
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
-        // Subquery: only get the latest notification per employee with status 6–8
+        // Step 1: Subquery - latest desktop notifications (status 6–8)
         $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
             ->from('notifications')
             ->where('user_id', $user_id)
-            ->where_in('status', [6, 7, 8]) // ✅ Only consider valid statuses here
+            ->where_in('status', [6, 7, 8])
             ->group_by('employee_id')
             ->get_compiled_select();
 
-        // Main query: join on filtered latest notifications
+        // Step 2: Fetch existing notifications
         $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.email, e.name as employee_name');
         $this->db->from('notifications n');
         $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
         $this->db->join('employees e', 'n.employee_id = e.id', 'left');
         $this->db->where('n.user_id', $user_id);
-        $this->db->where_in('n.status', [6, 7, 8]); // ✅ Matches subquery filter
-        $this->db->where('DATE(n.created_at)', date('Y-m-d'));
-
-
-        // Order: status first, then time
-        $this->db->order_by('n.status', 'ASC');
+        $this->db->where_in('n.status', [6, 7, 8]);
         $this->db->order_by('n.created_at', 'ASC');
 
         $query = $this->db->get();
-        return $query->result_array();
+        $notifications = $query->result_array();
+
+        // Step 3: Get employees without desktop notifications
+        $notified_employee_ids = array_column($notifications, 'employee_id');
+
+        $this->db->select('id, name, email, created_at');
+        $this->db->from('employees');
+        $this->db->where('user_id', $user_id);
+        if (!empty($notified_employee_ids)) {
+            $this->db->where_not_in('id', $notified_employee_ids);
+        }
+        $remaining_employees = $this->db->get()->result_array();
+
+        // Step 4: Add fallback rows
+        foreach ($remaining_employees as $emp) {
+            $notifications[] = [
+                'notification_id' => null,
+                'user_id'         => $user_id,
+                'employee_id'     => $emp['id'],
+                'description'     => 'User not yet logged into Workroom Application',
+                'created_at'      => $emp['created_at'],
+                'status'          => 9,
+                'email'           => $emp['email'],
+                'employee_name'   => $emp['name'],
+            ];
+        }
+
+        return $notifications;
     }
+
+
+
+
+    // public function web_notifications()
+    // {
+    //     $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+
+    //     // Subquery: only consider notifications with status 0–5
+    //     $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
+    //         ->from('notifications')
+    //         ->where('user_id', $user_id)
+    //         ->where_in('status', [0, 1, 2, 3, 4, 5]) // <-- status condition here
+    //         ->group_by('employee_id')
+    //         ->get_compiled_select();
+
+    //     // Main query: join on subquery
+    //     $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.email, e.name as employee_name');
+    //     $this->db->from('notifications n');
+    //     $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
+    //     $this->db->join('employees e', 'n.employee_id = e.id', 'left');
+    //     $this->db->where('n.user_id', $user_id);
+    //     $this->db->where_in('n.status', [0, 1, 2, 3, 4, 5]);
+    //     $this->db->where('DATE(n.created_at)', date('Y-m-d'));
+
+
+    //     // Order by status, then time
+    //     $this->db->order_by('n.status', 'ASC');
+    //     $this->db->order_by('n.created_at', 'ASC');
+
+    //     $query = $this->db->get();
+    //     return $query->result_array();
+    // }
 
     public function web_notifications()
     {
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
-        // Subquery: only consider notifications with status 0–5
+        // 1. Get subquery for latest notification per employee
         $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
             ->from('notifications')
             ->where('user_id', $user_id)
-            ->where_in('status', [0, 1, 2, 3, 4, 5]) // <-- status condition here
+            ->where_in('status', [0, 1, 2, 3, 4, 5, 6])
             ->group_by('employee_id')
             ->get_compiled_select();
 
-        // Main query: join on subquery
+        // 2. Main query: fetch existing notifications
         $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.email, e.name as employee_name');
         $this->db->from('notifications n');
         $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
         $this->db->join('employees e', 'n.employee_id = e.id', 'left');
         $this->db->where('n.user_id', $user_id);
-        $this->db->where_in('n.status', [0, 1, 2, 3, 4, 5]);
-        $this->db->where('DATE(n.created_at)', date('Y-m-d'));
-
-
-        // Order by status, then time
-        $this->db->order_by('n.status', 'ASC');
+        $this->db->where_in('n.status', [0, 1, 2, 3, 4, 5, 6]);
         $this->db->order_by('n.created_at', 'ASC');
 
         $query = $this->db->get();
-        return $query->result_array();
+        $notifications = $query->result_array();
+
+        // 3. Track employee_ids with notifications
+        $notified_employee_ids = array_column($notifications, 'employee_id');
+
+        // 4. Get all employees under this user/org
+        $this->db->select('id, name, email, created_at');
+        $this->db->from('employees');
+        $this->db->where('user_id', $user_id);
+        if (!empty($notified_employee_ids)) {
+            $this->db->where_not_in('id', $notified_employee_ids);
+        }
+        $remaining_employees = $this->db->get()->result_array();
+
+        // 5. Add fallback notification rows for employees without notifications
+        foreach ($remaining_employees as $emp) {
+            $notifications[] = [
+                'notification_id' => null,
+                'user_id'         => $user_id,
+                'employee_id'     => $emp['id'],
+                'description'     => 'User not yet logged into Workroom Application',
+                'created_at'      => $emp['created_at'],
+                'status'          => 9,
+                'email'           => $emp['email'],
+                'employee_name'   => $emp['name'],
+            ];
+        }
+        // 6. Sort all notifications by created_at ascending
+        usort($notifications, function ($a, $b) {
+            return strtotime($a['created_at']) - strtotime($b['created_at']);
+        });
+
+        return $notifications;
     }
+
 
 
 
