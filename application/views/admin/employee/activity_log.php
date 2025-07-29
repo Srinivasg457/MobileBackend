@@ -102,6 +102,7 @@
             <thead>
               <tr>
                 <th>S.No</th>
+                <th>Date</th>
                 <th>Start Time</th>
                 <th>End Time</th>
                 <th>Duration (minutes)</th>
@@ -217,6 +218,7 @@
             html += `
             <tr>
               <td>${counter}</td>
+              <td>${row.date_added}</td>
               <td>${row.timestamp_start}</td>
               <td>${row.timestamp_end}</td>
               <td>${duration}</td>
