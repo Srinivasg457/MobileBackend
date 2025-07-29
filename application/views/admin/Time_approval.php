@@ -35,11 +35,12 @@
         <hr>
 
         <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
-            <table class="table table-hover cushover">
+            <table class="table table-hover cushover"  id="dg_table">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Employee Name</th>
+                        <th>Date</th>
                         <th>Start</th>
                         <th>End</th>
                         <th>Duration</th>
@@ -166,6 +167,7 @@
                             <tr>
                                 <td>${i + 1}</td>
                                 <td>${employeeData[row.employee_id] || 'Unknown'}</td>
+                                <td>${row.date_added}</td>
                                 <td>${startTime}</td>
                                 <td>${endTime}</td>
                                 <td>${duration}</td>
