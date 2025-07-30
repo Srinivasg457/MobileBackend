@@ -166,63 +166,7 @@ private function getRequestSource($params)
     return $sources;
 }
     
-    
-    public function updateTimelog() {
-        $employee_id = $this->session->userdata('employee_id') ?? $this->input->post('employee_id');
-        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id') ;
-        $date = $this->input->post('date') ?? date('Y-m-d');
-    
-        // New values to be updated
-        $end_time = $this->input->post('end_time') ;
-        $total_active_time = $this->input->post('total_active_time');
-        $total_idle_time = $this->input->post('total_idle_time');
-        $status = $this->input->post('status');
-        $updated_at = date('Y-m-d H:i:s');
-    
-        // Validate required fields
-        if (empty($employee_id) || empty($user_id) || empty($end_time)) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode([
-                    'status' => false,
-                    'message' => 'Missing required parameters (employee_id, user_id, end_time)'
-                ]));
-        }
-    
-        // Check if timelog exists for this user, employee, and date
-        $this->db->where('user_id', $user_id);
-        $this->db->where('employee_id', $employee_id);
-        $this->db->where('DATE(log_date)', $date);
-        $exists = $this->db->get('time_logs')->num_rows();
-    
-        if ($exists == 0) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode([
-                    'status' => false,
-                    'message' => 'No existing timelog found for this user on the given date.'
-                ]));
-        }
-    
-        // Update the record
-        $this->db->where('user_id', $user_id);
-        $this->db->where('employee_id', $employee_id);
-        $this->db->where('DATE(log_date)', $date);
-        $this->db->update('time_logs', [
-            'end_time' => $end_time,
-            'total_active_time' => $total_active_time,
-            'total_idle_time' => $total_idle_time,
-            'status' => $status,
-            'updated_at' => $updated_at
-        ]);
-    
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => true,
-                'message' => 'Timelog updated successfully.'
-            ]));
-    }
+   
     
  public function update_timelog()
     {
@@ -242,6 +186,7 @@ private function getRequestSource($params)
             'user_id' => 'user_id',
             'employee_id' => 'employee_id',
             'log_date' => 'log_date',
+            'start_time'=>'start_time',
             'end_time' => 'end_time',
             'total_active_time' => 'total_active_time',
             'total_idle_time' => 'total_idle_time'
@@ -343,7 +288,7 @@ private function getRequestSource($params)
         
         $this->db->where('user_id', $headers['user_id']);
         $this->db->where('employee_id', $headers['employee_id']);
-        $this->db->where('log_date', $headers['log_date']);
+        $this->db->where('start_time', $headers['start_time']);
         $updated = $this->db->update('time_logs', $data);
         
         $this->db->trans_complete();
