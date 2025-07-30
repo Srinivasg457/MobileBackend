@@ -271,49 +271,96 @@ public function update_timelog()
             ]));
     }
 
-    // Validate and format timestamps
     try {
         $end_datetime = (new DateTime($headers['end_time']))->format('Y-m-d H:i:s');
-        
-        // Get the last log entry to use as base for the new entry
+
+        // Get the most recent log entry
         $this->db->where('employee_id', $headers['employee_id']);
         $this->db->where('user_id', $headers['user_id']);
         $this->db->where('log_date', $headers['log_date']);
         $this->db->order_by('log_id', 'DESC');
         $this->db->limit(1);
-        $last_log = $this->db->get('time_logs')->row();
+        $existing_log = $this->db->get('time_logs')->row();
 
-        // If no previous log exists, we'll create a new one with the current time as start time
-        $start_time = $last_log ? $last_log->end_time : $end_datetime;
-
-        if (strtotime($end_datetime) <= strtotime($start_time)) {
-            throw new Exception("End time must be after start time");
+        if (!$existing_log) {
+            // Create first log entry if none exists
+            $current_time = date('Y-m-d H:i:s');
+            $new_log_data = [
+                'user_id' => $headers['user_id'],
+                'employee_id' => $headers['employee_id'],
+                'log_date' => $headers['log_date'],
+                'start_time' => $end_datetime,
+                'end_time' => $end_datetime,
+                'total_active_time' => $headers['total_active_time'],
+                'total_idle_time' => $headers['total_idle_time'],
+                'created_at' => $current_time,
+                'updated_at' => $current_time
+            ];
+            
+            $this->db->insert('time_logs', $new_log_data);
+            $new_log_id = $this->db->insert_id();
+            
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(201)
+                ->set_output(json_encode([
+                    "status" => "success",
+                    "message" => "Initial time log created",
+                    "data" => $new_log_data
+                ]));
         }
 
-        // Function to convert time to seconds
-        function timeToSeconds($time) {
-            if (empty($time) || $time == '00:00:00') return 0;
-            $parts = explode(':', $time);
-            return $parts[0] * 3600 + $parts[1] * 60 + $parts[2];
-        }
-
-        // Function to convert seconds to HH:MM:SS
-        function secondsToTime($seconds) {
-            $hours = floor($seconds / 3600);
-            $minutes = floor(($seconds % 3600) / 60);
-            $seconds = $seconds % 60;
-            return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
-        }
-
-        // Calculate new active and idle times by adding to previous values
-        $previous_active = $last_log ? timeToSeconds($last_log->total_active_time) : 0;
-        $previous_idle = $last_log ? timeToSeconds($last_log->total_idle_time) : 0;
+        // Only create new log if session was interrupted (more than 5 minutes gap)
+        $last_end_time = strtotime($existing_log->end_time);
+        $new_start_time = strtotime($end_datetime);
         
-        $new_active = timeToSeconds($headers['total_active_time']);
-        $new_idle = timeToSeconds($headers['total_idle_time']);
-        
-        $total_active = secondsToTime($previous_active + $new_active);
-        $total_idle = secondsToTime($previous_idle + $new_idle);
+        if (($new_start_time - $last_end_time) > 300) { // 300 seconds = 5 minutes
+            // Create new log entry
+            $current_time = date('Y-m-d H:i:s');
+            $new_log_data = [
+                'user_id' => $headers['user_id'],
+                'employee_id' => $headers['employee_id'],
+                'log_date' => $headers['log_date'],
+                'start_time' => $end_datetime,
+                'end_time' => $end_datetime,
+                'total_active_time' => $headers['total_active_time'],
+                'total_idle_time' => $headers['total_idle_time'],
+                'created_at' => $current_time,
+                'updated_at' => $current_time
+            ];
+            
+            $this->db->insert('time_logs', $new_log_data);
+            
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(201)
+                ->set_output(json_encode([
+                    "status" => "success",
+                    "message" => "New session log created",
+                    "data" => $new_log_data
+                ]));
+        }
+
+        // Otherwise, update the existing log
+        $update_data = [
+            'end_time' => $end_datetime,
+            'total_active_time' => $headers['total_active_time'],
+            'total_idle_time' => $headers['total_idle_time'],
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('log_id', $existing_log->log_id);
+        $this->db->update('time_logs', $update_data);
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(200)
+            ->set_output(json_encode([
+                "status" => "success",
+                "message" => "Time log updated",
+                "data" => $update_data,
+                "log_id" => $existing_log->log_id
+            ]));
 
     } catch (Exception $e) {
         return $this->output
@@ -324,58 +371,7 @@ public function update_timelog()
                 "message" => "Invalid time data: " . $e->getMessage()
             ]));
     }
-
-    // Prepare new log data
-    $current_time = date('Y-m-d H:i:s');
-    $new_log_data = [
-        'user_id' => $headers['user_id'],
-        'employee_id' => $headers['employee_id'],
-        'log_date' => $headers['log_date'],
-        'start_time' => $start_time,
-        'end_time' => $end_datetime,
-        'total_active_time' => $total_active,
-        'total_idle_time' => $total_idle,
-        'created_at' => $current_time,
-        'updated_at' => $current_time
-    ];
-
-    // Start database transaction
-    $this->db->trans_start();
-
-    $inserted = $this->db->insert('time_logs', $new_log_data);
-    $new_log_id = $this->db->insert_id();
-
-    $this->db->trans_complete();
-
-    if (!$this->db->trans_status() || !$inserted) {
-        $error = $this->db->error();
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(500)
-            ->set_output(json_encode([
-                "status" => "error",
-                "message" => "Failed to create new time log",
-                "error" => $error['message'] ?? 'Unknown database error'
-            ]));
-    }
-
-    // Get the newly created record
-    $new_record = $this->db->get_where('time_logs', ['log_id' => $new_log_id])->row();
-
-    // Log success
-    log_message('info', "New time log created with log_id {$new_log_id} (employee {$headers['employee_id']})");
-
-    return $this->output
-        ->set_content_type('application/json')
-        ->set_status_header(201)
-        ->set_output(json_encode([
-            "status" => "success",
-            "message" => "New time log created successfully",
-            "data" => $new_record,
-            "previous_log" => $last_log
-        ]));
 }
-
     
 
 
