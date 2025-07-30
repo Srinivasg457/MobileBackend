@@ -227,7 +227,7 @@ private function getRequestSource($params)
 
 
    
-   public function update_timelog()
+public function update_timelog()
 {
     // Validate request method
     if ($this->input->server('REQUEST_METHOD') !== 'PUT') {
@@ -271,58 +271,49 @@ private function getRequestSource($params)
             ]));
     }
 
-    // Validate and format timestamp
+    // Validate and format timestamps
     try {
         $end_datetime = (new DateTime($headers['end_time']))->format('Y-m-d H:i:s');
-
-        // Get only the latest time log entry for the given employee and user on this date
+        
+        // Get the last log entry to use as base for the new entry
         $this->db->where('employee_id', $headers['employee_id']);
         $this->db->where('user_id', $headers['user_id']);
         $this->db->where('log_date', $headers['log_date']);
         $this->db->order_by('log_id', 'DESC');
         $this->db->limit(1);
-        $existing = $this->db->get('time_logs')->row();
+        $last_log = $this->db->get('time_logs')->row();
 
-        if (!$existing) {
-            return $this->output
-                ->set_content_type('application/json')
-                ->set_status_header(404)
-                ->set_output(json_encode([
-                    "status" => "error",
-                    "message" => "Time log not found for update"
-                ]));
-        }
+        // If no previous log exists, we'll create a new one with the current time as start time
+        $start_time = $last_log ? $last_log->end_time : $end_datetime;
 
-        if (strtotime($end_datetime) <= strtotime($existing->start_time)) {
+        if (strtotime($end_datetime) <= strtotime($start_time)) {
             throw new Exception("End time must be after start time");
         }
 
-        // Function to convert various time formats to HH:MM:SS
-        function convertToHHMMSS($time) {
-            if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
-                return $time;
-            }
-
-            if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $time)) {
-                return str_replace('-', ':', $time);
-            }
-
-            if (is_numeric($time)) {
-                $hours = (float)$time;
-                $total_seconds = (int)($hours * 3600);
-
-                $hours = floor($total_seconds / 3600);
-                $minutes = floor(($total_seconds % 3600) / 60);
-                $seconds = $total_seconds % 60;
-
-                return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
-            }
-
-            throw new Exception("Invalid time format");
+        // Function to convert time to seconds
+        function timeToSeconds($time) {
+            if (empty($time) || $time == '00:00:00') return 0;
+            $parts = explode(':', $time);
+            return $parts[0] * 3600 + $parts[1] * 60 + $parts[2];
         }
 
-        $active_time = convertToHHMMSS($headers['total_active_time']);
-        $idle_time = convertToHHMMSS($headers['total_idle_time']);
+        // Function to convert seconds to HH:MM:SS
+        function secondsToTime($seconds) {
+            $hours = floor($seconds / 3600);
+            $minutes = floor(($seconds % 3600) / 60);
+            $seconds = $seconds % 60;
+            return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
+        }
+
+        // Calculate new active and idle times by adding to previous values
+        $previous_active = $last_log ? timeToSeconds($last_log->total_active_time) : 0;
+        $previous_idle = $last_log ? timeToSeconds($last_log->total_idle_time) : 0;
+        
+        $new_active = timeToSeconds($headers['total_active_time']);
+        $new_idle = timeToSeconds($headers['total_idle_time']);
+        
+        $total_active = secondsToTime($previous_active + $new_active);
+        $total_idle = secondsToTime($previous_idle + $new_idle);
 
     } catch (Exception $e) {
         return $this->output
@@ -334,53 +325,54 @@ private function getRequestSource($params)
             ]));
     }
 
-    // Prepare update data
+    // Prepare new log data
     $current_time = date('Y-m-d H:i:s');
-    $data = [
+    $new_log_data = [
+        'user_id' => $headers['user_id'],
+        'employee_id' => $headers['employee_id'],
+        'log_date' => $headers['log_date'],
+        'start_time' => $start_time,
         'end_time' => $end_datetime,
-        'total_active_time' => $active_time,
-        'total_idle_time' => $idle_time,
+        'total_active_time' => $total_active,
+        'total_idle_time' => $total_idle,
+        'created_at' => $current_time,
         'updated_at' => $current_time
     ];
 
     // Start database transaction
     $this->db->trans_start();
 
-    $this->db->where('log_id', $existing->log_id); // only update that specific row
-    $updated = $this->db->update('time_logs', $data);
+    $inserted = $this->db->insert('time_logs', $new_log_data);
+    $new_log_id = $this->db->insert_id();
 
     $this->db->trans_complete();
 
-    if (!$this->db->trans_status() || !$updated) {
+    if (!$this->db->trans_status() || !$inserted) {
         $error = $this->db->error();
         return $this->output
             ->set_content_type('application/json')
             ->set_status_header(500)
             ->set_output(json_encode([
                 "status" => "error",
-                "message" => "Failed to update time log",
+                "message" => "Failed to create new time log",
                 "error" => $error['message'] ?? 'Unknown database error'
             ]));
     }
 
-    // Get the updated record
-    $this->db->where('log_id', $existing->log_id);
-    $updated_record = $this->db->get('time_logs')->row();
+    // Get the newly created record
+    $new_record = $this->db->get_where('time_logs', ['log_id' => $new_log_id])->row();
 
     // Log success
-    log_message('info', "Time log updated for log_id {$existing->log_id} (employee {$headers['employee_id']})");
+    log_message('info', "New time log created with log_id {$new_log_id} (employee {$headers['employee_id']})");
 
     return $this->output
         ->set_content_type('application/json')
-        ->set_status_header(200)
+        ->set_status_header(201)
         ->set_output(json_encode([
             "status" => "success",
-            "message" => "Time log updated successfully",
-            "data" => [
-                "original_data" => $existing,
-                "updated_data" => $updated_record,
-                "changes_applied" => $data
-            ]
+            "message" => "New time log created successfully",
+            "data" => $new_record,
+            "previous_log" => $last_log
         ]));
 }
 
