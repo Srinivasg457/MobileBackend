@@ -323,13 +323,14 @@ public function update_timelog()
                 'log_date' => $headers['log_date'],
                 'start_time' => $end_datetime,
                 'end_time' => $end_datetime,
-                'total_active_time' => $headers['total_active_time'],
-                'total_idle_time' => $headers['total_idle_time'],
+                'total_active_time' => $headers['total_active_time'], // Start fresh for new session
+                'total_idle_time' => $headers['total_idle_time'], // Start fresh for new session
                 'created_at' => $current_time,
                 'updated_at' => $current_time
             ];
             
             $this->db->insert('time_logs', $new_log_data);
+            $new_log_id = $this->db->insert_id();
             
             return $this->output
                 ->set_content_type('application/json')
@@ -341,11 +342,12 @@ public function update_timelog()
                 ]));
         }
 
-        // Otherwise, update the existing log
+        // Otherwise, update the existing log with the new active/idle times
+        // This preserves each session's independent time tracking
         $update_data = [
             'end_time' => $end_datetime,
-            'total_active_time' => $headers['total_active_time'],
-            'total_idle_time' => $headers['total_idle_time'],
+            'total_active_time' => $headers['total_active_time'], // Update with current total
+            'total_idle_time' => $headers['total_idle_time'], // Update with current total
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
@@ -372,7 +374,6 @@ public function update_timelog()
             ]));
     }
 }
-    
 
 
     public function get_employee_by_email()
