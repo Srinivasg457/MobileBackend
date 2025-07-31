@@ -271,16 +271,29 @@ private function getRequestSource($params)
                     "message" => "Invalid time data: " . $e->getMessage()
                 ]));
         }
-    
-        // Prepare update data
-        $current_time = date('Y-m-d H:i:s');
+
+        // // Prepare update data
+        // $current_time =  get_user_datetime_only($headers['user_id']);
+        // $data = [
+        //     'end_time' => $end_datetime,
+        //     'total_active_time' => $active_time,
+        //     'total_idle_time' => $idle_time,
+        //     'updated_at' => $current_time
+        // ];
+        $current_time = get_user_datetime_only($headers['user_id']);
+
         $data = [
             'end_time' => $end_datetime,
-            'total_active_time' => $active_time,
-            'total_idle_time' => $idle_time,
             'updated_at' => $current_time
         ];
-    
+
+        // Only include active and idle time if they are not both '00:00:00'
+        if ($active_time !== '00:00:00' || $idle_time !== '00:00:00') {
+            $data['total_active_time'] = $active_time;
+            $data['total_idle_time'] = $idle_time;
+        }
+
+
         // Start database transaction
         $this->db->trans_start();
         
