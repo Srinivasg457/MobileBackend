@@ -716,30 +716,35 @@ public function save_activity()
         ];
 
         if ($existing) {
-            // Ensure end_time is after start_time
-            if (strtotime($end_time) <= strtotime($existing->start_time)) {
+            // Ensure end_time is after existing end_time (optional)
+            if (strtotime($end_time) <= strtotime($existing->end_time)) {
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_output(json_encode([
                         'status' => 'error',
-                        'message' => 'End time must be after existing start time',
+                        'message' => 'New end time must be after existing end time',
                     ]));
             }
 
-            // Update existing log
+            // Update only end_time and updated_at
+            $update_data = [
+                'end_time' => $end_time,
+                'updated_at' => $current_datetime
+            ];
+
             $this->db->where([
                 'employee_id' => $employee_id,
                 'user_id' => $user_id,
                 'log_date' => $log_date
             ]);
-            $this->db->update('time_logs', $data);
+            $this->db->update('time_logs', $update_data);
 
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'success',
-                    'message' => 'Time log updated',
-                    'data' => $data
+                    'message' => 'End time updated',
+                    'data' => $update_data
                 ]));
         } else {
             // Add creation fields
@@ -747,6 +752,7 @@ public function save_activity()
             $data['user_id'] = $user_id;
             $data['log_date'] = $log_date;
             $data['created_at'] = $current_datetime;
+            $data['updated_at'] = $current_datetime;
 
             // Insert new log
             $this->db->insert('time_logs', $data);
