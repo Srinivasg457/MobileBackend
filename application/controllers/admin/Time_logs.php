@@ -102,7 +102,7 @@ class Time_logs extends Home_Controller {
     start_time, 
     end_time, 
     ROUND(total_active_time / 60, 2) AS total_active_time, 
-    ROUND(total_idle_time / 60, 2) AS total_active_time, 
+    ROUND(total_idle_time / 60, 2) AS total_idle_time, 
     created_at, 
     updated_at
 ');
