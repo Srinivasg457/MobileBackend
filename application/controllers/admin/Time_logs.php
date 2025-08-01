@@ -57,7 +57,69 @@ class Time_logs extends Home_Controller {
                 'data' => $query->result_array()
             ]));
     }
-    
+    public function get_time_logs_for_tool()
+    {
+        // Get inputs from session or GET request
+        $employee_id = $this->input->get('employee_id');
+        $user_id = $this->input->get('user_id');
+        $date =  date('Y-m-d'); // Default to today if not provided
+
+        // Validate inputs
+        if (empty($employee_id) || empty($user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Missing employee_id or user_id'
+                ]));
+        }
+
+        // Check if logs exist for the given date
+        $this->db->select('log_id');
+        $this->db->from('time_logs');
+        $this->db->where('user_id', $user_id);
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('DATE(log_date)', $date);
+
+        $exists = $this->db->get();
+
+        if ($exists->num_rows() == 0) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'No time logs found for the specified user_id, employee_id, and date.'
+                ]));
+        }
+
+        // Fetch time log details
+        // Fetch time log details
+        $this->db->select('
+    log_id, 
+    employee_id, 
+    user_id, 
+    log_date, 
+    start_time, 
+    end_time, 
+    ROUND(total_active_time / 60, 2) AS total_active_time, 
+    ROUND(total_idle_time / 60, 2) AS total_active_time, 
+    created_at, 
+    updated_at
+');
+        $this->db->from('time_logs');
+        $this->db->where('user_id', $user_id);
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('DATE(log_date)', $date);
+        $query = $this->db->get();
+
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => true,
+                'data' => $query->result_array()
+            ]));
+    }
 
     public function checkExistingTimelog() 
     {
