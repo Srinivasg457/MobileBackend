@@ -57,6 +57,7 @@ class Time_logs extends Home_Controller {
                 'data' => $query->result_array()
             ]));
     }
+
 //     public function get_time_logs_for_tool()
 //     {
 //         // Get inputs from session or GET request
@@ -120,6 +121,7 @@ class Time_logs extends Home_Controller {
 //                 'data' => $query->result_array()
 //             ]));
 //     }
+
 
     public function checkExistingTimelog() 
     {
