@@ -1,19 +1,22 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Time_logs extends Home_Controller { 
+class Time_logs extends Home_Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->load->database(); // Load the database library
     }
 
-    public function get_time_logs() {
+    public function get_time_logs()
+    {
         // Get inputs from session or GET request
         $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
         $date = $this->input->get('date') ?: date('Y-m-d'); // Default to today if not provided
-    
+
         // Validate inputs
         if (empty($employee_id) || empty($user_id)) {
             return $this->output
@@ -23,7 +26,7 @@ class Time_logs extends Home_Controller {
                     'message' => 'Missing employee_id or user_id'
                 ]));
         }
-    
+
         // Check if logs exist for the given date
         $this->db->select('log_id');
         $this->db->from('time_logs');
@@ -32,7 +35,7 @@ class Time_logs extends Home_Controller {
         $this->db->where('DATE(log_date)', $date);
 
         $exists = $this->db->get();
-    
+
         if ($exists->num_rows() == 0) {
             return $this->output
                 ->set_content_type('application/json')
@@ -41,7 +44,7 @@ class Time_logs extends Home_Controller {
                     'message' => 'No time logs found for the specified user_id, employee_id, and date.'
                 ]));
         }
-    
+
         // Fetch time log details
         $this->db->select('log_id, employee_id, user_id, log_date, start_time, end_time, total_active_time, total_idle_time, created_at, updated_at');
         $this->db->from('time_logs');
@@ -49,7 +52,70 @@ class Time_logs extends Home_Controller {
         $this->db->where('employee_id', $employee_id);
         $this->db->where('DATE(log_date)', $date);
         $query = $this->db->get();
-    
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => true,
+                'data' => $query->result_array()
+            ]));
+    }
+    public function get_time_logs_for_tool()
+    {
+        // Get inputs from session or GET request
+        $employee_id = $this->input->get('employee_id');
+        $user_id = $this->input->get('user_id');
+        $date =  date('Y-m-d'); // Default to today if not provided
+
+        // Validate inputs
+        if (empty($employee_id) || empty($user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Missing employee_id or user_id'
+                ]));
+        }
+
+        // Check if logs exist for the given date
+        $this->db->select('log_id');
+        $this->db->from('time_logs');
+        $this->db->where('user_id', $user_id);
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('DATE(log_date)', $date);
+
+        $exists = $this->db->get();
+
+        if ($exists->num_rows() == 0) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'No time logs found for the specified user_id, employee_id, and date.'
+                ]));
+        }
+
+        // Fetch time log details
+        // Fetch time log details
+        $this->db->select('
+        log_id, 
+        employee_id, 
+        user_id, 
+        log_date, 
+        start_time, 
+        end_time, 
+        ROUND(total_active_time / 60, 0) AS total_active_time, 
+        ROUND(total_idle_time / 60, 0) AS total_idle_time, 
+        created_at, 
+        updated_at
+        ');
+        $this->db->from('time_logs');
+        $this->db->where('user_id', $user_id);
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('DATE(log_date)', $date);
+        $query = $this->db->get();
+
+
         return $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
@@ -58,79 +124,14 @@ class Time_logs extends Home_Controller {
             ]));
     }
 
-//     public function get_time_logs_for_tool()
-//     {
-//         // Get inputs from session or GET request
-//         $employee_id = $this->input->get('employee_id');
-//         $user_id = $this->input->get('user_id');
-//         $date =  date('Y-m-d'); // Default to today if not provided
-
-//         // Validate inputs
-//         if (empty($employee_id) || empty($user_id)) {
-//             return $this->output
-//                 ->set_content_type('application/json')
-//                 ->set_output(json_encode([
-//                     'status' => false,
-//                     'message' => 'Missing employee_id or user_id'
-//                 ]));
-//         }
-
-//         // Check if logs exist for the given date
-//         $this->db->select('log_id');
-//         $this->db->from('time_logs');
-//         $this->db->where('user_id', $user_id);
-//         $this->db->where('employee_id', $employee_id);
-//         $this->db->where('DATE(log_date)', $date);
-
-//         $exists = $this->db->get();
-
-//         if ($exists->num_rows() == 0) {
-//             return $this->output
-//                 ->set_content_type('application/json')
-//                 ->set_output(json_encode([
-//                     'status' => false,
-//                     'message' => 'No time logs found for the specified user_id, employee_id, and date.'
-//                 ]));
-//         }
-
-//         // Fetch time log details
-//         // Fetch time log details
-//         $this->db->select('
-//     log_id, 
-//     employee_id, 
-//     user_id, 
-//     log_date, 
-//     start_time, 
-//     end_time, 
-//     ROUND(total_active_time / 60, 2) AS total_active_time, 
-//     ROUND(total_idle_time / 60, 2) AS total_active_time, 
-//     created_at, 
-//     updated_at
-// ');
-//         $this->db->from('time_logs');
-//         $this->db->where('user_id', $user_id);
-//         $this->db->where('employee_id', $employee_id);
-//         $this->db->where('DATE(log_date)', $date);
-//         $query = $this->db->get();
-
-
-//         return $this->output
-//             ->set_content_type('application/json')
-//             ->set_output(json_encode([
-//                 'status' => true,
-//                 'data' => $query->result_array()
-//             ]));
-//     }
-
-
-    public function checkExistingTimelog() 
+    public function checkExistingTimelog()
     {
         try {
             // Strictly get identifiers from headers only
             $employee_id = $this->input->get_request_header('employee_id', TRUE);
             $user_id = $this->input->get_request_header('user_id', TRUE);
             $date = $this->input->get_request_header('date', TRUE);
-    
+
             // Validate required headers
             if (empty($employee_id) || empty($user_id)) {
                 return $this->output
@@ -150,10 +151,10 @@ class Time_logs extends Home_Controller {
                         ]
                     ]));
             }
-    
+
             // Set default date if not provided
             $date = empty($date) ? date('Y-m-d') : $date;
-    
+
             // Build query without status field
             $this->db->select('log_id, employee_id, user_id, log_date, start_time, 
                              end_time, total_active_time, total_idle_time, 
@@ -162,15 +163,15 @@ class Time_logs extends Home_Controller {
             $this->db->where('user_id', $user_id);
             $this->db->where('employee_id', $employee_id);
             $this->db->where('DATE(log_date)', $date);
-            
+
             $query = $this->db->get();
-            
+
             if (!$query) {
                 throw new Exception('Database query failed: ' . $this->db->error()['message']);
             }
-            
+
             $result = $query->row_array();
-    
+
             if (empty($result)) {
                 return $this->output
                     ->set_content_type('application/json')
@@ -185,7 +186,7 @@ class Time_logs extends Home_Controller {
                         ]
                     ]));
             }
-    
+
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(200)
@@ -193,7 +194,6 @@ class Time_logs extends Home_Controller {
                     'status' => true,
                     'data' => $result
                 ]));
-    
         } catch (Exception $e) {
             return $this->output
                 ->set_content_type('application/json')
@@ -206,32 +206,34 @@ class Time_logs extends Home_Controller {
         }
     }
 
-/**
- * Helper method to determine request parameter sources
- */
-private function getRequestSource($params)
-{
-    $sources = [];
-    
-    foreach ($params as $key => $value) {
-        if ($this->input->get_request_header($key, TRUE) !== null) {
-            $sources[$key] = 'header';
-        } elseif ($this->session->userdata($key) !== null || 
-                 ($key === 'user_id' && ($this->session->userdata('employee_org_id') !== null || 
-                                        $this->session->userdata('id') !== null))) {
-            $sources[$key] = 'session';
-        } elseif ($this->input->get_post($key) !== null) {
-            $sources[$key] = 'request';
-        } else {
-            $sources[$key] = 'default';
+    /**
+     * Helper method to determine request parameter sources
+     */
+    private function getRequestSource($params)
+    {
+        $sources = [];
+
+        foreach ($params as $key => $value) {
+            if ($this->input->get_request_header($key, TRUE) !== null) {
+                $sources[$key] = 'header';
+            } elseif (
+                $this->session->userdata($key) !== null ||
+                ($key === 'user_id' && ($this->session->userdata('employee_org_id') !== null ||
+                    $this->session->userdata('id') !== null))
+            ) {
+                $sources[$key] = 'session';
+            } elseif ($this->input->get_post($key) !== null) {
+                $sources[$key] = 'request';
+            } else {
+                $sources[$key] = 'default';
+            }
         }
+
+        return $sources;
     }
-    
-    return $sources;
-}
-    
-    
- public function update_timelog()
+
+
+    public function update_timelog()
     {
         // Validate request method
         if ($this->input->server('REQUEST_METHOD') !== 'PUT') {
@@ -243,7 +245,7 @@ private function getRequestSource($params)
                     "message" => "Only PUT requests are allowed"
                 ]));
         }
-    
+
         // Get and validate headers
         $required_headers = [
             'user_id' => 'user_id',
@@ -253,10 +255,10 @@ private function getRequestSource($params)
             'total_active_time' => 'total_active_time',
             'total_idle_time' => 'total_idle_time'
         ];
-    
+
         $headers = [];
         $missing_fields = [];
-    
+
         foreach ($required_headers as $field => $label) {
             $value = $this->input->get_request_header($field, TRUE);
             if (empty($value)) {
@@ -264,7 +266,7 @@ private function getRequestSource($params)
             }
             $headers[$field] = $value;
         }
-    
+
         if (!empty($missing_fields)) {
             return $this->output
                 ->set_content_type('application/json')
@@ -274,17 +276,17 @@ private function getRequestSource($params)
                     "message" => "Missing required headers: " . implode(', ', $missing_fields)
                 ]));
         }
-    
+
         // Validate and format timestamp
         try {
             $end_datetime = (new DateTime($headers['end_time']))->format('Y-m-d H:i:s');
-            
+
             // Get existing log to validate end time is after start time
             $this->db->where('employee_id', $headers['employee_id']);
             $this->db->where('user_id', $headers['user_id']);
             $this->db->where('log_date', $headers['log_date']);
             $existing = $this->db->get('time_logs')->row();
-            
+
             if (!$existing) {
                 return $this->output
                     ->set_content_type('application/json')
@@ -294,38 +296,38 @@ private function getRequestSource($params)
                         "message" => "Time log not found for update"
                     ]));
             }
-            
+
             if (strtotime($end_datetime) <= strtotime($existing->start_time)) {
                 throw new Exception("End time must be after start time");
             }
-    
+
             // Function to convert various time formats to HH:MM:SS
-            function convertToHHMMSS($time) {
+            function convertToHHMMSS($time)
+            {
                 if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
                     return $time;
                 }
-    
+
                 if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $time)) {
                     return str_replace('-', ':', $time);
                 }
-    
+
                 if (is_numeric($time)) {
                     $hours = (float)$time;
                     $total_seconds = (int)($hours * 3600);
-                    
+
                     $hours = floor($total_seconds / 3600);
                     $minutes = floor(($total_seconds % 3600) / 60);
                     $seconds = $total_seconds % 60;
-    
+
                     return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
                 }
-    
+
                 throw new Exception("Invalid time format");
             }
-    
+
             $active_time = convertToHHMMSS($headers['total_active_time']);
             $idle_time = convertToHHMMSS($headers['total_idle_time']);
-    
         } catch (Exception $e) {
             return $this->output
                 ->set_content_type('application/json')
@@ -335,26 +337,39 @@ private function getRequestSource($params)
                     "message" => "Invalid time data: " . $e->getMessage()
                 ]));
         }
-    
-        // Prepare update data
-        $current_time = date('Y-m-d H:i:s');
+
+        // // Prepare update data
+        $current_time =  get_user_datetime_only($headers['user_id']);
         $data = [
             'end_time' => $end_datetime,
             'total_active_time' => $active_time,
             'total_idle_time' => $idle_time,
             'updated_at' => $current_time
         ];
-    
+        // $current_time = get_user_datetime_only($headers['user_id']);
+
+        // $data = [
+        //     'end_time' => $end_datetime,
+        //     'updated_at' => $current_time
+        // ];
+
+        // Only include active and idle time if they are not both '00:00:00'
+        // if ($active_time !== '00:00:00' || $idle_time !== '00:00:00') {
+        //     $data['total_active_time'] = $active_time;
+        //     $data['total_idle_time'] = $idle_time;
+        // }
+
+
         // Start database transaction
         $this->db->trans_start();
-        
+
         $this->db->where('user_id', $headers['user_id']);
         $this->db->where('employee_id', $headers['employee_id']);
         $this->db->where('log_date', $headers['log_date']);
         $updated = $this->db->update('time_logs', $data);
-        
+
         $this->db->trans_complete();
-    
+
         if (!$this->db->trans_status() || !$updated) {
             $error = $this->db->error();
             return $this->output
@@ -366,16 +381,16 @@ private function getRequestSource($params)
                     "error" => $error['message'] ?? 'Unknown database error'
                 ]));
         }
-    
+
         // Get the updated record
         $this->db->where('employee_id', $headers['employee_id']);
         $this->db->where('user_id', $headers['user_id']);
         $this->db->where('log_date', $headers['log_date']);
         $updated_record = $this->db->get('time_logs')->row();
-    
+
         // Log success
         log_message('info', "Time log updated for employee {$headers['employee_id']} on date {$headers['log_date']}");
-    
+
         return $this->output
             ->set_content_type('application/json')
             ->set_status_header(200)
@@ -395,10 +410,10 @@ private function getRequestSource($params)
         // 1. Request headers
         // 2. Session data
         // 3. POST data
-        $email = $this->input->get_request_header('email', TRUE) 
-                 ?? $this->session->userdata('email') 
-                 ?? $this->input->post('email');
-        
+        $email = $this->input->get_request_header('email', TRUE)
+            ?? $this->session->userdata('email')
+            ?? $this->input->post('email');
+
         // 1. Validate email
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->output
@@ -414,14 +429,14 @@ private function getRequestSource($params)
                     ]
                 ]));
         }
-    
+
         // 2. Get employee details by email
         $employee = $this->db
             ->select('*') // Select all fields or specify the ones you need
             ->where('email', $email)
             ->get('employees')
             ->row_array();
-    
+
         // 3. Return response
         if ($employee) {
             return $this->output
@@ -446,7 +461,7 @@ private function getRequestSource($params)
                 ]));
         }
     }
-    
+
     /**
      * Helper method to determine where the email came from
      */
@@ -465,96 +480,96 @@ private function getRequestSource($params)
     }
 
     public function get_server_time()
-{
-    // Set default timezone (if not already set in config)
-    date_default_timezone_set('UTC'); // or your preferred timezone
-    
-    // Get current server time
-    $server_time = date('Y-m-d H:i:s');
-    $timestamp = time();
-    $timezone = date_default_timezone_get();
-    
-    // Prepare response data
-    $response = [
-        'status' => 'success',
-        'data' => [
-            'datetime' => $server_time,
-            'timestamp' => $timestamp,
-            'timezone' => $timezone,
-            'iso8601' => date('c'), // ISO 8601 format
-            'rfc2822' => date('r'), // RFC 2822 format
-            'milliseconds' => round(microtime(true) * 1000)
-        ],
-        'server_info' => [
-            'software' => $_SERVER['SERVER_SOFTWARE'] ?? null,
-            'protocol' => $_SERVER['SERVER_PROTOCOL'] ?? null
-        ]
-    ];
-    
-    // Return JSON response
-    return $this->output
-        ->set_content_type('application/json')
-        ->set_status_header(200)
-        ->set_output(json_encode($response));
-}
+    {
+        // Set default timezone (if not already set in config)
+        date_default_timezone_set('UTC'); // or your preferred timezone
 
+        // Get current server time
+        $server_time = date('Y-m-d H:i:s');
+        $timestamp = time();
+        $timezone = date_default_timezone_get();
 
-public function save_activity()
-{
-    $user_id = $this->input->get_request_header('user_id', TRUE);
-    $employee_id = $this->input->get_request_header('employee_id', TRUE);
-    $mouse = $this->input->get_request_header('total_mouse_movement', TRUE);
-    $keys = $this->input->get_request_header('total_keystrokes', TRUE);
+        // Prepare response data
+        $response = [
+            'status' => 'success',
+            'data' => [
+                'datetime' => $server_time,
+                'timestamp' => $timestamp,
+                'timezone' => $timezone,
+                'iso8601' => date('c'), // ISO 8601 format
+                'rfc2822' => date('r'), // RFC 2822 format
+                'milliseconds' => round(microtime(true) * 1000)
+            ],
+            'server_info' => [
+                'software' => $_SERVER['SERVER_SOFTWARE'] ?? null,
+                'protocol' => $_SERVER['SERVER_PROTOCOL'] ?? null
+            ]
+        ];
 
-    // Basic validation
-    if(empty($user_id) || empty($employee_id) || !is_numeric($mouse) || !is_numeric($keys)) {
+        // Return JSON response
         return $this->output
             ->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Missing or invalid data',
-                'required_fields' => [
-                    'user_id (got: '.$user_id.')',
-                    'employee_id (got: '.$employee_id.')',
-                    'total_mouse_movement (numeric, got: '.$mouse.')',
-                    'total_keystrokes (numeric, got: '.$keys.')'
-                ]
-            ]));
+            ->set_status_header(200)
+            ->set_output(json_encode($response));
     }
 
-    // Prepare data
-    $data = [
-        'user_id' => $user_id,
-        'employee_id' => $employee_id,
-        'total_mouse_movement' => $mouse,
-        'total_keystrokes' => $keys,
-        'created_at' => get_user_datetime_only($user_id)
-    ];
 
-    // Insert to database
-    $this->db->insert('Employee_Activity', $data);
+    public function save_activity()
+    {
+        $user_id = $this->input->get_request_header('user_id', TRUE);
+        $employee_id = $this->input->get_request_header('employee_id', TRUE);
+        $mouse = $this->input->get_request_header('total_mouse_movement', TRUE);
+        $keys = $this->input->get_request_header('total_keystrokes', TRUE);
 
-    // Check if inserted
-    if($this->db->affected_rows() > 0) {
-        $activity_id = $this->db->insert_id();
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => 'success',
-                'message' => 'Activity saved successfully',
-                'activity_id' => $activity_id,
-                'data' => $data
-            ]));
-    } else {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Failed to save activity',
-                'database_error' => $this->db->error()
-            ]));
+        // Basic validation
+        if (empty($user_id) || empty($employee_id) || !is_numeric($mouse) || !is_numeric($keys)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Missing or invalid data',
+                    'required_fields' => [
+                        'user_id (got: ' . $user_id . ')',
+                        'employee_id (got: ' . $employee_id . ')',
+                        'total_mouse_movement (numeric, got: ' . $mouse . ')',
+                        'total_keystrokes (numeric, got: ' . $keys . ')'
+                    ]
+                ]));
+        }
+
+        // Prepare data
+        $data = [
+            'user_id' => $user_id,
+            'employee_id' => $employee_id,
+            'total_mouse_movement' => $mouse,
+            'total_keystrokes' => $keys,
+            'created_at' => get_user_datetime_only($user_id)
+        ];
+
+        // Insert to database
+        $this->db->insert('Employee_Activity', $data);
+
+        // Check if inserted
+        if ($this->db->affected_rows() > 0) {
+            $activity_id = $this->db->insert_id();
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'success',
+                    'message' => 'Activity saved successfully',
+                    'activity_id' => $activity_id,
+                    'data' => $data
+                ]));
+        } else {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Failed to save activity',
+                    'database_error' => $this->db->error()
+                ]));
+        }
     }
-}
 
 
 
@@ -571,36 +586,38 @@ public function save_activity()
         $total_idle_time = $this->input->get_request_header('total_idle_time', TRUE);
 
         // Basic validation
-        if(empty($employee_id) || empty($user_id) || empty($log_date) || 
-           empty($start_time) || empty($end_time) || 
-           empty($total_active_time) || empty($total_idle_time)) {
+        if (
+            empty($employee_id) || empty($user_id) || empty($log_date) ||
+            empty($start_time) || empty($end_time) ||
+            empty($total_active_time) || empty($total_idle_time)
+        ) {
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'error',
                     'message' => 'Missing required data',
                     'required_fields' => [
-                        'employee_id (got: '.$employee_id.')',
-                        'user_id (got: '.$user_id.')',
-                        'log_date (got: '.$log_date.')',
-                        'start_time (got: '.$start_time.')',
-                        'end_time (got: '.$end_time.')',
-                        'total_active_time (got: '.$total_active_time.')',
-                        'total_idle_time (got: '.$total_idle_time.')'
+                        'employee_id (got: ' . $employee_id . ')',
+                        'user_id (got: ' . $user_id . ')',
+                        'log_date (got: ' . $log_date . ')',
+                        'start_time (got: ' . $start_time . ')',
+                        'end_time (got: ' . $end_time . ')',
+                        'total_active_time (got: ' . $total_active_time . ')',
+                        'total_idle_time (got: ' . $total_idle_time . ')'
                     ]
                 ]));
         }
 
         // Validate numeric IDs
-        if(!is_numeric($employee_id) || !is_numeric($user_id)) {
+        if (!is_numeric($employee_id) || !is_numeric($user_id)) {
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'error',
                     'message' => 'Invalid ID format',
                     'invalid_fields' => [
-                        'employee_id (must be numeric, got: '.$employee_id.')',
-                        'user_id (must be numeric, got: '.$user_id.')'
+                        'employee_id (must be numeric, got: ' . $employee_id . ')',
+                        'user_id (must be numeric, got: ' . $user_id . ')'
                     ]
                 ]));
         }
@@ -641,7 +658,7 @@ public function save_activity()
                             ],
                             'expected_current_time' => $expected_start_datetime,
                             'received_start_time' => $received_time,
-                            'user_timezone' => 'Based on user_id: '.$user_id
+                            'user_timezone' => 'Based on user_id: ' . $user_id
                         ]
                     ]));
             }
@@ -664,7 +681,7 @@ public function save_activity()
         $this->db->insert('time_logs', $data);
 
         // Check if inserted
-        if($this->db->affected_rows() > 0) {
+        if ($this->db->affected_rows() > 0) {
             $log_id = $this->db->insert_id();
             return $this->output
                 ->set_content_type('application/json')
@@ -911,189 +928,188 @@ public function save_activity()
 
 
     public function get_weekly_reports()
-{
-    // Get required headers
-    $employee_id = $this->input->get_request_header('employee_id', TRUE);
-    $user_id = $this->input->get_request_header('user_id', TRUE);
+    {
+        // Get required headers
+        $employee_id = $this->input->get_request_header('employee_id', TRUE);
+        $user_id = $this->input->get_request_header('user_id', TRUE);
 
-    // Basic validation
-    if (empty($employee_id) || empty($user_id)) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Missing required headers',
-                'required_headers' => [
-                    'employee_id',
-                    'user_id'
-                ]
-            ]));
-    }
+        // Basic validation
+        if (empty($employee_id) || empty($user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Missing required headers',
+                    'required_headers' => [
+                        'employee_id',
+                        'user_id'
+                    ]
+                ]));
+        }
 
-    // Validate numeric IDs
-    if (!is_numeric($employee_id) || !is_numeric($user_id)) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Invalid ID format',
-                'invalid_fields' => [
-                    'employee_id (must be numeric)',
-                    'user_id (must be numeric)'
-                ]
-            ]));
-    }
+        // Validate numeric IDs
+        if (!is_numeric($employee_id) || !is_numeric($user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Invalid ID format',
+                    'invalid_fields' => [
+                        'employee_id (must be numeric)',
+                        'user_id (must be numeric)'
+                    ]
+                ]));
+        }
 
-    try {
-        // Initialize response array
-        $weekly_reports = [];
-        $weeks_to_include_raw = []; // Use a temporary array to build weeks before filtering
+        try {
+            // Initialize response array
+            $weekly_reports = [];
+            $weeks_to_include_raw = []; // Use a temporary array to build weeks before filtering
 
-        // Get current date
-        $today = new DateTime();
+            // Get current date
+            $today = new DateTime();
 
-        // Add Current Week
-        $current_week_start = clone $today;
-        $current_week_start->modify('last sunday'); // Start of the current week (Sunday)
-        $current_week_end = clone $today; // End of the current week (today's date)
-
-        $weeks_to_include_raw[] = [
-            'name_prefix' => 'Current Week',
-            'start_date' => $current_week_start->format('Y-m-d'),
-            'end_date' => $current_week_end->format('Y-m-d')
-        ];
-
-        // Add up to 4 previous weeks
-        $week_counter = 1;
-        $prev_week_cursor_end = clone $current_week_start; // Start from current week's Sunday
-
-        for ($i = 0; $i < 4; $i++) {
-            $prev_week_end = clone $prev_week_cursor_end;
-            $prev_week_end->modify('-1 day'); // End of this previous week (Saturday)
-
-            $prev_week_start = clone $prev_week_end;
-            $prev_week_start->modify('last sunday'); // Start of this previous week (Sunday)
-
-            // Ensure we don't go too far back if current week hasn't started yet
-            if ($prev_week_start > $today) {
-                 break; // Avoid adding future weeks if today is before the calculated start
-            }
+            // Add Current Week
+            $current_week_start = clone $today;
+            $current_week_start->modify('last sunday'); // Start of the current week (Sunday)
+            $current_week_end = clone $today; // End of the current week (today's date)
 
             $weeks_to_include_raw[] = [
-                'name_prefix' => 'Week ' . $week_counter,
-                'start_date' => $prev_week_start->format('Y-m-d'),
-                'end_date' => $prev_week_end->format('Y-m-d')
+                'name_prefix' => 'Current Week',
+                'start_date' => $current_week_start->format('Y-m-d'),
+                'end_date' => $current_week_end->format('Y-m-d')
             ];
 
-            // Move cursor for the next iteration (next previous week)
-            $prev_week_cursor_end = clone $prev_week_start;
-            $week_counter++;
-        }
-        
-        // We want the weeks to be ordered from oldest to newest for the graph display.
-        // The loop adds them in reverse chronological order (Current, Week 1, Week 2, ...).
-        // So, we need to reverse the array to get them in the desired order.
-        $weeks_to_process = array_reverse($weeks_to_include_raw);
-        
-        foreach ($weeks_to_process as $week_data) {
-            $week_name = $week_data['name_prefix'];
+            // Add up to 4 previous weeks
+            $week_counter = 1;
+            $prev_week_cursor_end = clone $current_week_start; // Start from current week's Sunday
 
-            $this->db->select('log_date, total_active_time')
-                     ->from('worksmart.time_logs')
-                     ->where('employee_id', $employee_id)
-                     ->where('user_id', $user_id)
-                     ->where('log_date >=', $week_data['start_date'])
-                     ->where('log_date <=', $week_data['end_date'])
-                     ->order_by('log_date', 'ASC');
+            for ($i = 0; $i < 4; $i++) {
+                $prev_week_end = clone $prev_week_cursor_end;
+                $prev_week_end->modify('-1 day'); // End of this previous week (Saturday)
 
-            $query = $this->db->get();
-            $logs = $query->result_array();
+                $prev_week_start = clone $prev_week_end;
+                $prev_week_start->modify('last sunday'); // Start of this previous week (Sunday)
 
-            $total_seconds = 0;
-            $daily_hours = [];
-            $days_with_data = 0;
-
-            foreach ($logs as $log) {
-                if (!isset($log['total_active_time']) || empty($log['total_active_time'])) {
-                    continue;
+                // Ensure we don't go too far back if current week hasn't started yet
+                if ($prev_week_start > $today) {
+                    break; // Avoid adding future weeks if today is before the calculated start
                 }
 
-                $time_parts = explode(':', $log['total_active_time']);
-                if (count($time_parts) !== 3) continue;
-
-                $hours = (int)$time_parts[0];
-                $minutes = (int)$time_parts[1];
-                $seconds = (int)$time_parts[2];
-                
-                $daily_seconds = ($hours * 3600) + ($minutes * 60) + $seconds;
-                $total_seconds += $daily_seconds;
-                
-                $daily_hours[$log['log_date']] = $log['total_active_time'];
-                $days_with_data++;
-            }
-
-            // Convert total seconds to HH:MM:SS
-            $hours = floor($total_seconds / 3600);
-            $remaining_seconds = $total_seconds % 3600;
-            $minutes = floor($remaining_seconds / 60);
-            $seconds = $remaining_seconds % 60;
-            
-            // Only add the report if there is data for the week
-            if ($days_with_data > 0) {
-                $weekly_reports[] = [
-                    'week_name' => $week_name,
-                    'date_range' => $week_data['start_date'] . ' to ' . $week_data['end_date'],
-                    'total_active_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds),
-                    'days_with_data' => $days_with_data,
-                    'total_days_in_week' => (new DateTime($week_data['end_date']))->diff(new DateTime($week_data['start_date']))->days + 1,
-                    'daily_breakdown' => $daily_hours
+                $weeks_to_include_raw[] = [
+                    'name_prefix' => 'Week ' . $week_counter,
+                    'start_date' => $prev_week_start->format('Y-m-d'),
+                    'end_date' => $prev_week_end->format('Y-m-d')
                 ];
+
+                // Move cursor for the next iteration (next previous week)
+                $prev_week_cursor_end = clone $prev_week_start;
+                $week_counter++;
             }
+
+            // We want the weeks to be ordered from oldest to newest for the graph display.
+            // The loop adds them in reverse chronological order (Current, Week 1, Week 2, ...).
+            // So, we need to reverse the array to get them in the desired order.
+            $weeks_to_process = array_reverse($weeks_to_include_raw);
+
+            foreach ($weeks_to_process as $week_data) {
+                $week_name = $week_data['name_prefix'];
+
+                $this->db->select('log_date, total_active_time')
+                    ->from('worksmart.time_logs')
+                    ->where('employee_id', $employee_id)
+                    ->where('user_id', $user_id)
+                    ->where('log_date >=', $week_data['start_date'])
+                    ->where('log_date <=', $week_data['end_date'])
+                    ->order_by('log_date', 'ASC');
+
+                $query = $this->db->get();
+                $logs = $query->result_array();
+
+                $total_seconds = 0;
+                $daily_hours = [];
+                $days_with_data = 0;
+
+                foreach ($logs as $log) {
+                    if (!isset($log['total_active_time']) || empty($log['total_active_time'])) {
+                        continue;
+                    }
+
+                    $time_parts = explode(':', $log['total_active_time']);
+                    if (count($time_parts) !== 3) continue;
+
+                    $hours = (int)$time_parts[0];
+                    $minutes = (int)$time_parts[1];
+                    $seconds = (int)$time_parts[2];
+
+                    $daily_seconds = ($hours * 3600) + ($minutes * 60) + $seconds;
+                    $total_seconds += $daily_seconds;
+
+                    $daily_hours[$log['log_date']] = $log['total_active_time'];
+                    $days_with_data++;
+                }
+
+                // Convert total seconds to HH:MM:SS
+                $hours = floor($total_seconds / 3600);
+                $remaining_seconds = $total_seconds % 3600;
+                $minutes = floor($remaining_seconds / 60);
+                $seconds = $remaining_seconds % 60;
+
+                // Only add the report if there is data for the week
+                if ($days_with_data > 0) {
+                    $weekly_reports[] = [
+                        'week_name' => $week_name,
+                        'date_range' => $week_data['start_date'] . ' to ' . $week_data['end_date'],
+                        'total_active_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds),
+                        'days_with_data' => $days_with_data,
+                        'total_days_in_week' => (new DateTime($week_data['end_date']))->diff(new DateTime($week_data['start_date']))->days + 1,
+                        'daily_breakdown' => $daily_hours
+                    ];
+                }
+            }
+
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'success',
+                    'data' => $weekly_reports,
+                    'meta' => [
+                        'employee_id' => (int)$employee_id,
+                        'user_id' => (int)$user_id,
+                        'report_date' => date('Y-m-d'),
+                        'weeks_included' => count($weekly_reports)
+                    ]
+                ]));
+        } catch (Exception $e) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Server error occurred',
+                    'error_details' => $e->getMessage()
+                ]));
         }
-
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => 'success',
-                'data' => $weekly_reports,
-                'meta' => [
-                    'employee_id' => (int)$employee_id,
-                    'user_id' => (int)$user_id,
-                    'report_date' => date('Y-m-d'),
-                    'weeks_included' => count($weekly_reports)
-                ]
-            ]));
-
-    } catch (Exception $e) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(500)
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Server error occurred',
-                'error_details' => $e->getMessage()
-            ]));
     }
-}
-  public function generate_last_two_months_logs()
+    public function generate_last_two_months_logs()
     {
         $timezone = new DateTimeZone('UTC');
         $user_id = $this->session->userdata('employee_org_id');
         $id = $this->session->userdata('employee_id');
- 
+
         // Date range: last 2 months
         $endDate = new DateTime('now', $timezone);
         $startDate = (clone $endDate)->sub(new DateInterval('P2M'));
- 
+
         $data = [];
         $interval = new DateInterval('P1D');
         $dateRange = new DatePeriod($startDate, $interval, $endDate);
- 
+
         foreach ($dateRange as $date) {
             $logDate = $date->format('Y-m-d');
- 
+
             // Random start and end time
             $startHour = rand(8, 9);
             $startMin = rand(0, 59);
@@ -1101,25 +1117,25 @@ public function save_activity()
             $endHour = rand(16, 18);
             $endMin = rand(0, 59);
             $endSec = rand(0, 59);
- 
+
             $startTime = (clone $date)->setTime($startHour, $startMin, $startSec);
             $endTime = (clone $date)->setTime($endHour, $endMin, $endSec);
- 
+
             // Duration in seconds
             $totalSeconds = $endTime->getTimestamp() - $startTime->getTimestamp();
- 
+
             // Active and idle split
             $activeSeconds = rand((int)($totalSeconds * 0.6), (int)($totalSeconds * 0.9));
             $idleSeconds = $totalSeconds - $activeSeconds;
- 
+
             $totalActiveTime = gmdate('H:i:s', $activeSeconds);
             $totalIdleTime = gmdate('H:i:s', $idleSeconds);
- 
+
             // Estimate keystrokes and mouse movements from active seconds
             $activeMinutes = floor($activeSeconds / 60);
             $estimated_keystrokes = $activeMinutes * 40;
             $estimated_mouse = $activeMinutes * 20;
- 
+
             // Insert into time_logs
             $log = [
                 'employee_id' => $id,
@@ -1133,7 +1149,7 @@ public function save_activity()
                 'updated_at' => $startTime->format('Y-m-d H:i:s')
             ];
             $this->db->insert('time_logs', $log);
- 
+
             // Insert into Employee_Activity
             $activity = [
                 'employee_id' => $id,
@@ -1143,14 +1159,14 @@ public function save_activity()
                 'created_at' => $startTime->format('Y-m-d H:i:s')
             ];
             $this->db->insert('Employee_Activity', $activity);
- 
+
             // For return/debug
             $data[] = [
                 'log' => $log,
                 'activity' => $activity
             ];
         }
- 
+
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
@@ -1160,4 +1176,3 @@ public function save_activity()
             ]));
     }
 }
-?>
