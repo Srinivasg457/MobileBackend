@@ -703,59 +703,14 @@ class Time_logs extends Home_Controller
     }
 public function store_application_usage_log()
 {
-    // Get all headers
-    $employee_id     = $this->input->get_request_header('employee_id', TRUE);
-    $user_id         = $this->input->get_request_header('user_id', TRUE);
-    $session_id      = $this->input->get_request_header('session_id', TRUE);
-    $log_dates       = $this->input->get_request_header('log_date', TRUE);
-    $start_times     = $this->input->get_request_header('start_time', TRUE);
-    $end_times       = $this->input->get_request_header('end_time', TRUE);
-    $durations       = $this->input->get_request_header('duration_seconds', TRUE);
-    $app_names       = $this->input->get_request_header('application_name', TRUE);
-    $window_titles   = $this->input->get_request_header('window_title', TRUE);
-    $website_urls    = $this->input->get_request_header('website_url', TRUE);
+    $input = json_decode(file_get_contents('php://input'), true);
 
-    // Validate required headers
-    if (empty($employee_id) || empty($user_id) || empty($session_id) || empty($log_dates) || empty($start_times) || empty($end_times) || empty($app_names)) {
+    if (!is_array($input) || empty($input)) {
         return $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
                 'status' => 'error',
-                'message' => 'Missing required headers'
-            ]));
-    }
-
-    // Validate numeric IDs
-    if (!is_numeric($employee_id) || !is_numeric($user_id)) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Invalid ID format: employee_id and user_id must be numeric'
-            ]));
-    }
-
-    // Split header values into arrays
-    $log_date_arr     = explode(',', $log_dates);
-    $start_time_arr   = explode(',', $start_times);
-    $end_time_arr     = explode(',', $end_times);
-    $duration_arr     = explode(',', $durations);
-    $app_name_arr     = explode(',', $app_names);
-    $window_title_arr = !empty($window_titles) ? explode(',', $window_titles) : [];
-    $website_url_arr  = !empty($website_urls) ? explode(',', $website_urls) : [];
-
-    // Check count match
-    $count = count($log_date_arr);
-    if (
-        $count !== count($start_time_arr) ||
-        $count !== count($end_time_arr) ||
-        $count !== count($app_name_arr)
-    ) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Header field count mismatch'
+                'message' => 'Invalid or missing JSON body'
             ]));
     }
 
@@ -763,35 +718,43 @@ public function store_application_usage_log()
     $failed_entries = [];
     $inserted_data = [];
 
-    for ($i = 0; $i < $count; $i++) {
-        $data = [
-            'session_id'        => $session_id,
-            'employee_id'       => $employee_id,
-            'user_id'           => $user_id,
-            'log_date'          => trim($log_date_arr[$i]),
-            'start_time'        => trim($start_time_arr[$i]),
-            'end_time'          => trim($end_time_arr[$i]),
-            'duration_seconds'  => isset($duration_arr[$i]) ? trim($duration_arr[$i]) : 0,
-            'application_name'  => trim($app_name_arr[$i]),
-            'window_title'      => isset($window_title_arr[$i]) ? trim($window_title_arr[$i]) : null,
-            'website_url'       => isset($website_url_arr[$i]) ? trim($website_url_arr[$i]) : null,
-            'created_at'        => date('Y-m-d H:i:s'),
-            'updated_at'        => date('Y-m-d H:i:s')
-        ];
-
-        if (empty($data['log_date']) || empty($data['start_time']) || empty($data['end_time']) || empty($data['application_name'])) {
+    foreach ($input as $i => $log) {
+        if (
+            empty($log['user_id']) ||
+            empty($log['employee_id']) ||
+            empty($log['session_id']) ||
+            empty($log['log_date']) ||
+            empty($log['start_time']) ||
+            empty($log['end_time']) ||
+            empty($log['application_name'])
+        ) {
             $failed_entries[] = [
                 'index' => $i,
-                'reason' => 'Missing required data fields'
+                'reason' => 'Missing required fields'
             ];
             continue;
         }
+
+        $data = [
+            'session_id'        => $log['session_id'],
+            'employee_id'       => $log['employee_id'],
+            'user_id'           => $log['user_id'],
+            'log_date'          => $log['log_date'],
+            'start_time'        => $log['start_time'],
+            'end_time'          => $log['end_time'],
+            'duration_seconds'  => isset($log['duration_seconds']) ? $log['duration_seconds'] : 0,
+            'application_name'  => $log['application_name'],
+            'window_title'      => isset($log['window_title']) ? $log['window_title'] : null,
+            'website_url'       => isset($log['website_url']) ? $log['website_url'] : null,
+            'created_at'        => date('Y-m-d H:i:s'),
+            'updated_at'        => date('Y-m-d H:i:s')
+        ];
 
         $this->db->insert('application_usage_logs', $data);
 
         if ($this->db->affected_rows() > 0) {
             $success_count++;
-            $inserted_data[] = $data; // Collect inserted entry
+            $inserted_data[] = $data;
         } else {
             $failed_entries[] = [
                 'index' => $i,
@@ -802,19 +765,18 @@ public function store_application_usage_log()
     }
 
     return $this->output
-        ->set_status_header(200)
         ->set_content_type('application/json')
         ->set_output(json_encode([
             'status' => 'success',
-            'code' => 200,
-            'message' => 'Application usage logs processed via headers',
+            'message' => 'Logs processed successfully',
             'data' => [
                 'success_count' => $success_count,
                 'failed_entries' => $failed_entries,
-                'inserted_data' => $inserted_data // Show all values stored in DB
+                'inserted_data' => $inserted_data
             ]
         ]));
 }
+
 
 
     public function get_weekly_reports()
