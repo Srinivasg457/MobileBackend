@@ -744,8 +744,8 @@ public function store_application_usage_log()
             'application_name'  => $log['application_name'],
             'window_title'      => isset($log['window_title']) ? $log['window_title'] : null,
             'website_url'       => isset($log['website_url']) ? $log['website_url'] : null,
-            'created_at'        =>  get_user_datetime_only($log['start_time']),
-            'updated_at'        =>  get_user_datetime_only($log['end_time'])
+            'created_at'        =>  date('Y-m-d H:i:s'),
+            'updated_at'        =>  date('Y-m-d H:i:s')
         ];
 
         $this->db->insert('application_usage_logs', $data);
