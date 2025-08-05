@@ -722,7 +722,6 @@ public function store_application_usage_log()
         if (
             empty($log['user_id']) ||
             empty($log['employee_id']) ||
-            empty($log['session_id']) ||
             empty($log['log_date']) ||
             empty($log['start_time']) ||
             empty($log['end_time']) ||
@@ -736,18 +735,19 @@ public function store_application_usage_log()
         }
 
         $data = [
-            'session_id'        => $log['session_id'],
             'employee_id'       => $log['employee_id'],
             'user_id'           => $log['user_id'],
             'log_date'          => $log['log_date'],
-            'start_time'        => $log['start_time'],
-            'end_time'          => $log['end_time'],
+            // 'start_time'        => $log['start_time'],
+            // 'end_time'          => $log['end_time'],
+             'start_time'        => get_user_datetime_only($log['user_id']),
+            'end_time'          => get_user_datetime_only($log['user_id']),
             'duration_seconds'  => isset($log['duration_seconds']) ? $log['duration_seconds'] : 0,
             'application_name'  => $log['application_name'],
             'window_title'      => isset($log['window_title']) ? $log['window_title'] : null,
             'website_url'       => isset($log['website_url']) ? $log['website_url'] : null,
-            'created_at'        => date('Y-m-d H:i:s'),
-            'updated_at'        => date('Y-m-d H:i:s')
+            'created_at'        =>  get_user_datetime_only($log['user_id']),
+            'updated_at'        =>  get_user_datetime_only($log['user_id'])
         ];
 
         $this->db->insert('application_usage_logs', $data);
