@@ -701,230 +701,120 @@ class Time_logs extends Home_Controller
                 ]));
         }
     }
+public function store_application_usage_log()
+{
+    // Get all headers
+    $employee_id     = $this->input->get_request_header('employee_id', TRUE);
+    $user_id         = $this->input->get_request_header('user_id', TRUE);
+    $session_id      = $this->input->get_request_header('session_id', TRUE);
+    $log_dates       = $this->input->get_request_header('log_date', TRUE);
+    $start_times     = $this->input->get_request_header('start_time', TRUE);
+    $end_times       = $this->input->get_request_header('end_time', TRUE);
+    $durations       = $this->input->get_request_header('duration_seconds', TRUE);
+    $app_names       = $this->input->get_request_header('application_name', TRUE);
+    $window_titles   = $this->input->get_request_header('window_title', TRUE);
+    $website_urls    = $this->input->get_request_header('website_url', TRUE);
 
-    // public function store_Time_Log()
-    // {
-    //     // Get all headers
-    //     $employee_id = $this->input->get_request_header('employee_id', TRUE);
-    //     $user_id = $this->input->get_request_header('user_id', TRUE);
-    //     $log_date = $this->input->get_request_header('log_date', TRUE);
-    //     $start_time = $this->input->get_request_header('start_time', TRUE);
-    //     $end_time = $this->input->get_request_header('end_time', TRUE);
-    //     $total_active_time = $this->input->get_request_header('total_active_time', TRUE);
-    //     $total_idle_time = $this->input->get_request_header('total_idle_time', TRUE);
+    // Validate required headers
+    if (empty($employee_id) || empty($user_id) || empty($session_id) || empty($log_dates) || empty($start_times) || empty($end_times) || empty($app_names)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'Missing required headers'
+            ]));
+    }
 
-    //     // Basic validation
-    //     if (
-    //         empty($employee_id) || empty($user_id) || empty($log_date) ||
-    //         empty($start_time) || empty($end_time) ||
-    //         empty($total_active_time) || empty($total_idle_time)
-    //     ) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Missing required data',
-    //             ]));
-    //     }
+    // Validate numeric IDs
+    if (!is_numeric($employee_id) || !is_numeric($user_id)) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'Invalid ID format: employee_id and user_id must be numeric'
+            ]));
+    }
 
-    //     // Validate numeric IDs
-    //     if (!is_numeric($employee_id) || !is_numeric($user_id)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Invalid ID format',
-    //             ]));
-    //     }
+    // Split header values into arrays
+    $log_date_arr     = explode(',', $log_dates);
+    $start_time_arr   = explode(',', $start_times);
+    $end_time_arr     = explode(',', $end_times);
+    $duration_arr     = explode(',', $durations);
+    $app_name_arr     = explode(',', $app_names);
+    $window_title_arr = !empty($window_titles) ? explode(',', $window_titles) : [];
+    $website_url_arr  = !empty($website_urls) ? explode(',', $website_urls) : [];
 
-    //     // Get current datetime
-    //     $current_datetime = get_user_datetime_only($user_id);
-    //     $current_date = date('Y-m-d', strtotime($current_datetime));
-    //     $current_time = date('H:i:s', strtotime($current_datetime));
+    // Check count match
+    $count = count($log_date_arr);
+    if (
+        $count !== count($start_time_arr) ||
+        $count !== count($end_time_arr) ||
+        $count !== count($app_name_arr)
+    ) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'Header field count mismatch'
+            ]));
+    }
 
-    //     // Optional: Check 3-minute window only if it's for today's log
-    //     if ($log_date === $current_date) {
-    //         $received_time = (strpos($start_time, ' ') !== false) ? $start_time : $log_date . ' ' . $start_time;
-    //         $received_minute = date('Y-m-d H:i', strtotime($received_time));
-    //         $now = strtotime($current_datetime);
+    $success_count = 0;
+    $failed_entries = [];
+    $inserted_data = [];
 
-    //         $valid_range = [
-    //             date('Y-m-d H:i', $now - 60),
-    //             date('Y-m-d H:i', $now),
-    //             date('Y-m-d H:i', $now + 60),
-    //         ];
+    for ($i = 0; $i < $count; $i++) {
+        $data = [
+            'session_id'        => $session_id,
+            'employee_id'       => $employee_id,
+            'user_id'           => $user_id,
+            'log_date'          => trim($log_date_arr[$i]),
+            'start_time'        => trim($start_time_arr[$i]),
+            'end_time'          => trim($end_time_arr[$i]),
+            'duration_seconds'  => isset($duration_arr[$i]) ? trim($duration_arr[$i]) : 0,
+            'application_name'  => trim($app_name_arr[$i]),
+            'window_title'      => isset($window_title_arr[$i]) ? trim($window_title_arr[$i]) : null,
+            'website_url'       => isset($website_url_arr[$i]) ? trim($website_url_arr[$i]) : null,
+            'created_at'        => date('Y-m-d H:i:s'),
+            'updated_at'        => date('Y-m-d H:i:s')
+        ];
 
-    //         if (!in_array($received_minute, $valid_range)) {
-    //             return $this->output
-    //                 ->set_content_type('application/json')
-    //                 ->set_output(json_encode([
-    //                     'status' => 'error',
-    //                     'message' => 'Start time not within the 3-minute window',
-    //                 ]));
-    //         }
-    //     }
+        if (empty($data['log_date']) || empty($data['start_time']) || empty($data['end_time']) || empty($data['application_name'])) {
+            $failed_entries[] = [
+                'index' => $i,
+                'reason' => 'Missing required data fields'
+            ];
+            continue;
+        }
 
-    //     // Check if entry already exists
-    //     $this->db->where([
-    //         'employee_id' => $employee_id,
-    //         'user_id' => $user_id,
-    //         'log_date' => $log_date
-    //     ]);
-    //     $existing = $this->db->get('time_logs')->row();
+        $this->db->insert('application_usage_logs', $data);
 
-    //     // Format time properly
-    //     function normalizeTime($time)
-    //     {
-    //         if (preg_match('/^\d+(\.\d+)?$/', $time)) {
-    //             $seconds = round($time * 3600);
-    //             return sprintf('%02d:%02d:%02d', ($seconds / 3600), ($seconds / 60 % 60), $seconds % 60);
-    //         } elseif (preg_match('/^\d{2}[:-]\d{2}[:-]\d{2}$/', $time)) {
-    //             return str_replace('-', ':', $time);
-    //         }
-    //         return $time;
-    //     }
+        if ($this->db->affected_rows() > 0) {
+            $success_count++;
+            $inserted_data[] = $data; // Collect inserted entry
+        } else {
+            $failed_entries[] = [
+                'index' => $i,
+                'reason' => 'Database insert failed',
+                'db_error' => $this->db->error()
+            ];
+        }
+    }
 
-    //     $total_active_time = normalizeTime($total_active_time);
-    //     $total_idle_time = normalizeTime($total_idle_time);
-
-    //     // Common data
-    //     $data = [
-    //         'start_time' => $start_time,
-    //         'end_time' => $end_time,
-    //         'total_active_time' => $total_active_time,
-    //         'total_idle_time' => $total_idle_time,
-    //         'updated_at' => $current_datetime
-    //     ];
-
-    //     if ($existing) {
-    //         // Ensure end_time is after existing end_time (optional)
-    //         if (strtotime($end_time) <= strtotime($existing->end_time)) {
-    //             return $this->output
-    //                 ->set_content_type('application/json')
-    //                 ->set_output(json_encode([
-    //                     'status' => 'error',
-    //                     'message' => 'New end time must be after existing end time',
-    //                 ]));
-    //         }
-
-    //         // Update only end_time and updated_at
-    //         $update_data = [
-    //             'end_time' => $end_time,
-    //             'updated_at' => $current_datetime
-    //         ];
-
-    //         $this->db->where([
-    //             'employee_id' => $employee_id,
-    //             'user_id' => $user_id,
-    //             'log_date' => $log_date
-    //         ]);
-    //         $this->db->update('time_logs', $update_data);
-
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'success',
-    //                 'message' => 'End time updated',
-    //                 'data' => $update_data
-    //             ]));
-    //     } else {
-    //         // Add creation fields
-    //         $data['employee_id'] = $employee_id;
-    //         $data['user_id'] = $user_id;
-    //         $data['log_date'] = $log_date;
-    //         $data['created_at'] = $current_datetime;
-    //         $data['updated_at'] = $current_datetime;
-
-    //         // Insert new log
-    //         $this->db->insert('time_logs', $data);
-
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'success',
-    //                 'message' => 'Time log stored',
-    //                 'data' => $data
-    //             ]));
-    //     }
-    // }
-
-
-    // public function get_Time_Logs_dashboard()
-    // {
-    //     // Get required headers
-    //     $employee_id = $this->input->get_request_header('employee_id', TRUE);
-    //     $user_id = $this->input->get_request_header('user_id', TRUE);
-    //     $date = $this->input->get_request_header('date', TRUE);
-
-    //     // Basic validation
-    //     if (empty($employee_id) || empty($user_id) || empty($date)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Missing required headers',
-    //                 'required_headers' => [
-    //                     'employee_id',
-    //                     'user_id',
-    //                     'date (format: YYYY-MM-DD)'
-    //                 ]
-    //             ]));
-    //     }
-
-    //     // Validate numeric IDs
-    //     if (!is_numeric($employee_id) || !is_numeric($user_id)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Invalid ID format',
-    //                 'invalid_fields' => [
-    //                     'employee_id (must be numeric)',
-    //                     'user_id (must be numeric)'
-    //                 ]
-    //             ]));
-    //     }
-
-    //     // Validate date format
-    //     if (!DateTime::createFromFormat('Y-m-d', $date)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Invalid date format',
-    //                 'expected_format' => 'YYYY-MM-DD',
-    //                 'received_value' => $date
-    //             ]));
-    //     }
-
-    //     // Query the database
-    //     $this->db->select('*')
-    //              ->from('time_logs')
-    //              ->where('employee_id', $employee_id)
-    //              ->where('user_id', $user_id)
-    //              ->where('log_date', $date)
-    //              ->order_by('start_time', 'ASC');
-
-    //     $query = $this->db->get();
-    //     $logs = $query->result_array();
-
-    //     return $this->output
-    //         ->set_content_type('application/json')
-    //         ->set_output(json_encode([
-    //             'status' => 'success',
-    //             'data' => $logs,
-    //             'meta' => [
-    //                 'employee_id' => $employee_id,
-    //                 'user_id' => $user_id,
-    //                 'date' => $date,
-    //                 'count' => count($logs)
-    //             ]
-    //         ]));
-    // }
-
+    return $this->output
+        ->set_status_header(200)
+        ->set_content_type('application/json')
+        ->set_output(json_encode([
+            'status' => 'success',
+            'code' => 200,
+            'message' => 'Application usage logs processed via headers',
+            'data' => [
+                'success_count' => $success_count,
+                'failed_entries' => $failed_entries,
+                'inserted_data' => $inserted_data // Show all values stored in DB
+            ]
+        ]));
+}
 
 
     public function get_weekly_reports()
