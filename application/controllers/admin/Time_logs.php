@@ -297,7 +297,7 @@ class Time_logs extends Home_Controller
                     ]));
             }
 
-            if (strtotime($end_datetime) <= strtotime($existing->start_time)) {
+            if (strtotime($end_datetime) < strtotime($existing->start_time)) {
                 throw new Exception("End time must be after start time");
             }
 
