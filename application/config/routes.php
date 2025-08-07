@@ -91,6 +91,7 @@ $route['admin/organization_settings'] = 'admin/Organization_settings/Organizatio
 $route['admin/employee_settings'] = 'admin/Organization_settings/org_exception_settings';
 $route['admin/activity_logs'] = 'admin/Activity_logs';
 $route['admin/time_cards'] = 'admin/Activity_logs/Time_Cards';
+$route['admin/application_tracker'] = 'admin/Application_Tracker';
 $route['admin/live_monitoring'] = 'admin/Monitoring_room';
 $route['admin/notification/webcam'] = 'admin/Notification';
 $route['admin/notification/desktop'] = 'admin/Notification/desktop';

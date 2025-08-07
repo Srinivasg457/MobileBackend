@@ -57,7 +57,7 @@
               </a>
             </li>
           <?php else :  ?>
-              <!-- // rest of the employess -->
+            <!-- // rest of the employess -->
               <?php $allowed = get_allowed_feature_ids();
               $can = function ($fid) use ($allowed) {
                 return in_array($fid, $allowed, true);
@@ -112,7 +112,16 @@
                   </ul>
                 </li>
               <?php endif; ?>
-              <?php if ($can(8)): ?>
+            <?php if ($can(13)): ?>
+              <li class="<?php if (isset($page_title) && $page_title == "application_tracker") {
+                            echo "active";
+                          } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                <a href="<?php echo base_url('admin/application_tracker') ?>">
+                  <i class="bi bi-window-stack mr-5"></i> <span><?php echo "Application Tracker" ?></span>
+                </a>
+              </li>
+            <?php endif; ?>
+            <?php if ($can(8)): ?>
                 <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -407,7 +416,7 @@
 
             <?php if (check_payment_status() == TRUE || settings()->enable_paypal == 0 || user()->user_type == 'trial'): ?>
 
-             
+
 
 
               <!-- <li class="treeview <?php if (isset($main_page) && $main_page == "Sales") {
@@ -583,12 +592,12 @@
                 <li class="<?php if (isset($page_title) && $page_title == "application_tracker") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/Application_Tracker') ?>">
-                    <i class="bi bi-eye mr-5"></i> <span><?php echo "Application Tracker" ?></span>
+                  <a href="<?php echo base_url('admin/application_tracker') ?>">
+                    <i class="bi bi-window-stack mr-5"></i> <span><?php echo "Application Tracker" ?></span>
                   </a>
                 </li>
-               <!-- Application Tracker -->
-                   <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
+                <!-- Application Tracker -->
+                <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
                   <a href="<?php echo base_url('admin/live_monitoring') ?>">
@@ -610,7 +619,7 @@
                     <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
                   </a>
                 </li>
-               
+
                 <!-- Employees -->
                 <li class="<?php if (isset($page_title) && $page_title == "Employee") {
                               echo "active";
@@ -619,8 +628,8 @@
                     <i class="bi bi-people mr-5"></i> <span><?php echo ('Employees') ?></span>
                   </a>
                 </li>
-                 <!-- Departments -->
-                 <li class="<?php if (isset($page_title) && $page_title == "Department") {
+                <!-- Departments -->
+                <li class="<?php if (isset($page_title) && $page_title == "Department") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
                   <a href="<?php echo base_url('admin/hrm/departments') ?>">
@@ -651,8 +660,8 @@
                     <i class="bi bi-tools mr-5"></i> <span><?php echo "Employee settings" ?></span>
                   </a>
                 </li>
-             
-               
+
+
               <?php endif; ?>
 
               <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>

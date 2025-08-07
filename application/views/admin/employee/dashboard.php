@@ -172,7 +172,7 @@
                                  <!-- <span class="input-group-addon"><i class="fa fa-calendar"></i></span> -->
                                  <span class="input-group-addon btn btn-secondary align-content-center" id="search_date"><i class="fa fa-search"></i></span>
                              </div>
-                             <span class="text-danger small pl-5" id="error"></span>
+                             <span class="text-danger small pl-sh5" id="error"></span>
                          </div>
                      </div>
 
