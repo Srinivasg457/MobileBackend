@@ -734,19 +734,19 @@ public function store_application_usage_log()
             continue;
         }
 
-        $data = [
-            'employee_id'       => $log['employee_id'],
-            'user_id'           => $log['user_id'],
-            'log_date'          => $log['log_date'],
-            'start_time'        => $log['start_time'],
-            'end_time'          => $log['end_time'],
-            'duration_seconds'  => isset($log['duration_seconds']) ? $log['duration_seconds'] : 0,
-            'application_name'  => $log['application_name'],
-            'window_title'      => isset($log['window_title']) ? $log['window_title'] : null,
-            'website_url'       => "youtube.com",
-            'created_at'        =>  date('Y-m-d H:i:s'),
-            'updated_at'        =>  date('Y-m-d H:i:s')
-        ];
+      $data = [
+    'employee_id'       => $log['employee_id'],
+    'user_id'           => $log['user_id'],
+    'log_date'          => $log['log_date'],
+    'start_time'        => $log['start_time'],
+    'end_time'          => $log['end_time'],
+    'duration_seconds'  => isset($log['duration_seconds']) ? $log['duration_seconds'] : 0,
+    'application_name'  => $log['application_name'],
+    'window_title'      => isset($log['window_title']) ? $log['window_title'] : null,
+    'website_url'       => isset($log['website_url']) ? $log['website_url'] : null,
+    'created_at'        => date('Y-m-d H:i:s'),
+    'updated_at'        => date('Y-m-d H:i:s')
+];
 
         $this->db->insert('application_usage_logs', $data);
 
