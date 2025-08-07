@@ -75,6 +75,61 @@
   }
   ?>
   <style type="text/css">
+    /* application_logs custom style */
+    .application_logs {
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .total-time-badge {
+        /* background-color: #1a237e; */
+        background-color: #0FB783;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .app-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .app-name {
+        font-weight: 500;
+        font-size: 1.1rem;
+      }
+
+      .app-time {
+        font-weight: 600;
+        /* color: #5d5dff; */
+        color: #0FB783;
+      }
+
+      .progress-container {
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+      }
+
+      .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        /* background: linear-gradient(to right, #5d5dff, #66ccff); */
+        background: linear-gradient(to right, #0FB783, #4EE5A1);
+      }
+    }
+
     /* notification custom style */
     .notificaion_style {
       .form-group label {
