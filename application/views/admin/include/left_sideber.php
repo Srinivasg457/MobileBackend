@@ -580,7 +580,15 @@
                   </ul>
                 </li>
                 <!-- Live Monitoring -->
-                <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
+                <li class="<?php if (isset($page_title) && $page_title == "application_tracker") {
+                              echo "active";
+                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                  <a href="<?php echo base_url('admin/Application_Tracker') ?>">
+                    <i class="bi bi-eye mr-5"></i> <span><?php echo "Application Tracker" ?></span>
+                  </a>
+                </li>
+               <!-- Application Tracker -->
+                   <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
                               echo "active";
                             } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
                   <a href="<?php echo base_url('admin/live_monitoring') ?>">
