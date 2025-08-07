@@ -29,7 +29,6 @@
                          <?php endforeach; ?>
                      </select>
                  </div>
-                 <div class="form-group col-lg-4 my-3"></div>
                  <div class="form-group col-lg-4 my-3">
                      <label class="control-label">Date</label>
                      <?php
@@ -57,6 +56,13 @@
                      <?php if (!empty($help_text)): ?>
                          <small class="text-muted"><?= $help_text ?></small>
                      <?php endif; ?>
+                 </div>
+                 <div class="form-group col-lg-4 my-3">
+                     <label class="control-label">Sort By</label>
+                     <select name="order" id="sortOrder" class="form-control single_select">
+                         <option value="ascending" <?= ($order == "ascending") ? 'selected' : '' ?>>Ascending</option>
+                         <option value="descending" <?= ($order == "descending") ? 'selected' : '' ?>>Descending</option>
+                     </select>
                  </div>
              </div>
          </form>
@@ -102,8 +108,8 @@
                                      </div>
                                      <div class="app-time"><?= formatTime($appSeconds); ?></div>
                                  </div>
-                                 <div class="progress-container">
-                                     <div class="progress-bar" data-toggle="tooltip" data-placement="top" title="Usage Time: <?= formatTime($appSeconds); ?>" style="width: <?= number_format($percentage, 1); ?>%;"></div>
+                                 <div class="progress-container" data-toggle="tooltip" data-placement="top" title="Usage Time: <?= formatTime($appSeconds); ?>" style="cursor:pointer;">
+                                     <div class="progress-bar" style="width: <?= number_format($percentage, 1); ?>%;"></div>
                                  </div>
                                  <div class="text-muted"><?= number_format($percentage, 1); ?>% of total</div>
                              </div>
@@ -126,11 +132,7 @@
  <script>
      $(document).ready(function() {
 
-         $(document).on('change', "#employee_search", function(e) {
-             $('.user_filter_form').submit();
-         });
-         $(document).on('change', "#datePicker", function(e) {
-             const selectedValue = $(this).val();
+         $(document).on('change', '#employee_search, #datePicker, #sortOrder', function(e) {
              $('.user_filter_form').submit();
          });
 
