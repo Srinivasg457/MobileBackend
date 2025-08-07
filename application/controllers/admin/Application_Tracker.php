@@ -12,13 +12,17 @@ class Application_Tracker extends Home_Controller {
     }
      public function index()
     {
-        require_feature(2);
+        require_feature(13);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'application_tracker';
+        $employee_id =  $this->input->post('employee_id', true) ?? $this->get_random_employee_id();
+        $date =  $this->input->post('date', true) ?? date('Y-m-d');
+        $data['employees'] = $this->list_employees_by_user();
+        $data['employee_id'] = $employee_id;
+        $data['date'] = $date;
         $data['can_edit'] = $this->auth_model->get_permission(2);
-        $data['main_page'] = 'Analytics';
-          $response_data = $this->get_application_usage_logs();
+        $response_data = $this->get_application_usage_logs($employee_id, $date);
         $data['response_data'] = $response_data;
         $data['main_content'] = $this->load->view('admin/application_tracker', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -28,10 +32,11 @@ class Application_Tracker extends Home_Controller {
     }
 
 
- public function get_application_usage_logs()
+   public function get_application_usage_logs($employee_id, $date)
     {
         // --- Get inputs (POST or GET) ---
-        $employee_id = $this->input->get_post('employee_id')??$this->input->get('employee_id') ?? $this->session->userdata('employee_id')??48;
+        $this->$employee_id = $employee_id;
+        $this->$date = $date;
         $user_id     = $this->input->get_post('user_id')?? $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
         $start_date_raw  = $this->input->get_post('start_date');
@@ -65,14 +70,20 @@ class Application_Tracker extends Home_Controller {
         $this->db->from('application_usage_logs');
         $this->db->where('employee_id', (int)$employee_id);
         $this->db->where('user_id', (int)$user_id);
+        // $this->db->where('log_date', (int)$date);
 
-        if ($start_date !== null) {
-            // Using date() on log_date column - if log_date is DATE type this works
-            $this->db->where('log_date >=', $start_date);
+        // Apply date filter
+        if (!empty($date)) {
+            $this->db->where('log_date', $date);
+        } else {
+            if ($start_date !== null) {
+                $this->db->where('log_date >=', $start_date);
+            }
+            if ($end_date !== null) {
+                $this->db->where('log_date <=', $end_date);
+            }
         }
-        if ($end_date !== null) {
-            $this->db->where('log_date <=', $end_date);
-        }
+
         if (!empty($application_name)) {
             // Partial match, case-insensitive depending on DB collation; optionally force lower
             $this->db->like('application_name', $application_name);
@@ -227,6 +238,53 @@ class Application_Tracker extends Home_Controller {
             }
         }
         return $out;
+    }
+
+
+    public function list_employees_by_user()
+    {
+        // Get user_id from session first
+        $user_id = $this->session->userdata('id');
+
+        // If not found in session, try to get from header
+        if (empty($user_id)) {
+            $user_id = $this->input->get_request_header('user_id', TRUE);
+        }
+
+        // Validate user ID
+        if (empty($user_id) || !is_numeric($user_id)) {
+            return []; // Return empty array on invalid user_id
+        }
+
+        // Get employees from the employees table matching the provided user_id
+        $employees = $this->db
+            ->select('id, name, email, country, role_id')
+            ->where('user_id', $user_id)
+            ->get('employees')
+            ->result_array();
+
+        // Filter out CEOs using your helper
+        $filtered = array_filter($employees, function ($emp) {
+            return !is_CEO($emp['role_id']);
+        });
+
+        // Reindex the array
+        $filtered = array_values($filtered);
+
+        return $filtered;
+    }
+    public function get_random_employee_id()
+    {
+        $employees = $this->list_employees_by_user();
+
+        if (empty($employees)) {
+            return null; // No employee found
+        }
+
+        // Get a random employee
+        $random_employee = $employees[array_rand($employees)];
+
+        return $random_employee['id'];
     }
 
 }
