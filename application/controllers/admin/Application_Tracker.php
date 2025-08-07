@@ -18,11 +18,13 @@ class Application_Tracker extends Home_Controller {
         $data['page_title'] = 'application_tracker';
         $employee_id =  $this->input->post('employee_id', true) ?? $this->get_random_employee_id();
         $date =  $this->input->post('date', true) ?? date('Y-m-d');
+        $order =  $this->input->post('order', true) ?? "descending";
         $data['employees'] = $this->list_employees_by_user();
         $data['employee_id'] = $employee_id;
         $data['date'] = $date;
+        $data['order'] = $order;
         $data['can_edit'] = $this->auth_model->get_permission(2);
-        $response_data = $this->get_application_usage_logs($employee_id, $date);
+        $response_data = $this->get_application_usage_logs($employee_id, $date, $order);
         $data['response_data'] = $response_data;
         $data['main_content'] = $this->load->view('admin/application_tracker', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -32,11 +34,12 @@ class Application_Tracker extends Home_Controller {
     }
 
 
-   public function get_application_usage_logs($employee_id, $date)
+   public function get_application_usage_logs($employee_id, $date, $order)
     {
         // --- Get inputs (POST or GET) ---
         $this->$employee_id = $employee_id;
         $this->$date = $date;
+        $this->$order = $order == "descending" ? true : false;
         $user_id     = $this->input->get_post('user_id')?? $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
         $start_date_raw  = $this->input->get_post('start_date');
@@ -160,7 +163,7 @@ class Application_Tracker extends Home_Controller {
                 'total_usage_time' => $this->seconds_to_time($total_usage_seconds),
                 'raw_total_usage_seconds' => $total_usage_seconds,
                 'top_applications' => $this->sort_and_format_apps($app_breakdown),
-                'daily_breakdown' => $this->format_daily_breakdown($daily_breakdown),
+                'daily_breakdown' => $this->format_daily_breakdown($daily_breakdown, $this->$order),
                 'raw_logs' => $logs
             ]
         ];
@@ -228,10 +231,16 @@ class Application_Tracker extends Home_Controller {
     /**
      * Format daily breakdown durations to H:i:s (keeps structure)
      */
-    private function format_daily_breakdown($daily_breakdown)
+    private function format_daily_breakdown($daily_breakdown, $order)
     {
         $out = [];
         foreach ($daily_breakdown as $date => $apps) {
+            // Sort the apps by seconds in ascending order
+            if ($order) {
+                arsort($apps);
+            } else {
+                asort($apps);
+            }
             $out[$date] = [];
             foreach ($apps as $app => $seconds) {
                 $out[$date][$app] = $this->seconds_to_time($seconds);
