@@ -26,6 +26,8 @@ class Application_Tracker extends Home_Controller {
         $data['can_edit'] = $this->auth_model->get_permission(2);
         $response_data = $this->get_application_usage_logs($employee_id, $date, $order);
         $data['response_data'] = $response_data;
+        $response = $this->get_application_usage_grouped_by_app();
+        $data['response'] = $response;
         $data['main_content'] = $this->load->view('admin/application_tracker', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
@@ -295,5 +297,159 @@ class Application_Tracker extends Home_Controller {
 
         return $random_employee['id'];
     }
+
+
+public function get_application_usage_grouped_by_app()
+{
+    try {
+        // --- Get inputs (POST or GET) ---
+        $employee_id = $this->input->get_post('employee_id') ?? $this->session->userdata('employee_id') ?? 56;
+        $user_id = $this->input->get_post('user_id') ?? $this->session->userdata('employee_org_id') ?? 6;
+        
+        $start_date_raw = $this->input->get_post('start_date');
+        $end_date_raw = $this->input->get_post('end_date');
+        $application_name = $this->input->get_post('application_name');
+        
+        $limit = (int) $this->input->get_post('limit', TRUE) ?: 2000;
+        $offset = (int) $this->input->get_post('offset', TRUE) ?: 0;
+        
+        $debug = (int) $this->input->get_post('debug', TRUE);
+
+        // --- Basic validation for employee/user ---
+        if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+            return $this->output
+                ->set_status_header(400)
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Invalid or missing employee_id or user_id'
+                ]));
+        }
+
+        // --- Normalize / parse date filters ---
+        $start_date = $this->normalize_date_filter($start_date_raw, 'start');
+        $end_date = $this->normalize_date_filter($end_date_raw, 'end');
+
+        // Build main query using Query Builder
+        $this->db->start_cache();
+        $this->db->select('application_name, window_title, SUM(duration_seconds) AS total_seconds')
+            ->from('application_usage_logs')
+            ->where('employee_id', (int)$employee_id)
+            ->where('user_id', (int)$user_id);
+            
+        // Apply date filters
+        if ($start_date !== null) {
+            $this->db->where('log_date >=', $start_date);
+        }
+        if ($end_date !== null) {
+            $this->db->where('log_date <=', $end_date);
+        }
+        
+        if (!empty($application_name)) {
+            $this->db->like('application_name', $application_name);
+        }
+        
+        $this->db->group_by(['application_name', 'window_title'])
+            ->order_by('total_seconds', 'DESC');
+            
+        $this->db->stop_cache();
+
+        // Debug - show compiled SQL and exit if requested
+        if ($debug === 1) {
+            $sql = $this->db->get_compiled_select();
+            $this->db->flush_cache();
+            echo $sql; exit;
+        }
+
+        // Get total matching groups (without limit) for pagination metadata
+        $count_query = $this->db->select('COUNT(DISTINCT CONCAT(application_name, window_title)) AS total')->get();
+        $total_rows = (int) $count_query->row()->total;
+
+        // Add limit and offset for actual data fetch
+        if ($limit > 0) {
+            $this->db->limit($limit, $offset);
+        }
+
+        $query = $this->db->get();
+        $result = $query->result_array();
+
+        // Clear cached where/selects
+        $this->db->flush_cache();
+
+        // Format time and prepare data structure
+        $grouped = [];
+        $total_usage_seconds = 0;
+        
+        foreach ($result as $row) {
+            $seconds = (int)$row['total_seconds'];
+            $total_usage_seconds += $seconds;
+            
+            $row['formatted_time'] = $this->seconds_to_time($seconds);
+            
+            if (!isset($grouped[$row['application_name']])) {
+                $grouped[$row['application_name']] = [
+                    'total_seconds' => 0,
+                    'formatted_time' => '',
+                    'windows' => []
+                ];
+            }
+            
+            $grouped[$row['application_name']]['total_seconds'] += $seconds;
+            $grouped[$row['application_name']]['formatted_time'] = $this->seconds_to_time(
+                $grouped[$row['application_name']]['total_seconds']
+            );
+            $grouped[$row['application_name']]['windows'][] = [
+                'window_title' => $row['window_title'],
+                'total_seconds' => $seconds,
+                'formatted_time' => $row['formatted_time']
+            ];
+        }
+
+        // Format output
+        $response = [
+            'status' => 'success',
+            'meta' => [
+                'total_rows' => $total_rows,
+                'limit' => $limit,
+                'offset' => $offset,
+            ],
+            'data' => [
+                'total_applications' => count($grouped),
+                'total_usage_time' => $this->seconds_to_time($total_usage_seconds),
+                'raw_total_usage_seconds' => $total_usage_seconds,
+                'applications' => $grouped
+            ]
+        ];
+
+        return $response;
+
+    } catch (Exception $e) {
+        log_message('error', 'get_application_usage_grouped_by_app failed: ' . $e->getMessage());
+
+        return $this->output
+            ->set_status_header(500)
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'Failed to get application usage data',
+                'error_details' => $e->getMessage()
+            ]));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
 
 }
