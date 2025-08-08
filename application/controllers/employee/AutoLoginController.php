@@ -19,20 +19,20 @@ class AutoLoginController extends CI_Controller {
         $token = $this->input->get('token');
 
         if (!$token) {
-            exit('Token not provided');
+            redirect('login');
         }
 
         // Step 2: Decode token payload (without verifying signature)
         $tokenParts = explode('.', $token);
         if (count($tokenParts) != 3) {
-            exit('Invalid token format');
+            redirect('login');
         }
 
         $payload = json_decode(base64_decode($tokenParts[1]), true);
         $userId = $payload['userId'] ?? null;
 
         if (!$userId) {
-            exit('User ID not found in token');
+            redirect('login');
         }
 
         // Step 3: Fetch employee secret key from DB
@@ -42,19 +42,19 @@ class AutoLoginController extends CI_Controller {
         ])->row();
 
         if (!$employee) {
-            exit('Employee not found');
+            redirect('login');
         }
 
         $secret_key = $employee->secret_key ?? null;
         if (!$secret_key) {
-            exit('Secret key not found for this user');
+            redirect('login');
         }
 
         // Step 4: Verify token using employee's secret key
         try {
             $decoded = JWT::decode($token, new Key($secret_key, 'HS256'));
         } catch (Exception $e) {
-            exit('Invalid token: ' . $secret_key);
+            redirect('login');
         }
 
         $employee_id = $decoded->userId ?? null;
