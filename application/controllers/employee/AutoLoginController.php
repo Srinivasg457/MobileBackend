@@ -7,13 +7,11 @@ use \Firebase\JWT\Key;
 
 class AutoLoginController extends CI_Controller {
 
-    private $jwt_key;
 
     public function __construct() {
         parent::__construct();
         $this->load->library('session');
         $this->load->database();
-        $this->jwt_key = "limitscale_workroom";
     }
 
     public function auto_login()
@@ -21,61 +19,87 @@ class AutoLoginController extends CI_Controller {
         $token = $this->input->get('token');
 
         if (!$token) {
-            log_message('error', 'AutoLogin: Token is missing.');
-            $this->session->set_flashdata('error_message', 'Token is missing.');
-            redirect('login');
-            return;
+            exit('Token not provided');
         }
 
+        // Step 2: Decode token payload (without verifying signature)
+        $tokenParts = explode('.', $token);
+        if (count($tokenParts) != 3) {
+            exit('Invalid token format');
+        }
+
+        $payload = json_decode(base64_decode($tokenParts[1]), true);
+        $userId = $payload['userId'] ?? null;
+
+        if (!$userId) {
+            exit('User ID not found in token');
+        }
+
+        // Step 3: Fetch employee secret key from DB
+        $employee = $this->db->get_where('employees', [
+            'id' => $userId,
+            'is_registered' => 1
+        ])->row();
+
+        if (!$employee) {
+            exit('Employee not found');
+        }
+
+        $secret_key = $employee->secret_key ?? null;
+        if (!$secret_key) {
+            exit('Secret key not found for this user');
+        }
+
+        // Step 4: Verify token using employee's secret key
         try {
-            $decoded = JWT::decode($token, new Key($this->jwt_key, 'HS256'));
-        } catch (\Exception $e) {
-            log_message('error', 'AutoLogin: Token is invalid: ' . $e->getMessage());
-            $this->session->set_flashdata('error_message', 'Invalid or expired token.');
-            redirect('login');
-            return;
+            $decoded = JWT::decode($token, new Key($secret_key, 'HS256'));
+        } catch (Exception $e) {
+            exit('Invalid token: ' . $secret_key);
         }
 
         $employee_id = $decoded->userId ?? null;
-        if (!$employee_id) {
-            log_message('error', 'AutoLogin: Employee ID is missing from token.');
-            $this->session->set_flashdata('error_message', 'Invalid token: Employee ID missing.');
+        $email = $decoded->email ?? null;
+
+        if (!$employee_id || !$email) {
+            log_message('error', 'AutoLogin: Token data missing (userId/email).');
+            $this->session->set_flashdata('error_message', 'Token data incomplete.');
             redirect('login');
             return;
         }
 
         $employee = $this->db->get_where('employees', [
             'id' => $employee_id,
-            'email' => $decoded->email ?? '',
-            'is_registered' => 1
+            'email' => $email,
+            'is_registered' => 1,
         ])->row();
 
         if (!$employee) {
-            log_message('error', "AutoLogin: Employee not found in database. Employee ID: $employee_id");
-            $this->session->set_flashdata('error_message', 'Invalid token: Employee not found.');
+            log_message('error', "AutoLogin: Employee not found. ID: $employee_id");
+            $this->session->set_flashdata('error_message', 'Employee not found.');
             redirect('login');
             return;
         }
 
         try {
             $this->session->set_userdata([
-                'user_type' => 'employee_user',
-                'employee_id' => $employee->id,
-                'employee_name' => $employee->name,
-                'employee_email' => $employee->email,
-                'business_id' => $employee->business_id,
-                'department_id' => $employee->department_id,
-                'employee_org_id' => $employee->user_id,
-                'employee_logged_in' => true,
-                'is_employee' => true
+                'employee_id'        => $employee->id,
+                'user_type'          => 'employee_user',
+                'employee_name'      => $employee->name,
+                'employee_email'     => $employee->email,
+                'business_id'        => $employee->business_id,
+                'department_id'      => $employee->department_id,
+                'role_id'            => $employee->role_id,
+                'employee_org_id'    => $employee->user_id,
+                'employee_logged_in' => TRUE,
+                'is_employee'        => TRUE
             ]);
-             log_message('info', "AutoLogin: Employee login successful. Employee ID: $employee->id");
+
+            log_message('info', "AutoLogin: Successful login for employee ID: $employee->id");
             redirect('employee/dashboard');
         } catch (\Exception $e) {
-            log_message('error', 'AutoLogin: Session setting failed: ' . $e->getMessage());
-             $this->session->set_flashdata('error_message', 'Login error. Please try again.');
+            log_message('error', 'AutoLogin: Session error: ' . $e->getMessage());
+            $this->session->set_flashdata('error_message', 'Login failed. Please try again.');
             redirect('login');
-            return;
         }
     }
 }
