@@ -47,7 +47,51 @@ class Auth_model extends CI_Model {
         $query = $this->db->get('users');
         return $query->row();
     }
+    public function list_employees_by_user()
+    {
+        // Get user_id from session first
+        $user_id = $this->session->userdata('id');
 
+        // If not found in session, try to get from header
+        if (empty($user_id)) {
+            $user_id = $this->input->get_request_header('user_id', TRUE);
+        }
+
+        // Validate user ID
+        if (empty($user_id) || !is_numeric($user_id)) {
+            return []; // Return empty array on invalid user_id
+        }
+
+        // Get employees from the employees table matching the provided user_id
+        $employees = $this->db
+            ->select('id, name, email, country, role_id')
+            ->where('user_id', $user_id)
+            ->get('employees')
+            ->result_array();
+
+        // Filter out CEOs using your helper
+        $filtered = array_filter($employees, function ($emp) {
+            return !is_CEO($emp['role_id']);
+        });
+
+        // Reindex the array
+        $filtered = array_values($filtered);
+
+        return $filtered;
+    }
+    public function get_random_employee_id()
+    {
+        $employees = $this->list_employees_by_user();
+
+        if (empty($employees)) {
+            return null; // No employee found
+        }
+
+        // Get a random employee
+        $random_employee = $employees[array_rand($employees)];
+
+        return $random_employee['id'];
+    }
    public function require_feature(int $featureId): void
     {
         // for security purpose

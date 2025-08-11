@@ -63,6 +63,25 @@ if (!function_exists('require_feature')) {
 		return $ci->auth_model->require_feature($featureId);
 	}
 }
+
+if (!function_exists('get_random_employee_id')) {
+	function get_random_employee_id()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->get_random_employee_id();
+	}
+}
+
+
+if (!function_exists('list_employees_by_user')) {
+	function list_employees_by_user()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->list_employees_by_user();
+	}
+}
 if (!function_exists('is_user_ceo')) {
 	function is_user_ceo()
 	{
