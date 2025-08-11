@@ -1,12 +1,3 @@
-    <?php
-    // Function: Convert seconds to "Hh Mm"
-    function formatTime($seconds) {
-        $h = floor($seconds / 3600);
-        $m = floor(($seconds % 3600) / 60);
-        return ($h > 0 ? "{$h}h " : "") . "{$m}m";
-    }
-    ?>
-
     <div class="content-wrapper application_logs">
         <section class="content">
             <h3>Application Usage Tracker</h3>
@@ -65,19 +56,26 @@
                     <div class="box-header with-border">
                         <div class="row">
                             <div class="col-6">
-                                <h4>Application Usage Summary</h4>
-                                <p class="text-muted">Total time tracked: <?= $response['data']['total_usage_time'] ?></p>
+                                <h4>Usage Stats</h4>
+                                <p class="text-muted"><i class="bi bi-clock mr-5"></i>Total time tracked - <?= $response['data']['total_usage_time'] ?></p>
                             </div>
                             <div class="col-6 text-end d-flex justify-content-end align-items-center">
-                                <span class="total-time-badge" style="height: max-content;">
+                                <!-- <span class="total-time-badge" data-toggle="tooltip" data-placement="top"
+                                    title="Total Time: <?= $response['data']['total_usage_time']  ?>" style="cursor:pointer; height: max-content;">
                                     <?= $response['data']['total_usage_time'] ?>
-                                </span>
+                                </span> -->
                             </div>
                         </div>
                     </div>
                     <div class="box-body">
-                        <?php foreach ($response['data']['applications'] as $appName => $appData): ?>
-                            <div class="py-4" style="border-bottom: 1px solid #dee2e6;">
+                        <?php
+                        $applications = $response['data']['applications'];
+                        $lastKey = array_key_last($applications);
+
+                        foreach ($applications as $appName => $appData):
+                            $isLast = ($appName === $lastKey);
+                        ?>
+                            <div class="py-4" style="<?= $isLast ? '' : 'border-bottom: 1px solid #dee2e6;' ?>">
                                 <div class="app-details">
                                     <div class="app-name">
                                         <div class="form-group my-0">
@@ -87,7 +85,7 @@
                                     </div>
                                     <div class="app-time"><?= $appData['formatted_time'] ?></div>
                                 </div>
-                                <div class="progress-container" data-toggle="tooltip" data-placement="top" 
+                                <div class="progress-container" data-toggle="tooltip" data-placement="top"
                                     title="Usage Time: <?= $appData['formatted_time'] ?>" style="cursor:pointer;">
                                     <div class="progress-bar" style="width: <?= ($appData['total_seconds'] / $response['data']['raw_total_usage_seconds']) * 100 ?>%;"></div>
                                 </div>
@@ -95,14 +93,16 @@
                                     <div class="text-muted">
                                         <?= number_format(($appData['total_seconds'] / $response['data']['raw_total_usage_seconds']) * 100, 1); ?>% of total
                                     </div>
-                                    <button type="button" class="btn text-info show-windows-modal" 
-                                            data-app="<?= htmlspecialchars($appName) ?>"
-                                            data-windows='<?= json_encode($appData['windows']) ?>'>
-                                        Show Windows
+                                    <button type="button" class="btn btn-default show-windows-modal"
+                                        data-app="<?= htmlspecialchars($appName) ?>"
+                                        data-windows='<?= json_encode($appData['windows']) ?>'>
+                                        <i class="bi bi-window-stack mr-5"></i>
+                                        Windows (<?= count($appData['windows']) ?>)
                                     </button>
                                 </div>
                             </div>
                         <?php endforeach; ?>
+
                     </div>
                 </div>
             <?php else: ?>
@@ -129,12 +129,12 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
+                    <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive p-0 ">
+                        <table class="table table-hover cushover mt-0 " id="dg_table">
                             <thead>
                                 <tr>
-                                    <th>Window Title</th>
-                                    <th>Formatted Time</th>
+                                    <th>Tab/Screen</th>
+                                    <th> Usage </th>
                                 </tr>
                             </thead>
                             <tbody id="windowDetailsBody">
@@ -161,69 +161,56 @@
              $('.user_filter_form').submit();
          });
 
-        // Show window details in modal
-        $(document).on('click', '.show-windows-modal', function() {
-            const appName = $(this).data('app');
-            const windows = $(this).data('windows');
-            
-            // Set modal title
-            $('#windowDetailsModalLabel').text('Window Details - ' + appName);
-            
-            // Clear previous content
-            $('#windowDetailsBody').empty();
-            
-            // Add window details to table
-            windows.forEach(function(window) {
-                $('#windowDetailsBody').append(`
-                    <tr>
-                        <td>${window.window_title}</td>
-                        <td>${window.formatted_time}</td>
-                    </tr>
-                `);
+            // Show window details in modal
+            $(document).on('click', '.show-windows-modal', function() {
+                const appName = $(this).data('app');
+                const windows = $(this).data('windows');
+
+                // Merge windows with the same title
+                const merged = {};
+                windows.forEach(function(window) {
+                    if (!merged[window.window_title]) {
+                        merged[window.window_title] = 0;
+                    }
+                    merged[window.window_title] += window.total_seconds; // Use raw seconds for sum
+                });
+
+                // Clear previous content
+                $('#windowDetailsBody').empty();
+
+                // Add merged window details to table
+                Object.entries(merged).forEach(function([title, totalSeconds]) {
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+
+                    // Format as h m s
+                    let timeStr = '';
+                    if (hours > 0) timeStr += hours + 'h ';
+                    if (minutes > 0) timeStr += minutes + 'min ';
+                    if (seconds > 0) timeStr += seconds + 's';
+
+                    // Shorten title to 20 characters + ellipsis if too long
+                    let displayTitle = title;
+                    if (title.length > 85) {
+                        displayTitle = title.substring(0, 85) + '...';
+                    }
+
+                    $('#windowDetailsBody').append(`
+            <tr>
+                <td title="${title}">${displayTitle}</td>
+                <td>${timeStr.trim()}</td>
+            </tr>
+        `);
+                });
+
+                // Initialize Bootstrap tooltips
+                $('#windowDetailsBody [title]').tooltip();
+
+                // Show the modal
+                $('#windowDetailsModal').modal('show');
             });
-            
-            // Show the modal
-            $('#windowDetailsModal').modal('show');
+
+
         });
-    });
     </script>
-
-    <style>
-    .app-details {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 5px;
-    }
-
-    .progress-container {
-        height: 10px;
-        background-color: #f0f0f0;
-        border-radius: 5px;
-        margin-bottom: 5px;
-    }
-
-    .progress-bar {
-        height: 100%;
-        background-color: #4e73df;
-        border-radius: 5px;
-    }
-
-    .total-time-badge {
-        background-color: #4e73df;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-weight: bold;
-    }
-
-    .window-details {
-        background-color: #f9f9f9;
-        border-radius: 5px;
-        padding: 10px;
-    }
-
-    .modal-dialog-zoom {
-        max-width: 800px;
-    }
-    </style>

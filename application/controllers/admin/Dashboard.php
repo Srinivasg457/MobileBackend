@@ -81,7 +81,7 @@ class Dashboard extends Home_Controller {
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Dashboard';
         $data['details'] = $this->session->userdata('employee_id');
-        $employee_id =  $this->input->post('employee_id', true)??$this->get_random_employee_id();
+        $employee_id =  $this->input->post('employee_id', true)?? get_random_employee_id();
         $user_id = $this->session->userdata('id');;
         $time_period = $this->input->post('Time_period', true);
         $from_date = $this->input->post('fromDate', true);
@@ -137,7 +137,7 @@ class Dashboard extends Home_Controller {
                     break;
             }
         }
-        $data['employees'] = $this->list_employees_by_user();
+        $data['employees'] = list_employees_by_user();
         $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line
         $data['response_data'] = $this->get_last_week_total_active_hours($user_id, $employee_id); // 👈 Add this line
         $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary($user_id, $employee_id);
@@ -245,51 +245,6 @@ class Dashboard extends Home_Controller {
         }
     }
 
-    public function list_employees_by_user()
-    {
-        // Get user_id from session first
-        $user_id = $this->session->userdata('id');
-
-        // If not found in session, try to get from header
-        if (empty($user_id)) {
-            $user_id = $this->input->get_request_header('user_id', TRUE);
-        }
-
-        // Validate user ID
-        if (empty($user_id) || !is_numeric($user_id)) {
-            return []; // Return empty array on invalid user_id
-        }
-
-        // Get employees from the employees table matching the provided user_id
-        $employees = $this->db
-            ->select('id, name, email, country, role_id')
-            ->where('user_id', $user_id)
-            ->get('employees')
-            ->result_array();
-
-        // Filter out CEOs using your helper
-        $filtered = array_filter($employees, function ($emp) {
-            return !is_CEO($emp['role_id']);
-        });
-
-        // Reindex the array
-        $filtered = array_values($filtered);
-
-        return $filtered;
-    }
-    public function get_random_employee_id()
-    {
-        $employees = $this->list_employees_by_user();
-
-        if (empty($employees)) {
-            return null; // No employee found
-        }
-
-        // Get a random employee
-        $random_employee = $employees[array_rand($employees)];
-
-        return $random_employee['id'];
-    }
 
 
     private function get_date_range($from_date, $to_date)
