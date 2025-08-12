@@ -297,8 +297,7 @@
   .custom-legend {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin: 37px 0px;
+  
   }
 
   .custom-legend-item {
@@ -540,16 +539,103 @@
     <div class="row mt-20">
       <div class="col-sm-4">
         <div class="box">
-          <div class="box-header with-border">
-            <h3 class="box-title"><?php echo "Overall Productivity" ?></h3>
-          </div>
-          <div class="box-body">
-            <div id="doughnutLegend" class="custom-legend"></div>
+      
+              <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <!-- <div class="box-body">
+                <div id="appUsageLegend" class="custom-legend"></div>
+                <canvas id="appUsageChart" style="max-height: 330px; width: 100%;"></canvas>
+            </div> -->
+<div class="box-header with-border">
+ <h3 class="box-title"><?php echo "Overall Productivity" ?></h3>
+   </div>   
+   <div class="box-body">
+    <div id="appUsageLegend" class="custom-legend"></div>
+   </div>
+           
+   <div class="pie-chart-wrapper">
+        <canvas id="appUsageChart"></canvas>
+   </div>
+   
 
-            <div style="height:260px;text-align: center;justify-content: center;display: flex;">
-              <canvas id="ProductivityReportChart" style="max-height: 250px; width: 100%;"></canvas>
-            </div>
-          </div>
+<style>
+.chart-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.pie-chart-wrapper {
+    height: 300px;
+    margin-bottom: 40px;
+}
+
+.custom-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    position: relative;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.color-box {
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.ellipsis-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: default;
+    position: relative;
+}
+
+.ellipsis-item:hover .hidden-items-tooltip {
+    display: block;
+}
+
+.hidden-items-tooltip {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 150px;
+}
+
+.hidden-legend-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 12px;
+    white-space: nowrap;
+}
+</style>
+
         </div>
       </div>
       <div class="col-sm-8">
@@ -745,7 +831,7 @@
       $('.user_filter_form').submit();
     });
 
-    render_employee_productivity_chart();
+    render_app_usage_chart();
     render_custom_date_report();
   });
 
@@ -889,591 +975,126 @@
   }
 
 
+</script>
+<script>
+function render_app_usage_chart() {
+    // Get PHP data
+    const usageData = <?= $usage_json ?>;
+
+    // Pick latest date
+    const dates = Object.keys(usageData);
+    const latestDate = dates[dates.length - 1];
+    const latestData = usageData[latestDate] || [];
+
+    // Extract labels and values
+    let labels = latestData.map(item => item.application_name);
+    let values = latestData.map(item => parseFloat(item.total_minutes));
+
+    // Handle no data or all zero data
+    const isAllZero = values.length === 0 || values.every(val => val === 0);
 
-  // function render_fourWeek_report() {
-  //   const weeklyReportsData = <?php echo json_encode($weekly_reports); ?>;
-  //   console.log(weeklyReportsData);
-  //   const labels = [];
-  //   const barData = [];
-  //   const lineData = [];
-  //   let maxBarValue = 0;
-
-  //   let filteredData = [];
-  //   let showDailyBreakdown = false;
-  //   let weekToShow = null;
-
-  //   const selectedPeriod = $('#period_search').val();
-  //   const weeklyCtx = document.getElementById('weeklyReportChart').getContext('2d');
-  //   const isNoData = weeklyReportsData.every(item => {
-  //     const breakdown = item.daily_breakdown;
-  //     return Object.values(breakdown).every(val => val.trim() === '0h 0m');
-  //   });
-  //   if (isNoData || weeklyReportsData.length === 0) {
-  //     labels.length = 0;
-  //     barData.length = 0;
-  //     lineData.length = 0;
-
-  //     if (selectedPeriod === 'two_week' || showDailyBreakdown) {
-  //       const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  //       daysOfWeek.forEach(day => {
-  //         labels.push(day);
-  //         barData.push(0);
-  //       });
-  //     } else if (selectedPeriod === 'this_year') {
-  //       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  //         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-  //       ];
-  //       months.forEach(month => {
-  //         labels.push(month);
-  //         barData.push(0);
-  //       });
-  //     } else if (selectedPeriod === 'last_6_months') {
-  //       const now = new Date();
-  //       for (let i = 5; i >= 0; i--) {
-  //         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-  //         const label = date.toLocaleString('default', {
-  //           month: 'short',
-  //           year: 'numeric'
-  //         });
-  //         labels.push(label);
-  //         barData.push(0);
-  //       }
-  //     } else {
-  //       for (let i = 1; i <= 4; i++) {
-  //         labels.push(`Week ${i}`);
-  //         barData.push(0);
-  //       }
-  //     }
-
-  //     // ✅ Key Fix Here: Ensure lineData matches barData length
-  //     lineData.length = 0;
-  //     for (let i = 0; i < barData.length; i++) {
-  //       lineData.push(0.1); // soft baseline
-  //     }
-
-  //     maxBarValue = 2;
-  //   } else {
-  //     switch (selectedPeriod) {
-  //       case 'current_week':
-  //         filteredData = weeklyReportsData.filter(item => item.week_name === 'Current Week');
-  //         showDailyBreakdown = true;
-  //         weekToShow = 'Current Week';
-  //         break;
-  //       case 'last_week':
-  //         filteredData = weeklyReportsData.filter(item => item.week_name === 'Week 1');
-  //         showDailyBreakdown = true;
-  //         weekToShow = 'Week 1';
-  //         break;
-  //       case 'two_week':
-  //         const weeksToCompare = ['Week 2', 'Week 1']; // Show Week 2 first
-  //         showDailyBreakdown = false;
-
-  //         filteredData = weeklyReportsData.filter(item =>
-  //           weeksToCompare.includes(item.week_name)
-  //         );
-
-  //         const weekMap = {};
-  //         filteredData.forEach(item => {
-  //           const startDateStr = item.date_range?.split(' to ')[0];
-  //           item.startDate = new Date(startDateStr);
-  //           weekMap[item.week_name] = item;
-  //         });
-
-  //         const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-  //         weeksToCompare.forEach(week => {
-  //           const weekData = weekMap[week];
-  //           if (!weekData) return;
-
-  //           daysOfWeek.forEach((day, index) => {
-  //             const currentDate = new Date(weekData.startDate);
-  //             currentDate.setDate(currentDate.getDate() + index); // Calculate day offset
-
-  //             const formattedDate = currentDate.toLocaleDateString('en-US', {
-  //               month: 'short',
-  //               day: 'numeric'
-  //             }); // Example: Jul 2
-
-  //             const label = `${day} (${formattedDate})`;
-
-  //             const dayTime = weekData.daily_breakdown?.[day] || "0h 0m";
-  //             const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
-  //             const hours = parseInt(activeParts?.[1] || 0);
-  //             const minutes = parseInt(activeParts?.[2] || 0);
-  //             const totalHours = hours + (minutes / 60);
-
-  //             labels.push(label);
-  //             barData.push(parseFloat(totalHours.toFixed(2)));
-  //             lineData.push((totalHours * 1.05).toFixed(2));
-  //             if (totalHours > maxBarValue) {
-  //               maxBarValue = totalHours;
-  //             }
-  //           });
-  //         });
-  //         break;
-  //       case 'this_month': {
-  //         const now = new Date();
-  //         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  //         const endOfMonth = now;
-
-  //         labels.length = 0;
-  //         barData.length = 0;
-  //         lineData.length = 0;
-
-  //         const daysInWeek = 7;
-  //         const weekMap = {};
-
-  //         // Iterate through all weeks in the report
-  //         weeklyReportsData.forEach(weekData => {
-  //           const startDateStr = weekData.date_range?.split(' to ')[0];
-  //           const weekStartDate = new Date(startDateStr);
-
-  //           let weeklyTotal = 0;
-  //           let weekStartLabel = null;
-  //           let weekEndLabel = null;
-
-  //           for (let i = 0; i < 7; i++) {
-  //             const currentDate = new Date(weekStartDate);
-  //             currentDate.setDate(currentDate.getDate() + i);
-
-  //             if (currentDate >= startOfMonth && currentDate <= endOfMonth) {
-  //               const dayOfWeek = currentDate.toLocaleString('en-US', {
-  //                 weekday: 'long'
-  //               });
-  //               const dayTime = weekData.daily_breakdown?.[dayOfWeek] || "0h 0m";
-  //               const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
-  //               const hours = parseInt(activeParts?.[1] || 0);
-  //               const minutes = parseInt(activeParts?.[2] || 0);
-  //               const totalHours = hours + (minutes / 60);
-
-  //               weeklyTotal += totalHours;
-
-  //               // Build week label
-  //               const formattedDate = currentDate.toLocaleDateString('en-US', {
-  //                 month: 'short',
-  //                 day: 'numeric'
-  //               });
-
-  //               if (!weekStartLabel) weekStartLabel = formattedDate;
-  //               weekEndLabel = formattedDate;
-  //             }
-  //           }
-
-  //           if (weeklyTotal > 0) {
-  //             const label = `${weekData.week_name} (${weekStartLabel}–${weekEndLabel})`;
-  //             labels.push(label);
-  //             const roundedTotal = parseFloat(weeklyTotal.toFixed(2));
-  //             barData.push(roundedTotal);
-  //             lineData.push((roundedTotal * 1.05).toFixed(2));
-  //             if (roundedTotal > maxBarValue) {
-  //               maxBarValue = roundedTotal;
-  //             }
-  //           }
-  //         });
-
-  //         break;
-  //       }
-  //       case 'last_month': {
-  //         const now = new Date();
-  //         const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  //         const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // last day of previous month
-
-  //         labels.length = 0;
-  //         barData.length = 0;
-  //         lineData.length = 0;
-
-  //         const weekMap = {};
-
-  //         weeklyReportsData.forEach(weekData => {
-  //           const startDateStr = weekData.date_range?.split(' to ')[0];
-  //           const weekStartDate = new Date(startDateStr);
-
-  //           let weeklyTotal = 0;
-  //           let weekStartLabel = null;
-  //           let weekEndLabel = null;
-
-  //           for (let i = 0; i < 7; i++) {
-  //             const currentDate = new Date(weekStartDate);
-  //             currentDate.setDate(currentDate.getDate() + i);
-
-  //             if (currentDate >= startOfLastMonth && currentDate <= endOfLastMonth) {
-  //               const dayOfWeek = currentDate.toLocaleString('en-US', {
-  //                 weekday: 'long'
-  //               });
-  //               const dayTime = weekData.daily_breakdown?.[dayOfWeek] || "0h 0m";
-  //               const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
-  //               const hours = parseInt(activeParts?.[1] || 0);
-  //               const minutes = parseInt(activeParts?.[2] || 0);
-  //               const totalHours = hours + (minutes / 60);
-
-  //               weeklyTotal += totalHours;
-
-  //               const formattedDate = currentDate.toLocaleDateString('en-US', {
-  //                 month: 'short',
-  //                 day: 'numeric'
-  //               });
-
-  //               if (!weekStartLabel) weekStartLabel = formattedDate;
-  //               weekEndLabel = formattedDate;
-  //             }
-  //           }
-
-  //           if (weeklyTotal > 0) {
-  //             const label = `${weekData.week_name} (${weekStartLabel}–${weekEndLabel})`;
-  //             labels.push(label);
-  //             const roundedTotal = parseFloat(weeklyTotal.toFixed(2));
-  //             barData.push(roundedTotal);
-  //             lineData.push((roundedTotal * 1.05).toFixed(2));
-  //             if (roundedTotal > maxBarValue) {
-  //               maxBarValue = roundedTotal;
-  //             }
-  //           }
-  //         });
-  //         break;
-  //       }
-  //       case 'last_6_months': {
-  //         const now = new Date();
-  //         const startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1); // 5 months ago
-  //         const endDate = now;
-
-  //         const monthGroups = {};
-  //         const monthKeys = [];
-
-  //         // Initialize past 6 months with 0 hours
-  //         for (let i = 5; i >= 0; i--) {
-  //           const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-  //           const key = date.toLocaleString('default', {
-  //             month: 'short',
-  //             year: 'numeric'
-  //           }); // e.g. "Mar 2025"
-  //           monthGroups[key] = 0;
-  //           monthKeys.push(key);
-  //         }
-
-  //         // Aggregate data
-  //         weeklyReportsData.forEach(item => {
-  //           const startDateStr = item.date_range?.split(' to ')[0];
-  //           const reportDate = new Date(startDateStr);
-
-  //           if (reportDate >= startDate && reportDate <= endDate) {
-  //             const key = reportDate.toLocaleString('default', {
-  //               month: 'short',
-  //               year: 'numeric'
-  //             });
-  //             if (!monthGroups[key]) {
-  //               monthGroups[key] = 0;
-  //             }
-
-  //             const activeParts = item.total_active.match(/(\d+)h\s+(\d+)m/);
-  //             const hours = parseInt(activeParts?.[1] || 0);
-  //             const minutes = parseInt(activeParts?.[2] || 0);
-  //             const totalHours = hours + (minutes / 60);
-  //             monthGroups[key] += totalHours;
-  //           }
-  //         });
-
-  //         // Render labels in chronological order
-  //         monthKeys.forEach(monthKey => {
-  //           const totalHours = monthGroups[monthKey];
-  //           labels.push(monthKey);
-  //           barData.push(parseFloat(totalHours.toFixed(2)));
-  //           lineData.push((totalHours * 1.05).toFixed(2));
-  //           if (totalHours > maxBarValue) {
-  //             maxBarValue = totalHours;
-  //           }
-  //         });
-
-  //         break;
-  //       }
-
-
-  //       case 'this_year': {
-  //         const now = new Date();
-  //         const currentYear = now.getFullYear();
-
-  //         const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  //         const monthGroups = {};
-
-  //         // Step 1: Initialize all months with 0
-  //         monthOrder.forEach(month => {
-  //           monthGroups[month] = 0;
-  //         });
-
-  //         // Step 2: Fill in available data
-  //         weeklyReportsData.forEach(item => {
-  //           const date = new Date(item.date_range.split(' to ')[0]);
-  //           const year = date.getFullYear();
-
-  //           if (year === currentYear) {
-  //             const monthKey = date.toLocaleString('default', {
-  //               month: 'short'
-  //             });
-  //             if (!monthGroups[monthKey]) {
-  //               monthGroups[monthKey] = 0;
-  //             }
-
-  //             const activeParts = item.total_active.match(/(\d+)h\s+(\d+)m/);
-  //             const hours = parseInt(activeParts?.[1] || 0);
-  //             const minutes = parseInt(activeParts?.[2] || 0);
-  //             const totalHours = hours + (minutes / 60);
-
-  //             monthGroups[monthKey] += totalHours;
-  //           }
-  //         });
-
-  //         // Step 3: Render in correct month order
-  //         monthOrder.forEach(month => {
-  //           const totalHours = monthGroups[month];
-  //           labels.push(month);
-  //           barData.push(parseFloat(totalHours.toFixed(2)));
-  //           lineData.push((totalHours * 1.05).toFixed(2));
-  //           if (totalHours > maxBarValue) {
-  //             maxBarValue = totalHours;
-  //           }
-  //         });
-
-  //         break;
-  //       }
-  //       case '':
-  //       default:
-  //         filteredData = weeklyReportsData;
-  //     }
-
-  //     if (!showDailyBreakdown && selectedPeriod !== 'this_year' && selectedPeriod !== 'two_week') {
-  //       filteredData.sort((a, b) => {
-  //         const dateA = new Date(a.date_range.split(' to ')[0]);
-  //         const dateB = new Date(b.date_range.split(' to ')[0]);
-  //         return dateA - dateB;
-  //       });
-
-  //       filteredData.forEach(report => {
-  //         const activeParts = report.total_active.match(/(\d+)h\s+(\d+)m/);
-  //         const hours = parseInt(activeParts[1] || 0);
-  //         const minutes = parseInt(activeParts[2] || 0);
-  //         const totalHours = hours + (minutes / 60);
-
-  //         labels.push(`${report.week_name} (Mon to Sun)`);
-  //         barData.push(parseFloat(totalHours.toFixed(2)));
-  //         lineData.push((totalHours * 1.05).toFixed(2));
-  //         if (totalHours > maxBarValue) {
-  //           maxBarValue = totalHours;
-  //         }
-  //       });
-  //     }
-
-  //     if (showDailyBreakdown && weekToShow) {
-  //       const weekData = weeklyReportsData.find(item => item.week_name === weekToShow);
-  //       if (weekData) {
-  //         const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-  //         daysOfWeek.forEach(day => {
-  //           const dayTime = weekData.daily_breakdown[day] || "0h 0m";
-  //           const activeParts = dayTime.match(/(\d+)h\s+(\d+)m/);
-  //           const hours = parseInt(activeParts[1] || 0);
-  //           const minutes = parseInt(activeParts[2] || 0);
-  //           const totalHours = hours + (minutes / 60);
-
-  //           labels.push(day);
-  //           barData.push(parseFloat(totalHours.toFixed(2)));
-  //           lineData.push((totalHours * 1.05).toFixed(2));
-  //           if (totalHours > maxBarValue) {
-  //             maxBarValue = totalHours;
-  //           }
-  //         });
-  //       }
-  //     }
-  //   }
-  //   const suggestedMaxY = Math.ceil((maxBarValue * 1.25) / 10) * 10;
-
-
-
-
-  //   if (window.weeklyChartInstance) {
-  //     window.weeklyChartInstance.destroy();
-  //   }
-
-  //   window.weeklyChartInstance = new Chart(weeklyCtx, {
-  //     type: 'bar',
-  //     data: {
-  //       labels: labels,
-  //       datasets: [{
-  //         label: (showDailyBreakdown || selectedPeriod === 'two_week') ? 'Daily Active Time (hr)' : selectedPeriod === 'this_year' ? 'Monthly Active Time (hr)' : 'Total Active Time (hr)',
-  //         data: barData,
-  //         backgroundColor: 'rgba(54, 162, 235, 0.8)',
-  //         borderColor: 'rgba(54, 162, 235, 1)',
-  //         borderWidth: 1,
-  //         order: 2,
-  //         barPercentage: 0.4,
-  //         categoryPercentage: 0.7
-  //       }, {
-  //         label: 'Trend (hr)',
-  //         data: lineData,
-  //         type: 'line',
-  //         borderColor: 'rgb(75, 192, 192)',
-  //         backgroundColor: 'rgba(75, 192, 192, 0.2)',
-  //         fill: false,
-  //         tension: 0.3,
-  //         order: 1
-  //       }]
-  //     },
-  //     options: {
-  //       responsive: true,
-  //       maintainAspectRatio: false,
-  //       layout: {
-  //         padding: {
-  //           left: 10,
-  //           right: 10,
-  //           top: 10,
-  //           bottom: 10
-  //         }
-  //       },
-  //       scales: {
-  //         y: {
-  //           beginAtZero: true,
-  //           max: suggestedMaxY,
-  //           title: {
-  //             display: true,
-  //             text: 'Hours (hr)',
-  //             font: {
-  //               size: window.innerWidth < 600 ? 10 : 12,
-  //               weight: 'bold'
-  //             }
-  //           },
-  //           ticks: {
-  //             stepSize: showDailyBreakdown || selectedPeriod === 'two_week' ? 1 : 2,
-  //             font: {
-  //               size: window.innerWidth < 600 ? 10 : 12
-  //             }
-  //           }
-  //         },
-  //         x: {
-  //           title: {
-  //             display: showDailyBreakdown || selectedPeriod === 'two_week',
-  //             text: (showDailyBreakdown || selectedPeriod === 'two_week') ? 'Days of Week' : '',
-  //             font: {
-  //               size: window.innerWidth < 600 ? 10 : 12,
-  //               weight: 'bold'
-  //             }
-  //           },
-  //           ticks: {
-  //             font: {
-  //               size: window.innerWidth < 600 ? 8 : 12
-  //             }
-  //           }
-  //         }
-  //       },
-  //       plugins: {
-  //         tooltip: {
-  //           callbacks: {
-  //             label: function(context) {
-  //               const value = context.parsed.y;
-  //               const hrs = Math.floor(value);
-  //               const mins = Math.round((value - hrs) * 60);
-  //               return `${context.dataset.label}: ${hrs}h ${mins}m`;
-  //             }
-  //           }
-  //         },
-  //         legend: {
-  //           position: 'top',
-  //           labels: {
-  //             font: {
-  //               size: 12
-  //             },
-  //             padding: 15
-  //           }
-  //         },
-
-  //       }
-  //     }
-  //   });
-  // }
-
-
-  function render_employee_productivity_chart() {
-
-    // Original PHP values
-    let manual = <?php echo $overall_productivity["manual_percentage"]; ?>;
-    let meeting = <?php echo $overall_productivity["meeting_percentage"]; ?>;
-    let idle = <?php echo $overall_productivity["idle_percentage"]; ?>;
-    let active = <?php echo $overall_productivity["active_percentage"]; ?>;
-
-    let chartData = [manual, meeting, idle, active];
-    const isAllZero = chartData.every(val => val === 0);
-
-    // Force small non-zero values to render the chart
     if (isAllZero) {
-      chartData = [0.0001, 0.0001, 0.0001, 0.0001];
-    }
-
-    const prod_labels = ['Manual Time', 'Meeting Time', 'Inactive Time', 'Active Time'];
-
-    const doughnutData = {
-      labels: prod_labels,
-      datasets: [{
-        label: 'Time Breakdown',
-        data: chartData,
-        backgroundColor: isAllZero ? ['#d3d3d3', '#d3d3d3', '#d3d3d3', '#d3d3d3'] : [
-          'rgb(75, 192, 192)',
-          'rgb(255, 99, 132)',
-          'rgb(255, 205, 86)',
-          'rgb(55, 175, 255)'
-        ],
-        hoverOffset: 4
-      }]
-    };
-
-    const doughnutConfig = {
-      type: 'doughnut',
-      data: doughnutData,
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const value = context.raw ?? 0;
-                return `${context.label}: ${isAllZero ? 0 : value}%`;
-              }
-            }
-          }
+        labels = ['No Data'];
+        values = [0.0001]; // tiny value so pie renders
+        
+        // Apply special styling only when empty
+        const chartWrapper = document.querySelector('.pie-chart-wrapper');
+        if (chartWrapper) {
+            chartWrapper.style.height = '335px';
+            chartWrapper.style.marginBottom = '40px';
         }
-      }
-    };
-
-    const doughnutCtx = document.getElementById('ProductivityReportChart').getContext('2d');
-    const doughnutChart = new Chart(doughnutCtx, doughnutConfig);
-
-    // Custom Legend
-    function renderCustomLegend(chart, legendId) {
-      const container = document.getElementById(legendId);
-      container.innerHTML = '';
-
-      const labels = chart.data.labels;
-      const data = chart.data.datasets[0].data;
-      const colors = chart.data.datasets[0].backgroundColor;
-
-      labels.forEach((label, i) => {
-        const item = document.createElement('div');
-        item.classList.add('custom-legend-item');
-
-        const box = document.createElement('div');
-        box.classList.add('custom-legend-box');
-        box.style.backgroundColor = colors[i];
-
-        const text = document.createElement('span');
-        const value = isAllZero ? 0 : data[i];
-        text.innerText = `${label}: ${value}%`;
-
-        item.appendChild(box);
-        item.appendChild(text);
-        container.appendChild(item);
-      });
     }
 
-    renderCustomLegend(doughnutChart, 'doughnutLegend');
+    // Define colors
+    const backgroundColors = isAllZero
+        ? ['#d3d3d3']
+        : [
+            "#B9D9EB", "#FBCEB1", "#CCCCFF", "#00B4D8", "#E9967A",
+            "#F0E68C", "#9ACD32", "#FF9F1C", "#118AB2", "#FF70A6",
+            "#000000", "#F77F00", "#2E8B57", "#E63946", "#A663CC"
+        ].slice(0, labels.length);
 
-  }
+    // Chart.js config
+    const pieData = {
+        labels: labels,
+        datasets: [{
+            data: values,
+            backgroundColor: backgroundColors,
+            hoverOffset: 4,
+            borderWidth: 1,
+            borderColor: '#fff'
+        }]
+    };
+
+    const pieConfig = {
+        type: 'pie',
+        data: pieData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return isAllZero 
+                                ? 'No Data Available' 
+                                : `${context.label}: ${Math.round(context.raw)} min`;
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    // Render chart
+    const pieCtx = document.getElementById('appUsageChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, pieConfig);
+
+    // Custom legend with ellipsis for overflow
+    function renderCustomLegend() {
+        const container = document.getElementById('appUsageLegend');
+        container.innerHTML = '';
+        
+        const maxVisibleItems = 7;
+        const hasOverflow = labels.length > maxVisibleItems;
+        const visibleItemsCount = hasOverflow ? maxVisibleItems - 1 : labels.length;
+
+        // Add visible items
+        for (let i = 0; i < visibleItemsCount; i++) {
+            const item = document.createElement('div');
+            item.className = 'legend-item';
+            item.title = labels[i]; // Show full name on hover
+            
+            item.innerHTML = `
+                <span class="color-box" style="background:${backgroundColors[i]}"></span>
+                <span class="label-text">${labels[i]}</span>
+            `;
+            
+            container.appendChild(item);
+        }
+
+        // Add ellipsis if there are hidden items
+        if (hasOverflow) {
+            const ellipsisItem = document.createElement('div');
+            ellipsisItem.className = 'ellipsis-item';
+            ellipsisItem.innerHTML = `
+                <span class="color-box" style="background:#cccccc"></span>
+                <span class="label-text">...</span>
+                <div class="hidden-items-tooltip">
+                    ${labels.slice(maxVisibleItems - 1).map((label, i) => `
+                        <div class="hidden-legend-item">
+                            <span class="color-box" style="background:${backgroundColors[i + maxVisibleItems - 1]}"></span>
+                            <span>${label}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            container.appendChild(ellipsisItem);
+        }
+    }
+
+    renderCustomLegend();
+}
 </script>
