@@ -679,8 +679,8 @@ class Time_logs extends Home_Controller
             $idle_time   = convertToHHMMSS($headers['total_idle_time']);
 
             // --- NEW LOGIC: Check gap between last update and new end_time ---
-            if (!empty($existing->updated_at)) {
-                $prev_update_ts = strtotime($existing->updated_at);
+            if (!empty($existing->end_time)) {
+                $prev_update_ts = strtotime($existing->end_time);
                 $end_ts         = strtotime($end_datetime);
 
                 $diff_seconds = $end_ts - $prev_update_ts;
