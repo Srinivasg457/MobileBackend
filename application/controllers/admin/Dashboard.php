@@ -1133,50 +1133,69 @@ class Dashboard extends Home_Controller {
         }
     }
 
-public function get_day_wise_application_usage($from_date,$to_date,$user_id, $employee_id)
+public function get_day_wise_application_usage($from_date, $to_date, $user_id, $employee_id)
 {
     try {
         if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
             return null;
         }
 
-          if (empty($from_date) || empty($to_date)) {
+        // Default to current week if no dates provided
+        if (empty($from_date) || empty($to_date)) {
             $from_date = date('Y-m-d', strtotime('monday this week'));
             $to_date = date('Y-m-d', strtotime('sunday this week'));
         }
 
-        // Query: Day-wise minutes per application (no fixed week range)
-        $this->db->select('log_date, application_name, ROUND(SUM(duration_seconds) / 60, 2) AS total_minutes');
+        // Base query
+        $this->db->select('application_name, log_date, ROUND(SUM(duration_seconds) / 60, 2) AS total_minutes');
         $this->db->from('application_usage_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $user_id);
-        $this->db->group_by(['log_date', 'application_name']);
         $this->db->where("DATE(log_date) >=", $from_date);
         $this->db->where("DATE(log_date) <=", $to_date);
-        $this->db->order_by('total_minutes', 'DESC');
 
-        $query = $this->db->get();
-        $raw_results = $query->result_array();
+        // If they specifically want the total for the range
+        if ($from_date !== $to_date) {
+            // Group by application only (sum over the range)
+            $this->db->group_by('application_name');
+            $this->db->order_by('total_minutes', 'DESC');
 
-        // Group results by date
-        $grouped_data = [];
-        foreach ($raw_results as $row) {
-            $date = $row['log_date'];
-            if (!isset($grouped_data[$date])) {
-                $grouped_data[$date] = [];
+            $query = $this->db->get();
+            $results = $query->result_array();
+
+            $response = [
+                'status' => 'success',
+                'message' => "Application usage calculated for range $from_date to $to_date",
+                'applications' => $results
+            ];
+        } else {
+            // Group by date & application (day-wise)
+            $this->db->group_by(['log_date', 'application_name']);
+            $this->db->order_by('log_date', 'ASC');
+            $this->db->order_by('total_minutes', 'DESC');
+
+            $query = $this->db->get();
+            $raw_results = $query->result_array();
+
+            // Group by date in array
+            $grouped_data = [];
+            foreach ($raw_results as $row) {
+                $date = $row['log_date'];
+                if (!isset($grouped_data[$date])) {
+                    $grouped_data[$date] = [];
+                }
+                $grouped_data[$date][] = [
+                    'application_name' => $row['application_name'],
+                    'total_minutes' => $row['total_minutes']
+                ];
             }
-            $grouped_data[$date][] = [
-                'application_name' => $row['application_name'],
-                'total_minutes' => $row['total_minutes']
+
+            $response = [
+                'status' => 'success',
+                'message' => 'Day-wise application usage calculated successfully',
+                'applications' => $grouped_data
             ];
         }
-
-        // Prepare response
-        $response = [
-            'status' => 'success',
-            'message' => 'Day-wise application usage calculated successfully',
-            'applications' => $grouped_data
-        ];
 
         return $response;
 
@@ -1195,6 +1214,7 @@ public function get_day_wise_application_usage($from_date,$to_date,$user_id, $em
             ->set_output(json_encode($error_response));
     }
 }
+
 
 
 
