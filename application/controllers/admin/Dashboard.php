@@ -140,6 +140,9 @@ class Dashboard extends Home_Controller {
         $data['employees'] = list_employees_by_user();
         $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line
         $data['response_data'] = $this->get_last_week_total_active_hours($user_id, $employee_id); // 👈 Add this line
+        $data['response'] = $this->get_day_wise_application_usage($from_date, $to_date,$user_id, $employee_id); // 👈 Add this line
+         $data['usage_json'] = json_encode($data['response']['applications']);
+
         $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary($user_id, $employee_id);
         $data['target_data'] = $this->get_this_week_target_time_data($user_id, $employee_id); // 👈 Add this line   
         $data['inactive_data'] = $this->get_this_week_inactive_time_data($user_id, $employee_id); // 👈 Add this line   
@@ -1129,6 +1132,71 @@ class Dashboard extends Home_Controller {
             return $error_output;
         }
     }
+
+public function get_day_wise_application_usage($from_date,$to_date,$user_id, $employee_id)
+{
+    try {
+        if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+            return null;
+        }
+
+          if (empty($from_date) || empty($to_date)) {
+            $from_date = date('Y-m-d', strtotime('monday this week'));
+            $to_date = date('Y-m-d', strtotime('sunday this week'));
+        }
+
+        // Query: Day-wise minutes per application (no fixed week range)
+        $this->db->select('log_date, application_name, ROUND(SUM(duration_seconds) / 60, 2) AS total_minutes');
+        $this->db->from('application_usage_logs');
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->group_by(['log_date', 'application_name']);
+        $this->db->where("DATE(log_date) >=", $from_date);
+        $this->db->where("DATE(log_date) <=", $to_date);
+        $this->db->order_by('total_minutes', 'DESC');
+
+        $query = $this->db->get();
+        $raw_results = $query->result_array();
+
+        // Group results by date
+        $grouped_data = [];
+        foreach ($raw_results as $row) {
+            $date = $row['log_date'];
+            if (!isset($grouped_data[$date])) {
+                $grouped_data[$date] = [];
+            }
+            $grouped_data[$date][] = [
+                'application_name' => $row['application_name'],
+                'total_minutes' => $row['total_minutes']
+            ];
+        }
+
+        // Prepare response
+        $response = [
+            'status' => 'success',
+            'message' => 'Day-wise application usage calculated successfully',
+            'applications' => $grouped_data
+        ];
+
+        return $response;
+
+    } catch (Exception $e) {
+        log_message('error', 'get_day_wise_application_usage failed: ' . $e->getMessage());
+
+        $error_response = [
+            'status' => 'error',
+            'message' => 'Failed to calculate day-wise application usage',
+            'error_details' => $e->getMessage()
+        ];
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode($error_response));
+    }
+}
+
+
 
     private function get_this_week_work_time_data($from_date, $to_date, $user_id, $employee_id)
     {
