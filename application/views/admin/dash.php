@@ -981,23 +981,35 @@ function render_app_usage_chart() {
     // Get PHP data
     const usageData = <?= $usage_json ?>;
 
-    // Pick latest date
-    const dates = Object.keys(usageData);
-    const latestDate = dates[dates.length - 1];
-    const latestData = usageData[latestDate] || [];
+    let labels = [];
+    let values = [];
 
-    // Extract labels and values
-    let labels = latestData.map(item => item.application_name);
-    let values = latestData.map(item => parseFloat(item.total_minutes));
+    // Helper: Convert minutes to HH:MM
+    function minutesToHHMM(minutes) {
+        const hrs = Math.floor(minutes / 60);
+        const mins = Math.round(minutes % 60);
+        return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+    }
+
+    // Check if data is aggregated (range mode) or daily (day-wise)
+    if (Array.isArray(usageData)) {
+        // Range mode
+        labels = usageData.map(item => item.application_name);
+        values = usageData.map(item => parseFloat(item.total_minutes)); // keep as minutes
+    } else {
+        // Day-wise mode
+        const dates = Object.keys(usageData);
+        const latestDate = dates[dates.length - 1];
+        const latestData = usageData[latestDate] || [];
+        labels = latestData.map(item => item.application_name);
+        values = latestData.map(item => parseFloat(item.total_minutes)); // keep as minutes
+    }
 
     // Handle no data or all zero data
     const isAllZero = values.length === 0 || values.every(val => val === 0);
-
     if (isAllZero) {
         labels = ['No Data'];
-        values = [0.0001]; // tiny value so pie renders
-        
-        // Apply special styling only when empty
+        values = [0.0001];
         const chartWrapper = document.querySelector('.pie-chart-wrapper');
         if (chartWrapper) {
             chartWrapper.style.height = '335px';
@@ -1010,15 +1022,17 @@ function render_app_usage_chart() {
         ? ['#d3d3d3']
         : [
             "#B9D9EB", "#FBCEB1", "#CCCCFF", "#00B4D8", "#E9967A",
-            "#F0E68C", "#9ACD32", "#FF9F1C", "#118AB2", "#FF70A6",
-            "#000000", "#F77F00", "#2E8B57", "#E63946", "#A663CC"
-        ].slice(0, labels.length);
+            "#F0E68C", "#9ACD32", "#FF0000","#260effff", "#006400", "#663399",
+            "#000000", "#8B4513", "#2E8B57", "#E63946","#8B0000",   '#6A4C93', 
+            '#FF9F1C','#2EC4B6', '#E71D36', '#8AC926', '#1982C4',
+             '#FFCA3A', '#6A8D73', '#fffc41ff', '#FF6B6B'         
+          ].slice(0, labels.length);
 
     // Chart.js config
     const pieData = {
         labels: labels,
         datasets: [{
-            data: values,
+            data: values, // still in minutes for pie proportions
             backgroundColor: backgroundColors,
             hoverOffset: 4,
             borderWidth: 1,
@@ -1037,9 +1051,9 @@ function render_app_usage_chart() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return isAllZero 
-                                ? 'No Data Available' 
-                                : `${context.label}: ${Math.round(context.raw)} min`;
+                            return isAllZero
+                                ? 'No Data Available'
+                                : `${context.label}: ${minutesToHHMM(context.raw)}`;
                         }
                     }
                 }
@@ -1049,9 +1063,9 @@ function render_app_usage_chart() {
 
     // Render chart
     const pieCtx = document.getElementById('appUsageChart').getContext('2d');
-    const pieChart = new Chart(pieCtx, pieConfig);
+    new Chart(pieCtx, pieConfig);
 
-    // Custom legend with ellipsis for overflow
+    // Custom legend with ellipsis
     function renderCustomLegend() {
         const container = document.getElementById('appUsageLegend');
         container.innerHTML = '';
@@ -1064,17 +1078,15 @@ function render_app_usage_chart() {
         for (let i = 0; i < visibleItemsCount; i++) {
             const item = document.createElement('div');
             item.className = 'legend-item';
-            item.title = labels[i]; // Show full name on hover
-            
+            item.title = `${labels[i]} (${minutesToHHMM(values[i])})`;
             item.innerHTML = `
                 <span class="color-box" style="background:${backgroundColors[i]}"></span>
                 <span class="label-text">${labels[i]}</span>
             `;
-            
             container.appendChild(item);
         }
 
-        // Add ellipsis if there are hidden items
+        // Add ellipsis for hidden items
         if (hasOverflow) {
             const ellipsisItem = document.createElement('div');
             ellipsisItem.className = 'ellipsis-item';
@@ -1085,12 +1097,11 @@ function render_app_usage_chart() {
                     ${labels.slice(maxVisibleItems - 1).map((label, i) => `
                         <div class="hidden-legend-item">
                             <span class="color-box" style="background:${backgroundColors[i + maxVisibleItems - 1]}"></span>
-                            <span>${label}</span>
+                            <span>${label} (${minutesToHHMM(values[i + maxVisibleItems - 1])})</span>
                         </div>
                     `).join('')}
                 </div>
             `;
-            
             container.appendChild(ellipsisItem);
         }
     }
