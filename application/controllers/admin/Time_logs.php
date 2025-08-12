@@ -404,9 +404,196 @@ class Time_logs extends Home_Controller
     //             ]
     //         ]));
     // }
+
+    // for calculating the signout time
+    // public function update_timelog()
+    // {
+    //     // Validate request method
+    //     if ($this->input->server('REQUEST_METHOD') !== 'PUT') {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_status_header(405)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "Only PUT requests are allowed"
+    //             ]));
+    //     }
+
+    //     // Get and validate headers
+    //     $required_headers = [
+    //         'user_id' => 'user_id',
+    //         'employee_id' => 'employee_id',
+    //         'log_date' => 'log_date',
+    //         'end_time' => 'end_time',
+    //         'total_active_time' => 'total_active_time',
+    //         'total_idle_time' => 'total_idle_time'
+    //     ];
+
+    //     $headers = [];
+    //     $missing_fields = [];
+
+    //     foreach ($required_headers as $field => $label) {
+    //         $value = $this->input->get_request_header($field, TRUE);
+    //         if (empty($value)) {
+    //             $missing_fields[] = $label;
+    //         }
+    //         $headers[$field] = $value;
+    //     }
+
+    //     if (!empty($missing_fields)) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_status_header(400)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "Missing required headers: " . implode(', ', $missing_fields)
+    //             ]));
+    //     }
+
+    //     // Validate and format timestamp
+    //     try {
+    //         $end_datetime = (new DateTime($headers['end_time']))->format('Y-m-d H:i:s');
+
+    //         // Get existing log to validate end time is after start time
+    //         $this->db->where('employee_id', $headers['employee_id']);
+    //         $this->db->where('user_id', $headers['user_id']);
+    //         $this->db->where('log_date', $headers['log_date']);
+    //         $existing = $this->db->get('time_logs')->row();
+
+    //         if (!$existing) {
+    //             return $this->output
+    //                 ->set_content_type('application/json')
+    //                 ->set_status_header(404)
+    //                 ->set_output(json_encode([
+    //                     "status" => "error",
+    //                     "message" => "Time log not found for update"
+    //                 ]));
+    //         }
+
+    //         if (strtotime($end_datetime) < strtotime($existing->start_time)) {
+    //             throw new Exception("End time must be after start time");
+    //         }
+
+    //         // Function to convert various time formats to HH:MM:SS
+    //         function convertToHHMMSS($time)
+    //         {
+    //             if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
+    //                 return $time;
+    //             }
+
+    //             if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $time)) {
+    //                 return str_replace('-', ':', $time);
+    //             }
+
+    //             if (is_numeric($time)) {
+    //                 $total_seconds = (int)($time * 3600);
+    //                 return sprintf(
+    //                     "%02d:%02d:%02d",
+    //                     floor($total_seconds / 3600),
+    //                     floor(($total_seconds % 3600) / 60),
+    //                     $total_seconds % 60
+    //                 );
+    //             }
+    //             throw new Exception("Invalid time format");
+    //         }
+
+    //         $active_time = convertToHHMMSS($headers['total_active_time']);
+    //         $idle_time   = convertToHHMMSS($headers['total_idle_time']);
+
+    //         // -------------------- NEW LOGIC --------------------
+    //         if (!empty($existing->signout_time)) {
+    //             $signout_ts = strtotime($existing->signout_time);
+    //             $end_ts     = strtotime($end_datetime);
+
+    //             if ($end_ts > $signout_ts) {
+    //                 $diff_seconds = $end_ts - $signout_ts;
+
+    //                 // Convert existing DB idle time to seconds
+    //                 list($ih, $im, $is) = explode(':', $existing->total_idle_time);
+    //                 $existing_idle_seconds = ($ih * 3600) + ($im * 60) + $is;
+
+    //                 // Add extra idle seconds
+    //                 $new_idle_seconds = $existing_idle_seconds + $diff_seconds;
+
+    //                 // Convert back to HH:MM:SS
+    //                 $idle_time = sprintf(
+    //                     "%02d:%02d:%02d",
+    //                     floor($new_idle_seconds / 3600),
+    //                     floor(($new_idle_seconds % 3600) / 60),
+    //                     $new_idle_seconds % 60
+    //                 );
+    //             }
+
+    //             // ✅ Reset signout_time so it won't be used again
+    //             $this->db->where('user_id', $headers['user_id']);
+    //             $this->db->where('employee_id', $headers['employee_id']);
+    //             $this->db->where('log_date', $headers['log_date']);
+    //             $this->db->update('time_logs', ['signout_time' => null]);
+    //         }
+    //         // -------------------- END NEW LOGIC --------------------
+
+    //     } catch (Exception $e) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_status_header(400)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "Invalid time data: " . $e->getMessage()
+    //             ]));
+    //     }
+
+    //     // // Prepare update data
+    //     $current_time =  get_user_datetime_only($headers['user_id']);
+    //     $data = [
+    //         'end_time' => $end_datetime,
+    //         'total_active_time' => $active_time,
+    //         'total_idle_time' => $idle_time,
+    //         'updated_at' => $current_time
+    //     ];
+
+    //     $this->db->trans_start();
+    //     $this->db->where('user_id', $headers['user_id']);
+    //     $this->db->where('employee_id', $headers['employee_id']);
+    //     $this->db->where('log_date', $headers['log_date']);
+    //     $updated = $this->db->update('time_logs', $data);
+    //     $this->db->trans_complete();
+
+    //     if (!$this->db->trans_status() || !$updated) {
+    //         $error = $this->db->error();
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_status_header(500)
+    //             ->set_output(json_encode([
+    //                 "status" => "error",
+    //                 "message" => "Failed to update time log",
+    //                 "error" => $error['message'] ?? 'Unknown database error'
+    //             ]));
+    //     }
+
+    //     // Get updated record
+    //     $this->db->where('employee_id', $headers['employee_id']);
+    //     $this->db->where('user_id', $headers['user_id']);
+    //     $this->db->where('log_date', $headers['log_date']);
+    //     $updated_record = $this->db->get('time_logs')->row();
+
+    //     log_message('info', "Time log updated for employee {$headers['employee_id']} on date {$headers['log_date']}");
+
+    //     return $this->output
+    //         ->set_content_type('application/json')
+    //         ->set_status_header(200)
+    //         ->set_output(json_encode([
+    //             "status" => "success",
+    //             "message" => "Time log updated successfully",
+    //             "data" => [
+    //                 "original_data" => $existing,
+    //                 "updated_data" => $updated_record,
+    //                 "changes_applied" => $data
+    //             ]
+    //         ]));
+    // }
+
     public function update_timelog()
     {
-        // Validate request method
         if ($this->input->server('REQUEST_METHOD') !== 'PUT') {
             return $this->output
                 ->set_content_type('application/json')
@@ -417,7 +604,6 @@ class Time_logs extends Home_Controller
                 ]));
         }
 
-        // Get and validate headers
         $required_headers = [
             'user_id' => 'user_id',
             'employee_id' => 'employee_id',
@@ -429,7 +615,6 @@ class Time_logs extends Home_Controller
 
         $headers = [];
         $missing_fields = [];
-
         foreach ($required_headers as $field => $label) {
             $value = $this->input->get_request_header($field, TRUE);
             if (empty($value)) {
@@ -448,11 +633,9 @@ class Time_logs extends Home_Controller
                 ]));
         }
 
-        // Validate and format timestamp
         try {
             $end_datetime = (new DateTime($headers['end_time']))->format('Y-m-d H:i:s');
 
-            // Get existing log to validate end time is after start time
             $this->db->where('employee_id', $headers['employee_id']);
             $this->db->where('user_id', $headers['user_id']);
             $this->db->where('log_date', $headers['log_date']);
@@ -472,17 +655,14 @@ class Time_logs extends Home_Controller
                 throw new Exception("End time must be after start time");
             }
 
-            // Function to convert various time formats to HH:MM:SS
             function convertToHHMMSS($time)
             {
                 if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
                     return $time;
                 }
-
                 if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $time)) {
                     return str_replace('-', ':', $time);
                 }
-
                 if (is_numeric($time)) {
                     $total_seconds = (int)($time * 3600);
                     return sprintf(
@@ -498,22 +678,19 @@ class Time_logs extends Home_Controller
             $active_time = convertToHHMMSS($headers['total_active_time']);
             $idle_time   = convertToHHMMSS($headers['total_idle_time']);
 
-            // -------------------- NEW LOGIC --------------------
-            if (!empty($existing->signout_time)) {
-                $signout_ts = strtotime($existing->signout_time);
-                $end_ts     = strtotime($end_datetime);
+            // --- NEW LOGIC: Check gap between last update and new end_time ---
+            if (!empty($existing->updated_at)) {
+                $prev_update_ts = strtotime($existing->updated_at);
+                $end_ts         = strtotime($end_datetime);
 
-                if ($end_ts > $signout_ts) {
-                    $diff_seconds = $end_ts - $signout_ts;
+                $diff_seconds = $end_ts - $prev_update_ts;
 
-                    // Convert existing DB idle time to seconds
-                    list($ih, $im, $is) = explode(':', $existing->total_idle_time);
+                if ($diff_seconds > 60) { // more than 1 minute
+                    list($ih, $im, $is) = explode(':', $idle_time);
                     $existing_idle_seconds = ($ih * 3600) + ($im * 60) + $is;
 
-                    // Add extra idle seconds
                     $new_idle_seconds = $existing_idle_seconds + $diff_seconds;
 
-                    // Convert back to HH:MM:SS
                     $idle_time = sprintf(
                         "%02d:%02d:%02d",
                         floor($new_idle_seconds / 3600),
@@ -521,15 +698,7 @@ class Time_logs extends Home_Controller
                         $new_idle_seconds % 60
                     );
                 }
-
-                // ✅ Reset signout_time so it won't be used again
-                $this->db->where('user_id', $headers['user_id']);
-                $this->db->where('employee_id', $headers['employee_id']);
-                $this->db->where('log_date', $headers['log_date']);
-                $this->db->update('time_logs', ['signout_time' => null]);
             }
-            // -------------------- END NEW LOGIC --------------------
-
         } catch (Exception $e) {
             return $this->output
                 ->set_content_type('application/json')
@@ -540,8 +709,7 @@ class Time_logs extends Home_Controller
                 ]));
         }
 
-        // // Prepare update data
-        $current_time =  get_user_datetime_only($headers['user_id']);
+        $current_time = get_user_datetime_only($headers['user_id']);
         $data = [
             'end_time' => $end_datetime,
             'total_active_time' => $active_time,
@@ -568,7 +736,6 @@ class Time_logs extends Home_Controller
                 ]));
         }
 
-        // Get updated record
         $this->db->where('employee_id', $headers['employee_id']);
         $this->db->where('user_id', $headers['user_id']);
         $this->db->where('log_date', $headers['log_date']);
@@ -589,6 +756,7 @@ class Time_logs extends Home_Controller
                 ]
             ]));
     }
+
 
 
 
