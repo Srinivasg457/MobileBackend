@@ -591,7 +591,7 @@ class Time_logs extends Home_Controller
     //             ]
     //         ]));
     // }
-
+  // if the dba  endtime and tool end time is diff then it will add the diff time to idle time
     public function update_timelog()
     {
         if ($this->input->server('REQUEST_METHOD') !== 'PUT') {
@@ -685,7 +685,7 @@ class Time_logs extends Home_Controller
 
                 $diff_seconds = $end_ts - $prev_update_ts;
 
-                if ($diff_seconds > 60) { // more than 1 minute
+                if ($diff_seconds > 120) { // more than 1 minute
                     list($ih, $im, $is) = explode(':', $idle_time);
                     $existing_idle_seconds = ($ih * 3600) + ($im * 60) + $is;
 
