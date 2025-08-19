@@ -532,7 +532,7 @@
                         if (res.success) {
                             /* fire the WebSocket */
                             const p = res.payload;
-                            changeOrganizationSetting(p.employeeId, p.settings);
+                            changeOrganizationSetting(p.employeeId, p);
 
                             /* UI feedback */
                             swal('Success!', res.msg, 'success');
