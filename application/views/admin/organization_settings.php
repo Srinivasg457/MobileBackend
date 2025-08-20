@@ -168,11 +168,30 @@
                             </div>
 
                             <!-- Timecards Interval -->
-                            <div class="col-md-6 mb-5 form-group">
+                            <!-- <div class="col-md-6 mb-5 form-group">
                                 <label class="control-label">Timecards Interval (mins):</label>
                                 <input type="text" name="timecards_time_interval" class="form-control" id="timecards_time_interval"
                                     value="<?= isset($settings['timecards_time_interval']) ? $settings['timecards_time_interval'] : '' ?>"
                                     <?= $is_edit_mode ? '' : 'readonly' ?>>
+                            </div> -->
+                            <!-- Timecards Interval -->
+                            <div class="col-md-6 mb-5 form-group">
+                                <label class="control-label">Timecards Interval (mins):</label>
+
+                                <?php if ($is_edit_mode): ?>
+                                    <select name="timecards_time_interval" class="form-control" id="timecards_time_interval">
+                                        <?php foreach ([1, 2, 5, 10] as $val): ?>
+                                            <?php if (is_plan_standard() && $val != 10 && $val != 5) continue; ?>
+                                            <option value="<?= $val ?>" <?= (isset($settings['timecards_time_interval']) && $settings['timecards_time_interval'] == $val) ? 'selected' : '' ?>>
+                                                <?= $val ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php else: ?>
+                                    <input type="text" class="form-control"
+                                        value="<?= isset($settings['timecards_time_interval']) ? $settings['timecards_time_interval'] : '' ?>"
+                                        readonly>
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -373,8 +392,9 @@
                 data: formData,
                 success: function(response) {
                     swal("Success!", 'Organization settings saved successfully!', "success");
-                    changeOrganizationSetting(null , response.payload);
-                    window.location.href = "<?= base_url('admin/organization_settings') ?>";
+                    changeOrganizationSetting(null, response.payload).then(() => {
+                        // window.location.href = "<?= base_url('admin/organization_settings') ?>";
+                    });
                 },
                 error: function(res) {
                     const errorMsg = res.responseJSON?.message || "Something went wrong.";
