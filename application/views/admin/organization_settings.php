@@ -373,7 +373,7 @@
                 data: formData,
                 success: function(response) {
                     swal("Success!", 'Organization settings saved successfully!', "success");
-                    changeOrganizationSetting(response.userId, formData);
+                    changeOrganizationSetting(null , response.payload);
                     window.location.href = "<?= base_url('admin/organization_settings') ?>";
                 },
                 error: function(res) {
