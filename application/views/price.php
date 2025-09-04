@@ -217,11 +217,13 @@
                 <div class="card-body pb-5">
                   <?php
                   $url = base_url('register?plan=' . $package->slug);
+                    $billing = isset($_GET['billing']) ? $_GET['billing'] : 'monthly'; // default
 
                   if ($package->slug == 'trial') {
                     $url .= '&billing=week';
                   } else {
-                    $url .= '&billing=monthly';
+                    $url .= '&billing=' . $billing;
+                    // $url .= '&billing=monthly';
                   }
 
                   if (settings()->trial_days != 0) {

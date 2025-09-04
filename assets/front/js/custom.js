@@ -216,7 +216,9 @@
                     window.location.href = base_url +'admin/subscription/upgrade_plan';
                 }else if (json.st == 4) {  
                     window.location.href = base_url+'auth/verify_email';
-                }else {
+                } else if (json.st == 5) {
+                    window.location.href = base_url + 'admin/subscription/current_plan';
+                } else {
                     $('#business_form')[0].reset();
                     $(".loader_btn2").html('Create');
                     swal({
