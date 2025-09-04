@@ -13,6 +13,9 @@ class Application_Tracker extends Home_Controller {
      public function index()
     {
         require_feature(13);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'application_tracker';
@@ -29,9 +32,6 @@ class Application_Tracker extends Home_Controller {
         $data['response'] = $this->get_application_usage_grouped_by_app($employee_id, $date, $order);
         $data['main_content'] = $this->load->view('admin/application_tracker', $data, TRUE);
         $this->load->view('admin/index', $data);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription/upgrade_plan');
-        }
     }
 
 

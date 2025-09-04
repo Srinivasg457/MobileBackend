@@ -62,18 +62,33 @@
                                             <strong class="text-danger">(<?php echo date_dif(date('Y-m-d'), $user->expire_on) ?> <?php echo trans('days-left') ?>)</strong>
                                         </p>
                                     </div>
+                                    <div class="box-footer text-center soft-<?php echo ($user->status == 'verified') ? "success" : "danger"; ?>">
+                                        <?php echo trans('payment-status') ?>: &emsp;
+                                        <i class="fa fa-<?php echo ($user->status == 'verified') ? "check" : "times"; ?>"></i>
+                                        <?php echo ucfirst(html_escape($user->status)) ?>
 
-                                    <div class="box-footer text-center soft-<?php if ($user->status == 'verified') {
-                                                                                echo "success";
-                                                                            } else {
-                                                                                echo "danger";
-                                                                            } ?>">
+                                        <?php if ($user->status != 'verified'): ?>
+                                            <?php  $billing_type = $user->billing_type == 'monthly' ? "monthly":"yearly" ?>
+                                            <div class="mt-3">
+                                                <a href="<?php echo base_url('admin/subscription/upgrade/' . $user->slug . '/' .$billing_type) ?>"
+                                                    class="btn btn-default btn-sm">
+                                                    <i class="fa fa-credit-card"></i> <?php echo 'Complete Payment' ?>
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- <div class="box-footer text-center soft-<?php if ($user->status == 'verified') {
+                                                                                        echo "success";
+                                                                                    } else {
+                                                                                        echo "danger";
+                                                                                    } ?>">
                                         <?php echo trans('payment-status') ?>: &emsp; <i class="fa fa-<?php if ($user->status == 'verified') {
                                                                                                             echo "check";
                                                                                                         } else {
                                                                                                             echo "times";
                                                                                                         } ?>"></i> <?php echo ucfirst(html_escape($user->status)) ?>
-                                    </div>
+                                    </div> -->
                                 <?php else: ?>
                                     <div class="box-body">
                                         <p><?php echo trans('your-subscription') ?>: <strong><?php echo trans('free-trial-of') ?> <?php echo settings()->trial_days . ' ' . trans('days') ?></strong></p>

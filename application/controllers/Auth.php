@@ -363,7 +363,7 @@ class Auth extends Home_Controller
                 $exists_in_employees = $this->db->get('employees')->row();
 
                 // Determine user type
-                if ($this->session->userdata('trial') == 'trial') {
+                if ( $this->input->post('plan', true) == 'trial') {
                     $user_type = 'trial';
                     $trial_expire = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
                 } else {
@@ -500,7 +500,11 @@ class Auth extends Home_Controller
             if (settings()->enable_email_verify == 1) {
                 $status = 4;
             } else {
+                if(!is_subscribed()){
+                    $status = 5;  
+                }else{
                 $status = 3;
+                }
             }
 
             // If validation false show error message using ajax
