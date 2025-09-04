@@ -303,6 +303,23 @@
         }
     });
 </script>
+<script>
+    $(document).ready(function() {
+        $('.switch_price').on('change', function() {
+            let billingType = $(this).val(); // monthly / yearly / trial
+
+            // update hidden input
+            $('.billing_type').val(billingType);
+
+            // update all plan links
+            $('.pricing-card a').each(function() {
+                let url = new URL($(this).attr('href'), window.location.origin);
+                url.searchParams.set("billing", billingType);
+                $(this).attr('href', url.toString());
+            });
+        });
+    });
+</script>
 
 
 <!-- endinject -->
