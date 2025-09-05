@@ -539,16 +539,70 @@ class Dashboard extends Home_Controller {
 
 
 
-    private function Employee_chart_Data($from_date, $to_date,  $organization_id, $employee_id)
+    // private function Employee_chart_Data($from_date, $to_date,  $organization_id, $employee_id)
+    // {
+    //     // Set date range to today if empty
+    //     if (empty($from_date) || empty($to_date)) {
+    //         $from_date = date('Y-m-d', strtotime('monday this week'));
+    //         $to_date = date('Y-m-d', strtotime('sunday this week'));
+    //     }
+
+    //     // Fetch total active, idle, and shift from time_logs
+    //     $this->db->select('SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active, SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle, SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS total_duration');
+    //     $this->db->from('time_logs');
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('user_id', $organization_id);
+    //     $this->db->where("DATE(log_date) >=", $from_date);
+    //     $this->db->where("DATE(log_date) <=", $to_date);
+    //     $query = $this->db->get()->row();
+
+    //     // Defaults
+    //     $total_active = $query->total_active ?? "0h 0m";
+    //     $total_idle = $query->total_idle ?? "0h 0m";
+    //     $shift_time = $query->total_duration ?? "0h 0m";;
+
+
+    //     // Fetch total mouse and keystrokes
+    //     $this->db->select('SUM(total_mouse_movement) AS total_mouse, SUM(total_keystrokes) AS total_keys');
+    //     $this->db->from('Employee_Activity');
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('user_id', $organization_id);
+    //     $this->db->where("DATE(created_at) >=", $from_date);
+    //     $this->db->where("DATE(created_at) <=", $to_date);
+    //     $activity = $this->db->get()->row();
+
+    //     // Format data
+    //     $total_mouse = number_format($activity->total_mouse ?? 0);
+    //     $total_keys = number_format($activity->total_keys ?? 0);
+
+    //     $formatted_total_active = $this->formatToHoursMins($total_active);
+    //     $formatted_total_idle = $this->formatToHoursMins($total_idle);
+    //     $formatted_total_shift_time = $this->formatToHoursMins($shift_time);
+
+
+    //     return [
+    //         'total_active' => $formatted_total_active,
+    //         'total_idle' => $formatted_total_idle,
+    //         'shift_time' => $formatted_total_shift_time,
+    //         'total_mouse_movements' => $total_mouse,
+    //         'total_keystrokes' => $total_keys,
+    //     ];
+    // }
+    private function Employee_chart_Data($from_date, $to_date, $organization_id, $employee_id)
     {
-        // Set date range to today if empty
+        // Set date range to this week if empty
         if (empty($from_date) || empty($to_date)) {
             $from_date = date('Y-m-d', strtotime('monday this week'));
             $to_date = date('Y-m-d', strtotime('sunday this week'));
         }
 
-        // Fetch total active, idle, and shift from time_logs
-        $this->db->select('SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active, SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle, SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS total_duration');
+        // Fetch totals from time_logs
+        $this->db->select('
+        SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active,
+        SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle,
+        SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS shift_time,
+        SEC_TO_TIME(SUM(TIME_TO_SEC(total_time))) AS total_time
+    ');
         $this->db->from('time_logs');
         $this->db->where('employee_id', $employee_id);
         $this->db->where('user_id', $organization_id);
@@ -559,8 +613,17 @@ class Dashboard extends Home_Controller {
         // Defaults
         $total_active = $query->total_active ?? "0h 0m";
         $total_idle = $query->total_idle ?? "0h 0m";
-        $shift_time = $query->total_duration ?? "0h 0m";;
+        $shift_time = $query->shift_time ?? "0h 0m";
+        $total_time = $query->total_time ?? "0h 0m";
 
+        // Convert all times to seconds for calculation
+        $shift_seconds = strtotime($shift_time, 0);
+        $total_seconds = strtotime($total_time, 0);
+        $idle_seconds = strtotime($total_idle, 0);
+
+        // Calculate diff (shift_time - total_time) as extra idle
+        $extra_idle_seconds = max(0, $shift_seconds - $total_seconds);
+        $final_idle_seconds = $idle_seconds + $extra_idle_seconds;
 
         // Fetch total mouse and keystrokes
         $this->db->select('SUM(total_mouse_movement) AS total_mouse, SUM(total_keystrokes) AS total_keys');
@@ -571,14 +634,13 @@ class Dashboard extends Home_Controller {
         $this->db->where("DATE(created_at) <=", $to_date);
         $activity = $this->db->get()->row();
 
-        // Format data
         $total_mouse = number_format($activity->total_mouse ?? 0);
         $total_keys = number_format($activity->total_keys ?? 0);
 
+        // Format outputs
         $formatted_total_active = $this->formatToHoursMins($total_active);
-        $formatted_total_idle = $this->formatToHoursMins($total_idle);
+        $formatted_total_idle = $this->formatToHoursMins(gmdate("H:i:s", $final_idle_seconds));
         $formatted_total_shift_time = $this->formatToHoursMins($shift_time);
-
 
         return [
             'total_active' => $formatted_total_active,
