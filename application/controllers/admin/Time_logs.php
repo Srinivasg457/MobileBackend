@@ -253,7 +253,8 @@ class Time_logs extends Home_Controller
             'log_date' => 'log_date',
             'end_time' => 'end_time',
             'total_active_time' => 'total_active_time',
-            'total_idle_time' => 'total_idle_time'
+            'total_idle_time' => 'total_idle_time',
+            'total_time ' => 'total_time '
         ];
 
         $headers = [];
@@ -328,6 +329,7 @@ class Time_logs extends Home_Controller
 
             $active_time = convertToHHMMSS($headers['total_active_time']);
             $idle_time = convertToHHMMSS($headers['total_idle_time']);
+            $total_time = convertToHHMMSS($headers['total_time']);
         } catch (Exception $e) {
             return $this->output
                 ->set_content_type('application/json')
@@ -344,6 +346,7 @@ class Time_logs extends Home_Controller
             'end_time' => $end_datetime,
             'total_active_time' => $active_time,
             'total_idle_time' => $idle_time,
+            'total_time' => $total_time,
             'updated_at' => $current_time
         ];
         // $current_time = get_user_datetime_only($headers['user_id']);
@@ -782,7 +785,7 @@ class Time_logs extends Home_Controller
             'end_time'       => 'end_time',
             'total_active_time' => 'total_active_time',
             'total_idle_time'   => 'total_idle_time',
-            'signout_time'   => 'signout_time' // new
+            'total_time'   => 'total_time',
         ];
 
         $headers = [];
@@ -834,6 +837,7 @@ class Time_logs extends Home_Controller
             // Convert to HH:MM:SS
             $active_time = $this->convertToHHMMSS($headers['total_active_time']);
             $idle_time   = $this->convertToHHMMSS($headers['total_idle_time']);
+            $total_time   = $this->convertToHHMMSS($headers['total_time']);
         } catch (Exception $e) {
             return $this->output
                 ->set_content_type('application/json')
@@ -850,7 +854,7 @@ class Time_logs extends Home_Controller
             'end_time'         => $end_datetime,
             'total_active_time' => $active_time,
             'total_idle_time'  => $idle_time,
-            'signout_time'     => $signout_datetime, // new
+            'total_time'  => $total_time,
             'updated_at'       => $current_time
         ];
 
