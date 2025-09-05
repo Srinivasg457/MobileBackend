@@ -106,6 +106,7 @@ class Time_logs extends Home_Controller
         end_time, 
         ROUND(TIME_TO_SEC(total_active_time) / 60, 0) AS total_active_time, 
         ROUND(TIME_TO_SEC(total_idle_time) / 60, 0) AS total_idle_time, 
+        ROUND(TIME_TO_SEC(total_time) / 60, 0) AS total_time, 
         created_at, 
         updated_at
         ');
