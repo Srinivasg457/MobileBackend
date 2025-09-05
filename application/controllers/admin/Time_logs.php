@@ -1110,6 +1110,7 @@ class Time_logs extends Home_Controller
         $end_time = $this->input->get_request_header('end_time', TRUE);
         $total_active_time = $this->input->get_request_header('total_active_time', TRUE);
         $total_idle_time = $this->input->get_request_header('total_idle_time', TRUE);
+        $total_time = $this->input->get_request_header('total_time', TRUE);
 
         // Basic validation
         if (
@@ -1199,6 +1200,7 @@ class Time_logs extends Home_Controller
             'end_time' => $end_time,
             'total_active_time' => $total_active_time,
             'total_idle_time' => $total_idle_time,
+            'total_time' => $total_time;
             'created_at' => $current_datetime,
             'updated_at' => $current_datetime
         ];
