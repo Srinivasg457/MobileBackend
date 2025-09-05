@@ -1200,7 +1200,7 @@ class Time_logs extends Home_Controller
             'end_time' => $end_time,
             'total_active_time' => $total_active_time,
             'total_idle_time' => $total_idle_time,
-            'total_time' => $total_time;
+            'total_time' => $total_time,
             'created_at' => $current_datetime,
             'updated_at' => $current_datetime
         ];
