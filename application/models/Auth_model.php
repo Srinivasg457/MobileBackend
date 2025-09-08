@@ -538,21 +538,18 @@ class Auth_model extends CI_Model {
  public function is_plan_basic()
 {
     $user_id = user()->id;
-    
-    $this->db->where('user_id', $user_id);
-    $this->db->where('package', 2);
-    $payment = $this->db->get('payment')->row();
 
+        $this->db->where('user_id', $user_id);
+        $this->db->where('package', 2);
+        $this->db->order_by('id', 'DESC'); // latest id first
+        $payment = $this->db->get('payment')->row();
     if ($payment) {
         // Check if package hasn't expired (assuming there's an expire_date column)
-        if (isset($payment->expire_date)) {
+        if ($payment->status === 'verified') {
             $today = date('Y-m-d');
-            if ($payment->expire_date >= $today) {
+            if ($payment->expire_on >= $today) {
                 return true; // Package 2 is active
             }
-        } else {
-            // If no expiration date, assume it's active
-            return true;
         }
     }
     
@@ -564,13 +561,14 @@ public function is_plan_standard()
     
     $this->db->where('user_id', $user_id);
     $this->db->where('package', 3);
-    $payment = $this->db->get('payment')->row();
+    $this->db->order_by('id', 'DESC'); // latest id first
+        $payment = $this->db->get('payment')->row();
 
     if ($payment) {
         // Check if package hasn't expired (assuming there's an expire_date column)
-        if (isset($payment->expire_date)) {
+        if ($payment->status === 'verified') {
             $today = date('Y-m-d');
-            if ($payment->expire_date >= $today) {
+            if ($payment->expire_on >= $today) {
                 return true; // Package 3 is active
             }
         } else {
