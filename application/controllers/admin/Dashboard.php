@@ -99,51 +99,19 @@ class Dashboard extends Home_Controller {
         $data['from_date'] = $from_date;
         $data['to_date'] = $to_date;
         if (empty($time_period) && (empty($from_date) || empty($to_date))) {
-            $data['time_period'] = "current_week";
+                if (is_pack_trial()) {
+                    $data['time_period'] = "last_1_days";
+                }else{
+                    $data['time_period'] = "current_week"; 
+                 }
+
+                // Set local variable so it flows correctly
+                $time_period = $data['time_period'];
         }
 
         // If dropdown is selected and from/to date are empty, calculate from dropdown
         if (!empty($time_period) && (empty($from_date) || empty($to_date))) {
-            switch ($time_period) {
-                case 'current_week':
-                    $from_date = date('Y-m-d', strtotime('monday this week'));
-                    $to_date = date('Y-m-d', strtotime('sunday this week'));
-                    break;
-
-                case 'last_week':
-                    $from_date = date('Y-m-d', strtotime('monday last week'));
-                    $to_date = date('Y-m-d', strtotime('sunday last week'));
-                    break;
-
-                case 'two_week':
-                    $from_date = date('Y-m-d', strtotime('monday -3 weeks'));
-                    $to_date = date('Y-m-d', strtotime('sunday last week'));
-                    break;
-
-                case 'this_month':
-                    $from_date = date('Y-m-01');
-                    $to_date = date('Y-m-t');
-                    break;
-
-                case 'last_month':
-                    $from_date = date('Y-m-01', strtotime('first day of last month'));
-                    $to_date = date('Y-m-t', strtotime('last day of last month'));
-                    break;
-
-                case 'last_6_months':
-                    $from_date = date('Y-m-01', strtotime('-6 months'));
-                    $to_date = date('Y-m-t');
-                    break;
-
-                case 'this_year':
-                    $from_date = date('Y-01-01');
-                    $to_date = date('Y-12-31');
-                    break;
-
-                default:
-                    $from_date = $to_date = date('Y-m-d');
-                    break;
-            }
+                list($from_date, $to_date) = $this->get_date_range_from_period($time_period, $from_date, $to_date);
         }
         $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line
         $data['response_data'] = $this->get_last_week_total_active_hours($user_id, $employee_id); // 👈 Add this line
@@ -168,7 +136,70 @@ class Dashboard extends Home_Controller {
     }
     }
 
+    private function get_date_range_from_period($time_period, $from_date = null, $to_date = null)
+    {
+        if (!empty($from_date) && !empty($to_date)) {
+            return [$from_date, $to_date];
+        }
 
+        switch ($time_period) {
+            case 'last_1_days':
+                $from_date = date('Y-m-d', strtotime('-1 days'));
+                $to_date   = date('Y-m-d');
+                break;
+
+            case 'last_7_days':
+                $from_date = date('Y-m-d', strtotime('-7 days'));
+                $to_date   = date('Y-m-d');
+                break;
+
+            case 'last_1_month':
+                $from_date = date('Y-m-d', strtotime('-1 month'));
+                $to_date   = date('Y-m-d');
+                break;
+
+            case 'current_week':
+                $from_date = date('Y-m-d', strtotime('monday this week'));
+                $to_date   = date('Y-m-d', strtotime('sunday this week'));
+                break;
+
+            case 'last_week':
+                $from_date = date('Y-m-d', strtotime('monday last week'));
+                $to_date   = date('Y-m-d', strtotime('sunday last week'));
+                break;
+
+            case 'two_week':
+                $from_date = date('Y-m-d', strtotime('monday -3 weeks'));
+                $to_date   = date('Y-m-d', strtotime('sunday last week'));
+                break;
+
+            case 'this_month':
+                $from_date = date('Y-m-01');
+                $to_date   = date('Y-m-t');
+                break;
+
+            case 'last_month':
+                $from_date = date('Y-m-01', strtotime('first day of last month'));
+                $to_date   = date('Y-m-t', strtotime('last day of last month'));
+                break;
+
+            case 'last_6_months':
+                $from_date = date('Y-m-01', strtotime('-6 months'));
+                $to_date   = date('Y-m-t');
+                break;
+
+            case 'this_year':
+                $from_date = date('Y-01-01');
+                $to_date   = date('Y-12-31');
+                break;
+
+            default:
+                $from_date = $to_date = date('Y-m-d');
+                break;
+        }
+
+        return [$from_date, $to_date];
+    }
     public function change_password()
     {
         $data = array();
@@ -464,7 +495,56 @@ class Dashboard extends Home_Controller {
 
 
 
+    // private function get_date_range_from_period($time_period, $from_date = null, $to_date = null)
+    // {
+    //     // If both from/to are provided, return them directly
+    //     if (!empty($from_date) && !empty($to_date)) {
+    //         return [$from_date, $to_date];
+    //     }
 
+    //     switch ($time_period) {
+    //         case 'current_week':
+    //             $from_date = date('Y-m-d', strtotime('monday this week'));
+    //             $to_date   = date('Y-m-d', strtotime('sunday this week'));
+    //             break;
+
+    //         case 'last_week':
+    //             $from_date = date('Y-m-d', strtotime('monday last week'));
+    //             $to_date   = date('Y-m-d', strtotime('sunday last week'));
+    //             break;
+
+    //         case 'two_week':
+    //             $from_date = date('Y-m-d', strtotime('monday -3 weeks'));
+    //             $to_date   = date('Y-m-d', strtotime('sunday last week'));
+    //             break;
+
+    //         case 'this_month':
+    //             $from_date = date('Y-m-01');
+    //             $to_date   = date('Y-m-t');
+    //             break;
+
+    //         case 'last_month':
+    //             $from_date = date('Y-m-01', strtotime('first day of last month'));
+    //             $to_date   = date('Y-m-t', strtotime('last day of last month'));
+    //             break;
+
+    //         case 'last_6_months':
+    //             $from_date = date('Y-m-01', strtotime('-6 months'));
+    //             $to_date   = date('Y-m-t');
+    //             break;
+
+    //         case 'this_year':
+    //             $from_date = date('Y-01-01');
+    //             $to_date   = date('Y-12-31');
+    //             break;
+
+    //         default:
+    //             $from_date = $to_date = date('Y-m-d');
+    //             break;
+    //     }
+
+    //     return [$from_date, $to_date];
+    // }
 
     private function employee_overall_productivity($from_date, $to_date, $organization_id, $employee_id)
     {

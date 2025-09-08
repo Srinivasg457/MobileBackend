@@ -33,7 +33,7 @@
       <div class="box">
         <div id="noEmployeeMessage" style="display:none;" class="box-header with-border text-center">
           <h3 class="box-title">
-            <strong class="text-right">No Live Monitoring Available</strong>
+            <strong class="text-right">No Live Monitoring Available.</strong>
           </h3>
         </div>
       </div>
