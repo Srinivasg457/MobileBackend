@@ -104,7 +104,7 @@
             <div class="box">
                 <div id="noEmployeeMessage" style="display:none;" class="box-header with-border text-center">
                     <h3 class="box-title">
-                        <strong class="text-right">No Time Cards data found.</strong>
+                        <strong class="text-right">No Time Cards found.</strong>
                     </h3>
                 </div>
             </div>
@@ -180,18 +180,18 @@
                     fetchActivityData(null, null, randomEmployee.id); // ✅ Pass random employee to fetch data
                 } else {
                     // ✅ Hide chart and totals, show message
-                    $('.totals-display').show();
+                    $('.totals-display').hide();
                     $('.chart-container').hide();
-                    $('#noEmployeeMessage').hide();
+                    $('#noEmployeeMessage').show();
                     employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
                 }
             },
             error: function() {
                 $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
                 // ✅ Hide chart and totals, show message
-                $('.totals-display').show();
+                $('.totals-display').hide();
                 $('.chart-container').hide();
-                $('#noEmployeeMessage').hide();
+                $('#noEmployeeMessage').show();
             }
         });
 
