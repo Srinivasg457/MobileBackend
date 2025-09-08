@@ -77,7 +77,7 @@ class Notification extends Home_Controller {
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
         // Step 1: Subquery - latest desktop notifications (status 6–8)
-        $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
+        $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id,MAX(notification_id) as latest_id')
             ->from('notifications')
             ->where('user_id', $user_id)
             ->where_in('status', [6, 7, 8])
@@ -87,7 +87,7 @@ class Notification extends Home_Controller {
         // Step 2: Fetch existing notifications
         $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.email, e.name as employee_name');
         $this->db->from('notifications n');
-        $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
+        $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time AND n.notification_id = latest.latest_id', 'inner');
         $this->db->join('employees e', 'n.employee_id = e.id', 'left');
         $this->db->where('n.user_id', $user_id);
         $this->db->where_in('n.status', [6, 7, 8]);
@@ -165,7 +165,7 @@ class Notification extends Home_Controller {
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
 
         // 1. Get subquery for latest notification per employee
-        $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id')
+        $subquery = $this->db->select('MAX(created_at) as latest_time, employee_id, MAX(notification_id) as latest_id')
             ->from('notifications')
             ->where('user_id', $user_id)
             ->where_in('status', [0, 1, 2, 3, 4, 5, 6])
@@ -175,7 +175,7 @@ class Notification extends Home_Controller {
         // 2. Main query: fetch existing notifications
         $this->db->select('n.notification_id, n.user_id, n.employee_id, n.description, n.created_at, n.status, e.email, e.name as employee_name');
         $this->db->from('notifications n');
-        $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time', 'inner');
+        $this->db->join("($subquery) as latest", 'n.employee_id = latest.employee_id AND n.created_at = latest.latest_time AND n.notification_id = latest.latest_id', 'inner');
         $this->db->join('employees e', 'n.employee_id = e.id', 'left');
         $this->db->where('n.user_id', $user_id);
         $this->db->where_in('n.status', [0, 1, 2, 3, 4, 5, 6]);

@@ -113,7 +113,7 @@
                 <div class="box">
                     <div class="box-header with-border text-center">
                         <h3 class="box-title">
-                            <strong class="text-right">No application usage data found.</strong>
+                            <strong class="text-right">No Application Usage Found.</strong>
                         </h3>
                     </div>
                 </div>

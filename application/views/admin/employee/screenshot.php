@@ -299,7 +299,7 @@
                                 `<div class="box">
                             <div class="box-header with-border text-center">
                                 <h3 class="box-title">
-                                    <strong class="text-right">No screenshots available.</strong>
+                                    <strong class="text-right">No Screenshots Available.</strong>
                                 </h3>
                             </div>
                         </div>`

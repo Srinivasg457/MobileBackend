@@ -93,9 +93,9 @@ function time_ago($datetime, $status, $full = false)
                     </thead>
                     <tbody>
                         <?php if (empty($notifications)): ?>
-                            <tr>
+                            <!-- <tr>
                                 <td>notification not found</td>
-                            </tr>
+                            </tr> -->
                         <?php else: ?>
                             <?php $i = 1;
                             foreach ($notifications as $notification): ?>
