@@ -26,15 +26,16 @@
                     </select>
                 </div>
             </div>
-            <div class="box">
-                <div id="noEmployeeMessage" style="display:none;" class="box-header with-border text-center">
-                    <h3 class="box-title">
-                        <strong class="text-right">No Webcam Screenshots Available.</strong>
-                    </h3>
-                </div>
-            </div>
+
             <div class="row mt-20">
                 <div class="col-12">
+                    <div class="box">
+                        <div id="noEmployeeMessage" style="display:none;" class="box-header with-border text-center">
+                            <h3 class="box-title">
+                                <strong class="text-right">No Webcam Screenshots Available.</strong>
+                            </h3>
+                        </div>
+                    </div>
                     <div class="card-container d-flex flex-column mt-4"></div>
                 </div>
             </div>

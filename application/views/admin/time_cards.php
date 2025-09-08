@@ -104,7 +104,7 @@
             <div class="box">
                 <div id="noEmployeeMessage" style="display:none;" class="box-header with-border text-center">
                     <h3 class="box-title">
-                        <strong class="text-right">No Time Cards found.</strong>
+                        <strong class="text-right">No Time Cards Found.</strong>
                     </h3>
                 </div>
             </div>
