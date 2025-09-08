@@ -9,15 +9,63 @@ class Time_logs extends Home_Controller
         parent::__construct();
         $this->load->database(); // Load the database library
     }
+    // public function get_time_logs()
+    // {
+    //     // Get inputs from session or GET request
+    //     $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
+    //     $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+    //     $date = $this->input->get('date') ?: date('Y-m-d'); // Default to today if not provided
+
+    //     // Validate inputs
+    //     if (empty($employee_id) || empty($user_id)) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => false,
+    //                 'message' => 'Missing employee_id or user_id'
+    //             ]));
+    //     }
+
+    //     // Check if logs exist for the given date
+    //     $this->db->select('log_id');
+    //     $this->db->from('time_logs');
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('DATE(log_date)', $date);
+
+    //     $exists = $this->db->get();
+
+    //     if ($exists->num_rows() == 0) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => false,
+    //                 'message' => 'No time logs found for the specified user_id, employee_id, and date.'
+    //             ]));
+    //     }
+
+    //     // Fetch time log details
+    //     $this->db->select('log_id, employee_id, user_id, log_date, start_time, end_time, total_active_time, total_idle_time, created_at, updated_at');
+    //     $this->db->from('time_logs');
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('DATE(log_date)', $date);
+    //     $query = $this->db->get();
+
+    //     return $this->output
+    //         ->set_content_type('application/json')
+    //         ->set_output(json_encode([
+    //             'status' => true,
+    //             'data' => $query->result_array()
+    //         ]));
+    // }
 
     public function get_time_logs()
     {
-        // Get inputs from session or GET request
         $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
         $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
-        $date = $this->input->get('date') ?: date('Y-m-d'); // Default to today if not provided
+        $date = $this->input->get('date') ?: date('Y-m-d');
 
-        // Validate inputs
         if (empty($employee_id) || empty($user_id)) {
             return $this->output
                 ->set_content_type('application/json')
@@ -27,13 +75,12 @@ class Time_logs extends Home_Controller
                 ]));
         }
 
-        // Check if logs exist for the given date
+        // Check if logs exist
         $this->db->select('log_id');
         $this->db->from('time_logs');
         $this->db->where('user_id', $user_id);
         $this->db->where('employee_id', $employee_id);
         $this->db->where('DATE(log_date)', $date);
-
         $exists = $this->db->get();
 
         if ($exists->num_rows() == 0) {
@@ -45,21 +92,36 @@ class Time_logs extends Home_Controller
                 ]));
         }
 
-        // Fetch time log details
-        $this->db->select('log_id, employee_id, user_id, log_date, start_time, end_time, total_active_time, total_idle_time, created_at, updated_at');
+        // Fetch detailed logs
+        $this->db->select('log_id, employee_id, user_id, log_date, start_time, end_time, total_active_time, total_idle_time, total_time, created_at, updated_at');
         $this->db->from('time_logs');
         $this->db->where('user_id', $user_id);
         $this->db->where('employee_id', $employee_id);
         $this->db->where('DATE(log_date)', $date);
-        $query = $this->db->get();
+        $logs = $this->db->get()->result_array();
+
+        // Manipulate total_idle_time for each log
+        foreach ($logs as &$log) {
+            $shift_seconds = strtotime($log['end_time'], 0) - strtotime($log['start_time'], 0);
+            $total_seconds = strtotime($log['total_time'], 0);
+            $idle_seconds  = strtotime($log['total_idle_time'], 0);
+
+            // Add extra idle if shift is longer than recorded total
+            $extra_idle_seconds = max(0, $shift_seconds - $total_seconds);
+            $final_idle_seconds = $idle_seconds + $extra_idle_seconds;
+
+            // Replace original idle time with calculated one
+            $log['total_idle_time'] = gmdate("H:i:s", $final_idle_seconds);
+        }
 
         return $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
                 'status' => true,
-                'data' => $query->result_array()
+                'data' => $logs
             ]));
     }
+
     public function get_time_logs_for_tool()
     {
         // Get inputs from session or GET request
