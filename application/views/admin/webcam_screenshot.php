@@ -26,6 +26,13 @@
                     </select>
                 </div>
             </div>
+            <div class="box">
+                <div id="noEmployeeMessage" style="display:none;" class="box-header with-border text-center">
+                    <h3 class="box-title">
+                        <strong class="text-right">No Webcam Screenshots Available.</strong>
+                    </h3>
+                </div>
+            </div>
             <div class="row mt-20">
                 <div class="col-12">
                     <div class="card-container d-flex flex-column mt-4"></div>
@@ -298,15 +305,44 @@
                     loadScreenshots(currentEmployeeId, date);
                 });
                 $('#datePicker').val(today);
+                // $.ajax({
+                //     url: "<?= base_url('/admin/ScreenshotController/list_employees_by_user') ?>",
+                //     method: "GET",
+                //     dataType: "json",
+                //     success: function(response) {
+                //         let employeeSelect = $('#employeeSelect');
+                //         employeeSelect.empty().append(`<option value="">-- Select Employee --</option>`);
+
+                //         if (response.status === "success" && response.employees.length > 0) {
+                //             response.employees.forEach(emp => {
+                //                 employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
+                //             });
+
+                //             const randomIndex = Math.floor(Math.random() * response.employees.length);
+                //             const randomEmployee = response.employees[randomIndex];
+                //             employeeSelect.val(randomEmployee.id);
+                //             $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`); // ✅ Set name on auto-load
+                //             const date = $('#datePicker').val();
+                //             loadScreenshots(randomEmployee.id, date);
+                //         } else {
+                //             employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
+                //         }
+                //     },
+
+
+                //     error: function() {
+                //         $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
+                //     }
+                // });
                 $.ajax({
                     url: "<?= base_url('/admin/ScreenshotController/list_employees_by_user') ?>",
                     method: "GET",
                     dataType: "json",
                     success: function(response) {
                         let employeeSelect = $('#employeeSelect');
-                        employeeSelect.empty().append(`<option value="">-- Select Employee --</option>`);
-
                         if (response.status === "success" && response.employees.length > 0) {
+                            $('#noEmployeeMessage').hide(); // ✅ hide message
+                            employeeSelect.empty();
                             response.employees.forEach(emp => {
                                 employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
                             });
@@ -314,17 +350,20 @@
                             const randomIndex = Math.floor(Math.random() * response.employees.length);
                             const randomEmployee = response.employees[randomIndex];
                             employeeSelect.val(randomEmployee.id);
-                            $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`); // ✅ Set name on auto-load
+                            $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`);
+
                             const date = $('#datePicker').val();
                             loadScreenshots(randomEmployee.id, date);
                         } else {
                             employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
+                            $('#noEmployeeMessage').show(); // ✅ show message
+                            $(".card-container").empty(); // clear screenshots
                         }
                     },
-
-
                     error: function() {
                         $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
+                        $('#noEmployeeMessage').show(); // ✅ show message
+                        $(".card-container").empty(); // clear screenshots
                     }
                 });
                 $('#employeeSelect').on('change', function() {

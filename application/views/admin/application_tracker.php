@@ -5,12 +5,16 @@
                 <div class="row mb-5 reprt-box">
                     <div class="form-group col-lg-4 my-3"><label class="control-label">Employee </label>
                         <select name="employee_id" id="employee_search" class="form-control single_select">
-                            <option value="">-- Select Employee --</option>
-                            <?php foreach ($employees as $emp): ?>
-                                <option value="<?= $emp['id'] ?>" <?= ($emp['id'] == $employee_id) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($emp['name']) ?> (<?= htmlspecialchars($emp['email']) ?>)
-                                </option>
-                            <?php endforeach; ?>
+                            <?php if (!empty($employees)): ?>
+                                <option value="">-- Select Employee --</option>
+                                <?php foreach ($employees as $emp): ?>
+                                    <option value="<?= $emp['id'] ?>" <?= ($emp['id'] == $employee_id) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($emp['name']) ?> (<?= htmlspecialchars($emp['email']) ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <option value="">-- No employees found --</option>
+                            <?php endif; ?>
                         </select>
                     </div>
                     <div class="form-group col-lg-4 my-3">
