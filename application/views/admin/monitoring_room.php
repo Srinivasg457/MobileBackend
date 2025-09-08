@@ -30,7 +30,13 @@
 
         </div>
       </div>
-
+      <div class="box">
+        <div id="noEmployeeMessage" style="display:none;" class="box-header with-border text-center">
+          <h3 class="box-title">
+            <strong class="text-right">No Live Monitoring Available</strong>
+          </h3>
+        </div>
+      </div>
       <div class="employee-grid mt-20" id="employeeGrid">
         <!-- Employee list will appear here -->
       </div>
@@ -51,12 +57,12 @@
               <img id="modalScreen" class="modal-screen" autoplay playsinline>
             </div>
             <div class="modal-footer" style="display: none;">
-                <div class="connection-status">
-                  <span class="status-indicator"></span>
-                  <span>Connected</span>
-                </div>
-                <div class="timestamp" id="modalTimestamp"></div>
+              <div class="connection-status">
+                <span class="status-indicator"></span>
+                <span>Connected</span>
               </div>
+              <div class="timestamp" id="modalTimestamp"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -116,11 +122,11 @@
             });
           }
         } else {
-          employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No employees found</p>');
+          $('#noEmployeeMessage').show(); // ✅ hide message
         }
       },
       error: function() {
-        $('#employeeGrid').html('<p class="text-center py-4" style="grid-column: 1 / -1">Error loading employee data</p>');
+        $('#noEmployeeMessage').show(); // ✅ hide message
       }
     });
   }
@@ -183,7 +189,7 @@
               getLatestScreenshot(employee.id);
             });
           } else {
-            employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+            employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No Matching Employees Found</p>');
           }
         },
         error: function() {
@@ -303,7 +309,7 @@
       },
       error: function(msg) {
         console.log(msg);
-        
+
         const container = $(`#screenshot-${currentEmployeeId}`).parent();
         container.addClass('blank-screen')
           .removeAttr('onclick') // Disable click
@@ -488,7 +494,7 @@
             getLatestScreenshot(employee.employee_id);
           });
         } else {
-          employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No matching employees found</p>');
+          employeeGrid.html('<p class="text-center py-4" style="grid-column: 1 / -1">No Matching Employees Found</p>');
         }
       },
       error: function() {

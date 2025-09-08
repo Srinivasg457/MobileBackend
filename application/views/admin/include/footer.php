@@ -1,7 +1,7 @@
 <footer class="main-footer">
   <div class="pull-right d-none d-sm-inline-block">
 
-    <?php if ((!is_admin() && !is_employee())): ?>
+    <!-- <?php if ((!is_admin() && !is_employee())): ?>
       <?php if (check_payment_status() == TRUE || settings()->enable_paypal == 0 || user()->user_type == 'trial'): ?>
         <div id="floating-container">
           <div class="circle1 circle-blue1"></div>
@@ -44,7 +44,7 @@
           </div>
         </div>
       <?php endif ?>
-    <?php endif ?>
+    <?php endif ?> -->
 
   </div>
 
