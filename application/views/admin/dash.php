@@ -297,7 +297,7 @@
   .custom-legend {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-  
+
   }
 
   .custom-legend-item {
@@ -318,6 +318,83 @@
     grid-template-columns: repeat(5, 1fr);
     gap: 20px;
     margin-top: 20px;
+  }
+
+  .chart-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .pie-chart-wrapper {
+    height: 300px;
+    margin-bottom: 40px;
+  }
+
+  .custom-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    position: relative;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .color-box {
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .ellipsis-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: default;
+    position: relative;
+  }
+
+  .ellipsis-item:hover .hidden-items-tooltip {
+    display: block;
+  }
+
+  .hidden-items-tooltip {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+  }
+
+  .hidden-legend-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   @media (max-width: 1200px) {
@@ -368,18 +445,36 @@
               <input type="hidden" id="first_record_date" value="<?php echo $first_record_date; ?>">
               <!-- <label class="control-label" for="period_search">Time Period</label> -->
               <div class="input-group">
+                <?php
+                $disabled_attr = 'disabled title="Upgrade to unlock this option"'; // common attribute
+
+                if (is_pack_trial()) {
+                  $extra_option = '<option value="last_1_days" ' . (($time_period == 'last_1_days') ? 'selected' : '') . '>Last 1 Days</option>';
+                } elseif (is_plan_basic()) {
+                  $extra_option = '<option value="last_7_days" ' . (($time_period == 'last_7_days') ? 'selected' : '') . '>Last 7 Days</option>';
+                } else {
+                  $extra_option = '';
+                }
+                ?>
+
                 <select name="Time_period" id="period_search" class="form-control single_select">
                   <option value="" <?= ($time_period == " ") ? 'selected' : ''; ?>>Select</option>
-                  <option value="current_week" <?= ($time_period == 'current_week') ? 'selected' : ''; ?>>This Week</option>
-                  <option value="last_week" <?= ($time_period == 'last_week') ? 'selected' : ''; ?>>Last Week</option>
-                  <option value="two_week" <?= ($time_period == 'two_week') ? 'selected' : ''; ?>>Last Two Week</option>
-                  <option value="this_month" <?= ($time_period == 'this_month') ? 'selected' : ''; ?>>This Month</option>
-                  <option value="last_month" <?= ($time_period == 'last_month') ? 'selected' : ''; ?>>Last Month</option>
-                  <option value="last_6_months" <?= ($time_period == 'last_6_months') ? 'selected' : ''; ?>>Last 6 Months</option>
-                  <option value="this_year" <?= ($time_period == 'this_year') ? 'selected' : ''; ?>>This Year</option>
+
+                  <?= $extra_option; ?>
+
+                  <option value="current_week" <?= ($time_period == 'current_week') ? 'selected' : ''; ?> <?= !is_pack_trial() ? '' : $disabled_attr; ?>>This Week</option>
+                  <option value="last_week" <?= ($time_period == 'last_week') ? 'selected' : ''; ?> <?= !is_pack_trial() && !is_plan_basic() ? '' : $disabled_attr; ?>>Last Week</option>
+                  <option value="two_week" <?= ($time_period == 'two_week') ? 'selected' : ''; ?> <?= !is_pack_trial() && !is_plan_basic() ? '' : $disabled_attr; ?>>Last Two Week</option>
+                  <option value="this_month" <?= ($time_period == 'this_month') ? 'selected' : ''; ?> <?= !is_pack_trial() && !is_plan_basic() ? '' : $disabled_attr; ?>>This Month</option>
+                  <?php if (is_plan_standard()): ?>
+                    <option value="last_1_month" <?= ($time_period == 'last_1_month') ? 'selected' : ''; ?>>Last 1 Month</option>
+                  <?php endif; ?>
+                  <option value="last_month" <?= ($time_period == 'last_month') ? 'selected' : ''; ?> <?= !is_pack_trial() && !is_plan_basic() && !is_plan_standard() ? '' : $disabled_attr; ?>>Last Month</option>
+                  <option value="last_6_months" <?= ($time_period == 'last_6_months') ? 'selected' : ''; ?> <?= !is_pack_trial() && !is_plan_basic() && !is_plan_standard() ? '' : $disabled_attr; ?>>Last 6 Months</option>
+                  <option value="this_year" <?= ($time_period == 'this_year') ? 'selected' : ''; ?> <?= !is_pack_trial() && !is_plan_basic() && !is_plan_standard() ? '' : $disabled_attr; ?>>This Year</option>
                   <option value="manual" <?= ($time_period == 'manual') ? 'selected' : ''; ?>>Pick Dates</option>
-                  </option>
                 </select>
+
 
 
                 <!-- <span id="searchManually" class="input-group-addon btn btn-secondary align-content-center mx-5"><i class="fa fa-search"></i> Pick Dates</span> -->
@@ -389,35 +484,68 @@
           </div>
 
           <div class="row position-relative" id="manual_filter_row" style="<?= $is_manual ? '' : 'display: none;' ?>">
+            <?php
+            $today = date('Y-m-d');
+            $min_date = '';
+            $help_text = '';
+
+            if (is_pack_trial()) {
+              $min_date = date('Y-m-d', strtotime('-1 day'));
+              $help_text = 'Trial plan only allows selecting today or yesterday\'s date.';
+            } elseif (is_plan_basic()) {
+              $min_date = date('Y-m-d', strtotime('-7 days'));
+              $help_text = 'Basic Package allows selecting dates from the last 7 days only.';
+            } elseif (is_plan_standard()) {
+              $min_date = date('Y-m-d', strtotime('-1 month'));
+              $help_text = 'Standard plan allows selecting dates from the last one month only.';
+            }
+
+            $from_date = !empty($from_date) ? $from_date : $today;
+            $to_date   = !empty($to_date) ? $to_date   : $today;
+            ?>
+
             <div class="col-12 text-right">
+              <small class="text-muted"><?= $help_text ?></small>
+
               <button type="button" id="cancelManualFilter" class="btn btn-secondary btn-sm">
                 <i class="fa fa-times"></i>
               </button>
             </div>
-            <?php
-            $today = date('Y-m-d');
-            $from_date = !empty($from_date) ? $from_date : $today;
-            $to_date = !empty($to_date) ? $to_date : $today;
-            ?>
+
             <div class="col-lg-6 form-group">
               <label class="control-label">From</label>
-              <div class="input-group">
-                <input type="text" class="inv-dpick form-control datepicker" name="fromDate" value="<?php echo $from_date ?>">
-                <!-- <span class="input-group-addon"><i class="fa fa-calendar"></i></span> -->
-              </div>
+              <input type="date"
+                class="inv-dpick form-control"
+                name="fromDate"
+                value="<?= $from_date ?>"
+                <?= !empty($min_date) ? "min='$min_date' max='$today'" : '' ?>
+                onfocus="this.showPicker()">
             </div>
 
             <div class="col-lg-6 form-group">
               <label class="control-label">To</label>
-              <div class="input-group">
-                <input type="text" class="inv-dpick form-control datepicker" name="toDate" value="<?php echo $to_date ?>">
-                <!-- <span class="input-group-addon"><i class="fa fa-calendar"></i></span> -->
-                <span class="input-group-addon btn btn-secondary align-content-center" id="search_date"><i class="fa fa-search"></i></span>
+              <div class="d-flex">
+                <input type="date"
+                  class="inv-dpick form-control"
+                  name="toDate"
+                  value="<?= $to_date ?>"
+                  <?= !empty($min_date) ? "min='$min_date' max='$today'" : '' ?>
+                  onfocus="this.showPicker()">
+                <span class="input-group-addon btn btn-secondary align-content-center"
+                  style="height: 40px;"
+                  id="search_date">
+                  <i class="fa fa-search"></i>
+                </span>
               </div>
               <span class="text-danger small pl-5" id="error"></span>
             </div>
-          </div>
 
+            <?php if (!empty($help_text)): ?>
+              <div class="col-12">
+              </div>
+            <?php endif; ?>
+
+          </div>
 
         </div>
 
@@ -539,102 +667,25 @@
     <div class="row mt-20">
       <div class="col-sm-4">
         <div class="box">
-      
-              <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <!-- <div class="box-body">
+
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <!-- <div class="box-body">
                 <div id="appUsageLegend" class="custom-legend"></div>
                 <canvas id="appUsageChart" style="max-height: 330px; width: 100%;"></canvas>
             </div> -->
-<div class="box-header with-border">
- <h3 class="box-title"><?php echo "Overall Productivity" ?></h3>
-   </div>   
-   <div class="box-body">
-    <div id="appUsageLegend" class="custom-legend"></div>
-   </div>
-           
-   <div class="pie-chart-wrapper">
-        <canvas id="appUsageChart"></canvas>
-   </div>
-   
+          <div class="box-header with-border">
+            <h3 class="box-title"><?php echo "Overall Productivity" ?></h3>
+          </div>
+          <div class="box-body">
+            <div id="appUsageLegend" class="custom-legend"></div>
+          </div>
 
-<style>
-.chart-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 20px;
-}
+          <div class="pie-chart-wrapper">
+            <canvas id="appUsageChart"></canvas>
+          </div>
 
-.pie-chart-wrapper {
-    height: 300px;
-    margin-bottom: 40px;
-}
 
-.custom-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    position: relative;
-}
 
-.legend-item {
-    display: flex;
-    align-items: center;
-    padding: 4px 8px;
-    background: #f5f5f5;
-    border-radius: 4px;
-    font-size: 12px;
-    max-width: 120px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.color-box {
-    width: 12px;
-    height: 12px;
-    margin-right: 6px;
-    border-radius: 2px;
-    flex-shrink: 0;
-}
-
-.ellipsis-item {
-    display: flex;
-    align-items: center;
-    padding: 4px 8px;
-    background: #f5f5f5;
-    border-radius: 4px;
-    font-size: 12px;
-    cursor: default;
-    position: relative;
-}
-
-.ellipsis-item:hover .hidden-items-tooltip {
-    display: block;
-}
-
-.hidden-items-tooltip {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 8px;
-    z-index: 100;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    min-width: 150px;
-}
-
-.hidden-legend-item {
-    display: flex;
-    align-items: center;
-    padding: 4px 0;
-    font-size: 12px;
-    white-space: nowrap;
-}
-</style>
 
         </div>
       </div>
@@ -973,11 +1024,9 @@
       }
     });
   }
-
-
 </script>
 <script>
-function render_app_usage_chart() {
+  function render_app_usage_chart() {
     // Get PHP data
     const usageData = <?= $usage_json ?>;
 
@@ -986,79 +1035,79 @@ function render_app_usage_chart() {
 
     // Helper: Convert minutes to HH:MM
     function minutesToHHMM(minutes) {
-        const hrs = Math.floor(minutes / 60);
-        const mins = Math.round(minutes % 60);
-        return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+      const hrs = Math.floor(minutes / 60);
+      const mins = Math.round(minutes % 60);
+      return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
     }
 
     // Check if data is aggregated (range mode) or daily (day-wise)
     if (Array.isArray(usageData)) {
-        // Range mode
-        labels = usageData.map(item => item.application_name);
-        values = usageData.map(item => parseFloat(item.total_minutes)); // keep as minutes
+      // Range mode
+      labels = usageData.map(item => item.application_name);
+      values = usageData.map(item => parseFloat(item.total_minutes)); // keep as minutes
     } else {
-        // Day-wise mode
-        const dates = Object.keys(usageData);
-        const latestDate = dates[dates.length - 1];
-        const latestData = usageData[latestDate] || [];
-        labels = latestData.map(item => item.application_name);
-        values = latestData.map(item => parseFloat(item.total_minutes)); // keep as minutes
+      // Day-wise mode
+      const dates = Object.keys(usageData);
+      const latestDate = dates[dates.length - 1];
+      const latestData = usageData[latestDate] || [];
+      labels = latestData.map(item => item.application_name);
+      values = latestData.map(item => parseFloat(item.total_minutes)); // keep as minutes
     }
 
     // Handle no data or all zero data
     const isAllZero = values.length === 0 || values.every(val => val === 0);
     if (isAllZero) {
-        labels = ['No Data'];
-        values = [0.0001];
-        const chartWrapper = document.querySelector('.pie-chart-wrapper');
-        if (chartWrapper) {
-            chartWrapper.style.height = '335px';
-            chartWrapper.style.marginBottom = '40px';
-        }
+      labels = ['No Data'];
+      values = [0.0001];
+      const chartWrapper = document.querySelector('.pie-chart-wrapper');
+      if (chartWrapper) {
+        chartWrapper.style.height = '335px';
+        chartWrapper.style.marginBottom = '40px';
+      }
     }
 
     // Define colors
-    const backgroundColors = isAllZero
-        ? ['#d3d3d3']
-        : [
-            "#B9D9EB", "#FBCEB1", "#CCCCFF", "#00B4D8", "#E9967A",
-            "#F0E68C", "#9ACD32", "#FF0000","#260effff", "#006400", "#663399",
-            "#000000", "#8B4513", "#2E8B57", "#E63946","#8B0000",   '#6A4C93', 
-            '#FF9F1C','#2EC4B6', '#E71D36', '#8AC926', '#1982C4',
-             '#FFCA3A', '#6A8D73', '#fffc41ff', '#FF6B6B'         
-          ].slice(0, labels.length);
+    const backgroundColors = isAllZero ? ['#d3d3d3'] : [
+      "#B9D9EB", "#FBCEB1", "#CCCCFF", "#00B4D8", "#E9967A",
+      "#F0E68C", "#9ACD32", "#FF0000", "#260effff", "#006400", "#663399",
+      "#000000", "#8B4513", "#2E8B57", "#E63946", "#8B0000", '#6A4C93',
+      '#FF9F1C', '#2EC4B6', '#E71D36', '#8AC926', '#1982C4',
+      '#FFCA3A', '#6A8D73', '#fffc41ff', '#FF6B6B'
+    ].slice(0, labels.length);
 
     // Chart.js config
     const pieData = {
-        labels: labels,
-        datasets: [{
-            data: values, // still in minutes for pie proportions
-            backgroundColor: backgroundColors,
-            hoverOffset: 4,
-            borderWidth: 1,
-            borderColor: '#fff'
-        }]
+      labels: labels,
+      datasets: [{
+        data: values, // still in minutes for pie proportions
+        backgroundColor: backgroundColors,
+        hoverOffset: 4,
+        borderWidth: 1,
+        borderColor: '#fff'
+      }]
     };
 
     const pieConfig = {
-        type: 'pie',
-        data: pieData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return isAllZero
-                                ? 'No Data Available'
-                                : `${context.label}: ${minutesToHHMM(context.raw)}`;
-                        }
-                    }
-                }
+      type: 'pie',
+      data: pieData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return isAllZero ?
+                  'No Data Available' :
+                  `${context.label}: ${minutesToHHMM(context.raw)}`;
+              }
             }
+          }
         }
+      }
     };
 
     // Render chart
@@ -1067,30 +1116,30 @@ function render_app_usage_chart() {
 
     // Custom legend with ellipsis
     function renderCustomLegend() {
-        const container = document.getElementById('appUsageLegend');
-        container.innerHTML = '';
-        
-        const maxVisibleItems = 7;
-        const hasOverflow = labels.length > maxVisibleItems;
-        const visibleItemsCount = hasOverflow ? maxVisibleItems - 1 : labels.length;
+      const container = document.getElementById('appUsageLegend');
+      container.innerHTML = '';
 
-        // Add visible items
-        for (let i = 0; i < visibleItemsCount; i++) {
-            const item = document.createElement('div');
-            item.className = 'legend-item';
-            item.title = `${labels[i]} (${minutesToHHMM(values[i])})`;
-            item.innerHTML = `
+      const maxVisibleItems = 7;
+      const hasOverflow = labels.length > maxVisibleItems;
+      const visibleItemsCount = hasOverflow ? maxVisibleItems - 1 : labels.length;
+
+      // Add visible items
+      for (let i = 0; i < visibleItemsCount; i++) {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.title = `${labels[i]} (${minutesToHHMM(values[i])})`;
+        item.innerHTML = `
                 <span class="color-box" style="background:${backgroundColors[i]}"></span>
                 <span class="label-text">${labels[i]}</span>
             `;
-            container.appendChild(item);
-        }
+        container.appendChild(item);
+      }
 
-        // Add ellipsis for hidden items
-        if (hasOverflow) {
-            const ellipsisItem = document.createElement('div');
-            ellipsisItem.className = 'ellipsis-item';
-            ellipsisItem.innerHTML = `
+      // Add ellipsis for hidden items
+      if (hasOverflow) {
+        const ellipsisItem = document.createElement('div');
+        ellipsisItem.className = 'ellipsis-item';
+        ellipsisItem.innerHTML = `
                 <span class="color-box" style="background:#cccccc"></span>
                 <span class="label-text">...</span>
                 <div class="hidden-items-tooltip">
@@ -1102,10 +1151,10 @@ function render_app_usage_chart() {
                     `).join('')}
                 </div>
             `;
-            container.appendChild(ellipsisItem);
-        }
+        container.appendChild(ellipsisItem);
+      }
     }
 
     renderCustomLegend();
-}
+  }
 </script>
