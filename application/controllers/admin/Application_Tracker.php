@@ -19,20 +19,69 @@ class Application_Tracker extends Home_Controller {
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'application_tracker';
-        $employee_id =  $this->input->post('employee_id', true) ?? get_random_employee_id();
-        $date =  $this->input->post('date', true) ?? date('Y-m-d');
-        $order =  $this->input->post('order', true) ?? "descending";
-        $data['employees'] = list_employees_by_user();
+
+        // Get employees first
+        $employees = list_employees_by_user();
+        $data['employees'] = $employees;
+
+        // Safe employee_id selection
+        $employee_id = $this->input->post('employee_id', true);
+
+        if (empty($employee_id) && !empty($employees)) {
+            // fallback: pick random or first employee if list not empty
+            $employee_id = get_random_employee_id();
+        }
+
+        $date  = $this->input->post('date', true) ?? date('Y-m-d');
+        $order = $this->input->post('order', true) ?? "descending";
+
         $data['employee_id'] = $employee_id;
-        $data['date'] = $date;
-        $data['order'] = $order;
-        $data['can_edit'] = $this->auth_model->get_permission(2);
-        // $response_data = $this->get_application_usage_logs($employee_id, $date, $order);
-        // $data['response_data'] = $response_data; 
-        $data['response'] = $this->get_application_usage_grouped_by_app($employee_id, $date, $order);
+        $data['date']        = $date;
+        $data['order']       = $order;
+        $data['can_edit']    = $this->auth_model->get_permission(2);
+
+        // Only fetch response if employee exists
+        if (!empty($employee_id)) {
+            $data['response'] = $this->get_application_usage_grouped_by_app($employee_id, $date, $order);
+        } else {
+            $data['response'] = [
+                'status' => 'success',
+                'data' => [
+                    'total_applications' => 0,
+                    'total_usage_time'   => '0s',
+                    'raw_total_usage_seconds' => 0,
+                    'applications'       => []
+                ]
+            ];
+        }
+
         $data['main_content'] = $this->load->view('admin/application_tracker', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
+
+    //  public function index()
+    // {
+    //     require_feature(13);
+    //     if (!is_subscribed()) {
+    //         redirect('/admin/subscription/upgrade_plan');
+    //     }
+    //     $data = array();
+    //     $data['is_employee_admin'] = true;
+    //     $data['page_title'] = 'application_tracker';
+    //     $employee_id =  $this->input->post('employee_id', true) ?? get_random_employee_id();
+    //     $date =  $this->input->post('date', true) ?? date('Y-m-d');
+    //     $order =  $this->input->post('order', true) ?? "descending";
+    //     $data['employees'] = list_employees_by_user();
+    //     $data['employee_id'] = $employee_id;
+    //     $data['date'] = $date;
+    //     $data['order'] = $order;
+    //     $data['can_edit'] = $this->auth_model->get_permission(2);
+    //     // $response_data = $this->get_application_usage_logs($employee_id, $date, $order);
+    //     // $data['response_data'] = $response_data; 
+    //     $data['response'] = $this->get_application_usage_grouped_by_app($employee_id, $date, $order);
+    //     $data['main_content'] = $this->load->view('admin/application_tracker', $data, TRUE);
+    //     $this->load->view('admin/index', $data);
+    // }
 
 
     /**

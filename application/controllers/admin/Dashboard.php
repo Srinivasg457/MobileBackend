@@ -77,11 +77,19 @@ class Dashboard extends Home_Controller {
         // $data['income_axis'] = json_encode(array_column($months, 'date'),JSON_NUMERIC_CHECK);
         // $data['income_data'] = json_encode(array_column($incomes, 'total'),JSON_NUMERIC_CHECK);
         // $data['expense_data'] = json_encode(array_column($expenses, 'total'),JSON_NUMERIC_CHECK);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Dashboard';
         $data['details'] = $this->session->userdata('employee_id');
         $employee_id =  $this->input->post('employee_id', true)?? get_random_employee_id();
+        $data['employees'] = list_employees_by_user();
+        if (empty($employee_id) && empty($employees)) {
+            $data['main_content'] = $this->load->view('include/no_employees_view.php', $data, TRUE);
+            $this->load->view('admin/index', $data);
+        }else{
         $user_id = $this->session->userdata('id');;
         $time_period = $this->input->post('Time_period', true);
         $from_date = $this->input->post('fromDate', true);
@@ -137,7 +145,6 @@ class Dashboard extends Home_Controller {
                     break;
             }
         }
-        $data['employees'] = list_employees_by_user();
         $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line
         $data['response_data'] = $this->get_last_week_total_active_hours($user_id, $employee_id); // 👈 Add this line
         $data['response'] = $this->get_day_wise_application_usage($from_date, $to_date,$user_id, $employee_id); // 👈 Add this line
@@ -158,9 +165,7 @@ class Dashboard extends Home_Controller {
         $data['first_record_date'] = $this->get_user_oldest_activity_date($user_id, $employee_id);
         $data['main_content'] = $this->load->view('admin/dash', $data, TRUE);
         $this->load->view('admin/index', $data);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription/upgrade_plan');
-        }
+    }
     }
 
 

@@ -101,7 +101,13 @@
                     </select>
                 </div>
             </div>
-
+            <div class="box">
+                <div id="noEmployeeMessage" style="display:none;" class="box-header with-border text-center">
+                    <h3 class="box-title">
+                        <strong class="text-right">No Time Cards data found.</strong>
+                    </h3>
+                </div>
+            </div>
             <div class="totals-display">
 
                 <div class="total-box">
@@ -159,6 +165,9 @@
             success: function(response) {
                 let employeeSelect = $('#employeeSelect');
                 if (response.status === "success" && response.employees.length > 0) {
+                    $('#noEmployeeMessage').hide(); // ✅ hide message
+                    $('.totals-display').show(); // ✅ show totals
+                    $('.chart-container').show(); // ✅ show chart section
                     response.employees.forEach(emp => {
                         employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
                     });
@@ -170,11 +179,19 @@
                     $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`);
                     fetchActivityData(null, null, randomEmployee.id); // ✅ Pass random employee to fetch data
                 } else {
+                    // ✅ Hide chart and totals, show message
+                    $('.totals-display').show();
+                    $('.chart-container').hide();
+                    $('#noEmployeeMessage').hide();
                     employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
                 }
             },
             error: function() {
                 $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
+                // ✅ Hide chart and totals, show message
+                $('.totals-display').show();
+                $('.chart-container').hide();
+                $('#noEmployeeMessage').hide();
             }
         });
 
