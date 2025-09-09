@@ -81,7 +81,14 @@
                   <tbody>
                     <tr>
                       <td width="30%">
-                        <h2></h2>
+                        <div class="p-3 border rounded text-center soft-success" style="background:#f8f9fa;width:100%">
+
+                          <h6 class="text-muted mb-2"> <i class="fa fa-check-circle text-success"></i> Active Plan</h6>
+                          <h4 class="text-dark mb-2"><?php echo $user->package_name ?></h4>
+                          <span class="badge bg-success fs-6">
+                            <?php echo ucfirst($user->billing_type) ?>
+                          </span>
+                        </div>
                       </td>
                       <?php $i = 1;
                       foreach ($packages as $package):
@@ -91,7 +98,7 @@
 
                         <td class="text-center">
                           <h2 class="mt-10"><?php if ($user->package == $package->id) {
-                                              echo '<i class="fa fa-check-circle text-success"></i>';
+                                              // echo '<i class="fa fa-check-circle text-success"></i>';
                                             } ?> <?php echo html_escape($package->name); ?></h2>
 
                           <?php if (settings()->enable_discount == 1): ?>

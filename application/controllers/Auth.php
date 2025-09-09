@@ -835,96 +835,173 @@ class Auth extends Home_Controller
 
 
     //stripe payment
+    // public function stripe_payment()
+    // {
+
+    //     $id = $this->input->post('package_id');
+    //     $package = $this->common_model->get_by_id($id, 'package');
+    //     $puid = random_string('numeric',5);
+    //     $billing_type = $this->input->post('billing_type');
+
+    //     if($billing_type =='monthly'):
+    //         if (settings()->enable_discount == 1){
+    //             $amount = get_discount($package->monthly_price, $package->dis_month); 
+    //         }else{
+    //             $amount = round($package->monthly_price); 
+    //         }
+    //         $expire_on = date('Y-m-d', strtotime('+1 month'));
+    //     else:
+    //         if (settings()->enable_discount == 1){
+    //             $amount = get_discount($package->yearly_price, $package->dis_year); 
+    //         }else{
+    //             $amount = round($package->yearly_price); 
+    //         }
+    //         $expire_on = date('Y-m-d', strtotime('+12 month'));
+    //     endif;
+
+    //     require_once('application/libraries/stripe-php/init.php');
+    //     \Stripe\Stripe::setApiKey(settings()->secret_key);
+
+    //     try {
+    //         $charge = \Stripe\Charge::create ([
+    //             "amount" => $amount*100,
+    //             "currency" => settings()->currency,
+    //             "source" => $this->input->post('stripeToken'),
+    //             "description" => "Payment from ".settings()->site_name 
+    //         ]);
+    //         $chargeJson = $charge->jsonSerialize();
+
+    //         $amount                  = $chargeJson['amount']/100;
+    //         $balance_transaction     = $chargeJson['balance_transaction'];
+    //         $currency                = $chargeJson['currency'];
+    //         $status                  = $chargeJson['status'];
+    //     }catch(Exception $e) { 
+    //         $error = $e->getMessage(); 
+    //         $this->session->set_flashdata('error', $error);
+    //         redirect($_SERVER['HTTP_REFERER']);
+    //     }
+
+    //     if($status == 'succeeded'){$status = 'verified';}else{$status = 'pending';};
+
+    //     if($status = 'verified'):  
+
+    //         $payments = $this->admin_model->get_previous_payments(user()->id);
+    //         foreach ($payments as $pay) {
+    //             $pays_data=array(
+    //                 'status' => 'expired'
+    //             );
+    //             $this->common_model->edit_option($pays_data, $pay->id, 'payment');
+    //         }
+
+    //         $pay_data=array(
+    //             'user_id' => user()->id,
+    //             'puid' => $puid,
+    //             'package' => $id,
+    //             'amount' => $amount,
+    //             'billing_type' => $billing_type,
+    //             'payment_type' => 'stripe',
+    //             'status' => $status,
+    //             'created_at' => my_date_now(),
+    //             'expire_on' => $expire_on
+    //         );
+    //         $pay_data = $this->security->xss_clean($pay_data);
+    //         $result = $this->common_model->insert($pay_data, 'payment');
+
+    //         if (user()->user_type == 'trial') {
+    //             //update user type
+    //             $user_data=array(
+    //                 'user_type' => 'registered',
+    //                 'trial_expire' => '0000-00-00'
+    //             );
+    //             $this->common_model->edit_option($user_data, user()->id, 'users');
+    //         }
+
+    //         redirect(base_url('payment-success/'.$puid));
+    //     else:
+    //         redirect(base_url('payment-cancel/'.$puid));
+    //     endif;
+    // }
+
     public function stripe_payment()
     {
-
         $id = $this->input->post('package_id');
         $package = $this->common_model->get_by_id($id, 'package');
-        $puid = random_string('numeric',5);
         $billing_type = $this->input->post('billing_type');
-        
-        if($billing_type =='monthly'):
-            if (settings()->enable_discount == 1){
-                $amount = get_discount($package->monthly_price, $package->dis_month); 
-            }else{
-                $amount = round($package->monthly_price); 
-            }
+        $puid = random_string('numeric', 5);
+
+        // Calculate amount & expiry
+        if ($billing_type == 'monthly') {
+            $amount = settings()->enable_discount == 1
+                ? get_discount($package->monthly_price, $package->dis_month)
+                : round($package->monthly_price);
             $expire_on = date('Y-m-d', strtotime('+1 month'));
-        else:
-            if (settings()->enable_discount == 1){
-                $amount = get_discount($package->yearly_price, $package->dis_year); 
-            }else{
-                $amount = round($package->yearly_price); 
-            }
+        } else {
+            $amount = settings()->enable_discount == 1
+                ? get_discount($package->yearly_price, $package->dis_year)
+                : round($package->yearly_price);
             $expire_on = date('Y-m-d', strtotime('+12 month'));
-        endif;
-        
-        require_once('application/libraries/stripe-php/init.php');
-        \Stripe\Stripe::setApiKey(settings()->secret_key);
-        
-        try {
-            $charge = \Stripe\Charge::create ([
-                "amount" => $amount*100,
-                "currency" => settings()->currency,
-                "source" => $this->input->post('stripeToken'),
-                "description" => "Payment from ".settings()->site_name 
-            ]);
-            $chargeJson = $charge->jsonSerialize();
-            
-            $amount                  = $chargeJson['amount']/100;
-            $balance_transaction     = $chargeJson['balance_transaction'];
-            $currency                = $chargeJson['currency'];
-            $status                  = $chargeJson['status'];
-        }catch(Exception $e) { 
-            $error = $e->getMessage(); 
-            $this->session->set_flashdata('error', $error);
-            redirect($_SERVER['HTTP_REFERER']);
         }
 
-        if($status == 'succeeded'){$status = 'verified';}else{$status = 'pending';};
+        require_once('application/libraries/stripe-php/init.php');
+        \Stripe\Stripe::setApiKey(settings()->secret_key);
 
-        if($status = 'verified'):  
+        try {
+            // Create & confirm the PaymentIntent (cards only)
+            $paymentIntent = \Stripe\PaymentIntent::create([
+                'amount' => $amount * 100,  // cents
+                'currency' => settings()->currency,
+                'payment_method' => $this->input->post('payment_method_id'),
+                'confirm' => true,
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                    'allow_redirects' => 'never', // disable redirect-based methods
+                ],
+            ]);
 
-            $payments = $this->admin_model->get_previous_payments(user()->id);
-            foreach ($payments as $pay) {
-                $pays_data=array(
-                    'status' => 'expired'
-                );
-                $this->common_model->edit_option($pays_data, $pay->id, 'payment');
+            if ($paymentIntent->status === 'succeeded') {
+                // Expire previous payments
+                $payments = $this->admin_model->get_previous_payments(user()->id);
+                foreach ($payments as $pay) {
+                    $this->common_model->edit_option(['status' => 'expired'], $pay->id, 'payment');
+                }
+
+                // Save new payment
+                $pay_data = [
+                    'user_id' => user()->id,
+                    'puid' => $puid,
+                    'package' => $id,
+                    'amount' => $amount,
+                    'billing_type' => $billing_type,
+                    'payment_type' => 'stripe',
+                    'status' => 'verified',
+                    'created_at' => my_date_now(),
+                    'expire_on' => $expire_on
+                ];
+                $this->common_model->insert($pay_data, 'payment');
+
+                // Update user type if trial
+                if (user()->user_type == 'trial') {
+                    $this->common_model->edit_option([
+                        'user_type' => 'registered',
+                        'trial_expire' => '0000-00-00'
+                    ], user()->id, 'users');
+                }
+
+                redirect(base_url('payment-success/' . $puid));
+            } else {
+                // requires_action, processing, or failed
+                redirect(base_url('payment-cancel/' . $puid));
             }
-
-            $pay_data=array(
-                'user_id' => user()->id,
-                'puid' => $puid,
-                'package' => $id,
-                'amount' => $amount,
-                'billing_type' => $billing_type,
-                'payment_type' => 'stripe',
-                'status' => $status,
-                'created_at' => my_date_now(),
-                'expire_on' => $expire_on
-            );
-            $pay_data = $this->security->xss_clean($pay_data);
-            $result = $this->common_model->insert($pay_data, 'payment');
-
-            if (user()->user_type == 'trial') {
-                //update user type
-                $user_data=array(
-                    'user_type' => 'registered',
-                    'trial_expire' => '0000-00-00'
-                );
-                $this->common_model->edit_option($user_data, user()->id, 'users');
-            }
-        
-            redirect(base_url('payment-success/'.$puid));
-        else:
-            redirect(base_url('payment-cancel/'.$puid));
-        endif;
+        } catch (Exception $e) {
+            $this->session->set_flashdata('error', $e->getMessage());
+            redirect($_SERVER['HTTP_REFERER']);
+        }
     }
 
 
 
-    
+
+
     // Recover forgot password 
     public function forgot_password()
     {
