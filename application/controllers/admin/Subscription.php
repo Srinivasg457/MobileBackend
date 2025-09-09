@@ -48,7 +48,7 @@ class Subscription extends Home_Controller
     }
 
 
-    public function upgrade($slug = '', $billing_type = '', $status = 0)
+    public function upgrade($slug = '', $billing_type = '', $status = 1)
     {
         if ($status == 0) {
             $data = array();
