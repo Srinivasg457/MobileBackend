@@ -1028,13 +1028,15 @@ class Time_logs extends Home_Controller
 
         // 3. Return response
         if ($employee) {
+            $plan_status = $this->get_user_plan_status($employee['user_id']); // 🔹 Added from file 1
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(200)
                 ->set_output(json_encode([
                     'status' => 'success',
                     'data' => [
-                        'employee' => $employee,
+                        'employee'     => $employee,
+                        'plan_status'  => $plan_status, // 🔹 Added response
                         'request_source' => $this->get_email_request_source()
                     ]
                 ]));
@@ -1292,6 +1294,72 @@ class Time_logs extends Home_Controller
                 ]));
         }
     }
+
+private function get_user_plan_status($user_id)
+{
+    $user = $this->db->get_where('users', ['id' => $user_id])->row();
+
+    if (!$user) {
+        return [
+            'status'  => 0,
+            'message' => 'Invalid user'
+        ];
+    }
+
+    // Case 1: Trial user
+    if ($user->user_type === 'trial' && !empty($user->trial_expire)) {
+        $today  = new DateTime('today');
+        $expire = new DateTime($user->trial_expire);
+
+        return [
+            'plan_type'   => 'trial',
+            'expiry_date' => $user->trial_expire,
+            'package'     => null, // No package for trial
+            'status'      => ($expire > $today) ? 1 : 0,
+            'message'     => ($expire > $today) ? 'Trial active' : 'Trial expired'
+        ];
+    }
+
+    // Case 2: Registered user - check latest payment
+    if ($user->user_type === 'registered') {
+        $payment = $this->db->select('billing_type, package, status, created_at, expire_on')
+            ->where('user_id', $user_id)
+            ->order_by('id', 'DESC')
+            ->limit(1)
+            ->get('payment')
+            ->row();
+
+        if ($payment && $payment->status === 'verified') {
+            $today  = new DateTime('today');
+            $expire = !empty($payment->expire_on) ? new DateTime($payment->expire_on) : null;
+
+            return [
+                'plan_type'    => 'registered',
+                'billing_type' => $payment->billing_type,
+                'package'      => $payment->package,
+                'expiry_date'  => $payment->expire_on ?? null,
+                'status'       => ($expire && $expire >= $today) ? 1 : 0,
+                'message'      => ($expire && $expire >= $today) ? 'Plan active' : 'Plan expired'
+            ];
+        } else {
+            return [
+                'plan_type' => 'registered',
+                'package'   => null,
+                'status'    => 0,
+                'message'   => 'Plan inactive'
+            ];
+        }
+    }
+
+    // Default
+    return [
+        'status'  => 0,
+        'message' => 'No valid plan',
+        'package' => null
+    ];
+}
+
+
 public function store_application_usage_log()
 {
     $input = json_decode(file_get_contents('php://input'), true);
