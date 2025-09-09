@@ -221,16 +221,28 @@ class ScreenshotController extends Home_Controller
         $compressed_upload_path = FCPATH . "uploads/screenshots_compressed/{$user_id}/{$employee_id}/";
     
         // Create the directories if they don't exist
-      // Ensure original upload path exists and has 0777 permission
- // Ensure original upload path exists and has 0777 permission
-if (!is_dir($original_upload_path)) {
-    mkdir($original_upload_path, 0777, true);
-    chmod($original_upload_path, 0777); // Explicitly set permissions
-}
-if (!is_dir($compressed_upload_path)) {
-    mkdir($compressed_upload_path, 0777, true);
-    chmod($compressed_upload_path, 0777); // Explicitly set permissions
-}
+        // Ensure original upload path exists and has 0777 permission
+        // Ensure original upload path exists and has 0777 permission
+        // if (!is_dir($original_upload_path)) {
+        //     mkdir($original_upload_path, 0777, true);
+        //     chmod($original_upload_path, 0777); // Explicitly set permissions
+        // }
+        // if (!is_dir($compressed_upload_path)) {
+        //     mkdir($compressed_upload_path, 0777, true);
+        //     chmod($compressed_upload_path, 0777); // Explicitly set permissions
+        // }
+        if (!is_dir($original_upload_path)) {
+            mkdir($original_upload_path, 0755, true);
+            chown($original_upload_path, 'www-data');
+            chgrp($original_upload_path, 'www-data');
+        }
+
+        if (!is_dir($compressed_upload_path)) {
+            mkdir($compressed_upload_path, 0755, true);
+            chown($compressed_upload_path, 'www-data');
+            chgrp($compressed_upload_path, 'www-data');
+        }
+
 
         // Get file extension and construct file names
         $file_extension = strtolower(pathinfo($_FILES['screenshot']['name'], PATHINFO_EXTENSION));
@@ -437,16 +449,28 @@ if (!is_dir($compressed_upload_path)) {
     $original_upload_path = FCPATH . "uploads/webcam/{$user_id}/{$employee_id}/";
     $compressed_upload_path = FCPATH . "uploads/webcam_compressed/{$user_id}/{$employee_id}/";
 
-    // Create the directories if they don't exist
-    if (!is_dir($original_upload_path)) {
-        mkdir($original_upload_path, 0755, true);
-    }
-    if (!is_dir($compressed_upload_path)) {
-        mkdir($compressed_upload_path, 0755, true);
-    }
+        // Create the directories if they don't exist
+        // if (!is_dir($original_upload_path)) {
+        //     mkdir($original_upload_path, 0755, true);
+        // }
+        // if (!is_dir($compressed_upload_path)) {
+        //     mkdir($compressed_upload_path, 0755, true);
+        // }
+        if (!is_dir($original_upload_path)) {
+            mkdir($original_upload_path, 0755, true);
+            chown($original_upload_path, 'www-data');
+            chgrp($original_upload_path, 'www-data');
+        }
 
-    // Get file extension and construct file names
-    $file_extension = strtolower(pathinfo($_FILES['webcam_image']['name'], PATHINFO_EXTENSION));
+        if (!is_dir($compressed_upload_path)) {
+            mkdir($compressed_upload_path, 0755, true);
+            chown($compressed_upload_path, 'www-data');
+            chgrp($compressed_upload_path, 'www-data');
+        }
+
+
+        // Get file extension and construct file names
+        $file_extension = strtolower(pathinfo($_FILES['webcam_image']['name'], PATHINFO_EXTENSION));
     $file_name = "webcam_{$formatted_timestamp}.{$file_extension}";
 
     // Original file paths

@@ -148,64 +148,54 @@
                                     </h3>
                                 </div>
                                 <div class="box-body">
-                    
-                                    <form role="form" action="<?php echo base_url('auth/stripe_payment') ?>" method="post" class="require-validation" data-cc-on-file="false" data-stripe-publishable-key="<?php echo settings()->publish_key; ?>" id="payment-form">
-                     
-                                        <div class='form-row row'>
-                                            <div class='col-xs-12 col-md-12 form-group required'>
-                                                <label class='control-label'><?php echo trans('name-on-card') ?></label> 
-                                                <input class='form-control' type='text' value="">
-                                            </div>
-                                        </div>
-                     
-                                        <div class='form-row row'>
-                                            <div class='col-xs-12 col-md-12 form-group card required'>
-                                                <label class='control-label'><?php echo trans('card-number') ?></label> <input
-                                                    autocomplete='off' class='form-control card-number'
-                                                    type='text' value="">
-                                            </div>
-                                        </div>
-                      
-                                        <div class='form-row row'>
-                                            <div class='col-xs-12 col-md-4 form-group cvc required'>
-                                                <label class='control-label'>CVC</label> <input autocomplete='off'
-                                                    class='form-control card-cvc' placeholder='ex. 311' size='4'
-                                                    type='text' value="">
-                                            </div>
-                                            <div class='col-xs-12 col-md-4 form-group expiration required'>
-                                                <label class='control-label'><?php echo trans('expiration').' '.trans('month') ?></label> <input
-                                                    class='form-control card-expiry-month' placeholder='MM' size='2'
-                                                    type='text' value="">
-                                            </div>
-                                            <div class='col-xs-12 col-md-4 form-group expiration required'>
-                                                <label class='control-label'><?php echo trans('expiration').' '.trans('year') ?></label> <input
-                                                    class='form-control card-expiry-year' placeholder='YYYY' size='4'
-                                                    type='text' value="">
-                                            </div>
-                                        </div>
+                                        <form id="payment-form" action="<?php echo base_url('auth/stripe_payment') ?>" method="POST">
+                                            <div id="card-element"><!-- Stripe injects card UI here --></div>
+                                            <div id="card-errors" role="alert"></div>
 
-                                        <div class="text-center text-success">
-                                            <div class="payment_loader" style="display: none;"><i class="fa fa-spinner fa-spin"></i> Loading....</div><br>
-                                        </div>
-                                    
-                                        <!-- csrf token -->
-                                        <input type="hidden" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
+                                            <!-- Hidden inputs -->
+                                            <input type="hidden" name="billing_type" value="<?php echo $billing_type; ?>" />
+                                            <input type="hidden" name="package_id" value="<?php echo $package->id; ?>" />
 
-                                        <input type="hidden" name="billing_type" value="<?php echo $billing_type; ?>" readonly>
-                                        <input type="hidden" name="package_id" value="<?php echo $package->id; ?>" readonly>
-                                        <div class="row">
-                                            <div class="col-md-12 text-center">
-                                                <button class="btn btn-info btn-lg payment_btn" type="submit">Pay Now <?php echo currency_to_symbol(settings()->currency); ?><?php echo html_escape($price) ?></button>
-                                            </div>
-                                        </div>
-                                             
-                                    </form>
-                                </div>
-                            </div>        
+                                            <button class="btn btn-info btn-lg payment_btn">Pay Now <?php echo currency_to_symbol(settings()->currency); ?><?php echo html_escape($price) ?></button>
+                                        </form>
+                                        <script src="https://js.stripe.com/v3/"></script>
+                                        <script>
+                                            const stripe = Stripe("<?php echo settings()->publish_key; ?>");
+                                            const elements = stripe.elements();
+                                            const card = elements.create("card");
+                                            card.mount("#card-element");
+
+                                            const form = document.getElementById("payment-form");
+                                            form.addEventListener("submit", async function(event) {
+                                                event.preventDefault();
+
+                                                const {
+                                                    paymentMethod,
+                                                    error
+                                                } = await stripe.createPaymentMethod({
+                                                    type: "card",
+                                                    card: card,
+                                                });
+
+                                                if (error) {
+                                                    document.getElementById("card-errors").textContent = error.message;
+                                                } else {
+                                                    // Add paymentMethod.id to the form and submit
+                                                    const input = document.createElement("input");
+                                                    input.type = "hidden";
+                                                    input.name = "payment_method_id";
+                                                    input.value = paymentMethod.id;
+                                                    form.appendChild(input);
+                                                    form.submit();
+                                                }
+                                            });
+                                        </script>
+                            </div>
                         </div>
                     </div>
                 </div>
-            <?php endif ?>     
+            </div>
+        <?php endif ?>
 
             <!-- paypal payment -->
             <?php if (settings()->razorpay_payment == 1): ?>
