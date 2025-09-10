@@ -1295,7 +1295,7 @@ class Time_logs extends Home_Controller
         }
     }
 
-private function get_user_plan_status($user_id)
+ public function get_user_plan_status($user_id)
 {
     $user = $this->db->get_where('users', ['id' => $user_id])->row();
 
