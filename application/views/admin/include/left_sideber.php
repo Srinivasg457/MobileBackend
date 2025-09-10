@@ -414,11 +414,6 @@
               </a>
             </li>
 
-            <?php if (check_payment_status() == TRUE || settings()->enable_paypal == 0 || user()->user_type == 'trial'): ?>
-
-
-
-
               <!-- <li class="treeview <?php if (isset($main_page) && $main_page == "Sales") {
                                           echo "active";
                                         } ?>">
@@ -548,7 +543,7 @@
                   <i class="bi bi-receipt mr-5"></i> <span><?php echo trans('tax') ?></span>
                 </a>
               </li> -->
-                <li class="treeview <?php if (isset($main_page) && $main_page == "Analytics") {
+              <li class="treeview <?php if (isset($main_page) && $main_page == "Analytics") {
                                       echo "active";
                                     } ?>">
 
@@ -841,9 +836,9 @@
               </li>
             <?php endif ?> -->
 
-
-
-            <?php endif ?>
+  <!-- code for hiding the navbar whenthe payment is pending -->
+            <?php if (check_payment_status() == TRUE || settings()->enable_paypal == 0 || user()->user_type == 'trial'): ?>
+              <?php endif ?>
 
             <?php if (auth('role') == 'user' || auth('role') == 'subadmin'): ?>
               <li class="treeview <?php if (isset($main_page) && $main_page == "plan&pack") {

@@ -81,18 +81,51 @@
                   <tbody>
                     <tr>
                       <td width="30%">
-                        <div class="p-3 border rounded text-center soft-success" style="background:#f8f9fa;width:100%">
+                        <div class="box add_area box-shadow">
+                          <div class="box-header flex-between">
+                            <div>
+                              <h3 class="box-title"><?php echo "Current Plan" ?></h3>
+                            </div>
+                            <div>
+                              <a  href="<?php echo base_url('admin/subscription/current_plan') ?>" class="pull-right btn btn-default btn-xs mt-1 brd-30"><i class="fa fa-file-text-o"></i> <?php echo "View plan";?></a>
+                            </div>
+                          </div>
+                          <div class="box-body" style="padding: 15px 10px 10px 30px;">
+                            <p><?php echo trans('your-subscription') ?>: <strong><?php echo html_escape($user->package_name) ?> <?php echo trans('plan') ?></strong></p>
+                            <!-- <p><?php echo trans('price') ?>: <strong><?php echo price_formatted($user->amount, 'site') ?> </strong></p> -->
+                            <p><?php echo trans('billing-frequency') ?> : <strong><?php echo ucfirst(html_escape($user->billing_type)) ?></strong> </p>
+                            <!-- <p><?php echo trans('last-billing') ?> : <strong><?php echo my_date_show($user->created_at) ?></strong> </p> -->
+                            <!-- <p><?php echo trans('next-billing') ?> : <strong><?php echo my_date_show($user->expire_on); ?></strong> -->
+                            <!-- <strong class="text-danger">(<?php echo date_dif(date('Y-m-d'), $user->expire_on) ?> <?php echo trans('days-left') ?>)</strong> -->
+                            <!-- </p> -->
+                          </div>
 
-                          <h6 class="text-muted mb-2"> <i class="fa fa-check-circle text-success"></i> Active Plan</h6>
-                          <h4 class="text-dark mb-2"><?php echo $user->package_name ?></h4>
-                          <span class="badge bg-success fs-6">
-                            <?php echo ucfirst($user->billing_type) ?>
-                          </span>
+                          <!-- <div class="p-3 border rounded text-center soft-success" style="background:#f8f9fa;width:100%">
+                              <h6 class="text-muted mb-2"> <i class="fa fa-times-circle text-danger"></i> Active Plan</h6>
+                              <h4 class="text-dark mb-2"><?php echo $user->package_name ?></h4>
+                              <span class="badge bg-success fs-6">
+                                <?php echo ucfirst($user->billing_type) ?>
+                              </span> -->
+                          <div class="box-footer text-center soft-<?php echo ($user->status == 'verified') ? "success" : "danger"; ?>">
+                            <?php echo trans('payment-status') ?>: &emsp;
+                            <i class="fa fa-<?php echo ($user->status == 'verified') ? "check" : "times"; ?>"></i>
+                            <?php echo ucfirst(html_escape($user->status)) ?>
+
+                            <?php if ($user->status != 'verified'): ?>
+                              <?php $billing_type = $user->billing_type == 'monthly' ? "monthly" : "yearly" ?>
+                              <div class="mt-3">
+                                <a href="<?php echo base_url('admin/subscription/upgrade/' . $user->slug . '/' . $billing_type) ?>"
+                                  class="btn btn-default btn-sm">
+                                  <i class="fa fa-credit-card"></i> <?php echo 'Complete Payment' ?>
+                                </a>
+                              </div>
+                            <?php endif; ?>
+                          </div>
                         </div>
                       </td>
                       <?php $i = 1;
                       foreach ($packages as $package):
-                        if ($package->name == "Trial" ) {
+                        if ($package->name == "Trial") {
                           continue;
                         }  ?>
 
