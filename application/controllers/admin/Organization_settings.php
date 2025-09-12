@@ -53,7 +53,7 @@ class Organization_settings extends Home_Controller {
         $data['page_title'] = 'Ex Organization settings';
         $data['can_edit'] = $this->auth_model->get_permission(5);
         $data['countries'] = $this->admin_model->select('country');
-        $data['empoyees_settings'] = $this->get_all_org_employee_settings();
+        $data['employees_settings'] = $this->get_all_org_employee_settings();
         // $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -70,7 +70,7 @@ class Organization_settings extends Home_Controller {
         $data['page_title'] = 'Ex Organization settings';
         $data['can_edit'] = $this->auth_model->get_permission(5);
         $data['countries'] = $this->admin_model->select('country');
-        $data['employees'] = $this->get_all_org_employee_no_settings();
+        $data['employees'] = $this->get_employees_without_settings();
         // $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -675,46 +675,25 @@ public function save_org_settings()
     public function get_all_org_employee_settings()
     {
         $user_id = $this->session->userdata('id');
-
         if (!$user_id) {
             return ['error' => 'Missing user_id parameter.'];
         }
 
-        // ✅ Get employees
-        $employeeDetails = $this->hrm_model->get_employees();
+        $employeeDetails = $this->get_employees_with_settings();
 
-        // ✅ Get exception settings for this user
-        $query = $this->db->get_where('organization_exception_setting', [
-            'user_id' => $user_id
-        ]);
+        $query = $this->db->get_where('organization_exception_setting', ['user_id' => $user_id]);
         $settings = $query->num_rows() > 0 ? $query->result_array() : [];
 
-        // ✅ Index settings by employee_id
+        // Index settings by employee_id
         $settingsByEmp = [];
         foreach ($settings as $s) {
-            $settingsByEmp[$s['employee_id']] = [
-                'screenshot' => [
-                    'flag'     => $s['screenshot'] ?? 1,
-                    'interval' => $s['screenshot_interval'] ?? 10
-                ],
-                'webcam' => [
-                    'flag'     => $s['webcam'] ?? 1,
-                    'interval' => $s['webcam_interval'] ?? 10
-                ],
-                'mouse_movement' => [
-                    'flag'     => $s['mouse_movement'] ?? 1,
-                    'interval' => $s['mouse_movement_interval'] ?? 10
-                ],
-                'keystrokes' => [
-                    'flag'     => $s['keystrokes'] ?? 1,
-                    'interval' => $s['keystrokes_interval'] ?? 10
-                ]
-            ];
+            $settingsByEmp[$s['employee_id']] = $s;
         }
 
-        // ✅ Merge employees with their settings
         $final = [];
         foreach ($employeeDetails as $emp) {
+            $s = $settingsByEmp[$emp->id] ?? [];
+
             $final[] = [
                 'id'         => $emp->id,
                 'user_id'    => $emp->user_id,
@@ -722,12 +701,28 @@ public function save_org_settings()
                 'email'      => $emp->email,
                 'department' => $emp->department_name ?? '',
                 'role'       => $emp->role_name ?? '',
-                'settings'   => $settingsByEmp[$emp->id] ?? [
-                    'screenshot' => ['flag' => 1, 'interval' => 10],
-                    'webcam' => ['flag' => 1, 'interval' => 10],
-                    'mouse_movement' => ['flag' => 1, 'interval' => 10],
-                    'keystrokes' => ['flag' => 1, 'interval' => 10],
-                ]
+                'settings'   => [
+                    'screenshot' => [
+                        'flag'     => $s['screenshot_flag'] ?? 1,
+                        'interval' => $s['screenshot_time_interval'] ?? 10,
+                    ],
+                    'webcam' => [
+                        'flag'     => $s['webcam_flag'] ?? 1,
+                        'interval' => $s['webcam_time_interval'] ?? 10,
+                    ],
+                    'mouse_movement' => [
+                        'flag'     => $s['mouse_move_flag'] ?? 1,
+                        'interval' => $s['mouse_move_threshold'] ?? 10,
+                    ],
+                    'keystrokes' => [
+                        'flag'     => $s['key_stroke_flag'] ?? 1,
+                        'interval' => $s['key_stroke_threshold'] ?? 10,
+                    ],
+                    'idle_time' => [
+                        'flag'     => $s['idle_time_flag'] ?? 1,
+                        'interval' => $s['timecards_time_interval'] ?? 10,
+                    ],
+                ],
             ];
         }
 
@@ -736,33 +731,109 @@ public function save_org_settings()
 
 
 
-    public function get_all_org_employee_no_settings()
+
+    // public function get_all_org_employee_no_settings()
+    // {
+    //     $user_id = $this->session->userdata('id');
+
+    //     if (!$user_id) {
+    //         return ['error' => 'Missing user_id parameter.'];
+    //     }
+
+    //     $this->db->select('id, user_id, name, email');
+    //     $this->db->where([
+    //         'user_id' => $user_id,
+    //         'settings_status' => 1
+    //     ]);
+    //     $query = $this->db->get('employees');
+
+
+    //     if ($query->num_rows() > 0) {
+    //         return $query->result_array(); // ✅ return array directly
+    //     } else {
+    //         return ['error' => 'No exception settings found for this user.'];
+    //     }
+    // }
+
+    public function get_employees_with_settings()
     {
-        $user_id = $this->session->userdata('id');
-
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
         if (!$user_id) {
-            return ['error' => 'Missing user_id parameter.'];
+            return [];
         }
 
-        $this->db->select('id, user_id, name, email');
-        $this->db->where([
-            'user_id' => $user_id,
-            'settings_status' => 1
-        ]);
-        $query = $this->db->get('employees');
+        $business = $this->db->select('uid')
+            ->from('business')
+            ->where('user_id', $user_id)
+            ->limit(1)
+            ->get()
+            ->row();
 
-
-        if ($query->num_rows() > 0) {
-            return $query->result_array(); // ✅ return array directly
-        } else {
-            return ['error' => 'No exception settings found for this user.'];
+        if (!$business) {
+            return [];
         }
+
+        $business_uid = $business->uid;
+
+        $this->db->select('
+        e.id,
+        e.user_id,
+        e.name,
+        e.email,
+        d.name AS department_name,
+        r.role_name
+    ');
+        $this->db->from('employees AS e');
+        $this->db->where('e.business_id', $business_uid);
+        $this->db->where('e.settings_status', 2); // Only employees with active settings
+        $this->db->join('departments AS d', 'e.department_id = d.id', 'LEFT');
+        $this->db->join('employee_roles AS r', 'e.role_id = r.id', 'LEFT');
+        $this->db->order_by('e.id', 'DESC');
+
+        return $this->db->get()->result();
+    }
+
+    public function get_employees_without_settings()
+    {
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
+        if (!$user_id) {
+            return [];
+        }
+
+        $business = $this->db->select('uid')
+            ->from('business')
+            ->where('user_id', $user_id)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if (!$business) {
+            return [];
+        }
+
+        $business_uid = $business->uid;
+
+        $this->db->select('
+        e.id,
+        e.user_id,
+        e.name,
+        e.email,
+        d.name AS department_name,
+        r.role_name
+    ');
+        $this->db->from('employees AS e');
+        $this->db->where('e.business_id', $business_uid);
+        $this->db->where('e.settings_status', 1); // Only employees without active settings
+        $this->db->join('departments AS d', 'e.department_id = d.id', 'LEFT');
+        $this->db->join('employee_roles AS r', 'e.role_id = r.id', 'LEFT');
+        $this->db->order_by('e.id', 'DESC');
+
+        return $this->db->get()->result();
     }
 
 
 
-
-public function get_organization_settings()
+    public function get_organization_settings()
 {
     $status = $this->input->get('status');
 
