@@ -392,13 +392,14 @@
                 data: formData,
                 success: function(response) {
                     swal("Success!", 'Organization settings saved successfully!', "success");
-                    changeOrganizationSetting(null, response.payload)
-                        .then(() => {
+                    window.changeOrganizationSetting(null, response.payload)
+                        // .then((wsResponse) => {
+                            // console.log("WS Response:", wsResponse);
                             window.location.href = "<?= base_url('admin/organization_settings') ?>";
-                        })
-                        .catch((err) => {
-                            console.error("WS Send Error:", err);
-                        });
+                        // })
+                    // .catch((err) => {
+                    //     console.error("WS Send Error:", err);
+                    // });
                 },
                 error: function(res) {
                     const errorMsg = res.responseJSON?.message || "Something went wrong.";

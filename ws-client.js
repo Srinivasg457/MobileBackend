@@ -22,57 +22,25 @@ if (!window._wsClientLoaded) {
     }
   }
 
-  // function changeOrganizationSetting(employeeId, settings) {
-  //   const payload = {
-  //     type: "organization-settings",
-  //     employeeId: parseInt(employeeId),
-  //     settings,
-  //   };
-
-  //   if (ws.readyState === WebSocket.OPEN) {
-  //     ws.send(JSON.stringify(payload));
-  //     console.log("[WS] sent organization-settings:", payload);
-  //   } else if (ws.readyState === WebSocket.CONNECTING) {
-  //     ws.addEventListener("open", () => {
-  //       ws.send(JSON.stringify(payload));
-  //       console.log("[WS] sent organization-settings after connect:", payload);
-  //     });
-  //   } else {
-  //     console.warn("[WS] not ready – packet skipped");
-  //   }
-  // }
   function changeOrganizationSetting(employeeId, settings) {
-    return new Promise((resolve, reject) => {
-      const payload = {
-        type: "organization-settings",
-        employeeId: employeeId ? parseInt(employeeId) : null,
-        settings,
-      };
+    const payload = {
+      type: "organization-settings",
+      employeeId: parseInt(employeeId),
+      settings,
+    };
 
-      function sendPayload() {
-        try {
-          ws.send(JSON.stringify(payload));
-          console.log("[WS] sent organization-settings:", payload);
-          resolve(true); // ✅ success
-        } catch (err) {
-          console.error("[WS] send failed:", err);
-          reject(err); // ❌ failure
-        }
-      }
-
-      if (ws.readyState === WebSocket.OPEN) {
-        sendPayload();
-      } else if (ws.readyState === WebSocket.CONNECTING) {
-        ws.addEventListener("open", () => {
-          sendPayload();
-        }, { once: true });
-      } else {
-        console.warn("[WS] not ready – packet skipped");
-        reject("WebSocket not ready");
-      }
-    });
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(payload));
+      console.log("[WS] sent organization-settings:", payload);
+    } else if (ws.readyState === WebSocket.CONNECTING) {
+      ws.addEventListener("open", () => {
+        ws.send(JSON.stringify(payload));
+        console.log("[WS] sent organization-settings after connect:", payload);
+      });
+    } else {
+      console.warn("[WS] not ready – packet skipped");
+    }
   }
-
 
   ws.addEventListener("message", (event) => {
     if (typeof event.data !== "string") {
