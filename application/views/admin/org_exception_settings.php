@@ -1,8 +1,9 @@
 <div class="content-wrapper org_exception_settings">
     <section class="content">
         <div class="container mt-4">
-            <h3>Employee Settings</h3> <?php print_r($empoyees_settngs) ?>
-            <?php print_r($empoyees) ?>
+            <h3>Employee Settings</h3> <?php print_r($employees_settings) ?>
+            <?php print_r($employees) ?>
+
             <div class="container mt-50">
                 <div class="row">
                     <div class="col-sm-6">
@@ -11,16 +12,16 @@
                                 <li>
                                     <a class="<?php if (isset($navbar) && $navbar == 'own_settings') echo 'active'; ?>"
                                         href="<?php echo base_url('admin/employee_settings') ?>">
-                                        <i class="fa fa-camera"></i>
-                                        <span class="hidden-xs"><?php echo "Settings" ?></span>
+                                        <i class="fa fa-cogs"></i>
+                                        <span class="hidden-xs"><?php echo "Assigned" ?></span>
                                     </a>
                                 </li>
 
                                 <li>
                                     <a class="<?php if (isset($navbar) && $navbar == 'no_own_settings') echo 'active'; ?>"
                                         href="<?php echo base_url('admin/no_employee_settings') ?>">
-                                        <i class="fa fa-desktop"></i>
-                                        <span class="hidden-xs"><?php echo "no Settings" ?></span>
+                                        <i class="fa fa-ban"></i>
+                                        <span class="hidden-xs"><?php echo "Unassigned" ?></span>
                                     </a>
                                 </li>
                             </ul>
@@ -29,7 +30,130 @@
                     </div>
                 </div>
             </div>
-            <div class="box">
+            <!-- table format for no settings employees -->
+
+            <?php if (!empty($employees)): ?>
+                <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive p-0">
+                    <table class="table table-hover cushover mt-0 <?php if (count($employees) > 10) {
+                                                                        echo "datatable";
+                                                                    } ?>" id="dg_table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th><?php echo 'Name'; ?></th>
+                                <th><?php echo 'Email'; ?></th>
+                                <th><?php echo 'Department'; ?></th>
+                                <th><?php echo 'Role'; ?></th>
+                                <th class="text-center"><?php echo trans('action'); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $i = 1;
+                            foreach ($employees as $employee): ?>
+                                <tr>
+                                    <td><?php echo $i; ?></td>
+                                    <td><?php echo $employee['name']; ?></td>
+                                    <td><?php echo $employee['email']; ?></td>
+                                    <td><?php echo $employee['department']; ?></td>
+                                    <td><?php echo $employee['role']; ?></td>
+
+                                    <td class="text-center">
+
+                                        <button class="btn btn-default rounded add-settings-btn" data-toggle="tooltip" data-placement="top" style="margin-top:5px;">
+                                            <i class="fa fa-plus"></i> Add Settings
+                                        </button>
+
+                                    </td>
+                                </tr>
+                            <?php $i++;
+                            endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <!-- employee_setting form or content goes here -->
+                <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive p-0">
+                    <table class="table table-hover cushover mt-0 <?php if (count($employees_settings) > 10) {
+                                                                        echo "datatable";
+                                                                    } ?>" id="dg_table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th><?php echo 'Name'; ?></th>
+                                <th><?php echo 'Email'; ?></th>
+                                <th><?php echo 'Department'; ?></th>
+                                <th><?php echo 'Role'; ?></th>
+                                <th><?php echo 'View Settings'; ?></th>
+                                <th class="text-center"><?php echo trans('action'); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $i = 1;
+                            foreach ($employees_settings as $employees_setting): ?>
+                                <tr>
+                                    <td><?php echo $i; ?></td>
+                                    <td><?php echo $employees_setting['name']; ?></td>
+                                    <td><?php echo $employees_setting['email']; ?></td>
+                                    <td><?php echo $employees_setting['department']; ?></td>
+                                    <td><?php echo $employees_setting['role']; ?></td>
+                                    <td class="text-center">
+                                        <a href="#" class="view-permissions mx-5"
+                                            data-role="${role.role_name}"
+                                            data-features='${JSON.stringify(featureDetails)}'
+                                            title="View settings">
+                                            <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
+                                        </a>
+                                    </td>
+
+                                    <td class="actions view-settings text-center">
+                                        <a href="javascript:void(0);"
+                                            class="edit-row"
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Edit"
+                                            data-original-title="Edit"
+                                            data-employee='<?php echo json_encode($employees_setting); ?>'>
+                                            <i class="fa fa-pencil" style="font-size: 1.5rem; color:black;"></i>
+                                        </a>
+
+                                        <a
+                                            data-val="employee"
+                                            data-id="<?php echo $employees_setting['id']; ?>"
+                                            href="<?php echo $employees_setting['id']; ?>"
+                                            class="remove-row delete_item"
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Delete"
+                                            data-original-title="Delete"
+                                            onclick="return confirm('Are you sure you want to delete this record?');">
+                                            <i class="fa fa-trash-o" style="font-size: 1.5rem;"></i>
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            <?php $i++;
+                            endforeach; ?>
+
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+            <script>
+                $(document).ready(function() {
+                    $('[data-toggle="tooltip"]').tooltip({
+                        html: true, // allow HTML in tooltip
+                        placement: 'top',
+                        container: 'body'
+                    });
+                });
+            </script>
+
+
+
+
+            <!-- Hidden form, initially hidden with inline style -->
+            <div class="box" style="display:none;">
                 <div class="box-body">
                     <div class="form-group mt-4 row"> <!-- Added 'row' class here -->
                         <div class="col-md-10">
@@ -58,26 +182,13 @@
                             <!-- Screenshot -->
                             <div class="col-md-4 mb-5 form-group">
                                 <label class="control-label">Screenshot Flag:</label><br>
-                                <!-- <label class="switch">
-                                    <input type="checkbox" name="screenshot_flag" checked>
-                                    <span class="slider"></span>
-                                </label> -->
                                 <div>
                                     <label class="toggle-switch ">
                                         <input type="checkbox" class="toggle-flag" name="screenshot_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
                                     </label>
                                 </div>
                             </div>
-                            <!-- <div class="col-md-6 form-group">
-                                <label>Screenshot Interval (mins):</label>
-                                <select name="screenshot_time_interval" class="form-control interval-field">
 
-                                    <option value="1" disabled>1</option>
-                                    <option value="2">2</option>
-                                    <option value="5">5</option>
-                                    <option value="10">10</option>
-                                </select>
-                            </div> -->
                             <div class="col-md-6 mb-5 form-group">
                                 <label>Screenshot Interval (mins):</label>
                                 <select name="screenshot_time_interval" class="form-control interval-field">
@@ -98,11 +209,6 @@
                             <!-- Webcam -->
                             <div class="col-md-4 mb-5 form-group">
                                 <label>Webcam Flag:</label><br>
-                                <!-- <label class="switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
-                                    <input type="checkbox" name="webcam_flag"
-                                        <?= (!is_plan_basic()) ? 'checked' : 'disabled' ?>>
-                                    <span class="slider"></span>
-                                </label> -->
                                 <div>
                                     <label class="toggle-switch ">
                                         <input type="checkbox" class="toggle-flag" name="webcam_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
@@ -133,10 +239,6 @@
                             <!-- Mouse Move -->
                             <div class="col-md-4 mb-5 form-group">
                                 <label>Mouse Move Flag:</label><br>
-                                <!-- <label class="switch">
-                                    <input type="checkbox" name="mouse_move_flag" checked>
-                                    <span class="slider"></span>
-                                </label> -->
                                 <div>
                                     <label class="toggle-switch ">
                                         <input type="checkbox" class="toggle-flag" name="mouse_move_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
@@ -151,10 +253,6 @@
                             <!-- Keystroke -->
                             <div class="col-md-4 mb-5 form-group">
                                 <label>Keystroke Flag:</label><br>
-                                <!-- <label class="switch">
-                                    <input type="checkbox" name="key_stroke_flag" checked>
-                                    <span class="slider"></span>
-                                </label> -->
                                 <div>
                                     <label class="toggle-switch ">
                                         <input type="checkbox" class="toggle-flag" name="key_stroke_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
@@ -169,10 +267,6 @@
                             <!-- Idle Time -->
                             <div class="col-md-4 mb-5 form-group">
                                 <label>Idle Time Flag:</label><br>
-                                <!-- <label class="switch">
-                                    <input type="checkbox" name="idle_time_flag" checked>
-                                    <span class="slider"></span>
-                                </label> -->
                                 <div>
                                     <label class="toggle-switch ">
                                         <input type="checkbox" class="toggle-flag" name="idle_time_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
@@ -181,21 +275,11 @@
                             </div>
                             <div class="col-md-6 mb-5 form-group">
                                 <label>Timecards Interval (mins):</label>
-                                <!-- <select name="timecards_time_interval" class="form-control interval-field">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                        </select> -->
                                 <input type="text" name="timecards_time_interval" class="form-control" value="1" readonly>
                             </div>
 
                             <div class="col-md-4 mb-5 form-group">
                                 <label>Self Login:</label><br>
-                                <!-- <label class="switch">
-                                    <input type="checkbox" name="self_login" value="1" <?php echo ($existing_value['self_login'] == 1) ? 'checked' : ''; ?>>
-                                    <span class="slider"></span>
-                                </label> -->
                                 <div>
                                     <label class="toggle-switch ">
                                         <input type="checkbox" class="toggle-flag" name="self_login" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
@@ -228,6 +312,7 @@
 
 
 <!-- Bootstrap Timezone Modal with Steps -->
+
 <div class="modal fade" id="timezoneModal" tabindex="-1" role="dialog" aria-labelledby="timezoneModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-zoom" role="document">
         <div class="modal-content" style="margin-top: 10% !important">
@@ -275,6 +360,77 @@
         </div>
     </div>
 </div>
+
+<!-- pop-up -->
+
+<!-- jQuery script to show form on Add Settings button click -->
+<script>
+    $(document).off('click', '.view-setting').on('click', '.view-setting', function(e) {
+        e.preventDefault();
+        const role = $(this).data('role');
+        const features = $(this).data('features');
+
+        // Build modal content and show modal
+        // ...
+        $('#permissionsModal').modal('show');
+    });
+
+    $(document).ready(function() {
+        // The form is already hidden by style="display:none;" on .box, no need to hide here
+
+        $('.add-settings-btn').click(function() {
+            // Show the form container
+            $('.box').show();
+
+            // Optional: scroll to the form smoothly
+            $('html, body').animate({
+                scrollTop: $(".box").offset().top
+            }, 500);
+        });
+    });
+    $(document).ready(function() {
+        $('.edit-row').on('click', function() {
+            var employee = $(this).data('employee');
+
+            // Show the form
+            $('.box').show();
+
+            // Populate employee select
+            $('#employeeSelect').html('<option value="' + employee.user_id + '" selected>' + employee.name + '</option>');
+
+            // Populate checkboxes and intervals
+            var settings = employee.settings;
+
+            $('input[name="screenshot_flag"]').prop('checked', settings.screenshot.flag == 1);
+            $('select[name="screenshot_time_interval"]').val(settings.screenshot.interval);
+
+            $('input[name="webcam_flag"]').prop('checked', settings.webcam.flag == 1);
+            $('select[name="webcam_time_interval"]').val(settings.webcam.interval);
+
+            $('input[name="mouse_move_flag"]').prop('checked', settings.mouse_movement.flag == 1);
+            // Set threshold if needed, e.g.
+            // $('input[name="mouse_move_threshold"]').val(settings.mouse_movement.threshold || 20);
+
+            $('input[name="key_stroke_flag"]').prop('checked', settings.keystrokes.flag == 1);
+            // $('input[name="key_stroke_threshold"]').val(settings.keystrokes.threshold || 40);
+
+            // Idle Time and Self Login might not be inside settings, set defaults or adapt as needed
+            $('input[name="idle_time_flag"]').prop('checked', employee.idle_time_flag == 1 || false);
+            $('input[name="self_login"]').prop('checked', employee.self_login == 1 || false);
+
+            // If you have input fields for idle_time_flag, self_login intervals, fill them here similarly
+
+            // Optional: scroll to form or focus on first input
+            $('html, body').animate({
+                scrollTop: $('.box').offset().top
+            }, 500);
+        });
+    });
+</script>
+
+
+
+
 <script src="<?= base_url('ws-client.js'); ?>"></script>
 <script>
     let currentEmployeeId = null;
@@ -426,7 +582,7 @@
         $('#employeeSelect').on('change', function() {
             const employeeId = $(this).val();
             currentEmployeeId = employeeId;
-            // ✅ FIXED: Get selected option's data-country
+            // FIXED: Get selected option's data-country
             let selectedCountryId = $(this).find(':selected').data('country');
             console.log(selectedCountryId);
 
