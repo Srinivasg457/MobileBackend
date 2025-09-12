@@ -1,7 +1,34 @@
 <div class="content-wrapper org_exception_settings">
     <section class="content">
         <div class="container mt-4">
-            <h3>Employee Settings</h3>
+            <h3>Employee Settings</h3> <?php print_r($empoyees_settngs) ?>
+            <?php print_r($empoyees) ?>
+            <div class="container mt-50">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="nav-tabs-custom">
+                            <ul class="nav nav-tabs admin">
+                                <li>
+                                    <a class="<?php if (isset($navbar) && $navbar == 'own_settings') echo 'active'; ?>"
+                                        href="<?php echo base_url('admin/employee_settings') ?>">
+                                        <i class="fa fa-camera"></i>
+                                        <span class="hidden-xs"><?php echo "Settings" ?></span>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="<?php if (isset($navbar) && $navbar == 'no_own_settings') echo 'active'; ?>"
+                                        href="<?php echo base_url('admin/no_employee_settings') ?>">
+                                        <i class="fa fa-desktop"></i>
+                                        <span class="hidden-xs"><?php echo "no Settings" ?></span>
+                                    </a>
+                                </li>
+                            </ul>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="box">
                 <div class="box-body">
                     <div class="form-group mt-4 row"> <!-- Added 'row' class here -->

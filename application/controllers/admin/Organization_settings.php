@@ -40,7 +40,7 @@ class Organization_settings extends Home_Controller {
         $this->load->view('admin/index', $data);
     }
 
-    public function org_exception_settings(): void
+    public function org_exception_settings()
     {
         require_feature(5);
         if (!is_subscribed()) {
@@ -48,12 +48,47 @@ class Organization_settings extends Home_Controller {
         }
         $data = array();
         $data['is_employee_admin'] = true;
+        $data['navbar'] = 'own_settings';
         $data['page_title'] = 'Ex Organization settings';
         $data['can_edit'] = $this->auth_model->get_permission(5);
         $data['countries'] = $this->admin_model->select('country');
+        $data['empoyees_settngs'] = $this->get_all_org_employee_settings();
         // $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
+    }
+    public function no_org_exception_settings()
+    {
+        require_feature(5);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
+        $data = array();
+        $data['is_employee_admin'] = true;
+        $data['navbar'] = 'no_own_settings';
+        $data['page_title'] = 'Ex Organization settings';
+        $data['can_edit'] = $this->auth_model->get_permission(5);
+        $data['countries'] = $this->admin_model->select('country');
+        $data['empoyees'] = $this->get_all_org_employee_no_settings();
+        // $data["timezone"] = $this->admin_model->get_timezone_list();
+        $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
+
+    public function index111()
+    {
+        require_feature(3);
+        $data = array();
+        $data['is_employee_admin'] = true;
+        $data['page_title'] = 'Notification';
+        $data['navbar'] = 'webcam';
+        $data['can_edit'] = $this->auth_model->get_permission(3);
+        $data['notifications'] = $this->web_notifications();
+        $data['main_content'] = $this->load->view('admin/notification', $data, TRUE);
+        $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
     }
 
 
@@ -636,6 +671,48 @@ public function save_org_settings()
         echo json_encode(['error' => 'No exception settings found for this user and employee.']);
     }
 }
+    public function get_all_org_employee_settings()
+    {
+        $user_id = $this->session->userdata('id');
+
+        if (!$user_id) {
+            return ['error' => 'Missing user_id parameter.'];
+        }
+
+        $query = $this->db->get_where('organization_exception_setting', [
+            'user_id' => $user_id
+        ]);
+
+        if ($query->num_rows() > 0) {
+            return $query->result_array(); // ✅ return array directly
+        } else {
+            return ['error' => 'No exception settings found for this user.'];
+        }
+    }
+
+    public function get_all_org_employee_no_settings()
+    {
+        $user_id = $this->session->userdata('id');
+
+        if (!$user_id) {
+            return ['error' => 'Missing user_id parameter.'];
+        }
+
+        $this->db->select('id, user_id, name, email');
+        $this->db->where([
+            'user_id' => $user_id,
+            'settings_status' => 1
+        ]);
+        $query = $this->db->get('employees');
+
+
+        if ($query->num_rows() > 0) {
+            return $query->result_array(); // ✅ return array directly
+        } else {
+            return ['error' => 'No exception settings found for this user.'];
+        }
+    }
+
 
 
 
