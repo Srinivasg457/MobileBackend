@@ -155,83 +155,236 @@
         return false;
     });
 
+// form validation
+// icon js code
+$(document).on('click', '.toggle-password', function () {
+    const input = $('#password');
+    const icon = $(this);
 
-    $(function(){
-        $(document).on('submit', "#register_form", function() {
-            form_original_data = $(".leave_con").serialize();
+    if (input.attr('type') === 'password') {
+        input.attr('type', 'text');
+        icon.removeClass('fa-eye-slash').addClass('fa-eye');
+    } else {
+        input.attr('type', 'password');
+        icon.removeClass('fa-eye').addClass('fa-eye-slash');
+    }
+});
+
+$(document).ready(function () {
+
+    // Enable submit button only when checkbox is checked
+    $('.agree_btn').on('change', function () {
+        $('.submit_btn').prop('disabled', !$(this).is(':checked'));
+    });
+
+    // Custom password rule: starts with uppercase and has a special character
+    $.validator.addMethod("strongPassword", function (value, element) {
+        return this.optional(element) || (/^[A-Z]/.test(value) && /[!@#$%^&*(),.?":{}|<>]/.test(value));
+    }, "Password must start with a capital letter and include one special character.");
+
+    // Minimal email validation (optional since `email` rule already covers it)
+    $.validator.addMethod("basicEmailCheck", function (value, element) {
+        return this.optional(element) || /@/.test(value);
+    }, "Please enter a valid email address.");
+
+    // Register form validation + submission handler combined
+    $('#register_form').validate({
+        rules: {
+            name: {
+                required: true,
+                minlength: 2,
+                maxlength: 50
+            },
+            email: {
+                required: true,
+                email: true,
+                basicEmailCheck: true,
+                maxlength: 100
+            },
+            phone: {
+                required: true,
+                digits: true,
+                rangelength: [10, 10]
+            },
+            password: {
+                required: true,
+                minlength: 4,
+                strongPassword: true
+            },
+            agree: {
+                required: true
+            }
+        },
+        messages: {
+            name: {
+                required: "Please enter your full name",
+                minlength: "Minimum 2 characters",
+                maxlength: "Maximum 50 characters"
+            },
+            email: {
+                required: "Please enter your email",
+                email: "Invalid email format",
+                maxlength: "Maximum 100 characters"
+            },
+            phone: {
+                required: "Please enter your phone number",
+                digits: "Only numbers allowed",
+                rangelength: "Phone number must be exactly 10 digits"
+            },
+            password: {
+                required: "Please enter a password",
+                minlength: "At least 4 characters",
+                strongPassword: "Start with capital & 1 special character"
+            },
+            agree: "You must agree with the terms"
+        },
+        errorPlacement: function (error, element) {
+            error.addClass("text-danger mt-1");
+            error.css("font-size", "11px");
+            if (element.prop("type") === "checkbox") {
+                error.insertAfter(element.closest('label'));
+            } else {
+                error.insertAfter(element);
+            }
+        },
+        highlight: function (element) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element) {
+            $(element).removeClass('is-invalid');
+        },
+        submitHandler: function (form) {
+            // This is called only if form is valid
+            $(".loader_btn").html(loader_btn); // show loader or whatever
             
-            $(".loader_btn").html(loader_btn);
-            $.post($('#register_form').attr('action'), $('#register_form').serialize(), function(json){
-                if (json.st == 1) {   
-                    $('#register_form')[0].reset();
+            $.post($(form).attr('action'), $(form).serialize(), function (json) {
+                if (json.st == 1) {
+                    $(form)[0].reset();
                     $('.account_area').hide();
                     $('.step_1').removeClass('active');
                     $('.step_2').addClass('active');
                     $('.business_area').show();
-                }else if (json.st == 2) {
+                } else if (json.st == 2) {
                     $(".loader_btn").html(msg_get_started);
                     swal({
-                      title: msg_opps,
-                      text: msg_email_exist,
-                      type: "error",
-                      showConfirmButton: true
+                        title: msg_opps,
+                        text: msg_email_exist,
+                        type: "error",
+                        showConfirmButton: true
                     });
-                }else if (json.st == 3) {
+                } else if (json.st == 3) {
                     $(".loader_btn").html(msg_get_started);
                     swal({
-                      title: msg_opps,
-                      text: msg_recaptcha_is_required,
-                      type: "error",
-                      showConfirmButton: true
+                        title: msg_opps,
+                        text: msg_recaptcha_is_required,
+                        type: "error",
+                        showConfirmButton: true
                     });
-                }else {
+                } else {
                     $(".loader_btn").html(msg_get_started);
-                    $('#register_form')[0].reset();
+                    $(form)[0].reset();
                     swal({
-                      title: msg_error,
-                      text: json.st,
-                      type: "error",
-                      showConfirmButton: true
+                        title: msg_error,
+                        text: json.st,
+                        type: "error",
+                        showConfirmButton: true
                     });
                 }
-            },'json');
-            return false;
-        });
+            }, 'json');
+        }
     });
 
+});
 
-    $(function(){
-        $(document).on('submit', "#business_form", function() {
-            form_original_data = $(".leave_con").serialize(); 
-            
-            $(".loader_btn2").html(loader_btn);
-            $.post($('#business_form').attr('action'), $('#business_form').serialize(), function(json){
-                if (json.st == 1) {  
-                    $('#business_form')[0].reset();
+// business_form validation
+
+ $(document).ready(function () {
+    // Enable timezone select dynamically based on country selection
+    $('#country').on('change', function () {
+        if ($(this).val() !== "") {
+            $('#timezone_select').prop('disabled', false);
+        } else {
+            $('#timezone_select').prop('disabled', true).val('');
+        }
+    });
+
+    $('#business_form').validate({
+        ignore: [], // ensure all fields are validated (even disabled ones)
+        rules: {
+            name: {
+                required: true,
+                minlength: 2,
+                maxlength: 100
+            },
+            country: {
+                required: true
+            },
+            time_zone: {
+                required: true
+            },
+            category: { // corrected from 'business_type'
+                required: true
+            }
+        },
+        messages: {
+            name: {
+                required: "Please enter your business name",
+                minlength: "Minimum 2 characters",
+                maxlength: "Maximum 100 characters"
+            },
+            country: {
+                required: "Please select a country"
+            },
+            time_zone: {
+                required: "Please select a time zone"
+            },
+            category: {
+                required: "Please select a type"
+            }
+        },
+        errorPlacement: function (error, element) {
+            error.addClass("text-danger mt-1");
+            error.css("font-size", "11px");
+            error.insertAfter(element);
+        },
+        highlight: function (element) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element) {
+            $(element).removeClass('is-invalid');
+        },
+        submitHandler: function (form) {
+                      $(".loader_btn").html(loader_btn); // show loader or whatever
+
+            $.post($(form).attr('action'), $(form).serialize(), function (json) {
+                if (json.st == 1) {
+                    form.reset();
                     $('.account_area').hide();
                     $('.business_area').hide();
                     $('.step_3').addClass('active');
                     $('.pricing_area').show();
-                }else if (json.st == 3) {  
-                    window.location.href = base_url +'admin/subscription/upgrade_plan';
-                }else if (json.st == 4) {  
-                    window.location.href = base_url+'auth/verify_email';
+                } else if (json.st == 3) {
+                    window.location.href = base_url + 'admin/subscription/upgrade_plan';
+                } else if (json.st == 4) {
+                    window.location.href = base_url + 'auth/verify_email';
                 } else if (json.st == 5) {
                     window.location.href = base_url + 'admin/subscription/current_plan';
                 } else {
-                    $('#business_form')[0].reset();
                     $(".loader_btn2").html('Create');
                     swal({
-                      title: msg_error,
-                      text: json.st,
-                      type: "error",
-                      showConfirmButton: true
+                        title: msg_error,
+                        text: json.st,
+                        type: "error",
+                        showConfirmButton: true
                     });
                 }
-            },'json');
+            }, 'json');
+
             return false;
-        });
+        }
     });
+});
+
 
 
 
