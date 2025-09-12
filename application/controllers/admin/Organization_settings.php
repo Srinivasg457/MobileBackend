@@ -8,6 +8,7 @@ class Organization_settings extends Home_Controller {
         parent::__construct();
         // Load database library
         $this->load->database();
+        $this->load->model('hrm_model');
     }
 
     public function index(): void
@@ -52,7 +53,7 @@ class Organization_settings extends Home_Controller {
         $data['page_title'] = 'Ex Organization settings';
         $data['can_edit'] = $this->auth_model->get_permission(5);
         $data['countries'] = $this->admin_model->select('country');
-        $data['empoyees_settngs'] = $this->get_all_org_employee_settings();
+        $data['empoyees_settings'] = $this->get_all_org_employee_settings();
         // $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -69,7 +70,7 @@ class Organization_settings extends Home_Controller {
         $data['page_title'] = 'Ex Organization settings';
         $data['can_edit'] = $this->auth_model->get_permission(5);
         $data['countries'] = $this->admin_model->select('country');
-        $data['empoyees'] = $this->get_all_org_employee_no_settings();
+        $data['employees'] = $this->get_all_org_employee_no_settings();
         // $data["timezone"] = $this->admin_model->get_timezone_list();
         $data['main_content'] = $this->load->view('admin/org_exception_settings', $data, TRUE);
         $this->load->view('admin/index', $data);
@@ -679,16 +680,61 @@ public function save_org_settings()
             return ['error' => 'Missing user_id parameter.'];
         }
 
+        // ✅ Get employees
+        $employeeDetails = $this->hrm_model->get_employees();
+
+        // ✅ Get exception settings for this user
         $query = $this->db->get_where('organization_exception_setting', [
             'user_id' => $user_id
         ]);
+        $settings = $query->num_rows() > 0 ? $query->result_array() : [];
 
-        if ($query->num_rows() > 0) {
-            return $query->result_array(); // ✅ return array directly
-        } else {
-            return ['error' => 'No exception settings found for this user.'];
+        // ✅ Index settings by employee_id
+        $settingsByEmp = [];
+        foreach ($settings as $s) {
+            $settingsByEmp[$s['employee_id']] = [
+                'screenshot' => [
+                    'flag'     => $s['screenshot'] ?? 1,
+                    'interval' => $s['screenshot_interval'] ?? 10
+                ],
+                'webcam' => [
+                    'flag'     => $s['webcam'] ?? 1,
+                    'interval' => $s['webcam_interval'] ?? 10
+                ],
+                'mouse_movement' => [
+                    'flag'     => $s['mouse_movement'] ?? 1,
+                    'interval' => $s['mouse_movement_interval'] ?? 10
+                ],
+                'keystrokes' => [
+                    'flag'     => $s['keystrokes'] ?? 1,
+                    'interval' => $s['keystrokes_interval'] ?? 10
+                ]
+            ];
         }
+
+        // ✅ Merge employees with their settings
+        $final = [];
+        foreach ($employeeDetails as $emp) {
+            $final[] = [
+                'id'         => $emp->id,
+                'user_id'    => $emp->user_id,
+                'name'       => $emp->name,
+                'email'      => $emp->email,
+                'department' => $emp->department_name ?? '',
+                'role'       => $emp->role_name ?? '',
+                'settings'   => $settingsByEmp[$emp->id] ?? [
+                    'screenshot' => ['flag' => 1, 'interval' => 10],
+                    'webcam' => ['flag' => 1, 'interval' => 10],
+                    'mouse_movement' => ['flag' => 1, 'interval' => 10],
+                    'keystrokes' => ['flag' => 1, 'interval' => 10],
+                ]
+            ];
+        }
+
+        return $final;
     }
+
+
 
     public function get_all_org_employee_no_settings()
     {
