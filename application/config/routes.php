@@ -89,6 +89,7 @@ $route['admin/view_screenshots'] = 'admin/ScreenshotController';
 $route['admin/webcam_screenshots'] = 'admin/ScreenshotController/webcam';
 $route['admin/organization_settings'] = 'admin/Organization_settings/Organization_settings_edit';
 $route['admin/employee_settings'] = 'admin/Organization_settings/org_exception_settings';
+$route['admin/no_employee_settings'] = 'admin/Organization_settings/no_org_exception_settings';
 $route['admin/activity_logs'] = 'admin/Activity_logs';
 $route['admin/time_cards'] = 'admin/Activity_logs/Time_Cards';
 $route['admin/application_tracker'] = 'admin/Application_Tracker';
