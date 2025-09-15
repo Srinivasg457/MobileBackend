@@ -61,12 +61,18 @@
                                             <td><?php echo $employee['role']; ?></td>
 
                                             <td class="text-center">
-
-                                                <button class="btn btn-default rounded add-settings-btn" data-toggle="tooltip" data-id="<?php echo $employee['id']; ?>"
-                                                    data-user-id="<?php echo $employee['user_id']; ?>" data-placement="top" style="margin-top:5px;">
-                                                    <i class="fa fa-plus"></i> Add Settings
-                                                </button>
-
+                                                <?php if ($can_edit): ?>
+                                                    <button class="btn btn-default rounded add-settings-btn" data-toggle="tooltip"
+                                                        data-id="<?php echo $employee['id']; ?>" data-user-id="<?php echo $employee['user_id']; ?>"
+                                                        data-placement="top" style="margin-top:5px;">
+                                                        <i class="fa fa-plus"></i> Add Settings
+                                                    </button>
+                                                <?php else: ?>
+                                                    <span class="btn btn-default rounded" data-toggle="tooltip"
+                                                        data-placement="top" style="margin-top:5px;" title="permission denied to manage employee settings">
+                                                        <i class="fa fa-plus"></i> Add Settings
+                                                    </span>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php $i++;
@@ -109,39 +115,57 @@
                                             <td class="text-center mr-5">
                                                 <a href="#" class="view-permissions"
                                                     data-role="${role.role_name}"
-                                                    data-features='${JSON.stringify(featureDetails)}'
+                                                    data-features='<?php echo json_encode($employees_setting); ?>'
                                                     title="View settings">
                                                     <i class="bi bi-eye-fill text-primary" style="font-size: 1.5rem;"></i>
                                                 </a>
                                             </td>
 
                                             <td class="actions view-settings text-center" width="15%">
+                                                <?php if ($can_edit): ?>
+                                                    <a href="#"
+                                                        class="on-default edit-row"
+                                                        data-toggle="tooltip"
+                                                        data-placement="top"
+                                                        data-id="<?php echo $employees_setting['id']; ?>"
+                                                        data-user-id="<?php echo $employees_setting['user_id']; ?>"
+                                                        title="Edit"
+                                                        data-original-title="Edit"
+                                                        data-employee='<?php echo json_encode($employees_setting); ?>'>
+                                                        <i class="fa fa-pencil"></i>
+                                                    </a>
 
-                                                <a href="#"
-                                                    class="on-default edit-row"
-                                                    data-toggle="tooltip"
-                                                    data-placement="top"
-                                                    data-id="<?php echo $employees_setting['id']; ?>"
-                                                    data-user-id="<?php echo $employees_setting['user_id']; ?>"
-                                                    title="Edit"
-                                                    data-original-title="Edit"
-                                                    data-employee='<?php echo json_encode($employees_setting); ?>'>
-                                                    <i class="fa fa-pencil"></i>
-                                                </a>
+                                                    <a
+                                                        data-val="department"
+                                                        data-id="<?php echo $employees_setting['id']; ?>"
+                                                        data-user-id="<?php echo $employees_setting['user_id']; ?>"
+                                                        href="<?php echo base_url('admin/Organization_settings/settings_delete/'  . html_escape($employees_setting['id'])) ?>"
+                                                        class="on-default remove-row delete_item"
+                                                        data-toggle="tooltip"
+                                                        data-placement="top"
+                                                        title="Delete"
+                                                        data-original-title="Delete">
+                                                        <i class="fa fa-trash-o"></i>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <a href="#"
+                                                        class="on-default edit-row"
+                                                        data-toggle="tooltip"
+                                                        data-placement="top"
+                                                        title="Permission denied"
+                                                        data-original-title="Edit">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </a>
 
-                                                <a
-                                                    data-val="department"
-                                                    data-id="<?php echo $employees_setting['id']; ?>"
-                                                    data-user-id="<?php echo $employees_setting['user_id']; ?>"
-                                                    href="<?php echo base_url('admin/Organization_settings/settings_delete/'  . html_escape($employees_setting['id'])) ?>"
-                                                    class="on-default remove-row delete_item"
-                                                    data-toggle="tooltip"
-                                                    data-placement="top"
-                                                    title="Delete"
-                                                    data-original-title="Delete">
-                                                    <i class="fa fa-trash-o"></i>
-                                                </a>
-
+                                                    <a href="#"
+                                                        class="on-default"
+                                                        data-toggle="tooltip"
+                                                        data-placement="top"
+                                                        title="Permission denied"
+                                                        data-original-title="Delete">
+                                                        <i class="fa fa-trash-o"></i>
+                                                    </a>
+                                                <?php endif; ?>
                                             </td>
 
                                         </tr>
@@ -330,7 +354,7 @@
                                         <?php if ($can_edit): ?>
                                             <button type="submit" class="btn btn-info">Save Settings</button>
                                         <?php else: ?>
-                                            <span data-toggle="tooltip" data-placement="top" title="permission denied to manage employee settings" class="btn btn-default btn-sm m-5">save Settings</span>
+                                            <span data-toggle="tooltip" data-placement="right" title="permission denied to manage employee settings" class="btn btn-default btn-sm m-5">Save Settings</span>
                                         <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
@@ -560,7 +584,7 @@
             $('#timezoneModal').modal('show');
         });
         $('.view-permissions').on('click', function() {
-            const employeeData = $(this).closest('tr').find('.edit-row').data('employee');
+            const employeeData = $(this).data('features');
             const settings = employeeData.settings;
 
             // Clear old rows
