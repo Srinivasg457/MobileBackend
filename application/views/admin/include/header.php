@@ -429,6 +429,29 @@
 
     .org-settings,
     .org_exception_settings {
+      .actions {
+        display: flex;
+        gap: 5px;
+
+        /* >a {
+          color: black;
+
+          >i {
+            transition: color 0.3s;
+            font-size: 20px;
+            margin-top: 5px;
+          }
+        } */
+/* 
+        >a:hover>i {
+          color: green;
+        }
+
+        >a:nth-child(2):hover>i {
+          color: red;
+        } */
+      }
+
       .toggle-switch {
         >.toggle {
           width: 90px !important;
