@@ -357,9 +357,11 @@
                             <div class="col-sm-6">
                                 <label class="form-label" for="">Time zone :</label><span class="" id="timeZoneValue"></span>
                             </div>
-                            <div class="col-sm-6">
-                                <label class="form-label" for="">Self Login :</label><span class="" id="selfLoginValue"></span>
+                            <div id="selfLoginStatus" class="mb-3">
+                                <label class="form-label">Self Login :</label>
+                                <span id="selfLoginValue"></span>
                             </div>
+
                         </div>
 
 
@@ -498,6 +500,7 @@
         return isValid;
     }
 
+
     $(document).ready(function() {
         $('.add-settings-btn').click(function() {
             let employeeId = $(this).data('id');
@@ -567,6 +570,22 @@
             // Set timezone
             $('#timeZoneValue').text(settings.time_zone || 'Not Set');
 
+            // self login
+            const selfLoginStatus = settings.self_login == 1 ? 'On' : 'Off';
+            const selfLoginColor = settings.self_login == 1 ? 'label label-success' : 'label label-danger';
+
+            console.log('Evaluated Status:', selfLoginStatus);
+            console.log('Evaluated Class:', selfLoginColor);
+
+            $('#selfLoginValue')
+                .removeClass()
+                .addClass(selfLoginColor)
+                .text(selfLoginStatus);
+
+            // (rest of your code to build the table etc.)
+
+            $('#view_settings').modal('show');
+
             // Prepare mapping (so labels look good)
             const settingMap = [{
                     key: 'screenshot',
@@ -587,11 +606,6 @@
                 {
                     key: 'idle_time',
                     label: 'Idle Time'
-                },
-                {
-                    key: 'self_login',
-                    label: 'Self Login',
-                    noInterval: true
                 }
             ];
 
