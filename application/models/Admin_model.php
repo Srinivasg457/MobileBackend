@@ -2521,6 +2521,27 @@ class Admin_model extends CI_Model {
         $this->db->delete($table, array('post_id' => $post_id));
         return;
     }
+    function delete_settings($employee_id, $table)
+    {
+        $user_id = $this->session->userdata('id');
+        if (!$user_id) {
+            return false; // safety check
+        }
+
+        // Delete from given settings table
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->delete($table);
+
+        // Update employees table → reset settings_status = 1
+        $this->db->where('id', $employee_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->update('employees', ['settings_status' => 1]);
+
+        return;
+    }
+
+
 
     // delete tax
     function delete_tax($product_id, $table){
