@@ -587,6 +587,48 @@ class Organization_settings extends Home_Controller
 
 
 
+    public function get_organization_settings()
+    {
+        $status = $this->input->get('status');
+
+        if (!$status) {
+            echo json_encode(['error' => 'Missing status parameter.']);
+            return;
+        }
+
+        // Determine input parameter and table based on status
+        if ($status == 1) {
+            $user_id = $this->input->get('user_id') ?? $this->session->userdata('user_id');
+            if (!$user_id) {
+                echo json_encode(['error' => 'Missing user_id parameter.']);
+                return;
+            }
+            $table = 'org_settings';
+            $column = 'user_id';
+            $value = $user_id;
+        } else if ($status == 2) {
+            $employee_id = $this->input->get('employee_id');
+            if (!$employee_id) {
+                echo json_encode(['error' => 'Missing employee_id parameter.']);
+                return;
+            }
+            $table = 'organization_exception_setting';
+            $column = 'employee_id';
+            $value = $employee_id;
+        } else {
+            echo json_encode(['error' => 'Invalid status value.']);
+            return;
+        }
+
+        // Query the database
+        $query = $this->db->get_where($table, [$column => $value]);
+
+        if ($query->num_rows() > 0) {
+            echo json_encode($query->row_array());
+        } else {
+            echo json_encode(['error' => 'No settings found.']);
+        }
+    }
     public function get_organization_settings_for_deletion($status, $employee_id)
     {
         if (!$status) {
