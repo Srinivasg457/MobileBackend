@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
@@ -111,7 +111,7 @@ $route['admin/subscription/upgrade_plan'] = 'admin/subscription';
 //employee sites
 $route['accept-invitation'] = 'employee/Employee/accept_invitation';
 $route['complete-registration'] = 'employee/Employee/complete_registration';
-
+$route['employee/application_tracker'] = 'admin/Application_Tracker/employee_application_tracker';
 $route['employee/dashboard'] = 'employee/EmployeeDashboard';
 $route['employee/view_screenshots'] = 'employee/Employee/screenshot';
 $route['employee/webcam_screenshots'] = 'admin/ScreenshotController/Employeewebcam';
