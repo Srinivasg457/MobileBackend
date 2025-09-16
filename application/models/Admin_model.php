@@ -2536,7 +2536,7 @@ class Admin_model extends CI_Model {
         // Update employees table → reset settings_status = 1
         $this->db->where('id', $employee_id);
         $this->db->where('user_id', $user_id);
-        $this->db->update('employees', ['settings_status' => 1]);
+        $this->db->update('employees', ['settings_status' => 1, 'self_login' => 0]);
 
         return;
     }
