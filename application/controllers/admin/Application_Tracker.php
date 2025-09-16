@@ -1,16 +1,17 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Application_Tracker extends Home_Controller {
+class Application_Tracker extends Home_Controller
+{
 
-       public function __construct()
+    public function __construct()
     {
         parent::__construct();
         $this->load->database();
         $this->load->helper(['url', 'form']);
-         $this->load->library('session');
+        $this->load->library('session');
     }
-     public function index()
+    public function index()
     {
         require_feature(13);
         if (!is_subscribed()) {
@@ -56,6 +57,29 @@ class Application_Tracker extends Home_Controller {
         }
 
         $data['main_content'] = $this->load->view('admin/application_tracker', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
+
+
+    public function employee_application_tracker()
+    {
+        $employee_id = $this->session->userdata('employee_id');  // temporary static
+        $data['page_title'] = "employee_application_tracker";
+        $date  = $this->input->post('date', true) ?? $this->input->get('date') ?? date('Y-m-d');
+        $order = $this->input->post('order', true) ?? $this->input->get('order') ?? "descending";
+
+        $data['date']        = $date;
+        $data['order']       = $order;
+        $data['response'] = $this->get_application_usage_grouped_by_app($employee_id, $date, $order);
+        // Example empty data (replace with model call later)
+        $data['data'] = [
+            'total_applications' => 0,
+            'total_usage_time'   => '0s',
+            'applications'       => []
+        ];
+
+        // make sure this view exists: application/views/employee/application_tracker.php
+        $data['main_content'] = $this->load->view('admin/employee/application_tracker', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
 
@@ -192,7 +216,7 @@ class Application_Tracker extends Home_Controller {
     // }
 
 
- 
+
 
     public function get_application_usage_grouped_by_app($employee_id, $date, $listOrder)
     {
@@ -304,7 +328,7 @@ class Application_Tracker extends Home_Controller {
                     'formatted_time' => $row['formatted_time']
                 ];
             }
-            $order ? arsort($grouped): asort($grouped);
+            $order ? arsort($grouped) : asort($grouped);
             // Format output
             $response = [
                 'status' => 'success',
