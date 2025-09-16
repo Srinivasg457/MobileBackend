@@ -102,6 +102,43 @@ class Organization_settings extends Home_Controller
             'payload' => $settings   // ✅ correct key name
         ]);
     }
+    public function get_settings_status()
+    {
+        $employee_id = 5;
+        $user_id = 4;
+        // $employee_id = $this->input->get('employee_id');
+        // $user_id = $this->input->get('user_id');
+
+        if (!$employee_id || !$user_id) {
+            echo json_encode(['error' => 'Missing employee_id or user_id parameter.']);
+            return;
+        }
+
+        // Query the database selecting only settings_status
+        $query = $this->db
+            ->select('settings_status')
+            ->get_where('employees', [
+                'id' => $employee_id,
+                'user_id' => $user_id
+            ]);
+
+        if ($query->num_rows() > 0) {
+            echo json_encode([
+                'status' => true,
+                'message' => 'Employee found.',
+                'settings_status' => $query->row()->settings_status // Return only this field
+            ]);
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Employee is not there.'
+            ]);
+        }
+    }
+
+
+
+
 
 
     public function save_org_settings()
