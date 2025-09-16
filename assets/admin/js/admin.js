@@ -1348,6 +1348,45 @@
       return false;
 
     });
+  
+  $(document).on('click', ".delete_Assigned_Settings_item", function () {
+
+    var del_url = $(this).attr('href');
+    var itemId = $(this).attr('data-id');
+
+
+    swal({
+      title: msg_are_you_sure,
+      text: msg_not_recover_file,
+      type: "warning",
+      showCancelButton: true,
+      cancelButtonText: msg_cancel,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: msg_yes,
+      closeOnConfirm: false
+    },
+      function () {
+
+        $.post(del_url, { data: 'value', 'csrf_test_name': csrf_token }, function (json) {
+          if (json.st == 1) {
+            swal({
+              title: msg_success,
+              text: msg_del_success,
+              type: "success",
+              showCancelButton: false
+            }),
+              $("#row_" + itemId).slideUp();
+          } 
+          let payload = json.payload;
+          let employeeId = json.payload?.employeeId;
+          changeOrganizationSetting(employeeId, payload);
+        }, 'json');
+
+      });
+
+    return false;
+
+  });
 
 
     $(document).on('click', ".reset_pass", function() {

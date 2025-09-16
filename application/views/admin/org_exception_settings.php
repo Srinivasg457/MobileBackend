@@ -140,7 +140,7 @@
                                                         data-id="<?php echo $employees_setting['id']; ?>"
                                                         data-user-id="<?php echo $employees_setting['user_id']; ?>"
                                                         href="<?php echo base_url('admin/Organization_settings/settings_delete/'  . html_escape($employees_setting['id'])) ?>"
-                                                        class="on-default remove-row delete_item"
+                                                        class="on-default remove-row delete_Assigned_Settings_item"
                                                         data-toggle="tooltip"
                                                         data-placement="top"
                                                         title="Delete"

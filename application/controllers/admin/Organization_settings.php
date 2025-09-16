@@ -95,8 +95,14 @@ class Organization_settings extends Home_Controller
     public function settings_delete($id)
     {
         $this->admin_model->delete_settings($id, 'organization_exception_setting');
-        echo json_encode(array('st' => 1));
+        $settings = $this->get_organization_settings_for_deletion(1, $id);
+
+        echo json_encode([
+            'st'      => 1,
+            'payload' => $settings   // ✅ correct key name
+        ]);
     }
+
 
     public function save_org_settings()
     {
@@ -160,6 +166,7 @@ class Organization_settings extends Home_Controller
         $payload = [
             'userId'   => (int) $user_id,
             'employeeId' => null,
+            'settingsRemoved' => false,
             'settings' => [
                 'screenshot_flag'          => $data['screenshot_flag'],
                 'screenshot_time_interval' => $data['screenshot_time_interval'],
@@ -266,6 +273,7 @@ class Organization_settings extends Home_Controller
         $payload = [
             'employeeId' => (int) $employee_id,
             'userId'     => (int) $user_id,
+            'settingsRemoved' => false,
             'settings'   => [
                 'screenshot_flag'          => $data['screenshot_flag'],
                 'screenshot_time_interval' => $data['screenshot_time_interval'],
@@ -566,7 +574,7 @@ class Organization_settings extends Home_Controller
         e.email,
         d.name AS department,
         r.role_name As role
-    ');
+     ');
         $this->db->from('employees AS e');
         $this->db->where('e.business_id', $business_uid);
         $this->db->where('e.settings_status', 1); // Only employees without active settings
@@ -579,48 +587,54 @@ class Organization_settings extends Home_Controller
 
 
 
-    public function get_organization_settings()
+    public function get_organization_settings_for_deletion($status, $employee_id)
     {
-        $status = $this->input->get('status');
-
         if (!$status) {
-            echo json_encode(['error' => 'Missing status parameter.']);
-            return;
+            return ['error' => 'Missing status parameter.'];
         }
 
-        // Determine input parameter and table based on status
         if ($status == 1) {
-            $user_id = $this->input->get('user_id') ?? $this->session->userdata('user_id');
+            $user_id = $this->session->userdata('id') ?? $this->session->userdata('user_id');
             if (!$user_id) {
-                echo json_encode(['error' => 'Missing user_id parameter.']);
-                return;
+                return ['error' => 'Missing user_id parameter.'];
             }
-            $table = 'org_settings';
+
+            $table  = 'org_settings';
             $column = 'user_id';
-            $value = $user_id;
-        } else if ($status == 2) {
-            $employee_id = $this->input->get('employee_id');
-            if (!$employee_id) {
-                echo json_encode(['error' => 'Missing employee_id parameter.']);
-                return;
-            }
-            $table = 'organization_exception_setting';
-            $column = 'employee_id';
-            $value = $employee_id;
+            $value  = $user_id;
         } else {
-            echo json_encode(['error' => 'Invalid status value.']);
-            return;
+            return ['error' => 'Invalid status value.'];
         }
 
-        // Query the database
         $query = $this->db->get_where($table, [$column => $value]);
 
         if ($query->num_rows() > 0) {
-            echo json_encode($query->row_array());
-        } else {
-            echo json_encode(['error' => 'No settings found.']);
+            $data = $query->row_array();
+
+            return [
+                'employeeId'      => (int) $employee_id,
+                'userId'          => (int) $user_id,
+                'settingsRemoved' => true,
+                'settings'        => [
+                    'screenshot_flag'          => $data['screenshot_flag'],
+                    'screenshot_time_interval' => $data['screenshot_time_interval'],
+                    'webcam_flag'              => $data['webcam_flag'],
+                    'webcam_time_interval'     => $data['webcam_time_interval'],
+                    'mouse_move_flag'          => $data['mouse_move_flag'],
+                    'mouse_move_threshold'     => $data['mouse_move_threshold'],
+                    'key_stroke_flag'          => $data['key_stroke_flag'],
+                    'key_stroke_threshold'     => $data['key_stroke_threshold'],
+                    'idle_time_flag'           => $data['idle_time_flag'],
+                    'timecards_time_interval'  => $data['timecards_time_interval'],
+                    'self_login'               => $data['self_login'],
+                    'time_zone'                => $data['time_zone'],
+                ],
+            ];
         }
+
+        return ['error' => 'No settings found.'];
     }
+
 
 
 
