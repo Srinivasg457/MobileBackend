@@ -10,7 +10,7 @@
                             <ul class="nav nav-tabs admin">
                                 <li>
                                     <a class="<?php if (isset($navbar) && $navbar == 'own_settings') echo 'active'; ?>"
-                                        href="<?php echo base_url('admin/employee_settings') ?>">
+                                        href="<?php echo base_url('admin/employee_settings/assigned') ?>">
                                         <i class="fa fa-cogs"></i>
                                         <span class="hidden-xs"><?php echo "Assigned" ?></span>
                                     </a>
@@ -18,7 +18,7 @@
 
                                 <li>
                                     <a class="<?php if (isset($navbar) && $navbar == 'no_own_settings') echo 'active'; ?>"
-                                        href="<?php echo base_url('admin/no_employee_settings') ?>">
+                                        href="<?php echo base_url('admin/employee_settings/unassigned') ?>">
                                         <i class="fa fa-ban"></i>
                                         <span class="hidden-xs"><?php echo "Unassigned" ?></span>
                                     </a>
