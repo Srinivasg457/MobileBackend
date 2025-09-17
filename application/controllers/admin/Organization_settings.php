@@ -104,10 +104,10 @@ class Organization_settings extends Home_Controller
     }
     public function get_settings_status()
     {
-        $employee_id = 5;
-        $user_id = 4;
-        // $employee_id = $this->input->get('employee_id');
-        // $user_id = $this->input->get('user_id');
+        // $employee_id = 5;
+        // $user_id = 4;
+        $employee_id = $this->input->get('employee_id');
+        $user_id = $this->input->get('user_id');
 
         if (!$employee_id || !$user_id) {
             echo json_encode(['error' => 'Missing employee_id or user_id parameter.']);
