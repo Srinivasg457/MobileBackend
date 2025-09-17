@@ -44,7 +44,7 @@
             <li class="nav-item <?= (isset($page_title) && $page_title == "employee_application_tracker") ? "active" : "" ?>"
               <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a class="nav-link" href="<?= base_url('employee/application_tracker') ?>">
-                <i class="bi bi-window-stack mr-2"></i> <span><?php echo "Applicatio Tracker" ?></span>
+                <i class="bi bi-window-stack mr-2"></i> <span><?php echo "Application Tracker" ?></span>
               </a>
             </li>
             <li class="<?php if (isset($page_title) && $page_title == "Report") {
@@ -589,7 +589,8 @@
 
                 </ul>
               </li>
-              <!-- Live Monitoring -->
+              <!-- Application Tracker -->
+
               <li class="<?php if (isset($page_title) && $page_title == "application_tracker") {
                             echo "active";
                           } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -597,7 +598,7 @@
                   <i class="bi bi-window-stack mr-5"></i> <span><?php echo "Application Tracker" ?></span>
                 </a>
               </li>
-              <!-- Application Tracker -->
+              <!-- Live Monitoring -->
               <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
                             echo "active";
                           } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>

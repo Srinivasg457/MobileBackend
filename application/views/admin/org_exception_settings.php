@@ -191,9 +191,9 @@
                         </h3>
                         <div class="box-tools pull-right">
                             <a href=" <?php if (isset($navbar) && $navbar == 'own_settings'):
-                                            echo base_url('admin/employee_settings');
+                                            echo base_url('admin/employee_settings/assigned');
                                         else :
-                                            echo base_url('admin/no_employee_settings');
+                                            echo base_url('admin/employee_settings/unassigned');
                                         endif; ?>" class="pull-right btn btn-default btn-sm back-btn"><i class="fa fa-angle-left"></i> Back</a>
                         </div>
                     </div>
