@@ -87,7 +87,7 @@
                                     </div>
                                     <button type="button" class="btn btn-default show-windows-modal"
                                         data-app="<?= htmlspecialchars($appName) ?>"
-                                        data-windows='<?= json_encode($appData['windows']) ?>'>
+                                        data-windows='<?= htmlspecialchars(json_encode($appData['windows']), ENT_QUOTES, 'UTF-8') ?>'>
                                         <i class="bi bi-window-stack mr-5"></i>
                                         Windows (<?= count($appData['windows']) ?>)
                                     </button>
@@ -156,9 +156,20 @@
             // Show window details in modal
             $(document).on('click', '.show-windows-modal', function() {
                 const appName = $(this).data('app');
-                const windows = $(this).data('windows');
 
                 // Merge windows with the same title
+                let windows = $(this).data('windows');
+
+                // If it's a string, parse it
+                if (typeof windows === "string") {
+                    try {
+                        windows = JSON.parse(windows);
+                    } catch (e) {
+                        console.error("Invalid windows JSON", e);
+                        windows = [];
+                    }
+                }
+
                 const merged = {};
                 windows.forEach(function(window) {
                     if (!merged[window.window_title]) {
@@ -182,7 +193,7 @@
                     if (minutes > 0) timeStr += minutes + 'min ';
                     if (seconds > 0) timeStr += seconds + 's';
 
-                    // Shorten title to 20 characters + ellipsis if too long
+                    // Shorten title to 85 characters
                     let displayTitle = title;
                     if (title.length > 85) {
                         displayTitle = title.substring(0, 85) + '...';
