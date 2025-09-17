@@ -1,3 +1,7 @@
 system.zip
 application/config/database.php
 application/config/database.php
+/uploads/screenshots/
+/uploads/screenshots_compressed/
+/uploads/webcam/
+/uploads/webcam_compressed/
