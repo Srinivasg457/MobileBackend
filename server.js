@@ -57,7 +57,7 @@ wss.on('connection', (ws) => {
                   streamerSocket.send(
                     JSON.stringify({
                       action: "settings",
-                      settings: msg,
+                      settings: msg.settings,
                     })
                   );
                   console.log(`Sent settings to department`);

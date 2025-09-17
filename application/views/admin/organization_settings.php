@@ -392,7 +392,8 @@
                 data: formData,
                 success: function(response) {
                     swal("Success!", 'Organization settings saved successfully!', "success");
-                    window.changeOrganizationSetting(null, response.payload)
+                    let p = response.payload
+                    changeOrganizationSetting(null, p)
                         // .then((wsResponse) => {
                             // console.log("WS Response:", wsResponse);
                             window.location.href = "<?= base_url('admin/organization_settings') ?>";
