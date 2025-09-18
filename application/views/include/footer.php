@@ -45,7 +45,133 @@
         </div>
     </footer><!-- themeforest:js -->
 <?php endif; ?>
+<!-- chatbot -->
+<div class="chat-bot">
+    <div id="chat-icon">💬</div>
 
+    <div id="chat-window">
+        <div class="header">
+            <button id="new-chat">
+                <img width="30px" src="	http://work-room.local/uploads/thumbnail/3_medium-400x400_thumb-100x100.png" alt="">
+            </button>
+            Chatbot
+            <span id="close-chat" style="position:absolute; right:10px; top:10px; cursor:pointer;">✖</span>
+        </div>
+
+        <div id="chat-content"></div>
+
+        <!-- Quick Reply Buttons -->
+        <div id="quick-replies">
+            <button class="quick-btn">Hello</button>
+            <button class="quick-btn">Can you help me?</button>
+        </div>
+
+        <div id="chat-input">
+            <input type="text" id="chat-message" placeholder="Type a message...">
+            <!-- Emoji Icon -->
+            <!-- <div id="emoji-container">
+            <span id="emoji-btn">😊</span>
+            <div id="emoji-picker">
+              😀 😁 😂 🤔 😎 😍 😡 🙏 👍 👎 🎉 🚀
+            </div>
+          </div> -->
+            <button id="send-message">
+                <i class="fa fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+</div>
+<!-- chatbot script -->
+<script>
+    //  emoji functions
+    // $(document).ready(function() {
+    //   // Toggle emoji picker
+    //   $('#emoji-btn').click(function(e) {
+    //     e.stopPropagation();
+    //     $('#emoji-picker').fadeToggle(150);
+    //   });
+
+    //   // Insert emoji into input
+    //   $('#emoji-picker span').click(function() {
+    //     let emoji = $(this).text();
+    //     let input = $('#chat-message');
+    //     input.val(input.val() + emoji); // append emoji to input
+    //   });
+
+    //   // Hide emoji picker when clicking outside
+    //   $(document).click(function(e) {
+    //     if (!$(e.target).closest('#emoji-container').length) {
+    //       $('#emoji-picker').hide();
+    //     }
+    //   });
+    // });
+    // chat bot
+    $(document).ready(function() {
+        function startNewChat() {
+            $('#chat-content').html('');
+            $('#chat-content').append('<div class="message bot-message">Hello! How can I help you today?</div>');
+            $('#chat-message').val('');
+            $('#chat-content').scrollTop($('#chat-content')[0].scrollHeight);
+        }
+
+        // Show chat window
+        $('#chat-icon').click(function(e) {
+            e.stopPropagation(); // prevent document click from firing
+            $('#chat-window').fadeToggle(200);
+            startNewChat(); // always start new
+        });
+
+        $('#close-chat').click(function() {
+            $('#chat-window').fadeOut(200);
+        });
+
+        // New chat button
+        $('#new-chat').click(function() {
+            startNewChat();
+        });
+
+        function sendMessage(message = null) {
+            let userMessage = message || $('#chat-message').val();
+            if (userMessage.trim() == '') return;
+
+            $('#chat-content').append('<div class="message user-message">' + userMessage + '</div>');
+
+            $.post('<?= base_url("chatbot/get_response") ?>', {
+                message: userMessage
+            }, function(data) {
+                let res = JSON.parse(data);
+                $('#chat-content').append('<div class="message bot-message">' + res.reply + '</div>');
+                $('#chat-content').scrollTop($('#chat-content')[0].scrollHeight);
+            });
+
+            $('#chat-message').val('');
+        }
+
+        // Send on button click
+        $('#send-message').click(function() {
+            sendMessage();
+        });
+
+        // Send on Enter key
+        $('#chat-message').keypress(function(e) {
+            if (e.which == 13) sendMessage();
+        });
+
+        // Quick reply buttons
+        $(document).on('click', '.quick-btn', function() {
+            let message = $(this).text();
+            sendMessage(message);
+        });
+
+        // Close chat when clicking outside
+        $(document).click(function(e) {
+            if (!$(e.target).closest('#chat-window, #chat-icon').length) {
+                $('#chat-window').fadeOut(200);
+            }
+        });
+    });
+</script>
 
 
 <?php include 'js_msg_list.php'; ?>
