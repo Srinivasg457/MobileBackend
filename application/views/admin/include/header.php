@@ -75,6 +75,286 @@
   }
   ?>
   <style type="text/css">
+    
+    /* Emoji container
+  .chat-bot  #emoji-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-right: 5px;
+      font-size: 20px;
+    }
+
+    Emoji button
+  .chat-bot  #emoji-btn {
+      padding: 4px;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+
+   .chat-bot #emoji-btn:hover {
+      background: #f0f0f0;
+    }
+
+    Emoji picker hidden by default
+   .chat-bot #emoji-picker {
+      display: none;
+      position: absolute;
+      bottom: 35px;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 6px;
+      border-radius: 8px;
+      font-size: 20px;
+      z-index: 1000;
+      width: 180px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      white-space: normal;
+    }
+
+ .chat-bot   #emoji-picker span {
+      cursor: pointer;
+      padding: 4px;
+    }
+
+ .chat-bot   #emoji-picker span:hover {
+      background: #eee;
+      border-radius: 5px;
+    }
+
+    Hover tooltip preview
+ .chat-bot   #emoji-btn::after {
+      content: "😀 😁 😂";
+      position: absolute;
+      bottom: 35px;
+      right: -20px;
+      background: #333a3d;
+      color: #fff;
+      padding: 4px 6px;
+      border-radius: 5px;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      white-space: nowrap;
+    }
+
+  .chat-bot  #emoji-btn:hover::after {
+      opacity: 1;
+      transform: translateY(0);
+    } */
+
+    /* chatbot */
+
+  .chat-bot  #chat-icon {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: #1e272a;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+      transition: transform 0.3s ease;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(30, 39, 42, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 15px rgba(30, 39, 42, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(30, 39, 42, 0);
+      }
+    }
+
+    /* Hover tooltip */
+ .chat-bot   #chat-icon::after {
+      content: "Need Help?";
+      position: absolute;
+      bottom: 70px;
+      background: #1e272a;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      white-space: nowrap;
+    }
+
+  .chat-bot  #chat-icon:hover::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Chat Window with animation */
+  .chat-bot  #chat-window {
+      display: none;
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 320px;
+      height: 420px;
+      background: #fdfdfd;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      animation: slideUp 0.3s ease forwards;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+   .chat-bot #chat-window .header {
+      background: #1e272a;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+      position: relative;
+      font-weight: bold;
+    }
+
+  .chat-bot  #new-chat {
+      position: absolute;
+      left: 10px;
+      top: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      background: #333a3d;
+      color: #fff;
+      border: none;
+      padding: 1px 15px;
+      border-radius: 5px;
+    }
+
+  .chat-bot  #chat-content {
+      padding: 10px;
+      height: 260px;
+      overflow-y: auto;
+      background: #f1f7fc;
+    }
+
+    /* Message Bubbles */
+  .chat-bot  .message {
+      max-width: 70%;
+      margin: 5px 0;
+      padding: 8px 12px;
+      border-radius: 12px;
+      clear: both;
+    }
+
+  .chat-bot  .bot-message {
+      background: #e5e5e5;
+      float: left;
+      text-align: left;
+    }
+
+  .chat-bot  .user-message {
+      background: #333a3d;
+      color: #fff;
+      float: right;
+      text-align: right;
+    }
+
+  .chat-bot  #quick-replies {
+      padding: 10px;
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      background: #f9f9f9;
+    }
+
+  .chat-bot  #quick-replies button {
+      background: #333a3d;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+  .chat-bot  #chat-input {
+      padding: 10px;
+      display: flex;
+      gap: 5px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+    }
+
+  .chat-bot  #chat-input input {
+      flex: 1;
+      padding: 6px;
+      border-radius: 5px;
+      outline: none;
+      border: 1px solid #ccc;
+    }
+
+  .chat-bot  #chat-input button {
+      padding: 6px 12px;
+      background: #333a3d;
+      color: #fff;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+   .chat-bot #chat-input button:hover {
+      background: rgba(15, 183, 131, 0.8);
+    }
+
+    /* Tooltip on hover  */
+   .chat-bot #chat-input button::after {
+      content: "Send";
+      position: absolute;
+      bottom: 70px;
+      right: 10px;
+      background: #333a3d;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+  .chat-bot  #chat-input button:hover::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+
     /* application_logs custom style */
     .application_logs {
       .header {
@@ -236,11 +516,12 @@
         font-size: 12px;
         /* Slightly smaller for better hierarchy */
       }
-   .time-ago{
-      font-size: 12px;
-      color: #999;
-      font-style: italic;
-   }
+
+      .time-ago {
+        font-size: 12px;
+        color: #999;
+        font-style: italic;
+      }
 
       .online {
         width: 80px;
@@ -442,7 +723,7 @@
             margin-top: 5px;
           }
         } */
-/* 
+        /* 
         >a:hover>i {
           color: green;
         }

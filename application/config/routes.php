@@ -121,3 +121,9 @@ $route['employee/activity_log'] = 'employee/Timecards_manual';
 $route['organization'] = 'admin/Organization_settings';
 
 $route['employee/report'] = 'employee/Report';
+
+
+
+// Chatbot main page
+$route['chatbot'] = 'Chatbot';
+$route['chatbot/get_response'] = 'chatbot/get_response';
