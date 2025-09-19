@@ -286,7 +286,7 @@
                                     <label>Mouse Move Flag:</label><br>
                                     <div>
                                         <label class="toggle-switch ">
-                                            <input type="checkbox" class="toggle-flag" name="mouse_move_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                            <input type="checkbox" class="toggle-flag" name="mouse_move_flag" value="1" checked disabled data-toggle="toggle" data-onstyle="info" data-width="100">
                                         </label>
                                     </div>
                                 </div>
@@ -300,7 +300,7 @@
                                     <label>Keystroke Flag:</label><br>
                                     <div>
                                         <label class="toggle-switch ">
-                                            <input type="checkbox" class="toggle-flag" name="key_stroke_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                            <input type="checkbox" class="toggle-flag" name="key_stroke_flag" value="1" checked disabled data-toggle="toggle" data-onstyle="info" data-width="100">
                                         </label>
                                     </div>
                                 </div>

@@ -52,17 +52,17 @@
                           echo "active";
                         } ?>">
               <a href="<?php echo base_url('employee/time_request') ?>">
-                <i class="bi bi-clock mr-5"></i> <span>Time Request</span>
+                <i class="bi bi-calendar-event mr-5"></i> <span>Time Request</span>
               </a>
             </li>
 
-            <li class="<?php if (isset($page_title) && $page_title == "Report") {
+            <!-- <li class="<?php if (isset($page_title) && $page_title == "Report") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
               <a href="<?php echo base_url('employee/report') ?>">
                 <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Report" ?></span>
               </a>
-            </li>
+            </li> -->
 
             <li class="<?php if (isset($page_title) && $page_title == "Change Password") {
                           echo "active";

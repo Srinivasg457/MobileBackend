@@ -122,8 +122,9 @@
                                 <label class="control-label">Mouse Movement Flag:</label>
                                 <div>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" class="toggle-flag" name="mouse_move_flag" value="1" <?= isset($settings['mouse_move_flag']) && $settings['mouse_move_flag'] ? 'checked' : '' ?> data-target="mouse_move_threshold" data-toggle="toggle" data-onstyle="info" data-width="100"
-                                            <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                        <!-- <input type="checkbox" class="toggle-flag" name="mouse_move_flag" value="1" <?= isset($settings['mouse_move_flag']) && $settings['mouse_move_flag'] ? 'checked' : '' ?> data-target="mouse_move_threshold" data-toggle="toggle" data-onstyle="info" data-width="100"
+                                            <?= $is_edit_mode ? '' : 'disabled' ?>> -->
+                                        <input type="checkbox" class="toggle-flag" name="mouse_move_flag" value="1" checked disabled data-target="mouse_move_threshold" data-toggle="toggle" data-onstyle="info" data-width="100">
                                     </label>
                                 </div>
                             </div>
@@ -141,8 +142,9 @@
                                 <label class="control-label">Keystroke Flag:</label>
                                 <div>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" class="toggle-flag" name="key_stroke_flag" value="1" <?= isset($settings['key_stroke_flag']) && $settings['key_stroke_flag'] ? 'checked' : '' ?> data-target="key_stroke_threshold" data-toggle="toggle" data-onstyle="info" data-width="100"
-                                            <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                        <!-- <input type="checkbox" class="toggle-flag" name="key_stroke_flag" value="1" <?= isset($settings['key_stroke_flag']) && $settings['key_stroke_flag'] ? 'checked' : '' ?> data-target="key_stroke_threshold" data-toggle="toggle" data-onstyle="info" data-width="100"
+                                            <?= $is_edit_mode ? '' : 'disabled' ?>> -->
+                                        <input type="checkbox" class="toggle-flag" name="key_stroke_flag" value="1" checked disabled data-target="key_stroke_threshold" data-toggle="toggle" data-onstyle="info" data-width="100">
                                     </label>
                                 </div>
                             </div>
@@ -394,10 +396,10 @@
                     swal("Success!", 'Organization settings saved successfully!', "success");
                     let p = response.payload
                     changeOrganizationSetting(null, p)
-                        // .then((wsResponse) => {
-                            // console.log("WS Response:", wsResponse);
-                            window.location.href = "<?= base_url('admin/organization_settings') ?>";
-                        // })
+                    // .then((wsResponse) => {
+                    // console.log("WS Response:", wsResponse);
+                    window.location.href = "<?= base_url('admin/organization_settings') ?>";
+                    // })
                     // .catch((err) => {
                     //     console.error("WS Send Error:", err);
                     // });

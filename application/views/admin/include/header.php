@@ -148,7 +148,7 @@
 
     /* chatbot */
 
-  .chat-bot  #chat-icon {
+    .chat-bot #chat-icon {
       position: fixed;
       bottom: 20px;
       right: 20px;
@@ -182,7 +182,7 @@
     }
 
     /* Hover tooltip */
- .chat-bot   #chat-icon::after {
+    .chat-bot #chat-icon::after {
       content: "Need Help?";
       position: absolute;
       bottom: 70px;
@@ -197,13 +197,13 @@
       white-space: nowrap;
     }
 
-  .chat-bot  #chat-icon:hover::after {
+    .chat-bot #chat-icon:hover::after {
       opacity: 1;
       transform: translateY(0);
     }
 
     /* Chat Window with animation */
-  .chat-bot  #chat-window {
+    .chat-bot #chat-window {
       display: none;
       position: fixed;
       bottom: 90px;
@@ -232,7 +232,7 @@
       }
     }
 
-   .chat-bot #chat-window .header {
+    .chat-bot #chat-window .header {
       background: #1e272a;
       color: #fff;
       padding: 10px;
@@ -241,7 +241,7 @@
       font-weight: bold;
     }
 
-  .chat-bot  #new-chat {
+    .chat-bot #new-chat {
       position: absolute;
       left: 10px;
       top: 5px;
@@ -254,7 +254,7 @@
       border-radius: 5px;
     }
 
-  .chat-bot  #chat-content {
+    .chat-bot #chat-content {
       padding: 10px;
       height: 260px;
       overflow-y: auto;
@@ -262,7 +262,7 @@
     }
 
     /* Message Bubbles */
-  .chat-bot  .message {
+    .chat-bot .message {
       max-width: 70%;
       margin: 5px 0;
       padding: 8px 12px;
@@ -270,20 +270,20 @@
       clear: both;
     }
 
-  .chat-bot  .bot-message {
+    .chat-bot .bot-message {
       background: #e5e5e5;
       float: left;
       text-align: left;
     }
 
-  .chat-bot  .user-message {
+    .chat-bot .user-message {
       background: #333a3d;
       color: #fff;
       float: right;
       text-align: right;
     }
 
-  .chat-bot  #quick-replies {
+    .chat-bot #quick-replies {
       padding: 10px;
       display: flex;
       gap: 5px;
@@ -291,7 +291,7 @@
       background: #f9f9f9;
     }
 
-  .chat-bot  #quick-replies button {
+    .chat-bot #quick-replies button {
       background: #333a3d;
       color: white;
       border: none;
@@ -301,7 +301,7 @@
       font-size: 13px;
     }
 
-  .chat-bot  #chat-input {
+    .chat-bot #chat-input {
       padding: 10px;
       display: flex;
       gap: 5px;
@@ -309,7 +309,7 @@
       border-top: 1px solid #ddd;
     }
 
-  .chat-bot  #chat-input input {
+    .chat-bot #chat-input input {
       flex: 1;
       padding: 6px;
       border-radius: 5px;
@@ -317,7 +317,7 @@
       border: 1px solid #ccc;
     }
 
-  .chat-bot  #chat-input button {
+    .chat-bot #chat-input button {
       padding: 6px 12px;
       background: #333a3d;
       color: #fff;
@@ -327,12 +327,12 @@
       border-radius: 5px;
     }
 
-   .chat-bot #chat-input button:hover {
+    .chat-bot #chat-input button:hover {
       background: rgba(15, 183, 131, 0.8);
     }
 
     /* Tooltip on hover  */
-   .chat-bot #chat-input button::after {
+    .chat-bot #chat-input button::after {
       content: "Send";
       position: absolute;
       bottom: 70px;
@@ -349,11 +349,49 @@
       pointer-events: none;
     }
 
-  .chat-bot  #chat-input button:hover::after {
+    .chat-bot #chat-input button:hover::after {
       opacity: 1;
       transform: translateY(0);
     }
 
+    .employee_timeRequest {
+      .status {
+        display: inline-block;
+        margin-top: 0px;
+        padding: 4px 12px;
+        font-size: 13px;
+        border-radius: 12px;
+        width: max-content;
+
+      }
+
+      .pending {
+        width: 80px;
+        text-align: center;
+        background-color: #fef3c7;
+        /* light amber */
+        color: #92400e;
+        /* dark amber/brown text */
+        border: 2px solid #92400e;
+        /* matching border */
+      }
+
+      .approved {
+        width: 80px;
+        text-align: center;
+        background-color: #dcfce7;
+        color: #166534;
+        border: 2px solid #166534;
+      }
+
+      .declined {
+        width: 80px;
+        text-align: center;
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 2px solid #991b1b;
+      }
+    }
 
     /* application_logs custom style */
     .application_logs {

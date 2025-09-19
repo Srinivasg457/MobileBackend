@@ -102,12 +102,6 @@ $route['admin/subscription/current_plan'] = 'admin/subscription/currentPlan';
 $route['admin/subscription/upgrade_plan'] = 'admin/subscription';
 
 
-
-
-
-
-
-
 //employee sites
 $route['accept-invitation'] = 'employee/Employee/accept_invitation';
 $route['complete-registration'] = 'employee/Employee/complete_registration';
@@ -116,12 +110,8 @@ $route['employee/dashboard'] = 'employee/EmployeeDashboard';
 $route['employee/view_screenshots'] = 'employee/Employee/screenshot';
 $route['employee/webcam_screenshots'] = 'admin/ScreenshotController/Employeewebcam';
 $route['employee/activity_log'] = 'employee/Timecards_manual';
-
-
 $route['organization'] = 'admin/Organization_settings';
-
-$route['employee/report'] = 'employee/Report';
-// time request
+// $route['employee/report'] = 'employee/Report';
 $route['employee/time_request'] = 'employee/TimeRequest';
 
 
