@@ -47,6 +47,15 @@
                 <i class="bi bi-window-stack mr-2"></i> <span><?php echo "Application Tracker" ?></span>
               </a>
             </li>
+            <!-- Time request -->
+            <li class="<?php if (isset($page_title) && $page_title == "Time Request") {
+                          echo "active";
+                        } ?>">
+              <a href="<?php echo base_url('employee/time_request') ?>">
+                <i class="bi bi-clock mr-5"></i> <span>Time Request</span>
+              </a>
+            </li>
+
             <li class="<?php if (isset($page_title) && $page_title == "Report") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
