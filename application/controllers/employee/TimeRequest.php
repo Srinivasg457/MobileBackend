@@ -25,8 +25,8 @@ class TimeRequest extends Home_Controller
 
     public function get_timecards_by_employee()
     {
-        $user_id     = 4;
-        $employee_id = 5;
+        $user_id         = $this->session->userdata('employee_org_id');
+        $employee_id     = $this->session->userdata('employee_id');
 
         if ($employee_id && $user_id) {
             $this->db->where('employee_id', $employee_id);
