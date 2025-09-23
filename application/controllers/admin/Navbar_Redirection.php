@@ -105,7 +105,7 @@ class Navbar_Redirection extends Home_Controller
         } elseif (in_array(3, $allowed)) {
             redirect('admin/notification/webcam');
         } elseif (in_array(9, $allowed)) {
-            redirect('employee/Timecards_manual/Time_Approval');
+            redirect('admin/time_approval');
         } elseif (in_array(4, $allowed)) {
             redirect('admin/organization_settings');
         } elseif (in_array(5, $allowed)) {

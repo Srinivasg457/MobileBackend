@@ -26,6 +26,21 @@ class Activity_logs extends Home_Controller
             redirect('/admin/subscription/upgrade_plan');
         }
     }
+    public function get_employee_index()
+    {
+        // if (!$this->session->userdata('logged_in')) {
+        //     redirect('login');
+        // }
+        $data = array();
+        $data['employee_id'] = $this->session->userdata('employee_id');
+        $data['employee_org_id'] = $this->session->userdata('employee_org_id');
+        $data['page_title'] = 'Activity Log';
+        $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
+        $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
+    }
     // public function check_activity_status()
     // {
     //     $employee_id = $this->input->get('employee_id', true);

@@ -79,7 +79,7 @@
 
     function updateApproval(manualId, status, employeeId, userId) {
         $.ajax({
-            url: '<?= base_url("employee/Timecards_manual/approve_timecard") ?>',
+            url: '<?= base_url("admin/Timecards_manual/approve_timecard") ?>',
             method: 'POST',
             data: {
                 manual_id: manualId,
@@ -99,7 +99,7 @@
     // updateDecline
     function updateDecline(manualId, employeeId, userId, button) {
         $.ajax({
-            url: '<?= base_url("employee/Timecards_manual/decline_timecard") ?>',
+            url: '<?= base_url("admin/Timecards_manual/decline_timecard") ?>',
             method: 'POST',
             data: {
                 manual_id: manualId,
@@ -193,7 +193,7 @@
         }
 
         $.ajax({
-            url: '<?= base_url("employee/Timecards_manual/get_timecards") ?>',
+            url: '<?= base_url("admin/Timecards_manual/get_timecards") ?>',
             method: 'GET',
             data: requestData,
             dataType: 'json',

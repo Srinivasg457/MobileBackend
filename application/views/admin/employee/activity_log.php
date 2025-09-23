@@ -178,7 +178,7 @@
     const employeeOrgId = <?= $employee_org_id ?>
 
     $.ajax({
-      url: '<?= base_url("employee/Timecards_manual/get_timecards_by_employee") ?>',
+      url: '<?= base_url("admin/Timecards_manual/get_timecards_by_employee") ?>',
       method: 'GET',
       data: {
         employee_id: employeeId,
@@ -316,7 +316,7 @@
 
     // Send AJAX request
     $.ajax({
-      url: '<?= base_url("employee/Timecards_manual/create_timecard") ?>',
+      url: '<?= base_url("admin/Timecards_manual/create_timecard") ?>',
       type: 'POST',
       data: formData,
       contentType: false,
