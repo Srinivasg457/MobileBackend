@@ -7,7 +7,7 @@
 
         <!-- Employee Requests Table -->
         <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
-            <table class="table table-hover cushover mt-0 <?php if ($userData > 10) {
+            <table class="table table-hover cushover mt-0 <?php if (count($userData) > 10) {
                                                                 echo "datatable";
                                                             } ?>" id="dg_table">
                 <thead>
@@ -32,11 +32,11 @@
                                 <td><?= substr($req['timestamp_start'], 0, 5) ?> → <?= substr($req['timestamp_end'], 0, 5) ?></td>
                                 <td><?= $req['reason'] ?></td>
                                 <td>
-                                    <?php if ($req['declined'] == 1) : ?>
+                                    <?php if ($req['approved'] == -1) : ?>
                                         <span class="status declined">Declined</span>
                                     <?php elseif ($req['approved'] == 1) : ?>
                                         <span class="status approved">Approved</span>
-                                    <?php else : ?>
+                                    <?php elseif ($req['approved'] == 0) : ?>
                                         <span class="status pending">Pending</span>
                                     <?php endif; ?>
                                 </td>

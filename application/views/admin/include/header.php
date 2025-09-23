@@ -355,6 +355,29 @@
     }
 
     .employee_timeRequest {
+      .actions {
+        display: flex;
+        gap: 5px;
+
+        /* >a {
+          color: black;
+
+          >i {
+            transition: color 0.3s;
+            font-size: 20px;
+            margin-top: 5px;
+          }
+        }
+
+        >a:hover>i {
+          color: green;
+        }
+
+        >a:nth-child(2):hover>i {
+          color: red;
+        } */
+      }
+
       .status {
         display: inline-block;
         margin-top: 0px;

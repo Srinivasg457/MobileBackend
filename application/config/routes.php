@@ -100,6 +100,8 @@ $route['admin/roles_permissions'] = 'employee/EmployeeRoles';
 $route['admin/roles_permissions/role_management'] = 'employee/EmployeeRoles/role';
 $route['admin/subscription/current_plan'] = 'admin/subscription/currentPlan';
 $route['admin/subscription/upgrade_plan'] = 'admin/subscription';
+$route['admin/time_approval/history'] = 'admin/Timecards_manual/Time_Approval_History';
+$route['admin/time_approval'] = 'admin/Timecards_manual/Time_Approval';
 
 
 //employee sites
@@ -110,7 +112,6 @@ $route['employee/dashboard'] = 'employee/EmployeeDashboard';
 $route['employee/view_screenshots'] = 'employee/Employee/screenshot';
 $route['employee/webcam_screenshots'] = 'admin/ScreenshotController/Employeewebcam';
 $route['employee/activity_log'] = 'admin/Activity_logs/get_employee_index';
-$route['admin/time_approval'] = 'admin/Timecards_manual/Time_Approval';
 $route['organization'] = 'admin/Organization_settings';
 // $route['employee/report'] = 'employee/Report';
 $route['employee/time_request'] = 'employee/TimeRequest';

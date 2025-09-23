@@ -9,16 +9,46 @@ class Timecards_manual extends Home_Controller
         parent::__construct();
         $this->load->database();
     }
-    public function index()
+    // public function index()
+    // {
+    //     // if (!$this->session->userdata('logged_in')) {
+    //     //     redirect('login');
+    //     // }
+    //     $data = array();
+    //     $data['employee_id'] = $this->session->userdata('employee_id');
+    //     $data['employee_org_id'] = $this->session->userdata('employee_org_id');
+    //     $data['page_title'] = 'Activity Log';
+    //     $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
+    //     $data['time_cards'] = "asd";
+    //     $this->load->view('admin/index', $data);
+    //     if (!is_subscribed()) {
+    //         redirect('/admin/subscription/upgrade_plan');
+    //     }
+    // }
+    public function Time_Approval()
     {
-        // if (!$this->session->userdata('logged_in')) {
-        //     redirect('login');
-        // }
-        $data = array();
-        $data['employee_id'] = $this->session->userdata('employee_id');
-        $data['employee_org_id'] = $this->session->userdata('employee_org_id');
-        $data['page_title'] = 'Activity Log';
-        $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
+        require_feature(9);
+        $data['page_title'] = 'Time_Approval';
+        $data['can_edit'] = $this->auth_model->get_permission(9);
+        $data['is_employee_admin'] = true;
+        $data['is_request_page'] = true;
+        $data['time_cards'] = $this->get_timecards2();
+        $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);
+        $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
+    }
+
+    public function Time_Approval_History()
+    {
+        require_feature(9);
+        $data['page_title'] = 'Time_Approval';
+        $data['can_edit'] = $this->auth_model->get_permission(9);
+        $data['is_employee_admin'] = true;
+        $data['is_request_page'] = false;
+        $data['time_cards'] = $this->get_timecards();
+        $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
@@ -63,9 +93,31 @@ class Timecards_manual extends Home_Controller
     /**
      * Approve a manual timecard
      */
-    public function approve_timecard()
+    // public function approve_timecard()
+    // {
+    //     $manual_id   = $this->input->post('manual_id');
+    //     $approved_by = $this->session->userdata("id"); // From session
+
+    //     if (!$manual_id || !$approved_by) {
+    //         echo "Manual ID and session are required.";
+    //         return;
+    //     }
+
+    //     $this->db->where('manual_id', $manual_id);
+    //     $this->db->where('user_id', $approved_by); // Ensures admin is updating only their own records
+    //     $this->db->update('timecards_manual', [
+    //         'approved'    => 1,
+    //         'approved_by' => $approved_by
+    //     ]);
+
+    //     echo ($this->db->affected_rows() > 0)
+    //         ? "Timecard approved successfully!"
+    //         : "Failed to approve timecard.";
+    // }
+
+    public function approve_timecard($manual_id)
     {
-        $manual_id   = $this->input->post('manual_id');
+
         $approved_by = $this->session->userdata("id"); // From session
 
         if (!$manual_id || !$approved_by) {
@@ -79,17 +131,15 @@ class Timecards_manual extends Home_Controller
             'approved'    => 1,
             'approved_by' => $approved_by
         ]);
-
-        echo ($this->db->affected_rows() > 0)
-            ? "Timecard approved successfully!"
-            : "Failed to approve timecard.";
+        echo json_encode([
+            'st'      => 1
+        ]);
     }
     //decline_timecard
 
-    public function decline_timecard()
+    public function decline_timecard($manual_id)
     {
         // 1. Get inputs from POST
-        $manual_id   = $this->input->post('manual_id');
         $declined_by = $this->input->post('declined_by') ?? $this->session->userdata('id');
 
         // 2. Validate input
@@ -117,22 +167,13 @@ class Timecards_manual extends Home_Controller
         // 4. Update the timecard to declined
         $this->db->where('manual_id', $manual_id)
             ->update('timecards_manual', [
-                'approved'    => 0,
-                'declined'    => 1,
-                'declined_by' => $declined_by
+                'approved'    => -1,
+                'approved_by' => $declined_by
             ]);
 
         // 5. Return success response
         echo json_encode([
-            'status'  => 'success',
-            'message' => 'Timecard declined successfully!',
-            'data'    => [
-                'manual_id'         => $manual_id,
-                'previous_approved' => $timecard['approved'],
-                'new_approved'      => 0,
-                'declined'          => 1,
-                'declined_by'       => $declined_by
-            ]
+            'st'      => 1
         ]);
     }
 
@@ -142,68 +183,41 @@ class Timecards_manual extends Home_Controller
      */
     public function get_timecards()
     {
-        $user_id     = $this->input->get('employee_org_id');
-        $employee_id = $this->input->get('employee_id');
-        $approval_status = $this->input->get('approved'); // approved/unapproved
-        $mode            = $this->input->get('mode'); // 'update' or null
-        $manual_id       = $this->input->get('manual_id');
-
+        // Get user_id from session
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
         if (!$user_id) {
-            echo "Unauthorized access: user not logged in.";
-            return;
+            return []; // Unauthorized
         }
 
-        // ---- UPDATE ----
-        if ($mode === 'update') {
-            if (!$manual_id || !$approval_status) {
-                echo "manual_id and approval_status required for update mode.";
-                return;
-            }
+        // Join with employee details
+        $this->db->select('t.manual_id, t.is_meeting, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, e.name as employee_name, e.email, e.thumb');
+        $this->db->from('timecards_manual t');
+        $this->db->join('employees e', 't.employee_id = e.id', 'left');
+        $this->db->where('t.user_id', $user_id);
+        // $this->db->where('t.approved', );
 
-            $approved_value = ($approval_status === 'approved') ? 1 : 0;
-
-            $this->db->where('manual_id', $manual_id);
-            $this->db->where('user_id', $user_id); // Ensure security
-            $this->db->update('timecards_manual', [
-                'approved'    => $approved_value,
-                'approved_by' => $user_id
-            ]);
-
-            echo ($this->db->affected_rows() > 0)
-                ? "Timecard status updated successfully."
-                : "No update performed.";
-            return;
-        }
-
-        // ---- FETCH ----
-        $this->db->where('user_id', $user_id);
-
-        if ($employee_id) {
-            $this->db->where('employee_id', $employee_id);
-        }
-
-        if ($approval_status === 'approved') {
-            $this->db->where('approved', 1);
-        } elseif ($approval_status === 'unapproved') {
-            $this->db->where('approved', 0);
-        }
-
-        $query = $this->db->get('timecards_manual');
-        echo json_encode($query->result());
+        $query = $this->db->get();
+        return $query->result_array(); // Return as normal PHP array
     }
-
-    public function Time_Approval()
+    public function get_timecards2()
     {
-        require_feature(9);
-        $data['page_title'] = 'Time_Approval';
-        $data['can_edit'] = $this->auth_model->get_permission(9);
-        $data['is_employee_admin'] = true;
-        $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);
-        $this->load->view('admin/index', $data);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription/upgrade_plan');
+        // Get user_id from session
+        $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+        if (!$user_id) {
+            return []; // Unauthorized
         }
+
+        // Join with employee details
+        $this->db->select('t.manual_id, t.is_meeting, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, e.name as employee_name, e.email, e.thumb');
+        $this->db->from('timecards_manual t');
+        $this->db->join('employees e', 't.employee_id = e.id', 'left');
+        $this->db->where('t.user_id', $user_id);
+        $this->db->where('t.approved', 0);
+
+        $query = $this->db->get();
+        return $query->result_array(); // Return as normal PHP array
     }
+
     public function get_timecards_by_employee()
     {
         $employee_id = $this->session->userdata('employee_id');
