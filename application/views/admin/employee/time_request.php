@@ -7,7 +7,7 @@
 
         <!-- Employee Requests Table -->
         <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
-            <table class="table table-hover cushover mt-0 <?php if (10 > 10) {
+            <table class="table table-hover cushover mt-0 <?php if ($userData > 10) {
                                                                 echo "datatable";
                                                             } ?>" id="dg_table">
                 <thead>
@@ -23,8 +23,7 @@
                 </thead>
                 <tbody>
                     <?php if (!empty($userData)) : ?>
-                        <?php $i = 1; // Initialize serial number 
-                        ?>
+                        <?php $i = 1; ?>
                         <?php foreach ($userData as $req) : ?>
                             <tr>
                                 <td><?= $i++ ?></td>
@@ -32,16 +31,16 @@
                                 <td><?= $req['date_added'] ?></td>
                                 <td><?= substr($req['timestamp_start'], 0, 5) ?> → <?= substr($req['timestamp_end'], 0, 5) ?></td>
                                 <td><?= $req['reason'] ?></td>
-                            <td>
-                                <?php if ($req['approved'] == 0) : ?>
-                                    <span class="status pending">Pending</span>
-                                <?php elseif ($req['approved'] == 1) : ?>
-                                    <span class="status approved">Approved</span>
-                                <?php else : ?>
-                                    <span class="status declined">Declined</span>
-                                <?php endif; ?>
-                            </td>
-                            <td><?= $req->admin_note ?? 'No note provided' ?></td>
+                                <td>
+                                    <?php if ($req['declined'] == 1) : ?>
+                                        <span class="status declined">Declined</span>
+                                    <?php elseif ($req['approved'] == 1) : ?>
+                                        <span class="status approved">Approved</span>
+                                    <?php else : ?>
+                                        <span class="status pending">Pending</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $req['admin_note'] ?? 'No note provided' ?></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else : ?>
@@ -49,6 +48,7 @@
                             <td colspan="9" class="text-center">No requests found</td>
                         </tr>
                     <?php endif; ?>
+
                 </tbody>
             </table>
 

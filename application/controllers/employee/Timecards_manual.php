@@ -1,14 +1,16 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Timecards_manual extends Home_Controller {
+class Timecards_manual extends Home_Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->load->database();
-
     }
-     public function index(){
+    public function index()
+    {
         // if (!$this->session->userdata('logged_in')) {
         //     redirect('login');
         // }
@@ -26,7 +28,8 @@ class Timecards_manual extends Home_Controller {
     /*
      * Create a manual timecard for an employee (by admin/org user)
      */
-    public function create_timecard() {
+    public function create_timecard()
+    {
         $user_id         = $this->session->userdata('employee_org_id');
         $employee_id     = $this->session->userdata('employee_id');
         $timestamp_start = $this->input->post('timestamp_start');
@@ -34,12 +37,12 @@ class Timecards_manual extends Home_Controller {
         $reason          = $this->input->post('reason');
         // Get the current date for the new 'date_added' column
         $date_added      = date('Y-m-d'); // Format: YYYY-MM-DD
-    
+
         if (!$user_id || !$employee_id || !$timestamp_start || !$timestamp_end || !$reason) {
             echo "All fields are required: employee_id, timestamp_start, timestamp_end, reason.";
             return;
         }
-    
+
         $data = array(
             'timestamp_start' => $timestamp_start,
             'timestamp_end'   => $timestamp_end,
@@ -50,9 +53,9 @@ class Timecards_manual extends Home_Controller {
             'approved_by'     => NULL,
             'date_added'      => get_user_datetime_only($user_id) // Add the new column here
         );
-    
+
         $this->db->insert('timecards_manual', $data);
-    
+
         echo ($this->db->affected_rows() > 0)
             ? "Timecard created successfully!"
             : "Failed to create timecard.";
@@ -60,7 +63,8 @@ class Timecards_manual extends Home_Controller {
     /**
      * Approve a manual timecard
      */
-    public function approve_timecard() {
+    public function approve_timecard()
+    {
         $manual_id   = $this->input->post('manual_id');
         $approved_by = $this->session->userdata("id"); // From session
 
@@ -80,11 +84,64 @@ class Timecards_manual extends Home_Controller {
             ? "Timecard approved successfully!"
             : "Failed to approve timecard.";
     }
+    //decline_timecard
+
+    public function decline_timecard()
+    {
+        // 1. Get inputs from POST
+        $manual_id   = $this->input->post('manual_id');
+        $declined_by = $this->input->post('declined_by') ?? $this->session->userdata('id');
+
+        // 2. Validate input
+        if (empty($manual_id) || empty($declined_by)) {
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Manual ID and Declined By are required'
+            ]);
+            return;
+        }
+
+        // 3. Check if timecard exists
+        $timecard = $this->db->where('manual_id', $manual_id)
+            ->get('timecards_manual')
+            ->row_array();
+
+        if (!$timecard) {
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'No timecard found with the given Manual ID'
+            ]);
+            return;
+        }
+
+        // 4. Update the timecard to declined
+        $this->db->where('manual_id', $manual_id)
+            ->update('timecards_manual', [
+                'approved'    => 0,
+                'declined'    => 1,
+                'declined_by' => $declined_by
+            ]);
+
+        // 5. Return success response
+        echo json_encode([
+            'status'  => 'success',
+            'message' => 'Timecard declined successfully!',
+            'data'    => [
+                'manual_id'         => $manual_id,
+                'previous_approved' => $timecard['approved'],
+                'new_approved'      => 0,
+                'declined'          => 1,
+                'declined_by'       => $declined_by
+            ]
+        ]);
+    }
+
 
     /**
      * Get or update timecards manually
      */
-    public function get_timecards() {
+    public function get_timecards()
+    {
         $user_id     = $this->input->get('employee_org_id');
         $employee_id = $this->input->get('employee_id');
         $approval_status = $this->input->get('approved'); // approved/unapproved
@@ -135,28 +192,29 @@ class Timecards_manual extends Home_Controller {
         echo json_encode($query->result());
     }
 
-     public function Time_Approval(){
+    public function Time_Approval()
+    {
         require_feature(9);
         $data['page_title'] = 'Time_Approval';
         $data['can_edit'] = $this->auth_model->get_permission(9);
         $data['is_employee_admin'] = true;
         $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);
-    $this->load->view('admin/index', $data);
-    if (!is_subscribed()) {
-        redirect('/admin/subscription/upgrade_plan');
+        $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
     }
-    }
-       public function get_timecards_by_employee() {
-    $employee_id = $this->session->userdata('employee_id');
-    
-    if ($employee_id) {
-        $this->db->where('employee_id', $employee_id);
-        $this->db->order_by('manual_id', 'DESC'); // Change 'id' to your preferred column
-        $query = $this->db->get('timecards_manual');
-        echo json_encode($query->result());
-    } else {
-        echo json_encode(['error' => 'Employee ID not found in session']);
-    }
-}
+    public function get_timecards_by_employee()
+    {
+        $employee_id = $this->session->userdata('employee_id');
 
+        if ($employee_id) {
+            $this->db->where('employee_id', $employee_id);
+            $this->db->order_by('manual_id', 'DESC'); // Change 'id' to your preferred column
+            $query = $this->db->get('timecards_manual');
+            echo json_encode($query->result());
+        } else {
+            echo json_encode(['error' => 'Employee ID not found in session']);
+        }
+    }
 }
