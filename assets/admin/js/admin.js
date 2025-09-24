@@ -1390,6 +1390,8 @@
   $(document).on('click', ".approve_request_item", function () {
 
     var del_url = $(this).attr('href');
+    console.log(del_url);
+    
     var itemId = $(this).attr('data-id');
 
 
@@ -1409,7 +1411,7 @@
           if (json.st == 1) {
             swal({
               title: msg_success,
-              text: msg_del_success,
+              text: "Approved successfully",
               type: "success",
               showCancelButton: false
             }),
@@ -1444,7 +1446,7 @@
           if (json.st == 1) {
             swal({
               title: msg_success,
-              text: msg_del_success,
+              text:"Request Declined",
               type: "success",
               showCancelButton: false
             }),
