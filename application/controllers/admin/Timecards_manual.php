@@ -8,6 +8,8 @@ class Timecards_manual extends Home_Controller
     {
         parent::__construct();
         $this->load->database();
+        $this->load->database();
+        $this->load->helper('url');
     }
     // public function index()
     // {
@@ -114,44 +116,52 @@ class Timecards_manual extends Home_Controller
     //         ? "Timecard approved successfully!"
     //         : "Failed to approve timecard.";
     // }
-
-    public function approve_timecard($manual_id)
+    public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null)
     {
+        $employee_name = urldecode($employee_name);
+        $employee_email = urldecode($employee_email);
+        $reason = urldecode($reason);
 
-        $approved_by = $this->session->userdata("id"); // From session
+        $approved_by = $this->session->userdata("id");
 
         if (!$manual_id || !$approved_by) {
-            echo "Manual ID and session are required.";
+            echo json_encode(['status' => 'error', 'message' => 'Manual ID and session are required.']);
             return;
         }
 
+        // Update approval in DB
         $this->db->where('manual_id', $manual_id);
-        $this->db->where('user_id', $approved_by); // Ensures admin is updating only their own records
+        $this->db->where('user_id', $approved_by);
         $this->db->update('timecards_manual', [
             'approved'    => 1,
             'approved_by' => $approved_by
         ]);
-        echo json_encode([
-            'st'      => 1
-        ]);
-    }
-    //decline_timecard
 
-    public function decline_timecard($manual_id)
+        // Send approval email
+        $time_range = substr($timecard['timestamp_start'], 0, 5) . " → " . substr($timecard['timestamp_end'], 0, 5);
+        $this->send_alert_mail($employee_id, $employee_name, $employee_email, $reason, 1, $time_range); // For approval
+
+        // $this->send_alert_mail($employee_id, $employee_name, $employee_email, $reason, 1);
+
+        echo json_encode(['st' => 1]);
+    }
+    public function decline_timecard($manual_id, $employee_id, $employee_name, $employee_email, $reason)
     {
-        // 1. Get inputs from POST
+        $employee_name = urldecode($employee_name);
+        $employee_email = urldecode($employee_email);
+        $reason = urldecode($reason);
+
         $declined_by = $this->input->post('declined_by') ?? $this->session->userdata('id');
 
-        // 2. Validate input
         if (empty($manual_id) || empty($declined_by)) {
             echo json_encode([
                 'status'  => 'error',
-                'message' => 'Manual ID and Declined By are required'
+                'message' => 'Manual ID and Declined By are required.'
             ]);
             return;
         }
 
-        // 3. Check if timecard exists
+        // Check if timecard exists
         $timecard = $this->db->where('manual_id', $manual_id)
             ->get('timecards_manual')
             ->row_array();
@@ -159,23 +169,118 @@ class Timecards_manual extends Home_Controller
         if (!$timecard) {
             echo json_encode([
                 'status'  => 'error',
-                'message' => 'No timecard found with the given Manual ID'
+                'message' => 'No timecard found with the given Manual ID.'
             ]);
             return;
         }
 
-        // 4. Update the timecard to declined
+        // Update to declined
         $this->db->where('manual_id', $manual_id)
             ->update('timecards_manual', [
                 'approved'    => -1,
                 'approved_by' => $declined_by
             ]);
 
-        // 5. Return success response
-        echo json_encode([
-            'st'      => 1
-        ]);
+        // Send declined email
+        $time_range = substr($timecard['timestamp_start'], 0, 5) . " → " . substr($timecard['timestamp_end'], 0, 5);
+        $this->send_alert_mail($employee_id, $employee_name, $employee_email, $reason, 0, $time_range); // For approval
+
+        // $this->send_alert_mail($employee_id, $employee_name, $employee_email, $reason, 0);
+
+        echo json_encode(['st' => 1]);
     }
+
+    // public function send_alert_mail($employee_id, $employee_name, $employee_email, $reason, $approved)
+    // {
+    //     if (empty($employee_email)) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => 'error',
+    //                 'message' => 'Employee email is missing.'
+    //             ]));
+    //     }
+
+    //     // Email subject and body
+    //     $subject = '';
+    //     $msg = "<p>Hi <strong>$employee_name</strong>,</p>";
+
+    //     if ((int)$approved === 1) {
+    //         // Approval email
+    //         $subject .= "Approval Notification: Manual Time Request";
+    //         $msg .= "<p>Your manual time request has been <strong style=\"color:green\">approved</strong> by the admin.</p>";
+    //         $msg .= "<p><strong>Reason provided:</strong></p>";
+    //         $msg .= "<blockquote style=\"font-style: italic; color: #555;\">$reason</blockquote>";
+    //         $msg .= "<p>This approval confirms that your request aligns with project goals and scheduling availability.</p>";
+    //     } else {
+    //         // Decline email
+    //         $subject .= "Request Declined: Manual Time Request";
+    //         $msg .= "<p>Your manual time request has been <strong style=\"color:red\">declined</strong> by the admin.</p>";
+    //         $msg .= "<p><strong>Reason provided:</strong></p>";
+    //         $msg .= "<blockquote style=\"font-style: italic; color: #555;\">$reason</blockquote>";
+    //         $msg .= "<p>If you believe this was an error or need further clarification, please reach out to your manager or admin.</p>";
+    //     }
+
+    //     $msg .= "<br><p>Regards,<br><strong>Admin Team</strong></p>";
+
+    //     // Send email
+    //     $this->email_model->send_email($employee_email, $subject, $msg);
+    // }
+
+    public function send_alert_mail($employee_id, $employee_name, $employee_email, $reason, $approved, $time_range = null)
+    {
+        if (empty($employee_email)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Employee email is missing.'
+                ]));
+        }
+
+        $subject = '';
+        $msg = "<p>Hi <strong>$employee_name</strong>,</p>";
+
+        if ((int)$approved === 1) {
+            $subject .= "Approval Notification: Manual Time Request";
+            $msg .= "<p>Your manual time request has been <strong style=\"color:green\">approved</strong> by the admin.</p>";
+        } else {
+            $subject .= "Request Declined: Manual Time Request";
+            $msg .= "<p>Your manual time request has been <strong style=\"color:red\">declined</strong> by the admin.</p>";
+        }
+
+        // Time & reason in table format
+        $msg .= "
+        <table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; margin-top: 10px;'>
+            <thead style='background-color: #f2f2f2;'>
+                <tr>
+                    <th style='text-align:left;'>Time Range</th>
+                    <th style='text-align:left;'>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$time_range</td>
+                    <td>$reason</td>
+                </tr>
+            </tbody>
+        </table>
+    ";
+
+        if ((int)$approved === 1) {
+            $msg .= "<p>This approval confirms that your request aligns with project goals and scheduling availability.</p>";
+        } else {
+            $msg .= "<p>If you believe this was an error or need further clarification, please reach out to your manager or admin.</p>";
+        }
+
+        $msg .= "<br><p>Regards,<br><strong>Admin Team</strong></p>";
+
+        // Send email
+        $this->email_model->send_email($employee_email, $subject, $msg);
+    }
+
+
+
 
 
     /**

@@ -70,7 +70,14 @@
                                                     data-val="Approve"
                                                     data-id="<?php echo $req['manual_id']; ?>"
                                                     data-user-id="<?php echo $req['user_id']; ?>"
-                                                    href="<?php echo base_url('admin/Timecards_manual/approve_timecard/'  . html_escape($req['manual_id'])) ?>"
+                                                    href="<?php echo base_url(
+                                                                'admin/Timecards_manual/approve_timecard/' .
+                                                                    html_escape($req['manual_id']) . '/' .
+                                                                    html_escape($req['user_id']) . '/' .
+                                                                    rawurlencode(html_escape($req['employee_name'])) . '/' .
+                                                                    rawurlencode(html_escape($req['email'])) . '/' .
+                                                                    rawurlencode(html_escape($req['reason'] ?? 'NA')) // Ensure it’s not missing
+                                                            ); ?>"
                                                     class="on-default remove-row approve_request_item"
                                                     data-toggle="tooltip"
                                                     data-placement="top"
@@ -79,12 +86,19 @@
                                                     <i class="fa fa-check text-success"></i>
                                                 </a>
 
+
                                                 <a
                                                     data-val="decline"
                                                     data-id="<?php echo $req['manual_id']; ?>"
                                                     data-user-id="<?php echo $req['user_id']; ?>"
-                                                    href="<?php echo base_url('admin/Timecards_manual/decline_timecard/'  . html_escape($req['manual_id'])) ?>"
-                                                    class="on-default remove-row decline_request_item"
+                                                    href="<?php echo base_url(
+                                                                'admin/Timecards_manual/decline_timecard/' .
+                                                                    html_escape($req['manual_id']) . '/' .
+                                                                    html_escape($req['user_id']) . '/' .
+                                                                    rawurlencode(html_escape($req['employee_name'])) . '/' .
+                                                                    rawurlencode(html_escape($req['email'])) . '/' .
+                                                                    rawurlencode(html_escape($req['reason'] ?? 'NA')) // Ensure it’s not missing
+                                                            ); ?>" class="on-default remove-row decline_request_item"
                                                     data-toggle="tooltip"
                                                     data-placement="top"
                                                     title="Decline"
