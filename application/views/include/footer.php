@@ -64,6 +64,7 @@
         <div id="quick-replies">
             <button class="quick-btn">Hello</button>
             <button class="quick-btn">Can you help me?</button>
+            <button class="quick-btn">Main Menu</button>
         </div>
 
         <div id="chat-input">
@@ -82,96 +83,7 @@
     </div>
 
 </div>
-<!-- chatbot script -->
-<script>
-    //  emoji functions
-    // $(document).ready(function() {
-    //   // Toggle emoji picker
-    //   $('#emoji-btn').click(function(e) {
-    //     e.stopPropagation();
-    //     $('#emoji-picker').fadeToggle(150);
-    //   });
 
-    //   // Insert emoji into input
-    //   $('#emoji-picker span').click(function() {
-    //     let emoji = $(this).text();
-    //     let input = $('#chat-message');
-    //     input.val(input.val() + emoji); // append emoji to input
-    //   });
-
-    //   // Hide emoji picker when clicking outside
-    //   $(document).click(function(e) {
-    //     if (!$(e.target).closest('#emoji-container').length) {
-    //       $('#emoji-picker').hide();
-    //     }
-    //   });
-    // });
-    // chat bot
-    $(document).ready(function() {
-        function startNewChat() {
-            $('#chat-content').html('');
-            $('#chat-content').append('<div class="message bot-message">Hello! How can I help you today?</div>');
-            $('#chat-message').val('');
-            $('#chat-content').scrollTop($('#chat-content')[0].scrollHeight);
-        }
-
-        // Show chat window
-        $('#chat-icon').click(function(e) {
-            e.stopPropagation(); // prevent document click from firing
-            $('#chat-window').fadeToggle(200);
-            startNewChat(); // always start new
-        });
-
-        $('#close-chat').click(function() {
-            $('#chat-window').fadeOut(200);
-        });
-
-        // New chat button
-        $('#new-chat').click(function() {
-            startNewChat();
-        });
-
-        function sendMessage(message = null) {
-            let userMessage = message || $('#chat-message').val();
-            if (userMessage.trim() == '') return;
-
-            $('#chat-content').append('<div class="message user-message">' + userMessage + '</div>');
-
-            $.post('<?= base_url("chatbot/get_response") ?>', {
-                message: userMessage
-            }, function(data) {
-                let res = JSON.parse(data);
-                $('#chat-content').append('<div class="message bot-message">' + res.reply + '</div>');
-                $('#chat-content').scrollTop($('#chat-content')[0].scrollHeight);
-            });
-
-            $('#chat-message').val('');
-        }
-
-        // Send on button click
-        $('#send-message').click(function() {
-            sendMessage();
-        });
-
-        // Send on Enter key
-        $('#chat-message').keypress(function(e) {
-            if (e.which == 13) sendMessage();
-        });
-
-        // Quick reply buttons
-        $(document).on('click', '.quick-btn', function() {
-            let message = $(this).text();
-            sendMessage(message);
-        });
-
-        // Close chat when clicking outside
-        $(document).click(function(e) {
-            if (!$(e.target).closest('#chat-window, #chat-icon').length) {
-                $('#chat-window').fadeOut(200);
-            }
-        });
-    });
-</script>
 
 
 <?php include 'js_msg_list.php'; ?>
@@ -197,6 +109,131 @@
 <script src="<?php echo base_url() ?>assets/admin/js/sweet-alert.min.js"></script>
 <script>
     AOS.init();
+</script>
+<!-- chatbot script -->
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        // Helper: Start New Chat
+        function startNewChat() {
+            $('#chat-content').html('');
+            $('#chat-content').append('<div class="message bot-message">Hello! How can I help you today?</div>');
+            $('#chat-message').val('');
+            $('#chat-content').scrollTop($('#chat-content')[0].scrollHeight);
+        }
+
+
+        // Show/Hide Chat Window
+
+        $('#chat-icon').click(function(e) {
+            e.stopPropagation();
+            $('#chat-window').fadeToggle(200);
+            startNewChat();
+        });
+
+        $('#close-chat').click(function() {
+            $('#chat-window').fadeOut(200);
+        });
+
+        $('#new-chat').click(function() {
+            startNewChat();
+        });
+
+        // Send Message Function
+        function sendMessage(message = null) {
+            let userMessage = message || $('#chat-message').val();
+            if (userMessage.trim() == '') return;
+
+            // Show user message
+            $('#chat-content').append('<div class="message user-message">' + userMessage + '</div>');
+
+            // AJAX request to chatbot
+            $.ajax({
+                url: "<?= base_url('chatbot/get_response') ?>",
+                method: "POST",
+                data: {
+                    message: userMessage
+                },
+                dataType: "json",
+                success: function(res) {
+                    // Show bot reply
+                    res.reply == null ?
+                        "" : $('#chat-content').append('<div class="message bot-message">' + res.reply + '</div>');
+
+                    // Remove old menu and append new menu
+                    $('#chat-content .bot-menu').remove();
+                    $('#chat-content').append('<div class="message bot-menu">' + res.menu + '</div>');
+
+                    // Scroll to bottom
+                    $('#chat-content').scrollTop($('#chat-content')[0].scrollHeight);
+                }
+            });
+
+            $('#chat-message').val('');
+        }
+
+        // Menu Click (using data-key)
+        $(document).on('click', '#chat-menu td', function() {
+            let selectedOption = $(this).data('key');
+            sendMessage(selectedOption);
+        });
+
+        // Generic Table Cell Click
+        // $(document).on('click', 'table tr td', function() {
+        //     let selectedOption = $(this).data('key') || $(this).text().trim();
+        //     sendMessage(selectedOption);
+        // });
+
+        // Send on Button Click
+        $('#send-message').click(function() {
+            sendMessage();
+        });
+
+        // Send on Enter Key
+
+        $('#chat-message').keypress(function(e) {
+            if (e.which == 13) sendMessage();
+        });
+
+        // Quick Reply Buttons
+
+        $(document).on('click', '.quick-btn', function() {
+            let message = $(this).text();
+            // if (message.toLowerCase() === 'main menu') {
+            //     message = 'main menu';
+            // }
+            sendMessage(message);
+        });
+
+        // Close Chat Clicking Outside
+        $(document).click(function(e) {
+            if (!$(e.target).closest('#chat-window, #chat-icon').length) {
+                $('#chat-window').fadeOut(200);
+            }
+        });
+
+
+        // Optional: Emoji Picker
+        /*
+        $('#emoji-btn').click(function(e) {
+            e.stopPropagation();
+            $('#emoji-picker').fadeToggle(150);
+        });
+
+        $('#emoji-picker span').click(function() {
+            let emoji = $(this).text();
+            let input = $('#chat-message');
+            input.val(input.val() + emoji);
+        });
+
+        $(document).click(function(e) {
+            if (!$(e.target).closest('#emoji-container').length) {
+                $('#emoji-picker').hide();
+            }
+        });
+        */
+
+    });
 </script>
 
 
