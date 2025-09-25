@@ -74,8 +74,8 @@
     redirect('login');
   }
   ?>
+
   <style type="text/css">
-    
     /* Emoji container
   .chat-bot  #emoji-container {
       position: relative;
@@ -181,6 +181,30 @@
       }
     }
 
+    .chat-bot .chat-bot-menu-itme {
+      font-size: 11px;
+      border: none !important;
+      padding: 10px 0px !important;
+      text-decoration: underline;
+    }
+
+    .chat-bot .chat-bot-main-menu {
+      font-size: 15px;
+    }
+
+    .chat-bot .chat-bot-main-menu-tap {
+      background-color: #ffffff;
+      max-width: 100%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      margin-left: -10px;
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    }
+
+    .chat-bot .chat-bot-menu-itme:hover {
+      cursor: pointer;
+    }
+
     /* Hover tooltip */
     .chat-bot #chat-icon::after {
       content: "Need Help?";
@@ -209,7 +233,7 @@
       bottom: 90px;
       right: 20px;
       width: 320px;
-      height: 420px;
+      height: 515px;
       background: #fdfdfd;
       border: 1px solid #ccc;
       border-radius: 12px;
@@ -256,7 +280,7 @@
 
     .chat-bot #chat-content {
       padding: 10px;
-      height: 260px;
+      height: 362px;
       overflow-y: auto;
       background: #f1f7fc;
     }
@@ -352,6 +376,108 @@
     .chat-bot #chat-input button:hover::after {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* Responsive adjustments */
+    @media screen and (max-width: 480px) {
+
+      /* Small mobile devices */
+      .chat-bot #chat-window {
+        width: 90%;
+        height: 400px;
+        bottom: 80px;
+        right: 5%;
+      }
+
+      .chat-bot #chat-content {
+        height: 253px;
+        padding: 8px;
+      }
+
+      .chat-bot .message {
+        max-width: 80%;
+        font-size: 14px;
+        padding: 6px 10px;
+      }
+
+      .chat-bot #quick-replies button {
+        font-size: 11px;
+        padding: 4px 8px;
+      }
+
+      .chat-bot #chat-input input {
+        font-size: 14px;
+      }
+
+      .chat-bot #chat-input button {
+        font-size: 14px;
+        padding: 6px 10px;
+      }
+    }
+
+    @media screen and (min-width: 481px) and (max-width: 768px) {
+
+      /* Tablets */
+      .chat-bot #chat-window {
+        width: 350px;
+        height: 414px;
+        bottom: 90px;
+        right: 20px;
+      }
+
+      .chat-bot #chat-content {
+        height: 264px;
+      }
+
+      .chat-bot .message {
+        max-width: 75%;
+        font-size: 15px;
+      }
+
+      .chat-bot #quick-replies button {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+
+      .chat-bot #chat-input input {
+        font-size: 15px;
+      }
+
+      .chat-bot #chat-input button {
+        font-size: 15px;
+        padding: 6px 12px;
+      }
+    }
+
+    @media screen and (min-width: 769px) {
+
+      /* Desktop */
+      .chat-bot #chat-window {
+        width: 320px;
+        height: 515px;
+      }
+
+      .chat-bot #chat-content {
+        height: 362px;
+      }
+
+      .chat-bot .message {
+        max-width: 70%;
+        font-size: 15px;
+      }
+
+      .chat-bot #quick-replies button {
+        font-size: 13px;
+      }
+    }
+
+    /* Optional: Make chat icon slightly smaller on small screens */
+    @media screen and (max-width: 480px) {
+      .chat-bot #chat-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+      }
     }
 
     .employee_timeRequest {
