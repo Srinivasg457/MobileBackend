@@ -578,6 +578,16 @@
           <div class="card-body">
             <div class="d-flex flex-row">
               <div class="ml-20 align-self-center">
+                <h4 class="text-muteds m-b-0"><?php echo "Meeting Hours" ?></h4>
+                <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom" title="<?php echo $employee_activity['shift_time'] ?>"><?php echo "1h 20m" ?></h2>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card counts">
+          <div class="card-body">
+            <div class="d-flex flex-row">
+              <div class="ml-20 align-self-center">
                 <h4 class="text-muteds m-b-0"><?php echo "Total Hours" ?></h4>
                 <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom" title="<?php echo $employee_activity['shift_time'] ?>"><?php echo $employee_activity['shift_time'] ?></h2>
               </div>
@@ -586,82 +596,59 @@
         </div>
         <div class="card counts">
           <div class="card-body">
-            <div class="ml-20 align-self-center">
-              <h4 class="text-muteds m-b-0"><?php echo "Key Stroke" ?></h4>
-              <?php
-              $keystroke_percentage = $output['keystroke_percentage'];
+            <!-- <h4 class="text-muted mb-3">Activity</h4> -->
 
-              // Determine color based on percentage
-              if ($keystroke_percentage >= 70) {
-                $stroke_color = "green";
-              } elseif ($keystroke_percentage >= 50) {
-                $stroke_color = "rgb(255, 205, 86)";
-              } else {
-                $stroke_color = "red";
-              }
-              ?>
-              <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom"><?php echo $keystroke_percentage . "%"; ?></h2>
+            <?php
+            $keystroke_percentage = $output['keystroke_percentage'];
+            $mouse_percentage     = $output['mouse_activity_percentage'];
 
-                <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                  <svg viewBox="0 0 36 36" width="40" height="40">
-                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
-                    <circle
-                      cx="18" cy="18" r="15.9155" fill="none"
-                      stroke="<?php echo $stroke_color; ?>" stroke-width="4"
-                      stroke-dasharray="<?php echo $keystroke_percentage . ' ' . (100 - $keystroke_percentage); ?>"
-                      stroke-dashoffset="25"
-                      transform="rotate(0 18 18)" />
-                  </svg>
-                  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
-                    data-toggle="tooltip" data-placement="bottom" title="<?php echo $keystroke_percentage; ?>">
-                    <?php echo $keystroke_percentage . "%"; ?>
-                  </div>
+            function getColor($value)
+            {
+              if ($value >= 70) return "bg-success";
+              if ($value >= 50) return "bg-warning";
+              return "bg-danger";
+            }
+            ?>
 
-                </div>
+            <!-- Keystrokes -->
+            <div class="mb-0">
+              <div class="d-flex justify-content-between align-items-center mb-1">
 
+                <span>Keystrokes</span>
+                <span><?php echo $keystroke_percentage; ?>%</span>
               </div>
-            </div>
-          </div>
-        </div>
-        <div class="card counts">
-          <div class="card-body">
-            <div class="ml-20 align-self-center">
-              <h4 class="text-muteds m-b-0"><?php echo "Mouse Activity" ?></h4>
-              <?php
-              $mouse_movement = $output['mouse_activity_percentage'];
-
-              // Determine color based on percentage
-              if ($mouse_movement >= 60) {
-                $stroke_color = "green";
-              } elseif ($mouse_movement >= 30) {
-                $stroke_color = "rgb(255, 205, 86)";
-              } else {
-                $stroke_color = "red";
-              }
-              ?>
-              <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom"><?php echo $mouse_movement . "%"; ?></h2>
-
-                <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                  <svg viewBox="0 0 36 36" width="40" height="40">
-                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4" />
-                    <circle
-                      cx="18" cy="18" r="15.9155" fill="none"
-                      stroke="<?php echo $stroke_color; ?>" stroke-width="4"
-                      stroke-dasharray="<?php echo $mouse_movement . ' ' . (100 - $mouse_movement); ?>"
-                      stroke-dashoffset="25"
-                      transform="rotate(0 18 18)" />
-                  </svg>
-                  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
-                    data-toggle="tooltip" data-placement="bottom" title="<?php echo $mouse_movement; ?>">
-                    <?php echo $mouse_movement . "%"; ?>
-                  </div>
+              <div class="progress" style="height: 12px;margin-bottom: 2px">
+                <div class="progress-bar <?php echo getColor($keystroke_percentage); ?>"
+                  role="progressbar"
+                  style="width: <?php echo $keystroke_percentage; ?>%;"
+                  aria-valuenow="<?php echo $keystroke_percentage; ?>"
+                  aria-valuemin="0"
+                  aria-valuemax="100">
                 </div>
               </div>
             </div>
+
+            <!-- Mouse -->
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span>Mouse</span>
+                <span><?php echo $mouse_percentage; ?>%</span>
+              </div>
+              <div class="progress" style="height: 12px;margin-bottom: 2px">
+                <div class="progress-bar <?php echo getColor($mouse_percentage); ?>"
+                  role="progressbar"
+                  style="width: <?php echo $mouse_percentage; ?>%;"
+                  aria-valuenow="<?php echo $mouse_percentage; ?>"
+                  aria-valuemin="0"
+                  aria-valuemax="100">
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
+
+
       </div>
     </div>
     <div class="row mt-20">

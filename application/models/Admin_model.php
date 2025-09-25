@@ -2521,6 +2521,19 @@ class Admin_model extends CI_Model {
         $this->db->delete($table, array('post_id' => $post_id));
         return;
     }
+    function  delete_request($manual_id, $table){
+        $user_id         = $this->session->userdata('employee_org_id');
+        $employee_id     = $this->session->userdata('employee_id');
+        if (!$user_id && !$manual_id && $employee_id) {
+            return false; // safety check
+        }
+        // Delete from given settings table
+        $this->db->where('user_id', $user_id);
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where('manual_id', $manual_id);
+        $this->db->delete($table);
+        return;
+    }
     function delete_settings($employee_id, $table)
     {
         $user_id = $this->session->userdata('id');

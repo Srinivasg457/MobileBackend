@@ -41,34 +41,51 @@ class TimeRequest extends Home_Controller
             return ['error' => 'Employee ID not found in session'];
         }
     }
+    public function request_delete($manual_id)
+    {
+        $this->admin_model->delete_request($manual_id, 'timecards_manual');
 
+        echo json_encode([
+            'st'      => 1
+        ]);
+    }
     // Handle form submit and add new request
     public function submit()
     {
         if ($this->input->post()) {
-            $user_id         = $this->session->userdata('employee_org_id');
-            $employee_id     = $this->session->userdata('employee_id');
+            $user_id     = $this->session->userdata('employee_org_id');
+            $employee_id = $this->session->userdata('employee_id');
+
             $data = array(
-                'is_meeting'     => $this->input->post('type'),
+                'is_meeting'      => $this->input->post('type'),
                 'timestamp_start' => $this->input->post('time_start'),
                 'timestamp_end'   => $this->input->post('time_end'),
                 'user_id'         => $user_id,
                 'employee_id'     => $employee_id,
                 'reason'          => $this->input->post('reason'),
-                'approved'        => 0,
-                'approved_by'     => NULL,
-                'date_added'      => get_user_datetime_only($user_id) // Add the new column here
+                'date_added'      => $this->input->post('requested_date'),
+                'updated_at'      => get_user_datetime_only($user_id)
             );
+
+            // if manual_id is present → update
+            $manual_id = $this->input->post('manual_id');
+            if (!empty($manual_id)) {
+                $this->db->where('manual_id', $manual_id)
+                    ->where('approved', 0)   // only allow update if still pending
+                    ->update('timecards_manual', $data);
+            } else {
+                $data['approved']    = 0;
+                $data['approved_by'] = NULL;
+                $data['created_at']  = get_user_datetime_only($user_id);
+                $this->db->insert('timecards_manual', $data);
+            }
+
+            redirect('employee/TimeRequest');
         }
-            // Append to session
-            $this->db->insert('timecards_manual', $data);
-
-            echo ($this->db->affected_rows() > 0)
-                ? "Timecard created successfully!"
-                : "Failed to create timecard.";          
-
-        redirect('employee/TimeRequest');
     }
+
+
+
 
     public function create_timecard()
     {
