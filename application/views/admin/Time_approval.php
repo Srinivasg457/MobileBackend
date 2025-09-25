@@ -76,7 +76,9 @@
                                                                     html_escape($req['user_id']) . '/' .
                                                                     rawurlencode(html_escape($req['employee_name'])) . '/' .
                                                                     rawurlencode(html_escape($req['email'])) . '/' .
-                                                                    rawurlencode(html_escape($req['reason'] ?? 'NA')) // Ensure it’s not missing
+                                                                    rawurlencode(html_escape($req['reason'] ?? 'NA')) . '/' .
+                                                                    rawurlencode(html_escape($req['timestamp_start'])) . '/' .
+                                                                    rawurlencode(html_escape($req['timestamp_end']))
                                                             ); ?>"
                                                     class="on-default remove-row approve_request_item"
                                                     data-toggle="tooltip"
@@ -97,7 +99,9 @@
                                                                     html_escape($req['user_id']) . '/' .
                                                                     rawurlencode(html_escape($req['employee_name'])) . '/' .
                                                                     rawurlencode(html_escape($req['email'])) . '/' .
-                                                                    rawurlencode(html_escape($req['reason'] ?? 'NA')) // Ensure it’s not missing
+                                                                    rawurlencode(html_escape($req['reason'] ?? 'NA')) . '/' .
+                                                                    rawurlencode(html_escape($req['timestamp_start'])) . '/' .
+                                                                    rawurlencode(html_escape($req['timestamp_end']))
                                                             ); ?>" class="on-default remove-row decline_request_item"
                                                     data-toggle="tooltip"
                                                     data-placement="top"
