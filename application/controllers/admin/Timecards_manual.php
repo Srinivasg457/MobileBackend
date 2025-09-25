@@ -590,7 +590,7 @@ class Timecards_manual extends Home_Controller
         }
 
         // Join with employee details
-        $this->db->select('t.manual_id, t.is_meeting, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, e.name as employee_name, e.email, e.thumb');
+        $this->db->select('t.manual_id, t.is_meeting, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, t.created_at, e.name as employee_name, e.email, e.thumb');
         $this->db->from('timecards_manual t');
         $this->db->join('employees e', 't.employee_id = e.id', 'left');
         $this->db->where('t.user_id', $user_id);
@@ -608,11 +608,12 @@ class Timecards_manual extends Home_Controller
         }
 
         // Join with employee details
-        $this->db->select('t.manual_id, t.is_meeting, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, e.name as employee_name, e.email, e.thumb');
+        $this->db->select('t.manual_id, t.is_meeting, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, t.created_at, e.name as employee_name, e.email, e.thumb');
         $this->db->from('timecards_manual t');
         $this->db->join('employees e', 't.employee_id = e.id', 'left');
         $this->db->where('t.user_id', $user_id);
         $this->db->where('t.approved', 0);
+        $this->db->order_by('manual_id', 'DESC');
 
         $query = $this->db->get();
         return $query->result_array(); // Return as normal PHP array
