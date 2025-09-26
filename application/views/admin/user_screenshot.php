@@ -83,33 +83,6 @@
                     loadScreenshots(currentEmployeeId, date);
                 });
                 $('#datePicker').val(today);
-                // $.ajax({
-                //     url: "<?= base_url('/admin/ScreenshotController/list_employees_by_user') ?>",
-                //     method: "GET",
-                //     dataType: "json",
-                //     success: function(response) {
-                //         let employeeSelect = $('#employeeSelect');
-                //         if (response.status === "success" && response.employees.length > 0) {
-                //             response.employees.forEach(emp => {
-                //                 employeeSelect.append(`<option value="${emp.id}">${emp.name} (${emp.email})</option>`);
-                //             });
-
-                //             const randomIndex = Math.floor(Math.random() * response.employees.length);
-                //             const randomEmployee = response.employees[randomIndex];
-                //             employeeSelect.val(randomEmployee.id);
-                //             $('#employeeName').text(`${randomEmployee.name} (${randomEmployee.email})`); // ✅ Set name on auto-load
-                //             const date = $('#datePicker').val();
-                //             loadScreenshots(randomEmployee.id, date);
-                //         } else {
-                //             employeeSelect.empty().append(`<option value="">-- No employees found --</option>`);
-                //         }
-                //     },
-
-
-                //     error: function() {
-                //         $('#employeeSelect').empty().append(`<option value="">-- No employees found --</option>`);
-                //     }
-                // });
                 $.ajax({
                     url: "<?= base_url('/admin/ScreenshotController/list_employees_by_user') ?>",
                     method: "GET",
@@ -172,6 +145,16 @@
                         employee_id: id,
                         date: date
                     },
+                    // Show loading message before request
+                    beforeSend: function() {
+                        $(".card-container").html(`
+                            <div class="box-header with-border text-center">
+                                <h4 class="box-title">
+                                    Screenshot loading...
+                                </h4>
+                            </div>
+                    `);
+                    },
                     success: function(response) {
                         console.log(response);
 
@@ -191,62 +174,52 @@
                                 groupedByHour[hourLabel].push(screenshot);
                             });
 
-                            // Get all hourRange keys and sort based on currentSortOrder
+                            // Sort hour ranges
                             let sortedHourRanges = Object.keys(groupedByHour);
-
                             sortedHourRanges.sort((a, b) => {
                                 const startHourA = parseInt(a.split(":")[0], 10);
                                 const startHourB = parseInt(b.split(":")[0], 10);
-
-                                if (currentSortOrder === 'ascending') {
-                                    return startHourA - startHourB;
-                                } else {
-                                    return startHourB - startHourA;
-                                }
+                                return currentSortOrder === 'ascending' ?
+                                    startHourA - startHourB :
+                                    startHourB - startHourA;
                             });
 
-                            // Process each hour group in sorted order
+                            // Process each hour group
                             sortedHourRanges.forEach(hourRange => {
                                 const screenshots = groupedByHour[hourRange];
-                                const groupId = `group-${hourRange.replace(/[^a-zA-Z0-9]/g, "")}`;
-                                output += `<div class="screenshot-group box" style="border-width: 1px;
-                             border-bottom-style: solid; padding: 10px; border-radius: 8px; margin-bottom: 30px;">
-                            <div class="box-header" style="font-weight: bold; margin-bottom: 10px;">Time: ${hourRange}</div>
-                            <div class="screenshot-visible" style="gap: 10px;">`;
+                                output += `<div class="screenshot-group box" style="border-width: 1px; border-bottom-style: solid; padding: 10px; border-radius: 8px; margin-bottom: 30px;">
+                        <div class="box-header" style="font-weight: bold; margin-bottom: 10px;">Time: ${hourRange}</div>
+                        <div class="screenshot-visible" style="gap: 10px;">`;
 
-                                // Group by 10-minute intervals within this hour
+                                // Group by 10-minute intervals
                                 const intervalScreenshots = {};
                                 screenshots.forEach(screenshot => {
                                     const time = screenshot.display_text;
                                     const [hours, minutes] = time.split(':').map(Number);
                                     const interval = Math.floor(minutes / 10) * 10;
                                     const intervalKey = `${hours}:${interval}`;
-
                                     if (!intervalScreenshots[intervalKey]) {
                                         intervalScreenshots[intervalKey] = [];
                                     }
                                     intervalScreenshots[intervalKey].push(screenshot);
                                 });
 
-                                // One screenshot per interval (closest to 5-minute mark)
+                                // One screenshot per interval
                                 Object.keys(intervalScreenshots).forEach(intervalKey => {
                                     const screenshotsInInterval = intervalScreenshots[intervalKey];
 
-                                    // Step 1: Compute average activity
-                                    let total = 0;
-                                    let count = 0;
-
+                                    // Average activity
+                                    let total = 0,
+                                        count = 0;
                                     screenshotsInInterval.forEach(screenshot => {
-                                        const value = screenshot.percentage ? parseInt(screenshot.percentage) : 0;
-                                        total += value;
+                                        total += screenshot.percentage ? parseInt(screenshot.percentage) : 0;
                                         count++;
                                     });
-
                                     const averageActivity = count > 0 ? Math.round(total / count) : 0;
 
-                                    // Step 2: Find screenshot closest to 5-minute mark
-                                    let closestScreenshot = null;
-                                    let smallestDiff = Infinity;
+                                    // Closest to 5-minute mark
+                                    let closestScreenshot = null,
+                                        smallestDiff = Infinity;
                                     const targetMinute = parseInt(intervalKey.split(':')[1]) + 5;
 
                                     screenshotsInInterval.forEach(screenshot => {
@@ -258,38 +231,36 @@
                                         }
                                     });
 
-                                    // Step 3: Generate HTML using average activity
+                                    // Build card
                                     if (closestScreenshot) {
                                         const timeWithoutSeconds = closestScreenshot.display_text.split(':').slice(0, 2).join(':');
-
                                         output += `<div class="screenshot-card box" style="box-sizing: border-box;">
-                                                <img src="${closestScreenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" 
-                                                    style="width: 100%; cursor: pointer;"
-                                                    data-interval="${intervalKey}"
-                                                    data-hour-range="${hourRange}"
-                                                    data-activity-percent="${averageActivity}">
-                                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
-                                                    <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
-                                                        <svg viewBox="0 0 36 36" width="40" height="40">
-                                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
-                                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
-                                                                stroke-dasharray="${averageActivity} ${100 - averageActivity}"
-                                                                stroke-dashoffset="25"
-                                                                transform="rotate(0 18 18)"
-                                                            />
-                                                        </svg>
-                                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
-                                                            data-toggle="tooltip" data-placement="top" title="${averageActivity}%">
-                                                            ${averageActivity}%
-                                                        </div>
-                                                    </div>
-                                                    <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
-                                                </div>
-                                                <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
-                                            </div>`;
+                                <img src="${closestScreenshot.image_url}" class="see-zoomable-screenshot" alt="Screenshot" 
+                                    style="width: 100%; cursor: pointer;"
+                                    data-interval="${intervalKey}"
+                                    data-hour-range="${hourRange}"
+                                    data-activity-percent="${averageActivity}">
+                                <div style="margin-top:10px; display: flex; align-items: center; justify-content: space-between;">
+                                    <div class="donut-chart" style="position: relative; width: 40px; height: 40px;">
+                                        <svg viewBox="0 0 36 36" width="40" height="40">
+                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e6e6e6" stroke-width="4"/>
+                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="green" stroke-width="4"
+                                                stroke-dasharray="${averageActivity} ${100 - averageActivity}"
+                                                stroke-dashoffset="25"
+                                                transform="rotate(0 18 18)"
+                                            />
+                                        </svg>
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; cursor: pointer;"
+                                            data-toggle="tooltip" data-placement="top" title="${averageActivity}%">
+                                            ${averageActivity}%
+                                        </div>
+                                    </div>
+                                    <p style="margin: 0; font-size: 12px;">${timeWithoutSeconds}</p>
+                                </div>
+                                <div class="additional-screenshots" style="display: none; width: 100%; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
+                            </div>`;
                                     }
                                 });
-
 
                                 output += `</div></div>`;
                             });
@@ -299,7 +270,7 @@
                             // Initialize tooltips
                             $('[data-toggle="tooltip"]').tooltip();
 
-                            // Zoom modal click handler
+                            // Zoom modal handler
                             $(".see-zoomable-screenshot").on('click', function() {
                                 const interval = $(this).data('interval');
                                 const hourRange = $(this).data('hour-range');
@@ -307,85 +278,82 @@
                                 const clickedTime = $(this).closest('.screenshot-card').find('p').text();
                                 const clickedImageUrl = $(this).attr('src');
 
-                                // Find all screenshots in the same interval
+                                // Find all screenshots in same interval
                                 const allScreenshotsInInterval = groupedByHour[hourRange].filter(screenshot => {
                                     const [hours, minutes] = screenshot.display_text.split(':').map(Number);
                                     const screenshotInterval = Math.floor(minutes / 10) * 10;
                                     return `${hours}:${screenshotInterval}` === interval;
                                 }).sort((a, b) => a.display_text.localeCompare(b.display_text));
 
-                                // Set modal main image and info
+                                // Update modal
                                 $('#modal-image').attr('src', clickedImageUrl);
                                 $('#image-info').html(`
-                                    <span style="display: inline-block; margin: 0 10px;">${clickedTime}</span>
-                                    <span style="display: inline-block; margin: 0 10px;">•</span>
-                                    <span style="display: inline-block; margin: 0 10px;">
-                                        Activity: <span style="color: ${getActivityColor(activity)}; font-weight: bold;">${activity}%</span>
-                                    </span>
-                                            `);
+                        <span style="display: inline-block; margin: 0 10px;">${clickedTime}</span>
+                        <span style="display: inline-block; margin: 0 10px;">•</span>
+                        <span style="display: inline-block; margin: 0 10px;">
+                            Activity: <span style="color: ${getActivityColor(activity)}; font-weight: bold;">${activity}%</span>
+                        </span>
+                    `);
 
-                                // Clear and add thumbnails
+                                // Thumbnails
                                 $('#modal-additional-screenshots').empty();
-
                                 allScreenshotsInInterval.forEach(screenshot => {
                                     const overallActivity = screenshot.percentage ? parseInt(screenshot.percentage) : 0;
                                     const timeWithoutSeconds = screenshot.display_text.split(':').slice(0, 2).join(':');
                                     const isActive = screenshot.image_url === clickedImageUrl;
 
                                     $('#modal-additional-screenshots').append(`
-                                                    <div id="screenshot-${screenshot.id}" class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
-                                                        style="border:2px solid white;cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
-                                                        data-src="${screenshot.image_url}"
-                                                        data-time="${timeWithoutSeconds}"
-                                                        data-activity="${overallActivity}"
-                                                        data-id="${screenshot.id}">
-
-                                                        <img id="main-image" src="${screenshot.image_url}" 
-                                                            style="width: 100%; height: 100px; object-fit: cover; display: block; filter: transition; transition: filter 0.3s;">
-
-                                                        <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
-                                                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                                                <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
-                                                                <span>${timeWithoutSeconds}</span>
-                                                                <?php if ($can_edit): ?>
-                                                                <div data-id="${screenshot.id}" data-empID="${$('#employeeSelect').val()}" class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                                                                    <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
-                                                                </div>
-                                                                <?php endif; ?>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    `);
+                            <div id="screenshot-${screenshot.id}" class="thumbnail-item ${isActive ? 'active-thumbnail' : ''}" 
+                                style="border:2px solid white;cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; position: relative;"
+                                data-src="${screenshot.image_url}"
+                                data-time="${timeWithoutSeconds}"
+                                data-activity="${overallActivity}"
+                                data-id="${screenshot.id}">
+                                <img id="main-image" src="${screenshot.image_url}" 
+                                    style="width: 100%; height: 100px; object-fit: cover; display: block; filter: transition; transition: filter 0.3s;">
+                                <div class="thumbnail-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 8px; font-size: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <span style="color: ${getActivityColor(overallActivity)}; font-weight: bold;">${overallActivity}%</span>
+                                        <span>${timeWithoutSeconds}</span>
+                                        <?php if ($can_edit): ?>
+                                        <div data-id="${screenshot.id}" data-empID="${$('#employeeSelect').val()}" class="delete-thumbnail" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                                            <img src="<?php echo base_url('assets/images/filled-trash.png') ?>" style="width: 100%; height: 100%; border-radius: 50%;" />
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
                                 });
 
-                                // Show modal
                                 $('#screenshot-modal').fadeIn();
 
-                                // Auto-refresh if current date
+                                // Auto-refresh
                                 setTimeout(function() {
-                                    // $('#screenshot-modal').fadeOut();
                                     let date = $('#datePicker').val();
                                     let id = $('#employeeSelect').val();
                                     if (date === new Date().toISOString().split('T')[0]) {
-                                        loadScreenshots(id, date)
+                                        loadScreenshots(id, date);
                                     }
                                 }, 6000);
                             });
                         } else {
-                            $(".card-container").html(
-                                `<div class="box">
-                            <div class="box-header with-border text-center">
-                                <h3 class="box-title">
-                                    <strong class="text-right">No Screenshots Available.</strong>
-                                </h3>
-                            </div>
-                        </div>`
-                            );
+                            $(".card-container").html(`
+                    <div class="box">
+                        <div class="box-header with-border text-center">
+                            <h3 class="box-title">
+                                <strong class="text-right">No Screenshots Available.</strong>
+                            </h3>
+                        </div>
+                    </div>
+                `);
                         }
                     },
-
                     error: function(xhr, status, error) {
                         $(".card-container").html("<p>Error loading screenshots. Please try again.</p>");
+                    },
+                    complete: function() {
+
                     }
                 });
             }
