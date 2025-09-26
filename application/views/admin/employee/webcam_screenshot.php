@@ -76,7 +76,7 @@
                         $(".card-container").html(`
                             <div class="box-header with-border text-center">
                                 <h4 class="box-title">
-                                    Screenshot loading...
+                                    loading...
                                 </h4>
                             </div>
                     `);
