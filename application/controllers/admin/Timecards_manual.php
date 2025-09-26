@@ -11,22 +11,7 @@ class Timecards_manual extends Home_Controller
         $this->load->database();
         $this->load->helper('url');
     }
-    // public function index()
-    // {
-    //     // if (!$this->session->userdata('logged_in')) {
-    //     //     redirect('login');
-    //     // }
-    //     $data = array();
-    //     $data['employee_id'] = $this->session->userdata('employee_id');
-    //     $data['employee_org_id'] = $this->session->userdata('employee_org_id');
-    //     $data['page_title'] = 'Activity Log';
-    //     $data['main_content'] = $this->load->view('admin/employee/activity_log', $data, TRUE);
-    //     $data['time_cards'] = "asd";
-    //     $this->load->view('admin/index', $data);
-    //     if (!is_subscribed()) {
-    //         redirect('/admin/subscription/upgrade_plan');
-    //     }
-    // }
+
     public function Time_Approval()
     {
         require_feature(9);
@@ -92,99 +77,7 @@ class Timecards_manual extends Home_Controller
             ? "Timecard created successfully!"
             : "Failed to create timecard.";
     }
-    /**
-     * Approve a manual timecard
-     */
-    // public function approve_timecard()
-    // {
-    //     $manual_id   = $this->input->post('manual_id');
-    //     $approved_by = $this->session->userdata("id"); // From session
-
-    //     if (!$manual_id || !$approved_by) {
-    //         echo "Manual ID and session are required.";
-    //         return;
-    //     }
-
-    //     $this->db->where('manual_id', $manual_id);
-    //     $this->db->where('user_id', $approved_by); // Ensures admin is updating only their own records
-    //     $this->db->update('timecards_manual', [
-    //         'approved'    => 1,
-    //         'approved_by' => $approved_by
-    //     ]);
-
-    //     echo ($this->db->affected_rows() > 0)
-    //         ? "Timecard approved successfully!"
-    //         : "Failed to approve timecard.";
-    // }
-    // public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $timecards = null)
-    // {
-    //     $employee_name = urldecode($employee_name);
-    //     $employee_email = urldecode($employee_email);
-    //     $reason = urldecode($reason);
-    //     $timecards = urldecode($timecards);
-
-    //     $approved_by = $this->session->userdata("id");
-
-    //     if (!$manual_id || !$approved_by) {
-    //         echo json_encode(['status' => 'error', 'message' => 'Manual ID and session are required.']);
-    //         return;
-    //     }
-
-    //     // Update approval in DB
-    //     $this->db->where('manual_id', $manual_id);
-    //     $this->db->where('user_id', $approved_by);
-    //     $this->db->update('timecards_manual', [
-    //         'approved'    => 1,
-    //         'approved_by' => $approved_by
-    //     ]);
-
-    //     // Send approval email
-    //     $time_range = substr($timecards['timestamp_start'], 0, 5) . " → " . substr($timecards['timestamp_end'], 0, 5);
-    //     $this->send_alert_mail($employee_id, $employee_name, $employee_email, $reason, 1, $timecards); // For approval
-
-    //     // $this->send_alert_mail($employee_id, $employee_name, $employee_email, $reason, 1);
-
-    //     echo json_encode(['st' => 1]);
-    // }
-    // public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = "0", $end_time = "0")
-    // {
-    //     $employee_name = urldecode($employee_name);
-    //     $employee_email = urldecode($employee_email);
-    //     $reason = urldecode($reason);
-    //     $start_time = urldecode($start_time);
-    //     $end_time = urldecode($end_time);
-
-    //     $approved_by = $this->session->userdata("id");
-
-    //     if (!$manual_id || !$approved_by) {
-    //         echo json_encode(['status' => 'error', 'message' => 'Manual ID and session are required.']);
-    //         return;
-    //     }
-
-    //     // Update approval in DB
-    //     $this->db->where('manual_id', $manual_id);
-    //     $this->db->where('user_id', $approved_by);
-    //     $this->db->update('timecards_manual', [
-    //         'approved'    => 1,
-    //         'approved_by' => $approved_by
-    //     ]);
-
-    //     // Fix: decode timecards string to array if it's JSON or build time range correctly
-    //     // Assuming timecards is a string with start and end timestamps concatenated separated by comma or something
-    //     // Since your link sends timestamp_start and timestamp_end as separate parameters, but your function takes only one timecards param,
-    //     // adjust here accordingly:
-    //     // If $timecards is like "start|end", explode it:
-    //     $timecards_array = explode('|', $timecards);
-    //     $time_range = isset($timecards_array[0], $timecards_array[1])
-    //         ? substr($timecards_array[0], 0, 5) . " → " . substr($timecards_array[1], 0, 5)
-    //         : $timecards; // fallback
-
-    //     // Pass manual_id as first argument (fix mismatch)
-    //     $this->send_alert_mail($manual_id, $employee_id, $employee_name, $employee_email, $reason, 1, $time_range);
-
-    //     echo json_encode(['st' => 1]);
-    // }
-    public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = "0", $end_time = "0")
+    public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = null, $end_time = null)
     {
         $employee_name = urldecode($employee_name);
         $employee_email = urldecode($employee_email);
@@ -194,8 +87,8 @@ class Timecards_manual extends Home_Controller
 
         $approved_by = $this->session->userdata("id");
 
-        if (!$manual_id || !$approved_by) {
-            echo json_encode(['status' => 'error', 'message' => 'Manual ID and session are required.']);
+        if (!$manual_id || !$approved_by || !$employee_email || !$employee_id || !$start_time || !$end_time) {
+            echo json_encode(['status' => 'error', 'message' => 'ID and session are required.']);
             return;
         }
 
@@ -206,6 +99,7 @@ class Timecards_manual extends Home_Controller
             'approved'    => 1,
             'approved_by' => $approved_by
         ]);
+        $this->add_active_time_from_request($manual_id);
 
         // Create time range string using start_time and end_time
         $time_range = substr($start_time, 0, 5) . " → " . substr($end_time, 0, 5);
@@ -215,102 +109,102 @@ class Timecards_manual extends Home_Controller
 
         echo json_encode(['st' => 1]);
     }
+    /**
+     * Add the approved manual request as active time into time_logs.
+     * If a log exists for the same employee and day, update active/idle/total times.
+     *
+     * Rules:
+     *  - If idle >= requested  → move requested from idle → active
+     *  - If requested > idle   → move all idle to active and add the remainder to active + total
+     *
+     * @param int $manual_id  The ID of the approved manual request
+     * @return bool
+     */
+    private function add_active_time_from_request($manual_id)
+    {
+        // Fetch approved request
+        $req = $this->db
+            ->where('manual_id', $manual_id)
+            ->where('approved', 1)
+            ->get('timecards_manual')
+            ->row();
 
-    // public function decline_timecard($manual_id, $employee_id, $employee_name, $employee_email, $reason, $timecards)
-    // {
-    //     $employee_name = urldecode($employee_name);
-    //     $employee_email = urldecode($employee_email);
-    //     $reason = urldecode($reason);
-    //     $timecards = urldecode($timecards);
+        if (!$req) {
+            return false;
+        }
+
+        // Combine the request date with the stored start/end times
+        // date_added is e.g. "2025-09-26"
+        $log_date = date('Y-m-d', strtotime($req->date_added));
+        $startDT  = new DateTime($log_date . ' ' . $req->timestamp_start);
+        $endDT    = new DateTime($log_date . ' ' . $req->timestamp_end);
+
+        $requested_seconds = $endDT->getTimestamp() - $startDT->getTimestamp();
+
+        // Look for an existing daily log
+        $log = $this->db
+            ->where('employee_id', $req->employee_id)
+            ->where('user_id', $req->user_id)
+            ->where('log_date', $log_date)
+            ->get('time_logs')
+            ->row();
+
+        // Helpers
+        $toSec  = fn($t) => $t && strpos($t, ':') !== false
+            ? array_sum(array_map(
+                fn($v, $i) => $v * pow(60, 2 - $i),
+                array_map('intval', explode(':', $t)),
+                [0, 1, 2]
+            ))
+            : 0;
+        $toTime = fn($s) => gmdate('H:i:s', max(0, $s));
+
+        if ($log) {
+            $idle   = $toSec($log->total_idle_time);
+            $active = $toSec($log->total_active_time);
+            $total  = $toSec($log->total_time);
+
+            if ($idle >= $requested_seconds) {
+                $idle   -= $requested_seconds;
+                $active += $requested_seconds;
+                // total stays the same
+            } else {
+                $active += $idle;
+                $requested_seconds -= $idle;
+                $idle = 0;
+                $active += $requested_seconds;
+                $total  += $requested_seconds; // grow total by the remainder
+            }
+
+            return $this->db
+                ->where('log_id', $log->log_id)
+                ->update('time_logs', [
+                    'total_active_time' => $toTime($active),
+                    'total_idle_time'   => $toTime($idle),
+                    'total_time'        => $toTime($active + $idle), // keep consistent
+                    'updated_at'        => date('Y-m-d H:i:s')
+                ]);
+        }
+
+        // No existing log: insert new
+        $duration = gmdate('H:i:s', $requested_seconds);
+
+        return $this->db->insert('time_logs', [
+            'session_id'        => null,
+            'employee_id'       => $req->employee_id,
+            'user_id'           => $req->user_id,
+            'log_date'          => $log_date,
+            'start_time'        => $startDT->format('Y-m-d H:i:s'),
+            'end_time'          => $endDT->format('Y-m-d H:i:s'),
+            'total_active_time' => $duration,
+            'total_idle_time'   => '00:00:00',
+            'total_time'        => $duration,
+            'created_at'        => date('Y-m-d H:i:s'),
+            'updated_at'        => date('Y-m-d H:i:s')
+        ]);
+    }
 
 
-    //     $declined_by = $this->input->post('declined_by') ?? $this->session->userdata('id');
-
-    //     if (empty($manual_id) || empty($declined_by)) {
-    //         echo json_encode([
-    //             'status'  => 'error',
-    //             'message' => 'Manual ID and Declined By are required.'
-    //         ]);
-    //         return;
-    //     }
-
-    //     // Check if timecard exists
-    //     $timecard = $this->db->where('manual_id', $manual_id)
-    //         ->get('timecards_manual')
-    //         ->row_array();
-
-    //     if (!$timecard) {
-    //         echo json_encode([
-    //             'status'  => 'error',
-    //             'message' => 'No timecard found with the given Manual ID.'
-    //         ]);
-    //         return;
-    //     }
-
-    //     // Update to declined
-    //     $this->db->where('manual_id', $manual_id)
-    //         ->update('timecards_manual', [
-    //             'approved'    => -1,
-    //             'approved_by' => $declined_by
-    //         ]);
-
-    //     // Send declined email
-    //     $time_range = substr($timecards['timestamp_start'], 0, 5) . " → " . substr($timecards['timestamp_end'], 0, 5);
-    //     $this->send_alert_mail($employee_id, $employee_name, $employee_email, $reason, 0, $time_range); // For approval
-
-    //     // $this->send_alert_mail($employee_id, $employee_name, $employee_email, $reason, 0);
-
-    //     echo json_encode(['st' => 1]);
-    // }
-    // public function decline_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = "0", $end_time = "0")
-    // {
-    //     $employee_name = urldecode($employee_name);
-    //     $employee_email = urldecode($employee_email);
-    //     $reason = urldecode($reason);
-    //     $start_time = urldecode($start_time);
-    //     $end_time = urldecode($end_time);
-
-    //     $declined_by = $this->input->post('declined_by') ?? $this->session->userdata('id');
-
-    //     if (empty($manual_id) || empty($declined_by)) {
-    //         echo json_encode([
-    //             'status'  => 'error',
-    //             'message' => 'Manual ID and Declined By are required.'
-    //         ]);
-    //         return;
-    //     }
-
-    //     // Check if timecard exists
-    //     $timecard = $this->db->where('manual_id', $manual_id)
-    //         ->get('timecards_manual')
-    //         ->row_array();
-
-    //     if (!$timecard) {
-    //         echo json_encode([
-    //             'status'  => 'error',
-    //             'message' => 'No timecard found with the given Manual ID.'
-    //         ]);
-    //         return;
-    //     }
-
-    //     // Update to declined
-    //     $this->db->where('manual_id', $manual_id)
-    //         ->update('timecards_manual', [
-    //             'approved'    => -1,
-    //             'approved_by' => $declined_by
-    //         ]);
-
-    //     // Decode $timecards like approve_timecard
-    //     $timecards_array = explode('|', $timecards);
-    //     $time_range = isset($timecards_array[0], $timecards_array[1])
-    //         ? substr($timecards_array[0], 0, 5) . " → " . substr($timecards_array[1], 0, 5)
-    //         : $timecards; // fallback
-
-    //     // Fix: Pass manual_id first
-    //     $this->send_alert_mail($manual_id, $employee_id, $employee_name, $employee_email, $reason, 0, $time_range);
-
-    //     echo json_encode(['st' => 1]);
-    // }
     public function decline_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = "0", $end_time = "0")
     {
         $employee_name = urldecode($employee_name);
@@ -359,157 +253,6 @@ class Timecards_manual extends Home_Controller
     }
 
 
-    // public function send_alert_mail($employee_id, $employee_name, $employee_email, $reason, $approved)
-    // {
-    //     if (empty($employee_email)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Employee email is missing.'
-    //             ]));
-    //     }
-
-    //     // Email subject and body
-    //     $subject = '';
-    //     $msg = "<p>Hi <strong>$employee_name</strong>,</p>";
-
-    //     if ((int)$approved === 1) {
-    //         // Approval email
-    //         $subject .= "Approval Notification: Manual Time Request";
-    //         $msg .= "<p>Your manual time request has been <strong style=\"color:green\">approved</strong> by the admin.</p>";
-    //         $msg .= "<p><strong>Reason provided:</strong></p>";
-    //         $msg .= "<blockquote style=\"font-style: italic; color: #555;\">$reason</blockquote>";
-    //         $msg .= "<p>This approval confirms that your request aligns with project goals and scheduling availability.</p>";
-    //     } else {
-    //         // Decline email
-    //         $subject .= "Request Declined: Manual Time Request";
-    //         $msg .= "<p>Your manual time request has been <strong style=\"color:red\">declined</strong> by the admin.</p>";
-    //         $msg .= "<p><strong>Reason provided:</strong></p>";
-    //         $msg .= "<blockquote style=\"font-style: italic; color: #555;\">$reason</blockquote>";
-    //         $msg .= "<p>If you believe this was an error or need further clarification, please reach out to your manager or admin.</p>";
-    //     }
-
-    //     $msg .= "<br><p>Regards,<br><strong>Admin Team</strong></p>";
-
-    //     // Send email
-    //     $this->email_model->send_email($employee_email, $subject, $msg);
-    // }
-
-    // public function send_alert_mail($employee_id, $employee_name, $employee_email, $reason, $approved, $time_range = null)
-    // {
-    //     if (empty($employee_email)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Employee email is missing.'
-    //             ]));
-    //     }
-
-
-    //     $subject = '';
-    //     $msg = "<p>Hi <strong>$employee_name</strong>,</p>";
-
-    //     if ((int)$approved === 1) {
-    //         $subject .= "Approval Notification: Manual Time Request";
-    //         $msg .= "<p>Your manual time request has been <strong style=\"color:green\">approved</strong> by the admin.</p>";
-    //     } else {
-    //         $subject .= "Request Declined: Manual Time Request";
-    //         $msg .= "<p>Your manual time request has been <strong style=\"color:red\">declined</strong> by the admin.</p>";
-    //     }
-
-    //     // Time & reason in table format
-    //     $msg .= "
-    //     <table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; margin-top: 10px;'>
-    //         <thead style='background-color: #f2f2f2;'>
-    //             <tr>
-    //                 <th style='text-align:left;'>Time Range</th>
-    //                 <th style='text-align:left;'>Reason</th>
-    //             </tr>
-    //         </thead>
-    //         <tbody>
-    //             <tr>
-    //                 <td>$time_range</td>
-    //                 <td>$reason</td>
-    //             </tr>
-    //         </tbody>
-    //     </table>
-    // ";
-
-    //     if ((int)$approved === 1) {
-    //         $msg .= "<p>This approval confirms that your request aligns with project goals and scheduling availability.</p>";
-    //     } else {
-    //         $msg .= "<p>If you believe this was an error or need further clarification, please reach out to your manager or admin.</p>";
-    //     }
-
-    //     $msg .= "<br><p>Regards,<br><strong>Admin Team</strong></p>";
-
-    //     // Send email
-    //     $this->email_model->send_email($employee_email, $subject, $msg);
-    // }
-    // public function send_alert_mail($manual_id, $employee_id, $employee_name, $employee_email, $reason, $approved, $timecards)
-    // {
-    //     if (empty($employee_email)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Employee email is missing.'
-    //             ]));
-    //     }
-
-    //     $timecards = $this->db->where('manual_id')
-    //         ->get('timecards_manual')
-    //         ->row_array();
-
-    //     if (!$timecards) {
-    //         echo json_encode([
-    //             'status'  => 'error',
-    //             'message' => 'No timecard found with the given Manual ID.'
-    //         ]);
-    //         return;
-    //     }
-    //     $subject = '';
-    //     $msg = "<p>Hi <strong>$employee_name</strong>,</p>";
-
-    //     if ((int)$approved === 1) {
-    //         $subject = "Approval Notification: Manual Time Request";
-    //         $msg .= "<p>Your manual time request has been <strong style=\"color:green\">approved</strong> by the admin.</p>";
-    //     } else {
-    //         $subject = "Request Declined: Manual Time Request";
-    //         $msg .= "<p>Your manual time request has been <strong style=\"color:red\">declined</strong> by the admin.</p>";
-    //     }
-
-    //     // Time & reason in table format
-    //     $msg .= "
-    //     <table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; margin-top: 10px;'>
-    //         <thead style='background-color: #f2f2f2;'>
-    //             <tr>
-    //                 <th style='text-align:left;'>Time Range</th>
-    //                 <th style='text-align:left;'>Reason</th>
-    //             </tr>
-    //         </thead>
-    //         <tbody>
-    //             <tr>
-    //                 <td>$timecards</td>
-    //                 <td>$reason</td>
-    //             </tr>
-    //         </tbody>
-    //     </table>
-    // ";
-
-    //     if ((int)$approved === 1) {
-    //         $msg .= "<p>This approval confirms that your request aligns with project goals and scheduling availability.</p>";
-    //     } else {
-    //         $msg .= "<p>If you believe this was an error or need further clarification, please reach out to your manager or admin.</p>";
-    //     }
-
-    //     $msg .= "<br><p>Regards,<br><strong>Admin Team</strong></p>";
-
-    //     //Send email
-    //     $this->email_model->send_email($employee_email, $subject, $msg);
-    // }
 
     public function send_alert_mail($manual_id, $employee_id, $employee_name, $employee_email, $reason, $approved, $time_range)
     {
@@ -590,10 +333,12 @@ class Timecards_manual extends Home_Controller
         }
 
         // Join with employee details
-        $this->db->select('t.manual_id, t.is_meeting, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, t.created_at, e.name as employee_name, e.email, e.thumb');
+        $this->db->select('t.manual_id, t.type, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, t.verification_status, t.created_at, e.name as employee_name, e.email, e.thumb');
         $this->db->from('timecards_manual t');
         $this->db->join('employees e', 't.employee_id = e.id', 'left');
         $this->db->where('t.user_id', $user_id);
+        $this->db->order_by('t.manual_id', 'DESC'); // Change column if needed
+
         // $this->db->where('t.approved', );
 
         $query = $this->db->get();
@@ -608,12 +353,17 @@ class Timecards_manual extends Home_Controller
         }
 
         // Join with employee details
-        $this->db->select('t.manual_id, t.is_meeting, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, t.created_at, e.name as employee_name, e.email, e.thumb');
+        $this->db->select('t.manual_id, t.type, t.timestamp_start, t.timestamp_end, t.user_id, t.employee_id, t.date_added, t.reason, t.approved, t.approved_by, t.verification_status, t.created_at, e.name as employee_name, e.email, e.thumb');
         $this->db->from('timecards_manual t');
         $this->db->join('employees e', 't.employee_id = e.id', 'left');
         $this->db->where('t.user_id', $user_id);
         $this->db->where('t.approved', 0);
-        $this->db->order_by('manual_id', 'DESC');
+
+        // Only last 7 days based on created_at
+        $this->db->where('t.created_at >=', date('Y-m-d 00:00:00', strtotime('-6 days')));
+        $this->db->where('t.created_at <=', date('Y-m-d 23:59:59'));
+
+        $this->db->order_by('t.manual_id', 'DESC');
 
         $query = $this->db->get();
         return $query->result_array(); // Return as normal PHP array

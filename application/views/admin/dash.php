@@ -578,7 +578,7 @@
           <div class="card-body">
             <div class="d-flex flex-row">
               <div class="ml-20 align-self-center">
-                <h4 class="text-muteds m-b-0"><?php echo "Meeting Hours" ?></h4>
+                <h4 class="text-muteds m-b-0"><?php echo "Signout Hours" ?></h4>
                 <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom" title="<?php echo $employee_activity['shift_time'] ?>"><?php echo "1h 20m" ?></h2>
               </div>
             </div>

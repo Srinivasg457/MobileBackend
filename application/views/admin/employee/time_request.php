@@ -4,7 +4,15 @@
             <a href="#" id="btn-create" class="pull-right btn btn-info btn-sm rounded  mx-5">
                 <i class="fa fa-plus"></i> Create Request</a>
         </h3>
-
+        <?php
+        $type_labels = [
+            1 => 'Manual Time',
+            2 => 'Client Meeting',
+            3 => 'Training',
+            4 => 'On-site Work',
+            5 => 'Other Offline Work',
+            6 => 'Internet Issues'
+        ]; ?>
         <!-- Employee Requests Table -->
         <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
             <table class="table table-hover cushover mt-0 <?php if (count($userData) > 10) {
@@ -28,7 +36,7 @@
                         <?php foreach ($userData as $req) : ?>
                             <tr id="row_<?php echo html_escape($req['manual_id']); ?>">
                                 <td><?= $i++ ?></td>
-                                <td><?= $req['is_meeting'] == 1 ? 'Meeting' : 'Manual' ?></td>
+                                <td><?php echo isset($type_labels[$req['type']]) ? $type_labels[$req['type']] : 'Unknown'; ?></td>
                                 <td>
                                     <p class="mb-0"><?php echo $req['date_added']; ?></p>
                                     <p class="mb-0 text-muted"><?php echo substr($req['timestamp_start'], 0, 5) ?> → <?= substr($req['timestamp_end'], 0, 5) ?></p>
@@ -206,11 +214,18 @@
                     <input type="hidden" name="manual_id" id="manual_id">
                     <div class="form-row mt-2">
                         <div class="col form-group">
-                            <label class="control-label" for="type">Type</label>
+                            <label class="control-label" for="type">Request Type</label>
                             <select name="type" id="type" class="form-control single_select" required>
-                                <option value="0">Manual Time</option>
+                                <option value="">-- Select Request Type --</option>
+                                <option value="1">Manual Time</option>
+                                <option value="2">Client Meeting</option>
+                                <option value="3">Training</option>
+                                <option value="4">On-site Work</option>
+                                <option value="5">Other Offline Work</option>
+                                <option value="6">Internet Issues</option>
                             </select>
                         </div>
+
 
                         <div class="col form-group">
                             <label for="requested_date" class="control-label">Requested Date</label>
@@ -218,6 +233,8 @@
                                 name="requested_date"
                                 id="requested_date"
                                 class="inv-dpick form-control"
+                                min="<?= date('Y-m-d', strtotime('-7 days')); ?>"
+                                max="<?= date('Y-m-d'); ?>"
                                 required>
                         </div>
                     </div>
@@ -269,32 +286,45 @@
             // clear old errors
             $('#err_time_start, #err_time_end').text('');
 
+            const startVal = $('#time_start').val().trim();
+            const endVal = $('#time_end').val().trim();
+
             // Start time required
-            if ($('#time_start').val().trim() === '') {
+            if (startVal === '') {
                 $('#err_time_start').text('Please enter a start time.');
                 valid = false;
             }
 
             // End time required
-            if ($('#time_end').val().trim() === '') {
+            if (endVal === '') {
                 $('#err_time_end').text('Please enter an end time.');
                 valid = false;
             }
 
-            // End time must be after start time
-            if (
-                $('#time_start').val() &&
-                $('#time_end').val() &&
-                $('#time_end').val() <= $('#time_start').val()
-            ) {
-                $('#err_time_end').text('End time must be after start time.');
-                valid = false;
+            if (startVal && endVal) {
+                // Check end > start
+                if (endVal <= startVal) {
+                    $('#err_time_end').text('End time must be after start time.');
+                    valid = false;
+                } else {
+                    // Minimum 5-minute difference
+                    const start = new Date(`1970-01-01T${startVal}:00`);
+                    const end = new Date(`1970-01-01T${endVal}:00`);
+                    const diffMinutes = (end - start) / (1000 * 60);
+
+                    if (diffMinutes < 5) {
+                        $('#err_time_end').text('The time range must be at least 5 minutes.');
+                        valid = false;
+                    }
+                }
             }
 
             if (!valid) {
                 e.preventDefault(); // stop form submission
             }
         });
+
+
 
         // --- Hide error when the field gains focus ---
         $('#time_start').on('focus', function() {

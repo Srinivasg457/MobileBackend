@@ -49,39 +49,111 @@ class TimeRequest extends Home_Controller
             'st'      => 1
         ]);
     }
-    // Handle form submit and add new request
     public function submit()
     {
         if ($this->input->post()) {
             $user_id     = $this->session->userdata('employee_org_id');
             $employee_id = $this->session->userdata('employee_id');
+            $type        = $this->input->post('type');
+            $requested_date = $this->input->post('requested_date');
+            $start_time  = $this->input->post('time_start');
+            $end_time    = $this->input->post('time_end');
+            $manual_id   = $this->input->post('manual_id');
 
-            $data = array(
-                'is_meeting'      => $this->input->post('type'),
-                'timestamp_start' => $this->input->post('time_start'),
-                'timestamp_end'   => $this->input->post('time_end'),
-                'user_id'         => $user_id,
-                'employee_id'     => $employee_id,
-                'reason'          => $this->input->post('reason'),
-                'date_added'      => $this->input->post('requested_date'),
-                'updated_at'      => get_user_datetime_only($user_id)
+            // ✅ 1. Check if the same request already exists (ignore the current record if editing)
+            $exists = $this->db->where('employee_id', $employee_id)
+                ->where('date_added', $requested_date)
+                ->where('timestamp_start', $start_time)
+                ->where('timestamp_end', $end_time)
+                ->where('approved !=', -1) // optional: skip invalid/declined if you like
+                ->where($manual_id ? "manual_id !=" : '1=1', $manual_id ?: null) // skip same row when updating
+                ->get('timecards_manual')
+                ->num_rows();
+
+            if ($exists > 0) {
+                // send flash message and stop
+                $this->session->set_flashdata('error', 'A request for the same date and time already exists.');
+                redirect('employee/TimeRequest');
+                return;
+            }
+
+            // ✅ 2. Continue with normal verification
+            $verification_status = $this->verify_time_request(
+                $employee_id,
+                $requested_date,
+                $start_time,
+                $end_time,
+                $type
             );
 
-            // if manual_id is present → update
-            $manual_id = $this->input->post('manual_id');
+            $data = [
+                'type'            => $type,
+                'timestamp_start' => $start_time,
+                'timestamp_end'   => $end_time,
+                'user_id'         => $user_id,
+                'employee_id'     => $employee_id,
+                'approved'        => 0,
+                'verification_status' => $verification_status,
+                'reason'          => $this->input->post('reason'),
+                'date_added'      => $requested_date,
+                'updated_at'      => get_user_datetime_only($user_id)
+            ];
+
             if (!empty($manual_id)) {
                 $this->db->where('manual_id', $manual_id)
-                    ->where('approved', 0)   // only allow update if still pending
+                    ->where('approved', 0)
                     ->update('timecards_manual', $data);
+                $this->session->set_flashdata('msg', 'Request Updated.');
             } else {
-                $data['approved']    = 0;
-                $data['approved_by'] = NULL;
-                $data['created_at']  = get_user_datetime_only($user_id);
+                $data['created_at'] = get_user_datetime_only($user_id);
                 $this->db->insert('timecards_manual', $data);
+                $this->session->set_flashdata('msg', 'Request Added.');
             }
 
             redirect('employee/TimeRequest');
         }
+    }
+
+
+    public function verify_time_request($employee_id, $requested_date, $start_time, $end_time, $type = '')
+    {
+        // Define start and end of the requested day
+        $start_of_day = $requested_date . ' ' . $start_time; // e.g., 2025-09-26 11:32:00
+        $end_of_day   = $requested_date . ' ' . $end_time;
+
+        // 1️⃣ Check activity in Employee_Activity
+        $this->db->select('SUM(total_mouse_movement) as mouse, SUM(total_keystrokes) as keystrokes');
+        $this->db->from('Employee_Activity');
+        $this->db->where('employee_id', $employee_id);
+        // Truncate seconds using DATE_FORMAT to match only up to minutes
+        $this->db->where("DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') >=", date('Y-m-d H:i', strtotime($start_of_day)));
+        $this->db->where("DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') <=", date('Y-m-d H:i', strtotime($end_of_day)));
+
+        $activity = $this->db->get()->row();
+
+        $total_mouse = $activity->mouse ?? 0;
+        $total_keys  = $activity->keystrokes ?? 0;
+
+
+        // 2️⃣ Check time_logs for the employee
+        $this->db->select('log_id');
+        $this->db->from('time_logs');
+        $this->db->where('employee_id', $employee_id);
+        $this->db->where("DATE(log_date)", $requested_date);
+        $log = $this->db->get()->row();
+
+        if (!empty($log)) {
+            if ($total_mouse > 0 || $total_keys > 0) {
+                return 0; // Needs review
+            } else {
+                return 1; // Valid
+            }
+        }else{
+            return 0;
+        }
+
+        // 3️⃣ No activity and no logs → invalid
+        return -1; // Invalid
     }
 
 
