@@ -84,6 +84,16 @@
                         employee_id: id,
                         date: date
                     },
+                     // Show loading message before request
+                    beforeSend: function() {
+                        $(".card-container").html(`
+                            <div class="box-header with-border text-center">
+                                <h4 class="box-title">
+                                    loading...
+                                </h4>
+                            </div>
+                    `);
+                    },
                     success: function(response) {
                         console.log(response);
 
@@ -291,6 +301,9 @@
                     error: function(xhr, status, error) {
                         console.error("AJAX Error:", status, error);
                         $(".card-container").html("<p>Error loading Webcam Images. Please try again.</p>");
+                    },
+                    complete: function() {
+                       
                     }
                 });
             }
