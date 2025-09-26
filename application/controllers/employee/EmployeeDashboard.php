@@ -356,30 +356,18 @@ class EmployeeDashboard extends Home_Controller
         $this->db->where("DATE(log_date) <=", $to_date);
         $query = $this->db->get()->row();
 
-        $this->db->select("
-                SEC_TO_TIME(SUM(CASE WHEN is_meeting = 1 THEN TIME_TO_SEC(TIMEDIFF(timestamp_end, timestamp_start)) ELSE 0 END)) AS meeting_time,
-                SEC_TO_TIME(SUM(CASE WHEN is_meeting = 0 THEN TIME_TO_SEC(TIMEDIFF(timestamp_end, timestamp_start)) ELSE 0 END)) AS manual_time
-            ");
-        $this->db->from('timecards_manual');
-        $this->db->where('employee_id', $employee_id);
-        $this->db->where('user_id', $organization_id);
-        $this->db->where("DATE(date_added) >=", $from_date);
-        $this->db->where("DATE(date_added) <=", $to_date);
-        $query1 = $this->db->get()->row();
 
 
         $formatted_total_active_temp = $this->formatToHoursMins($query->total_active);
         $formatted_total_idle_temp = $this->formatToHoursMins($query->total_idle);
         $formatted_total_shift_time_temp = $this->formatToHoursMins($query->total_duration);
-        $formatted_total_meeting_time_temp = $this->formatToHoursMins($query1->meeting_time);
-        $formatted_total_manual_time_temp = $this->formatToHoursMins($query1->manual_time);
+
 
 
         $formatted_total_active = $this->convertTimeToMinutes($formatted_total_active_temp);
         $formatted_total_idle = $this->convertTimeToMinutes($formatted_total_idle_temp);
         $formatted_total_shift_time = $this->convertTimeToMinutes($formatted_total_shift_time_temp);
-        $formatted_total_meeting_time = $this->convertTimeToMinutes($formatted_total_meeting_time_temp);
-        $formatted_total_manual_time = $this->convertTimeToMinutes($formatted_total_manual_time_temp);
+
 
 
 
@@ -392,16 +380,12 @@ class EmployeeDashboard extends Home_Controller
         if ($formatted_total_shift_time > 0) {
             $active_percent  = ($formatted_total_active > 0)  ? floor(($formatted_total_active / $formatted_total_shift_time) * 100)  : 0;
             $idle_percent    = ($formatted_total_idle > 0)    ? floor(($formatted_total_idle / $formatted_total_shift_time) * 100)    : 0;
-            $meeting_percent = ($formatted_total_meeting_time > 0) ? floor(($formatted_total_meeting_time / $formatted_total_shift_time) * 100) : 0;
-            $manual_percent  = ($formatted_total_manual_time > 0)  ? floor(($formatted_total_manual_time / $formatted_total_shift_time) * 100)  : 0;
-        }
+}
 
 
         return [
             'active_time' =>  $formatted_total_active_temp,
             'idle_time' =>  $formatted_total_idle_temp,
-            'meeting_time' =>  $formatted_total_meeting_time_temp,
-            'manual_time' =>  $formatted_total_manual_time_temp,
             'duration'  => $formatted_total_shift_time_temp,
             'active_percentage' => $active_percent,
             'idle_percentage' => $idle_percent,

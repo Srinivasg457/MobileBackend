@@ -10,7 +10,15 @@
                     <i class="fa fa-angle-left"></i> Back</a>
             <?php endif; ?>
         </h3>
-
+        <?php
+        $type_labels = [
+            1 => 'Manual Time',
+            2 => 'Client Meeting',
+            3 => 'Training',
+            4 => 'On-site Work',
+            5 => 'Other Offline Work',
+            6 => 'Internet Issues'
+        ]; ?>
         <!-- <?php print_r($time_cards) ?> -->
 
         <!-- Employee Requests Table -->
@@ -24,14 +32,13 @@
                             <th>#</th>
                             <th><?php echo trans('image') ?></th>
                             <th>Name</th>
-                            <!-- <th>Type</th> -->
-                            <th>Request Range</th>
+                            <th>Request Date</th>
                             <th>Reason</th>
                             <th>Created Date</th>
-                            <th>Status</th>
+                            <th>Verification</th>
+                            <th>Approval Status</th>
                             <th>View</th>
                             <th>Actions</th>
-
                         </tr>
                     </thead>
                     <tbody>
@@ -54,12 +61,23 @@
                                         <p class="mb-0 text-muted"><?php echo substr($req['timestamp_start'], 0, 5) ?> → <?= substr($req['timestamp_end'], 0, 5) ?></p>
                                     </td>
                                     <td title="<?= htmlspecialchars($req['reason'], ENT_QUOTES) ?>">
-                                        <?= strlen($req['reason']) > 40
-                                            ? htmlspecialchars(mb_substr($req['reason'], 0, 40), ENT_QUOTES) . '…'
-                                            : htmlspecialchars($req['reason'], ENT_QUOTES);
-                                        ?>
+                                        <p class="mb-0"><?php echo isset($type_labels[$req['type']]) ? $type_labels[$req['type']] : 'Unknown'; ?> </p>
+
+                                        <p class="mb-0 text-muted"> <?= strlen($req['reason']) > 20
+                                                                        ? htmlspecialchars(mb_substr($req['reason'], 0, 20), ENT_QUOTES) . '…'
+                                                                        : htmlspecialchars($req['reason'], ENT_QUOTES);
+                                                                    ?> </p>
                                     </td>
-                                    <td><?= $req['created_at'] ?></td>
+                                    <td><?= date('Y-m-d', strtotime($req['created_at'])) ?></td>
+                                    <td>
+                                        <?php if ($req['verification_status'] == -1) : ?>
+                                            <span class="validation_status validation_invalid">Invalid</span>
+                                        <?php elseif ($req['verification_status'] == 1) : ?>
+                                            <span class="validation_status validation_valid">Valid</span>
+                                        <?php elseif ($req['verification_status'] == 0) : ?>
+                                            <span class="validation_status validation_review">Review</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <?php if ($req['approved'] == -1) : ?>
                                             <span class="status declined">Declined</span>
@@ -74,20 +92,50 @@
                                             class="view-request"
                                             data-employee="<?= htmlspecialchars($req['employee_name']) ?>"
                                             data-reason="<?= htmlspecialchars($req['reason']) ?>"
+                                            data-type="<?= isset($type_labels[$req['type']]) ? $type_labels[$req['type']] : 'Unknown' ?>"
                                             data-range="<?= substr($req['timestamp_start'], 0, 5) ?> → <?= substr($req['timestamp_end'], 0, 5) ?>"
                                             data-date="<?= htmlspecialchars($req['date_added']) ?>"
-                                            data-status="<?=
-                                                            $req['approved'] == 1 ? 'Approved' : ($req['approved'] == -1 ? 'Declined' : 'Pending');
-                                                            ?>"
+                                            data-status="<?= $req['approved'] == 1 ? 'Approved' : ($req['approved'] == -1 ? 'Declined' : 'Pending') ?>"
                                             title="View Request">
                                             <i class="bi bi-eye-fill text-primary" style="font-size:1.5rem;"></i>
                                         </a>
+
                                     </td>
                                     <td class="actions view-settings text-center" width="15%">
                                         <?php if ($req['approved'] == -1) : ?>
+                                            <a href="#"
+                                                class="on-default edit-row"
+                                                data-toggle="tooltip"
+                                                data-placement="top"
+                                                title="You can edit only pending requests"
+                                                style="pointer-events: none; cursor: not-allowed; opacity: 0.6;">
+                                                <i class="fa fa-check text-success"></i>
+                                            </a>
+                                            <a href="#"
+                                                class="on-default edit-row"
+                                                data-toggle="tooltip"
+                                                data-placement="top"
+                                                title="You can edit only pending requests"
+                                                style="pointer-events: none; cursor: not-allowed; opacity: 0.6;">
+                                                <i class="fa fa-times text-danger"></i>
+                                            </a>
                                         <?php elseif ($req['approved'] == 1) : ?>
-                                            <!-- <span class="status approved">Approved</span> -->
-                                        <?php elseif ($req['approved'] == 0) : ?>
+                                            <a href="#"
+                                                class="on-default edit-row"
+                                                data-toggle="tooltip"
+                                                data-placement="top"
+                                                title="You can edit only pending requests"
+                                                style="pointer-events: none; cursor: not-allowed; opacity: 0.6;">
+                                                <i class="fa fa-check text-success"></i>
+                                            </a>
+                                            <a href="#"
+                                                class="on-default edit-row"
+                                                data-toggle="tooltip"
+                                                data-placement="top"
+                                                title="You can edit only pending requests"
+                                                style="pointer-events: none; cursor: not-allowed; opacity: 0.6;">
+                                                <i class="fa fa-times text-danger"></i>
+                                            </a> <?php elseif ($req['approved'] == 0) : ?>
                                             <?php if ($can_edit): ?>
                                                 <a
                                                     data-val="Approve"
@@ -175,10 +223,11 @@
                             <th><?php echo trans('image') ?></th>
                             <th>Name</th>
                             <!-- <th>Type</th> -->
-                            <th>Request Range</th>
+                            <th>Request Date</th>
                             <th>Reason</th>
                             <th>Created Date</th>
-                            <th>Status</th>
+                            <th>Verfication</th>
+                            <th>Approval Status</th>
                             <th>View</th>
                             <th>Actions</th>
                         </tr>
@@ -204,12 +253,23 @@
                                         <p class="mb-0 text-muted"><?php echo substr($req['timestamp_start'], 0, 5) ?> → <?= substr($req['timestamp_end'], 0, 5) ?></p>
                                     </td>
                                     <td title="<?= htmlspecialchars($req['reason'], ENT_QUOTES) ?>">
-                                        <?= strlen($req['reason']) > 40
-                                            ? htmlspecialchars(mb_substr($req['reason'], 0, 40), ENT_QUOTES) . '…'
-                                            : htmlspecialchars($req['reason'], ENT_QUOTES);
-                                        ?>
+                                        <p class="mb-0"> <?php echo isset($type_labels[$req['type']]) ? $type_labels[$req['type']] : 'Unknown'; ?> </p>
+
+                                        <p class="mb-0 text-muted"> <?= strlen($req['reason']) > 20
+                                                                        ? htmlspecialchars(mb_substr($req['reason'], 0, 20), ENT_QUOTES) . '…'
+                                                                        : htmlspecialchars($req['reason'], ENT_QUOTES);
+                                                                    ?> </p>
                                     </td>
-                                    <td><?= $req['created_at'] ?></td>
+                                    <td><?= date('Y-m-d', strtotime($req['created_at'])) ?></td>
+                                    <td>
+                                        <?php if ($req['verification_status'] == -1) : ?>
+                                            <span class="validation_status validation_invalid">Invalid</span>
+                                        <?php elseif ($req['verification_status'] == 1) : ?>
+                                            <span class="validation_status validation_valid">Valid</span>
+                                        <?php elseif ($req['verification_status'] == 0) : ?>
+                                            <span class="validation_status validation_review">Review</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <?php if ($req['approved'] == -1) : ?>
                                             <span class="status declined">Declined</span>
@@ -224,14 +284,14 @@
                                             class="view-request"
                                             data-employee="<?= htmlspecialchars($req['employee_name']) ?>"
                                             data-reason="<?= htmlspecialchars($req['reason']) ?>"
+                                            data-type="<?= isset($type_labels[$req['type']]) ? $type_labels[$req['type']] : 'Unknown' ?>"
                                             data-range="<?= substr($req['timestamp_start'], 0, 5) ?> → <?= substr($req['timestamp_end'], 0, 5) ?>"
                                             data-date="<?= htmlspecialchars($req['date_added']) ?>"
-                                            data-status="<?=
-                                                            $req['approved'] == 1 ? 'Approved' : ($req['approved'] == -1 ? 'Declined' : 'Pending');
-                                                            ?>"
+                                            data-status="<?= $req['approved'] == 1 ? 'Approved' : ($req['approved'] == -1 ? 'Declined' : 'Pending') ?>"
                                             title="View Request">
                                             <i class="bi bi-eye-fill text-primary" style="font-size:1.5rem;"></i>
                                         </a>
+
                                     </td>
                                     <td class="actions view-settings text-center" width="15%">
                                         <?php if ($req['approved'] == -1) : ?>
@@ -369,6 +429,10 @@
                                         <td id="vr_employee"></td>
                                     </tr>
                                     <tr>
+                                        <th>Type</th>
+                                        <td id="vr_type"></td>
+                                    </tr>
+                                    <tr>
                                         <th>Reason</th>
                                         <td id="vr_reason"></td>
                                     </tr>
@@ -381,7 +445,7 @@
                                         <td id="vr_date"></td>
                                     </tr>
                                     <tr>
-                                        <th>Status</th>
+                                        <th>Approval Status</th>
                                         <td id="vr_status"><span class="status"></span></td>
                                     </tr>
                                 </tbody>
@@ -406,6 +470,7 @@
 
         // Fill modal with the clicked row's data
         $('#vr_employee').text($el.data('employee'));
+        $('#vr_type').text($el.data('type'));
         $('#vr_reason').text($el.data('reason'));
         $('#vr_range').text($el.data('range'));
         $('#vr_date').text($el.data('date'));

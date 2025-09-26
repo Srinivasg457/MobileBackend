@@ -504,6 +504,42 @@
         } */
       }
 
+      .validation_status {
+        display: inline-block;
+        margin-top: 0px;
+        padding: 4px 12px;
+        font-size: 13px;
+        border-radius: 12px;
+        width: 88px;
+      }
+
+      .validation_review {
+        text-align: center;
+        background-color: #fef3c7;
+        /* light amber */
+        color: #92400e;
+        /* dark amber/brown text */
+        /* border: 2px solid #92400e; */
+        /* matching border */
+      }
+
+      .validation_valid {
+        text-align: center;
+        background-color: #d1fae5;
+        /* light green */
+        color: #065f46;
+        /* dark green text */
+        /* border: 2px solid #065f46;  optional matching border */
+      }
+
+      .validation_invalid {
+        text-align: center;
+        background-color: #fee2e2;
+        /* light red / rose */
+        color: #991b1b;
+        /* dark red text */
+        /* border: 2px solid #991b1b;  optional matching border */
+      }
 
       .status {
         display: inline-block;
