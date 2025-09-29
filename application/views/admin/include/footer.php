@@ -54,7 +54,7 @@
         <div id="chat-window">
           <div class="header">
             <button id="new-chat">
-              <img width="30px" src="	http://work-room.local/uploads/thumbnail/3_medium-400x400_thumb-100x100.png" alt="">
+              <img width="30px" src="<?php echo base_url('uploads/thumbnail/3_medium-400x400_thumb-100x100.png'); ?>" alt="">
             </button>
             Chatbot
             <span id="close-chat" style="position:absolute; right:10px; top:10px; cursor:pointer;">✖</span>
