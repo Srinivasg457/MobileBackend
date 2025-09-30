@@ -273,6 +273,7 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     font-family: 'Segoe UI', sans-serif;
     transition: background 0.3s;
+    width: 96.5%;
   }
 
   .insight-text:hover {
@@ -579,7 +580,7 @@
             <div class="d-flex flex-row">
               <div class="ml-20 align-self-center">
                 <h4 class="text-muteds m-b-0"><?php echo "Signout Hours" ?></h4>
-                <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom" title="<?php echo $employee_activity['shift_time'] ?>"><?php echo "1h 20m" ?></h2>
+                <h2 class="m-b-0" data-toggle="tooltip" data-placement="bottom" title="<?php echo $employee_activity['sign_out'] ?>"><?php echo $employee_activity['sign_out'] ?></h2>
               </div>
             </div>
           </div>

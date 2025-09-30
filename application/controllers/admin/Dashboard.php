@@ -1,18 +1,18 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Dashboard extends Home_Controller {
 
-	public function __construct()
+    public function __construct()
     {
         parent::__construct();
     }
-    
+
     public function index()
     {
         if (!is_admin()) {
             redirect(base_url());
         }
-       
+
         $data = array();
         $data['currency'] = currency_to_symbol(settings()->currency);
         for ($i = 1; $i <= 13; $i++) {
@@ -43,7 +43,7 @@ class Dashboard extends Home_Controller {
         $this->load->view('admin/index', $data);
     }
 
-    
+
 
     public function business()
     {
@@ -90,50 +90,50 @@ class Dashboard extends Home_Controller {
             $data['main_content'] = $this->load->view('include/no_employees_view.php', $data, TRUE);
             $this->load->view('admin/index', $data);
         }else{
-        $user_id = $this->session->userdata('id');;
-        $time_period = $this->input->post('Time_period', true);
-        $from_date = $this->input->post('fromDate', true);
-        $to_date = $this->input->post('toDate', true);
-        $data['employee_id'] = $employee_id;
-        $data['time_period'] = $time_period;
-        $data['from_date'] = $from_date;
-        $data['to_date'] = $to_date;
-        if (empty($time_period) && (empty($from_date) || empty($to_date))) {
+            $user_id = $this->session->userdata('id');;
+            $time_period = $this->input->post('Time_period', true);
+            $from_date = $this->input->post('fromDate', true);
+            $to_date = $this->input->post('toDate', true);
+            $data['employee_id'] = $employee_id;
+            $data['time_period'] = $time_period;
+            $data['from_date'] = $from_date;
+            $data['to_date'] = $to_date;
+            if (empty($time_period) && (empty($from_date) || empty($to_date))) {
                 if (is_pack_trial()) {
                     $data['time_period'] = "last_1_days";
                 }else{
-                    $data['time_period'] = "current_week"; 
-                 }
+                    $data['time_period'] = "current_week";
+                }
 
                 // Set local variable so it flows correctly
                 $time_period = $data['time_period'];
-        }
+            }
 
-        // If dropdown is selected and from/to date are empty, calculate from dropdown
-        if (!empty($time_period) && (empty($from_date) || empty($to_date))) {
+            // If dropdown is selected and from/to date are empty, calculate from dropdown
+            if (!empty($time_period) && (empty($from_date) || empty($to_date))) {
                 list($from_date, $to_date) = $this->get_date_range_from_period($time_period, $from_date, $to_date);
-        }
-        $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line
-        $data['response_data'] = $this->get_last_week_total_active_hours($user_id, $employee_id); // 👈 Add this line
+            }
+            $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line
+            $data['response_data'] = $this->get_last_week_total_active_hours($user_id, $employee_id); // 👈 Add this line
         $data['response'] = $this->get_day_wise_application_usage($from_date, $to_date,$user_id, $employee_id); // 👈 Add this line
-         $data['usage_json'] = json_encode($data['response']['applications']);
+            $data['usage_json'] = json_encode($data['response']['applications']);
 
-        $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary($user_id, $employee_id);
-        $data['target_data'] = $this->get_this_week_target_time_data($user_id, $employee_id); // 👈 Add this line   
-        $data['inactive_data'] = $this->get_this_week_inactive_time_data($user_id, $employee_id); // 👈 Add this line   
-        $data['avarage_data'] = $this->get_this_week_avarage_time_data($user_id, $employee_id); // 👈 Add this line    
-        $data['active_time_comparison'] = $this->compare_weekly_average_active_time($user_id, $employee_id);
-        $data['weekly_reports'] = $this->get_weekly_report_data($user_id, $employee_id);
-        $data['avarage_data'] = $this->get_this_week_avarage_time_data($user_id, $employee_id); // 👈 Add this line    
-        $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date, $user_id, $employee_id);
-        $data['overall_productivity'] = $this->employee_overall_productivity($from_date, $to_date, $user_id, $employee_id);
-        $data['custom_date_chart_data'] = $this->get_custom_date_chart_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line   
-        $data['date_range'] = $this->get_date_range($from_date, $to_date); // 👈 Add this line    
-        // $data['weekly_report'] = $this->get_weekly_report_data();
-        $data['first_record_date'] = $this->get_user_oldest_activity_date($user_id, $employee_id);
-        $data['main_content'] = $this->load->view('admin/dash', $data, TRUE);
-        $this->load->view('admin/index', $data);
-    }
+            $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary($user_id, $employee_id);
+            $data['target_data'] = $this->get_this_week_target_time_data($user_id, $employee_id); // 👈 Add this line   
+            $data['inactive_data'] = $this->get_this_week_inactive_time_data($user_id, $employee_id); // 👈 Add this line   
+            $data['avarage_data'] = $this->get_this_week_avarage_time_data($user_id, $employee_id); // 👈 Add this line    
+            $data['active_time_comparison'] = $this->compare_weekly_average_active_time($user_id, $employee_id);
+            $data['weekly_reports'] = $this->get_weekly_report_data($user_id, $employee_id);
+            $data['avarage_data'] = $this->get_this_week_avarage_time_data($user_id, $employee_id); // 👈 Add this line    
+            $data['employee_activity'] = $this->Employee_chart_Data($from_date, $to_date, $user_id, $employee_id);
+            $data['overall_productivity'] = $this->employee_overall_productivity($from_date, $to_date, $user_id, $employee_id);
+            $data['custom_date_chart_data'] = $this->get_custom_date_chart_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line   
+            $data['date_range'] = $this->get_date_range($from_date, $to_date); // 👈 Add this line    
+            // $data['weekly_report'] = $this->get_weekly_report_data();
+            $data['first_record_date'] = $this->get_user_oldest_activity_date($user_id, $employee_id);
+            $data['main_content'] = $this->load->view('admin/dash', $data, TRUE);
+            $this->load->view('admin/index', $data);
+        }
     }
 
     private function get_date_range_from_period($time_period, $from_date = null, $to_date = null)
@@ -211,11 +211,11 @@ class Dashboard extends Home_Controller {
 
     //change password
     public function change()
-    {   
+    {
         check_status();
-        
+
         if($_POST){
-            
+
             $id = user()->id;
 
             if (is_employee()) {
@@ -260,7 +260,7 @@ class Dashboard extends Home_Controller {
                     }
                 } else {
                     echo json_encode(array('st' => 0)); // old password incorrect
-                } 
+                }
             } 
             else {
                 // Admin user
@@ -567,17 +567,19 @@ class Dashboard extends Home_Controller {
         $this->db->where("DATE(log_date) <=", $to_date);
         $query = $this->db->get()->row();
 
-       
+
 
 
         $formatted_total_active_temp = $this->formatToHoursMins($query->total_active);
         $formatted_total_idle_temp = $this->formatToHoursMins($query->total_idle);
+        $formatted_total_signout_temp = $this->formatToHoursMins($query->total_signout);
         $formatted_total_shift_time_temp = $this->formatToHoursMins($query->total_duration);
 
 
 
         $formatted_total_active = $this->convertTimeToMinutes($formatted_total_active_temp);
         $formatted_total_idle = $this->convertTimeToMinutes($formatted_total_idle_temp);
+        $formatted_total_singout = $this->convertTimeToMinutes($formatted_total_signout_temp);
         $formatted_total_shift_time = $this->convertTimeToMinutes($formatted_total_shift_time_temp);
 
 
@@ -591,7 +593,7 @@ class Dashboard extends Home_Controller {
         if ($formatted_total_shift_time > 0) {
             $active_percent  = ($formatted_total_active > 0)  ? floor(($formatted_total_active / $formatted_total_shift_time) * 100)  : 0;
             $idle_percent    = ($formatted_total_idle > 0)    ? floor(($formatted_total_idle / $formatted_total_shift_time) * 100)    : 0;
- }
+        }
 
 
         return [
@@ -682,17 +684,16 @@ class Dashboard extends Home_Controller {
         // Defaults
         $total_active = $query->total_active ?? "0h 0m";
         $total_idle = $query->total_idle ?? "0h 0m";
+        // $total_signout = $query->total_signout ?? "0h 0m";
         $shift_time = $query->shift_time ?? "0h 0m";
         $total_time = $query->total_time ?? "0h 0m";
 
         // Convert all times to seconds for calculation
         $shift_seconds = strtotime($shift_time, 0);
         $total_seconds = strtotime($total_time, 0);
-        $idle_seconds = strtotime($total_idle, 0);
 
-        // Calculate diff (shift_time - total_time) as extra idle
         $extra_idle_seconds = max(0, $shift_seconds - $total_seconds);
-        $final_idle_seconds = $idle_seconds + $extra_idle_seconds;
+        $final_signout_seconds = $extra_idle_seconds;
 
         // Fetch total mouse and keystrokes
         $this->db->select('SUM(total_mouse_movement) AS total_mouse, SUM(total_keystrokes) AS total_keys');
@@ -708,12 +709,14 @@ class Dashboard extends Home_Controller {
 
         // Format outputs
         $formatted_total_active = $this->formatToHoursMins($total_active);
-        $formatted_total_idle = $this->formatToHoursMins(gmdate("H:i:s", $final_idle_seconds));
-        $formatted_total_shift_time = $this->formatToHoursMins($shift_time);
+        $formatted_total_idle = $this->formatToHoursMins($total_idle);
+        $formatted_total_signout = $this->formatToHoursMins(gmdate("H:i:s", $final_signout_seconds));
+        $formatted_total_shift_time = $this->formatToHoursMins($total_time);
 
         return [
             'total_active' => $formatted_total_active,
             'total_idle' => $formatted_total_idle,
+            'sign_out' => $formatted_total_signout,
             'shift_time' => $formatted_total_shift_time,
             'total_mouse_movements' => $total_mouse,
             'total_keystrokes' => $total_keys,
@@ -1264,87 +1267,86 @@ class Dashboard extends Home_Controller {
         }
     }
 
-public function get_day_wise_application_usage($from_date, $to_date, $user_id, $employee_id)
-{
-    try {
-        if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
-            return null;
-        }
+    public function get_day_wise_application_usage($from_date, $to_date, $user_id, $employee_id)
+    {
+        try {
+            if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+                return null;
+            }
 
-        // Default to current week if no dates provided
-        if (empty($from_date) || empty($to_date)) {
-            $from_date = date('Y-m-d', strtotime('monday this week'));
-            $to_date = date('Y-m-d', strtotime('sunday this week'));
-        }
+            // Default to current week if no dates provided
+            if (empty($from_date) || empty($to_date)) {
+                $from_date = date('Y-m-d', strtotime('monday this week'));
+                $to_date = date('Y-m-d', strtotime('sunday this week'));
+            }
 
-        // Base query
-        $this->db->select('application_name, log_date, ROUND(SUM(duration_seconds) / 60, 2) AS total_minutes');
-        $this->db->from('application_usage_logs');
-        $this->db->where('employee_id', $employee_id);
-        $this->db->where('user_id', $user_id);
-        $this->db->where("DATE(log_date) >=", $from_date);
-        $this->db->where("DATE(log_date) <=", $to_date);
+            // Base query
+            $this->db->select('application_name, log_date, ROUND(SUM(duration_seconds) / 60, 2) AS total_minutes');
+            $this->db->from('application_usage_logs');
+            $this->db->where('employee_id', $employee_id);
+            $this->db->where('user_id', $user_id);
+            $this->db->where("DATE(log_date) >=", $from_date);
+            $this->db->where("DATE(log_date) <=", $to_date);
 
-        // If they specifically want the total for the range
-        if ($from_date !== $to_date) {
-            // Group by application only (sum over the range)
-            $this->db->group_by('application_name');
-            $this->db->order_by('total_minutes', 'DESC');
+            // If they specifically want the total for the range
+            if ($from_date !== $to_date) {
+                // Group by application only (sum over the range)
+                $this->db->group_by('application_name');
+                $this->db->order_by('total_minutes', 'DESC');
 
-            $query = $this->db->get();
-            $results = $query->result_array();
+                $query = $this->db->get();
+                $results = $query->result_array();
 
-            $response = [
-                'status' => 'success',
-                'message' => "Application usage calculated for range $from_date to $to_date",
-                'applications' => $results
-            ];
-        } else {
-            // Group by date & application (day-wise)
-            $this->db->group_by(['log_date', 'application_name']);
-            $this->db->order_by('log_date', 'ASC');
-            $this->db->order_by('total_minutes', 'DESC');
+                $response = [
+                    'status' => 'success',
+                    'message' => "Application usage calculated for range $from_date to $to_date",
+                    'applications' => $results
+                ];
+            } else {
+                // Group by date & application (day-wise)
+                $this->db->group_by(['log_date', 'application_name']);
+                $this->db->order_by('log_date', 'ASC');
+                $this->db->order_by('total_minutes', 'DESC');
 
-            $query = $this->db->get();
-            $raw_results = $query->result_array();
+                $query = $this->db->get();
+                $raw_results = $query->result_array();
 
-            // Group by date in array
-            $grouped_data = [];
-            foreach ($raw_results as $row) {
-                $date = $row['log_date'];
-                if (!isset($grouped_data[$date])) {
-                    $grouped_data[$date] = [];
+                // Group by date in array
+                $grouped_data = [];
+                foreach ($raw_results as $row) {
+                    $date = $row['log_date'];
+                    if (!isset($grouped_data[$date])) {
+                        $grouped_data[$date] = [];
+                    }
+                    $grouped_data[$date][] = [
+                        'application_name' => $row['application_name'],
+                        'total_minutes' => $row['total_minutes']
+                    ];
                 }
-                $grouped_data[$date][] = [
-                    'application_name' => $row['application_name'],
-                    'total_minutes' => $row['total_minutes']
+
+                $response = [
+                    'status' => 'success',
+                    'message' => 'Day-wise application usage calculated successfully',
+                    'applications' => $grouped_data
                 ];
             }
 
-            $response = [
-                'status' => 'success',
-                'message' => 'Day-wise application usage calculated successfully',
-                'applications' => $grouped_data
+            return $response;
+        } catch (Exception $e) {
+            log_message('error', 'get_day_wise_application_usage failed: ' . $e->getMessage());
+
+            $error_response = [
+                'status' => 'error',
+                'message' => 'Failed to calculate day-wise application usage',
+                'error_details' => $e->getMessage()
             ];
+
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode($error_response));
         }
-
-        return $response;
-
-    } catch (Exception $e) {
-        log_message('error', 'get_day_wise_application_usage failed: ' . $e->getMessage());
-
-        $error_response = [
-            'status' => 'error',
-            'message' => 'Failed to calculate day-wise application usage',
-            'error_details' => $e->getMessage()
-        ];
-
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(500)
-            ->set_output(json_encode($error_response));
     }
-}
 
 
 
