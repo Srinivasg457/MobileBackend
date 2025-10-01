@@ -80,7 +80,40 @@ wss.on('connection', (ws) => {
               }
             }
             break;
+          case "approval-time":
+            if (!msg.approveTime) {
+              console.warn("No approveTime provided");
+              break;
+            }
 
+            // Optionally, broadcast approval time to the specific streamer or all viewers
+            if (msg.employee_id) {
+              // Send to a specific streamer
+              const streamerSocket = streamers.get(msg.employee_id);
+              if (streamerSocket && streamerSocket.readyState === ws.OPEN) {
+                streamerSocket.send(
+                  JSON.stringify({
+                    action: "approval-time",
+                    data: msg.approveTime
+                  })
+                );
+                console.log(`Sent approval-time to streamer ${msg.employee_id}:`, msg.approveTime);
+              }
+            } else {
+              // Broadcast to all streamers (or viewers if you want)
+              for (const [id, streamerSocket] of streamers.entries()) {
+                if (streamerSocket.readyState === ws.OPEN) {
+                  streamerSocket.send(
+                    JSON.stringify({
+                      action: "approval-time",
+                      data: msg.approveTime
+                    })
+                  );
+                }
+              }
+              console.log("Broadcasted approval-time to all streamers:", msg.approveTime);
+            }
+            break;
           case "viewer-join":
             viewers.set(ws, msg.employee_id);
             console.log(`Viewer joined for: ${msg.employee_id}`);

@@ -1387,13 +1387,46 @@
     return false;
 
   });
-  $(document).on('click', ".approve_request_item", function () {
+  // $(document).on('click', ".approve_request_item", function () {
 
-    var del_url = $(this).attr('href');
-    console.log(del_url);
+  //   var del_url = $(this).attr('href');
+  //   console.log(del_url);
     
-    var itemId = $(this).attr('data-id');
+  //   var itemId = $(this).attr('data-id');
 
+
+  //   swal({
+  //     title: msg_are_you_sure,
+  //     text: "Approve this request",
+  //     type: "warning",
+  //     showCancelButton: true,
+  //     cancelButtonText: msg_cancel,
+  //     confirmButtonColor: "#DD6B55",
+  //     confirmButtonText: msg_yes,
+  //     closeOnConfirm: false
+  //   },
+  //     function () {
+
+  //       $.post(del_url, { data: 'value', 'csrf_test_name': csrf_token }, function (json) {
+  //         if (json.st == 1) {
+  //           swal({
+  //             title: msg_success,
+  //             text: "Approved successfully",
+  //             type: "success",
+  //             showCancelButton: false
+  //           }),
+  //             $("#row_" + itemId).slideUp();
+  //         }
+  //       }, 'json');
+
+  //     });
+
+  //   return false;
+
+  // });
+  $(document).on('click', ".approve_request_item", function () {
+    var del_url = $(this).attr('href');
+    var itemId = $(this).attr('data-id');
 
     swal({
       title: msg_are_you_sure,
@@ -1404,26 +1437,29 @@
       confirmButtonColor: "#DD6B55",
       confirmButtonText: msg_yes,
       closeOnConfirm: false
-    },
-      function () {
+    }, function () {
+      $.post(del_url, { data: 'value', 'csrf_test_name': csrf_token }, function (json) {
+        if (json.st == 1) {
+          swal({
+            title: msg_success,
+            text: "Approved successfully",
+            type: "success",
+            showCancelButton: false
+          });
 
-        $.post(del_url, { data: 'value', 'csrf_test_name': csrf_token }, function (json) {
-          if (json.st == 1) {
-            swal({
-              title: msg_success,
-              text: "Approved successfully",
-              type: "success",
-              showCancelButton: false
-            }),
-              $("#row_" + itemId).slideUp();
+          $("#row_" + itemId).slideUp();
+
+          // Call sendApprovalTime if ws_payload exists
+          if (json.ws_payload !== null) {
+            sendApprovalTime(json.ws_payload);
           }
-        }, 'json');
-
-      });
+        }
+      }, 'json');
+    });
 
     return false;
-
   });
+
   $(document).on('click', ".decline_request_item", function () {
 
     var del_url = $(this).attr('href');

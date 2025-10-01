@@ -149,7 +149,8 @@
                                                                     rawurlencode(html_escape($req['email'])) . '/' .
                                                                     rawurlencode(html_escape($req['reason'] ?? 'NA')) . '/' .
                                                                     rawurlencode(html_escape($req['timestamp_start'])) . '/' .
-                                                                    rawurlencode(html_escape($req['timestamp_end']))
+                                                                    rawurlencode(html_escape($req['timestamp_end'])) . '/' .
+                                                                    rawurlencode(html_escape($req['date_added']))
                                                             ); ?>"
                                                     class="on-default remove-row approve_request_item"
                                                     data-toggle="tooltip"
@@ -342,7 +343,8 @@
                                                                     rawurlencode(html_escape($req['email'])) . '/' .
                                                                     rawurlencode(html_escape($req['reason'] ?? 'NA')) . '/' .
                                                                     rawurlencode(html_escape($req['timestamp_start'])) . '/' .
-                                                                    rawurlencode(html_escape($req['timestamp_end']))
+                                                                    rawurlencode(html_escape($req['timestamp_end'])) . '/' .
+                                                                    rawurlencode(html_escape($req['date_added']))
                                                             ); ?>"
                                                     class="on-default remove-row approve_request_item"
                                                     data-toggle="tooltip"
