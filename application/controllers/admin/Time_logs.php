@@ -60,6 +60,67 @@ class Time_logs extends Home_Controller
     //         ]));
     // }
 
+    // public function get_time_logs()
+    // {
+    //     $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
+    //     $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+    //     $date = $this->input->get('date') ?: date('Y-m-d');
+
+    //     if (empty($employee_id) || empty($user_id)) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => false,
+    //                 'message' => 'Missing employee_id or user_id'
+    //             ]));
+    //     }
+
+    //     // Check if logs exist
+    //     $this->db->select('log_id');
+    //     $this->db->from('time_logs');
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('DATE(log_date)', $date);
+    //     $exists = $this->db->get();
+
+    //     if ($exists->num_rows() == 0) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => false,
+    //                 'message' => 'No time logs found for the specified user_id, employee_id, and date.'
+    //             ]));
+    //     }
+
+    //     // Fetch detailed logs
+    //     $this->db->select('log_id, employee_id, user_id, log_date, start_time, end_time, total_active_time, total_idle_time, total_time, created_at, updated_at');
+    //     $this->db->from('time_logs');
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('DATE(log_date)', $date);
+    //     $logs = $this->db->get()->result_array();
+
+    //     // Manipulate total_idle_time for each log
+    //     foreach ($logs as &$log) {
+    //         $shift_seconds = strtotime($log['end_time'], 0) - strtotime($log['start_time'], 0);
+    //         $total_seconds = strtotime($log['total_time'], 0);
+    //         $idle_seconds  = strtotime($log['total_idle_time'], 0);
+
+    //         // Add extra idle if shift is longer than recorded total
+    //         $extra_idle_seconds = max(0, $shift_seconds - $total_seconds);
+    //         $final_idle_seconds = $idle_seconds + $extra_idle_seconds;
+
+    //         // Replace original idle time with calculated one
+    //         $log['total_idle_time'] = gmdate("H:i:s", $final_idle_seconds);
+    //     }
+
+    //     return $this->output
+    //         ->set_content_type('application/json')
+    //         ->set_output(json_encode([
+    //             'status' => true,
+    //             'data' => $logs
+    //         ]));
+    // }
     public function get_time_logs()
     {
         $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
@@ -100,7 +161,6 @@ class Time_logs extends Home_Controller
         $this->db->where('DATE(log_date)', $date);
         $logs = $this->db->get()->result_array();
 
-        // Manipulate total_idle_time for each log
         foreach ($logs as &$log) {
             $shift_seconds = strtotime($log['end_time'], 0) - strtotime($log['start_time'], 0);
             $total_seconds = strtotime($log['total_time'], 0);
@@ -108,10 +168,17 @@ class Time_logs extends Home_Controller
 
             // Add extra idle if shift is longer than recorded total
             $extra_idle_seconds = max(0, $shift_seconds - $total_seconds);
-            $final_idle_seconds = $idle_seconds + $extra_idle_seconds;
+            $final_idle_seconds = $idle_seconds;
 
             // Replace original idle time with calculated one
             $log['total_idle_time'] = gmdate("H:i:s", $final_idle_seconds);
+
+            // ✅ New: Calculate signout time
+            $signout_seconds = max(0, $shift_seconds - $total_seconds);
+            $log['sign_out_time'] = gmdate("H:i:s", $signout_seconds);
+
+            // ✅ New: Keep total_time formatted (HH:MM)
+            $log['total_time'] = gmdate("H:i:s", $total_seconds);
         }
 
         return $this->output
@@ -121,6 +188,213 @@ class Time_logs extends Home_Controller
                 'data' => $logs
             ]));
     }
+    // public function get_time_logs()
+    // {
+    //     $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
+    //     $user_id = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+    //     $date = $this->input->get('date') ?: date('Y-m-d');
+
+    //     if (empty($employee_id) || empty($user_id)) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => false,
+    //                 'message' => 'Missing employee_id or user_id'
+    //             ]));
+    //     }
+
+    //     // Check if logs exist
+    //     $this->db->select('log_id');
+    //     $this->db->from('time_logs');
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('DATE(log_date)', $date);
+    //     $exists = $this->db->get();
+
+    //     if ($exists->num_rows() == 0) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => false,
+    //                 'message' => 'No time logs found for the specified user_id, employee_id, and date.'
+    //             ]));
+    //     }
+
+    //     // Fetch totals from time_logs (for the given day)
+    //     $this->db->select('
+    //     SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active,
+    //     SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle,
+    //     SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS shift_time,
+    //     SEC_TO_TIME(SUM(TIME_TO_SEC(total_time))) AS total_time,
+    //     MIN(start_time) AS first_in,
+    //     MAX(end_time) AS last_out
+    // ');
+    //     $this->db->from('time_logs');
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('DATE(log_date)', $date);
+    //     $summary = $this->db->get()->row();
+
+    //     // Defaults
+    //     $total_active = $summary->total_active ?? "00:00:00";
+    //     $total_idle   = $summary->total_idle ?? "00:00:00";
+    //     $shift_time   = $summary->shift_time ?? "00:00:00";
+    //     $total_time   = $summary->total_time ?? "00:00:00";
+
+    //     // Convert all times to seconds for calculation
+    //     $shift_seconds = strtotime($shift_time, 0);
+    //     $total_seconds = strtotime($total_time, 0);
+
+    //     // Calculate extra idle → signout
+    //     $extra_idle_seconds   = max(0, $shift_seconds - $total_seconds);
+    //     $final_signout_seconds = $extra_idle_seconds;
+
+    //     // Format outputs
+    //     $formatted_total_active  = $this->formatToHoursMins($total_active);
+    //     $formatted_total_idle    = $this->formatToHoursMins($total_idle);
+    //     $formatted_total_signout = $this->formatToHoursMins(gmdate("H:i:s", $final_signout_seconds));
+    //     $formatted_total_shift   = $this->formatToHoursMins($shift_time);
+    //     $formatted_total_time    = $this->formatToHoursMins($total_time);
+
+    //     return $this->output
+    //         ->set_content_type('application/json')
+    //         ->set_output(json_encode([
+    //             'status' => true,
+    //             'data' => [
+    //                 'date'         => $date,
+    //                 'employee_id'  => $employee_id,
+    //                 'user_id'      => $user_id,
+    //                 'active'       => $formatted_total_active,
+    //                 'idle'         => $formatted_total_idle,
+    //                 'sign_out'     => $formatted_total_signout,
+    //                 'shift_time'   => $formatted_total_shift,
+    //                 'total_time'   => $formatted_total_time,
+    //                 'first_in'     => $summary->first_in,
+    //                 'last_out'     => $summary->last_out
+    //             ]
+    //         ]));
+    // }
+    // public function get_time_logs()
+    // {
+    //     $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
+    //     $user_id     = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+    //     $from_date   = $this->input->get('from_date') ?: date('Y-m-d', strtotime('monday this week'));
+    //     $to_date     = $this->input->get('to_date')   ?: date('Y-m-d', strtotime('sunday this week'));
+
+    //     if (empty($employee_id) || empty($user_id)) {
+    //         return $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => false,
+    //                 'message' => 'Missing employee_id or user_id'
+    //             ]));
+    //     }
+
+    //     // Fetch day-wise logs
+    //     $this->db->select("
+    //     DATE(log_date) as log_date,
+    //     SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active,
+    //     SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle,
+    //     SEC_TO_TIME(SUM(TIME_TO_SEC(total_time))) AS total_time,
+    //     SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS shift_time
+    // ");
+    //     $this->db->from('time_logs');
+    //     $this->db->where('employee_id', $employee_id);
+    //     $this->db->where('user_id', $user_id);
+    //     $this->db->where("DATE(log_date) >=", $from_date);
+    //     $this->db->where("DATE(log_date) <=", $to_date);
+    //     $this->db->group_by("DATE(log_date)");
+    //     $query = $this->db->get()->result();
+
+    //     $result = [];
+    //     foreach ($query as $row) {
+    //         // Convert seconds properly
+    //         $shift_seconds  = strtotime($row->shift_time, 0);
+    //         $total_seconds  = strtotime($row->total_time, 0);
+    //         $extra_idle_sec = max(0, $shift_seconds - $total_seconds);
+
+    //         $result[] = [
+    //             'date'       => $row->log_date,
+    //             'active'     => $this->formatToHoursMins($row->total_active),
+    //             'idle'       => $this->formatToHoursMins($row->total_idle),
+    //             'sign_out'   => $this->formatToHoursMins(gmdate("H:i:s", $extra_idle_sec)),
+    //             'shift_time' => $this->formatToHoursMins($row->shift_time),
+    //             'total_time' => $this->formatToHoursMins($row->total_time),
+    //         ];
+    //     }
+
+    //     return $this->output
+    //         ->set_content_type('application/json')
+    //         ->set_output(json_encode([
+    //             'status' => true,
+    //             'data'   => $result
+    //         ]));
+    // }
+//     public function get_time_logs()
+// {
+//     $employee_id = $this->input->get('employee_id') ?? $this->session->userdata('employee_id');
+//     $user_id     = $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
+//     $from_date   = $this->input->get('from_date') ?: date('Y-m-d', strtotime('monday this week'));
+//     $to_date     = $this->input->get('to_date')   ?: date('Y-m-d', strtotime('sunday this week'));
+
+//     if (empty($employee_id) || empty($user_id)) {
+//         return $this->output
+//             ->set_content_type('application/json')
+//             ->set_output(json_encode([
+//                 'status' => false,
+//                 'message' => 'Missing employee_id or user_id'
+//             ]));
+//     }
+
+//     // Aggregate totals from time_logs
+//     $this->db->select("
+//         SEC_TO_TIME(SUM(TIME_TO_SEC(total_active_time))) AS total_active,
+//         SEC_TO_TIME(SUM(TIME_TO_SEC(total_idle_time))) AS total_idle,
+//         SEC_TO_TIME(SUM(TIME_TO_SEC(total_time))) AS total_time,
+//         SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))) AS shift_time,
+//         MIN(start_time) AS first_in,
+//         MAX(end_time) AS last_out
+//     ");
+//     $this->db->from('time_logs');
+//     $this->db->where('employee_id', $employee_id);
+//     $this->db->where('user_id', $user_id);
+//     $this->db->where("DATE(log_date) >=", $from_date);
+//     $this->db->where("DATE(log_date) <=", $to_date);
+//     $query = $this->db->get()->row();
+
+//     // Defaults if no data
+//     $total_active = $query->total_active ?? "00:00:00";
+//     $total_idle   = $query->total_idle ?? "00:00:00";
+//     $total_time   = $query->total_time ?? "00:00:00";
+//     $shift_time   = $query->shift_time ?? "00:00:00";
+//     $first_in     = $query->first_in ?? "00:00:00";
+//     $last_out     = $query->last_out ?? "00:00:00";
+
+//     // Calculate sign out time
+//     $shift_seconds = strtotime($shift_time, 0);
+//     $total_seconds = strtotime($total_time, 0);
+//     $extra_idle_seconds = max(0, $shift_seconds - $total_seconds);
+//     $sign_out = gmdate("H:i:s", $extra_idle_seconds);
+
+//     $result = [
+//         'active'     => $this->formatToHoursMins($total_active),
+//         'idle'       => $this->formatToHoursMins($total_idle),
+//         'total_time' => $this->formatToHoursMins($total_time),
+//         'shift_time' => $this->formatToHoursMins($shift_time),
+//         'sign_out'   => $this->formatToHoursMins($sign_out),
+//         'first_in'   => $first_in,
+//         'last_out'   => $last_out,
+//     ];
+
+//     return $this->output
+//         ->set_content_type('application/json')
+//         ->set_output(json_encode([
+//             'status' => true,
+//             'data'   => $result
+//         ]));
+// }
+
+
 
     public function get_time_logs_for_tool()
     {
@@ -657,7 +931,7 @@ class Time_logs extends Home_Controller
     //             ]
     //         ]));
     // }
-  // if the dba  endtime and tool end time is diff then it will add the diff time to idle time
+    // if the dba  endtime and tool end time is diff then it will add the diff time to idle time
     // public function update_timelog()
     // {
     //     if ($this->input->server('REQUEST_METHOD') !== 'PUT') {
@@ -1295,7 +1569,7 @@ class Time_logs extends Home_Controller
         }
     }
 
-     private function get_user_plan_status($user_id)
+    private function get_user_plan_status($user_id)
     {
         $user = $this->db->get_where('users', ['id' => $user_id])->row();
 
@@ -1442,78 +1716,78 @@ class Time_logs extends Home_Controller
 
 
     public function store_application_usage_log()
-{
-    $input = json_decode(file_get_contents('php://input'), true);
+    {
+        $input = json_decode(file_get_contents('php://input'), true);
 
-    if (!is_array($input) || empty($input)) {
+        if (!is_array($input) || empty($input)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Invalid or missing JSON body'
+                ]));
+        }
+
+        $success_count = 0;
+        $failed_entries = [];
+        $inserted_data = [];
+
+        foreach ($input as $i => $log) {
+            if (
+                empty($log['user_id']) ||
+                empty($log['employee_id']) ||
+                empty($log['log_date']) ||
+                empty($log['start_time']) ||
+                empty($log['end_time']) ||
+                empty($log['application_name'])
+            ) {
+                $failed_entries[] = [
+                    'index' => $i,
+                    'reason' => 'Missing required fields'
+                ];
+                continue;
+            }
+
+            $data = [
+                'employee_id'       => $log['employee_id'],
+                'user_id'           => $log['user_id'],
+                'log_date'          => $log['log_date'],
+                'start_time'        => $log['start_time'],
+                'end_time'          => $log['end_time'],
+                'duration_seconds'  => isset($log['duration_seconds']) ? $log['duration_seconds'] : 0,
+                'application_name'  => $log['application_name'],
+                'window_title'      => isset($log['window_title']) ? $log['window_title'] : null,
+                'website_url'       => isset($log['website_url']) ? $log['website_url'] : null,
+                'created_at'        => date('Y-m-d H:i:s'),
+                'updated_at'        => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->insert('application_usage_logs', $data);
+
+            if ($this->db->affected_rows() > 0) {
+                $success_count++;
+                $inserted_data[] = $data;
+            } else {
+                $failed_entries[] = [
+                    'index' => $i,
+                    'reason' => 'Database insert failed',
+                    'db_error' => $this->db->error()
+                ];
+            }
+        }
+
         return $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Invalid or missing JSON body'
+                'status' => 'success',
+                'message' => 'Logs processed successfully',
+                'data' => [
+                    'success_count' => $success_count,
+                    'failed_entries' => $failed_entries,
+                    'inserted_data' => $inserted_data
+                ]
             ]));
     }
-
-    $success_count = 0;
-    $failed_entries = [];
-    $inserted_data = [];
-
-    foreach ($input as $i => $log) {
-        if (
-            empty($log['user_id']) ||
-            empty($log['employee_id']) ||
-            empty($log['log_date']) ||
-            empty($log['start_time']) ||
-            empty($log['end_time']) ||
-            empty($log['application_name'])
-        ) {
-            $failed_entries[] = [
-                'index' => $i,
-                'reason' => 'Missing required fields'
-            ];
-            continue;
-        }
-
-      $data = [
-    'employee_id'       => $log['employee_id'],
-    'user_id'           => $log['user_id'],
-    'log_date'          => $log['log_date'],
-    'start_time'        => $log['start_time'],
-    'end_time'          => $log['end_time'],
-    'duration_seconds'  => isset($log['duration_seconds']) ? $log['duration_seconds'] : 0,
-    'application_name'  => $log['application_name'],
-    'window_title'      => isset($log['window_title']) ? $log['window_title'] : null,
-    'website_url'       => isset($log['website_url']) ? $log['website_url'] : null,
-    'created_at'        => date('Y-m-d H:i:s'),
-    'updated_at'        => date('Y-m-d H:i:s')
-];
-
-        $this->db->insert('application_usage_logs', $data);
-
-        if ($this->db->affected_rows() > 0) {
-            $success_count++;
-            $inserted_data[] = $data;
-        } else {
-            $failed_entries[] = [
-                'index' => $i,
-                'reason' => 'Database insert failed',
-                'db_error' => $this->db->error()
-            ];
-        }
-    }
-
-    return $this->output
-        ->set_content_type('application/json')
-        ->set_output(json_encode([
-            'status' => 'success',
-            'message' => 'Logs processed successfully',
-            'data' => [
-                'success_count' => $success_count,
-                'failed_entries' => $failed_entries,
-                'inserted_data' => $inserted_data
-            ]
-        ]));
-}
 
     public function generate_last_two_months_logs()
     {

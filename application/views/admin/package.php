@@ -110,7 +110,7 @@
                         <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_basic); ?></strong> -->
                       <?php endif ?>
                     </td>
-                    <td width="5%"><a href="#featureModal_<?php echo html_escape($feature->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-features') ?></a></td>
+                    <td class="hide" width="5%"><a href="#featureModal_<?php echo html_escape($feature->id); ?>" data-toggle="modal" class="btn btn-default" data-placement="top" title="Edit"><i class="fa fa-pencil"></i> <?php echo trans('edit-features') ?></a></td>
                   </tr>
                 <?php endforeach ?>
               </tbody>
