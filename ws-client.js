@@ -41,7 +41,25 @@ if (!window._wsClientLoaded) {
       console.warn("[WS] not ready – packet skipped");
     }
   }
+  function sendApprovalTime(wsPayload) {
+    const payload = {
+      type: "approval-time",
+      approveTime: wsPayload,  // wsPayload can be the JSON from PHP
+      employee_id: wsPayload.employee_id  // optional if you want to target a specific streamer
+    };
 
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(payload));
+      console.log("[WS] sent approval-time:", payload);
+    } else if (ws.readyState === WebSocket.CONNECTING) {
+      ws.addEventListener("open", () => {
+        ws.send(JSON.stringify(payload));
+        console.log("[WS] sent approval-time after connect:", payload);
+      });
+    } else {
+      console.warn("[WS] not ready – approval-time packet skipped");
+    }
+  }
   ws.addEventListener("message", (event) => {
     if (typeof event.data !== "string") {
       const blob = new Blob([event.data], { type: "image/jpeg" });
@@ -64,4 +82,5 @@ if (!window._wsClientLoaded) {
   // Optional: expose functions to global scope if needed from HTML
   window.playVideo = playVideo;
   window.changeOrganizationSetting = changeOrganizationSetting;
+  window.sendApprovalTime = sendApprovalTime;
 }

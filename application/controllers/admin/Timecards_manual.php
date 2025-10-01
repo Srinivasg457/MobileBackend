@@ -77,18 +77,51 @@ class Timecards_manual extends Home_Controller
             ? "Timecard created successfully!"
             : "Failed to create timecard.";
     }
-    public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = null, $end_time = null)
+    // public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = null, $end_time = null)
+    // {
+    //     $employee_name = urldecode($employee_name);
+    //     $employee_email = urldecode($employee_email);
+    //     $reason = urldecode($reason);
+    //     $start_time = urldecode($start_time);
+    //     $end_time = urldecode($end_time);
+
+    //     $approved_by = $this->session->userdata("id");
+
+    //     if (!$manual_id || !$approved_by || !$employee_email || !$employee_id || !$start_time || !$end_time) {
+    //         echo json_encode(['status' => 'error', 'message' => 'ID and session are required.']);
+    //         return;
+    //     }
+
+    //     // Update approval in DB
+    //     $this->db->where('manual_id', $manual_id);
+    //     $this->db->where('user_id', $approved_by);
+    //     $this->db->update('timecards_manual', [
+    //         'approved'    => 1,
+    //         'approved_by' => $approved_by
+    //     ]);
+    //     $this->add_active_time_from_request($manual_id);
+
+    //     // Create time range string using start_time and end_time
+    //     $time_range = substr($start_time, 0, 5) . " → " . substr($end_time, 0, 5);
+
+    //     // Pass manual_id as first argument (correct order)
+    //     $this->send_alert_mail($manual_id, $employee_id, $employee_name, $employee_email, $reason, 1, $time_range);
+
+    //     echo json_encode(['st' => 1]);
+    // }
+    public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = null, $end_time = null, $requested_date = null)
     {
         $employee_name = urldecode($employee_name);
         $employee_email = urldecode($employee_email);
         $reason = urldecode($reason);
         $start_time = urldecode($start_time);
         $end_time = urldecode($end_time);
+        $requested_date = urldecode($requested_date);
 
         $approved_by = $this->session->userdata("id");
 
         if (!$manual_id || !$approved_by || !$employee_email || !$employee_id || !$start_time || !$end_time) {
-            echo json_encode(['status' => 'error', 'message' => 'ID and session are required.']);
+            echo json_encode(['status' => 'error', 'message' => 'ID and session are required.', 'ws_payload' => null]);
             return;
         }
 
@@ -99,15 +132,36 @@ class Timecards_manual extends Home_Controller
             'approved'    => 1,
             'approved_by' => $approved_by
         ]);
-        $this->add_active_time_from_request($manual_id);
+
+        // Update active time and get the log data
+        $timeLog = $this->add_active_time_from_request($manual_id, true); // return log data
 
         // Create time range string using start_time and end_time
         $time_range = substr($start_time, 0, 5) . " → " . substr($end_time, 0, 5);
 
-        // Pass manual_id as first argument (correct order)
+        // Send alert email
         $this->send_alert_mail($manual_id, $employee_id, $employee_name, $employee_email, $reason, 1, $time_range);
 
-        echo json_encode(['st' => 1]);
+        // Prepare JSON payload for WebSocket
+        $payload = null;
+        // ✅ Check if requested date is today
+        $requested_date = $requested_date;
+        $today = date('Y-m-d');
+
+        if ($timeLog && $requested_date === $today) {
+            $payload = [
+                'type'       => 'timecard-approved',
+                'employee_id' => $employee_id,
+                'user_id'    => $approved_by,
+                'data'       => [
+                    'total_active_time' => $timeLog['total_active_time'],
+                    'total_idle_time'   => $timeLog['total_idle_time'],
+                    'total_time'        => $timeLog['total_time']
+                ]
+            ];
+        }
+
+        echo json_encode(['st' => 1, 'ws_payload' => $payload]);
     }
     /**
      * Add the approved manual request as active time into time_logs.
@@ -120,28 +174,105 @@ class Timecards_manual extends Home_Controller
      * @param int $manual_id  The ID of the approved manual request
      * @return bool
      */
-    private function add_active_time_from_request($manual_id)
+    // private function add_active_time_from_request($manual_id)
+    // {
+    //     // Fetch approved request
+    //     $req = $this->db
+    //         ->where('manual_id', $manual_id)
+    //         ->where('approved', 1)
+    //         ->get('timecards_manual')
+    //         ->row();
+
+    //     if (!$req) {
+    //         return false;
+    //     }
+
+    //     // Combine the request date with the stored start/end times
+    //     // date_added is e.g. "2025-09-26"
+    //     $log_date = date('Y-m-d', strtotime($req->date_added));
+    //     $startDT  = new DateTime($log_date . ' ' . $req->timestamp_start);
+    //     $endDT    = new DateTime($log_date . ' ' . $req->timestamp_end);
+
+    //     $requested_seconds = $endDT->getTimestamp() - $startDT->getTimestamp();
+
+    //     // Look for an existing daily log
+    //     $log = $this->db
+    //         ->where('employee_id', $req->employee_id)
+    //         ->where('user_id', $req->user_id)
+    //         ->where('log_date', $log_date)
+    //         ->get('time_logs')
+    //         ->row();
+
+    //     // Helpers
+    //     $toSec  = fn($t) => $t && strpos($t, ':') !== false
+    //         ? array_sum(array_map(
+    //             fn($v, $i) => $v * pow(60, 2 - $i),
+    //             array_map('intval', explode(':', $t)),
+    //             [0, 1, 2]
+    //         ))
+    //         : 0;
+    //     $toTime = fn($s) => gmdate('H:i:s', max(0, $s));
+
+    //     if ($log) {
+    //         $idle   = $toSec($log->total_idle_time);
+    //         $active = $toSec($log->total_active_time);
+    //         $total  = $toSec($log->total_time);
+
+    //         if ($idle >= $requested_seconds) {
+    //             $idle   -= $requested_seconds;
+    //             $active += $requested_seconds;
+    //             // total stays the same
+    //         } else {
+    //             $active += $idle;
+    //             $requested_seconds -= $idle;
+    //             $idle = 0;
+    //             $active += $requested_seconds;
+    //             $total  += $requested_seconds; // grow total by the remainder
+    //         }
+
+    //         return $this->db
+    //             ->where('log_id', $log->log_id)
+    //             ->update('time_logs', [
+    //                 'total_active_time' => $toTime($active),
+    //                 'total_idle_time'   => $toTime($idle),
+    //                 'total_time'        => $toTime($active + $idle), // keep consistent
+    //                 'updated_at'        => date('Y-m-d H:i:s')
+    //             ]);
+    //     }
+
+    //     // No existing log: insert new
+    //     $duration = gmdate('H:i:s', $requested_seconds);
+
+    //     return $this->db->insert('time_logs', [
+    //         'session_id'        => null,
+    //         'employee_id'       => $req->employee_id,
+    //         'user_id'           => $req->user_id,
+    //         'log_date'          => $log_date,
+    //         'start_time'        => $startDT->format('Y-m-d H:i:s'),
+    //         'end_time'          => $endDT->format('Y-m-d H:i:s'),
+    //         'total_active_time' => $duration,
+    //         'total_idle_time'   => '00:00:00',
+    //         'total_time'        => $duration,
+    //         'created_at'        => date('Y-m-d H:i:s'),
+    //         'updated_at'        => date('Y-m-d H:i:s')
+    //     ]);
+    // }
+    private function add_active_time_from_request($manual_id, $returnLog = false)
     {
-        // Fetch approved request
         $req = $this->db
             ->where('manual_id', $manual_id)
             ->where('approved', 1)
             ->get('timecards_manual')
             ->row();
 
-        if (!$req) {
-            return false;
-        }
+        if (!$req) return false;
 
-        // Combine the request date with the stored start/end times
-        // date_added is e.g. "2025-09-26"
         $log_date = date('Y-m-d', strtotime($req->date_added));
         $startDT  = new DateTime($log_date . ' ' . $req->timestamp_start);
         $endDT    = new DateTime($log_date . ' ' . $req->timestamp_end);
 
         $requested_seconds = $endDT->getTimestamp() - $startDT->getTimestamp();
 
-        // Look for an existing daily log
         $log = $this->db
             ->where('employee_id', $req->employee_id)
             ->where('user_id', $req->user_id)
@@ -149,13 +280,8 @@ class Timecards_manual extends Home_Controller
             ->get('time_logs')
             ->row();
 
-        // Helpers
         $toSec  = fn($t) => $t && strpos($t, ':') !== false
-            ? array_sum(array_map(
-                fn($v, $i) => $v * pow(60, 2 - $i),
-                array_map('intval', explode(':', $t)),
-                [0, 1, 2]
-            ))
+            ? array_sum(array_map(fn($v, $i) => $v * pow(60, 2 - $i), array_map('intval', explode(':', $t)), [0, 1, 2]))
             : 0;
         $toTime = fn($s) => gmdate('H:i:s', max(0, $s));
 
@@ -167,29 +293,33 @@ class Timecards_manual extends Home_Controller
             if ($idle >= $requested_seconds) {
                 $idle   -= $requested_seconds;
                 $active += $requested_seconds;
-                // total stays the same
             } else {
                 $active += $idle;
                 $requested_seconds -= $idle;
                 $idle = 0;
                 $active += $requested_seconds;
-                $total  += $requested_seconds; // grow total by the remainder
+                $total  += $requested_seconds;
             }
 
-            return $this->db
+            $this->db
                 ->where('log_id', $log->log_id)
                 ->update('time_logs', [
                     'total_active_time' => $toTime($active),
                     'total_idle_time'   => $toTime($idle),
-                    'total_time'        => $toTime($active + $idle), // keep consistent
+                    'total_time'        => $toTime($active + $idle),
                     'updated_at'        => date('Y-m-d H:i:s')
                 ]);
+
+            return $returnLog ? [
+                'total_active_time' => $toTime($active),
+                'total_idle_time'   => $toTime($idle),
+                'total_time'        => $toTime($active + $idle)
+            ] : false;
         }
 
-        // No existing log: insert new
         $duration = gmdate('H:i:s', $requested_seconds);
 
-        return $this->db->insert('time_logs', [
+        $this->db->insert('time_logs', [
             'session_id'        => null,
             'employee_id'       => $req->employee_id,
             'user_id'           => $req->user_id,
@@ -202,7 +332,14 @@ class Timecards_manual extends Home_Controller
             'created_at'        => date('Y-m-d H:i:s'),
             'updated_at'        => date('Y-m-d H:i:s')
         ]);
+
+        return $returnLog ? [
+            'total_active_time' => $duration,
+            'total_idle_time'   => '00:00:00',
+            'total_time'        => $duration
+        ] : false;
     }
+
 
 
     public function decline_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = "0", $end_time = "0")
