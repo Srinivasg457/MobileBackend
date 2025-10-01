@@ -34,8 +34,8 @@
         <div class="col-md-3 col-sm-6 col-12 mb-1">
           <div class="info-box-pay border ">
             <div class="info-box-content-pay">
-              <span class="info-box-number-pay  text-success"><strong>00 hrs 00 min</strong></span>
-              <span class="info-box-texts text-dark fs-13 text-capitalize">Manual Time</span>
+              <span class="info-box-number-pay  text-success signout"><strong>00 hrs 00 min</strong></span>
+              <span class="info-box-texts text-dark fs-13 text-capitalize">Signout Time</span>
             </div>
           </div>
         </div>
@@ -43,8 +43,8 @@
         <div class="col-md-3 col-sm-6 col-12 mb-1">
           <div class="info-box-pay border">
             <div class="info-box-content-pay">
-              <span class="info-box-number-pay text-success"><strong>00 hrs 00 min</strong></span>
-              <span class="info-box-texts text-dark fs-13 text-capitalize">Meeting Time</span>
+              <span class="info-box-number-pay text-success totaltime"><strong>00 hrs 00 min</strong></span>
+              <span class="info-box-texts text-dark fs-13 text-capitalize">Total Time</span>
             </div>
           </div>
         </div>
@@ -238,42 +238,55 @@
         $('#log-data').html('<tr><td colspan="6">Error loading data</td></tr>');
       }
     });
-    $.ajax({
-      url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
-      type: 'GET',
-      dataType: 'json',
-      success: function(response) {
-        if (response.status && response.data.length > 0) {
-          const data = response.data[0];
+    // $.ajax({
+    //   url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+    //   type: 'GET',
+    //   dataType: 'json',
+    //   success: function(response) {
+    //     console.log(response);
 
-          // Active time
-          const activeParts = data.total_active_time.split(':');
-          const activeHours = parseInt(activeParts[0]);
-          const activeMinutes = parseInt(activeParts[1]);
-          const activeFormatted = `${activeHours.toString().padStart(2, '0')} hrs ${activeMinutes.toString().padStart(2, '0')} min`;
-          $('#active-time').text(activeFormatted);
+    //     if (response.status && response.data.length > 0) {
+    //       const data = response.data[0];
 
-          // Inactive time
-          const idleParts = data.total_idle_time.split(':');
-          const idleHours = parseInt(idleParts[0]);
-          const idleMinutes = parseInt(idleParts[1]);
-          const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
+    //       // Active time
+    //       const activeParts = data.total_active_time.split(':');
+    //       const activeHours = parseInt(activeParts[0]);
+    //       const activeMinutes = parseInt(activeParts[1]);
+    //       const activeFormatted = `${activeHours.toString().padStart(2, '0')} hrs ${activeMinutes.toString().padStart(2, '0')} min`;
+    //       $('#active-time').text(activeFormatted);
 
-          // Update the second .status-box strong tag (Inactive)
-          $('.danger.inactive strong').text(idleFormatted);
-        } else {
-          $('#active-time').text("00 hrs 00 min");
-          $('.danger.inactive strong').text("00 hrs 00 min");
-        }
-      },
-      error: function() {
-        alert('Failed to load time log data.');
-      }
-    });
+    //       // Inactive time
+    //       const idleParts = data.total_idle_time.split(':');
+    //       const idleHours = parseInt(idleParts[0]);
+    //       const idleMinutes = parseInt(idleParts[1]);
+    //       const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
+
+    //       // Update the second .status-box strong tag (Inactive)
+    //       $('.danger.inactive strong').text(idleFormatted);
+    //       // signout time 
+    //       const signoutParts = data.sign_out_time.split(':');
+    //       const signoutHours = parseInt(signoutParts[0]);
+    //       const signoutMinutes = parseInt(signoutParts[1]);
+    //       const signoutFormatted = `${signoutHours.toString().padStart(2, '0')} hrs ${signoutMinutes.toString().padStart(2, '0')} min`;
+
+    //       $('.signout').text(signoutFormatted);
+    //       // total time
+    //       const totaltimeParts = data.total_time.split(':');
+    //       const totaltimeHours = parseInt(totaltimeParts[0]);
+    //       const totaltimeMinutes = parseInt(totaltimeParts[1]);
+    //       const totaltimeFormatted = `${totaltimeHours.toString().padStart(2, '0')} hrs ${totaltimeMinutes.toString().padStart(2, '0')} min`;
+
+    //       $('.totaltime').text(totaltimeFormatted);
+    //     } else {
+    //       $('#active-time').text("00 hrs 00 min");
+    //       $('.danger.inactive strong').text("00 hrs 00 min");
+    //     }
+    //   },
+    //   error: function() {
+    //     alert('Failed to load time log data.');
+    //   }
+    // });
   }
-
-
-
 
   $('#saveManualBtn').on('click', function() {
     const timestamp_start = $('#timestamp_start').val();
@@ -447,6 +460,20 @@
 
           // Update the second .status-box strong tag (Inactive)
           $('.danger.inactive strong').text(idleFormatted);
+          // signout time 
+          const signoutParts = data.sign_out_time.split(':');
+          const signoutHours = parseInt(signoutParts[0]);
+          const signoutMinutes = parseInt(signoutParts[1]);
+          const signoutFormatted = `${signoutHours.toString().padStart(2, '0')} hrs ${signoutMinutes.toString().padStart(2, '0')} min`;
+
+          $('.signout').text(signoutFormatted);
+          // total time
+          const totaltimeParts = data.total_time.split(':');
+          const totaltimeHours = parseInt(totaltimeParts[0]);
+          const totaltimeMinutes = parseInt(totaltimeParts[1]);
+          const totaltimeFormatted = `${totaltimeHours.toString().padStart(2, '0')} hrs ${totaltimeMinutes.toString().padStart(2, '0')} min`;
+
+          $('.totaltime').text(totaltimeFormatted);
         } else {
           $('#active-time').text("00 hrs 00 min");
           $('.danger.inactive strong').text("00 hrs 00 min");

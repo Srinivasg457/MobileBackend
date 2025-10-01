@@ -62,8 +62,9 @@
                     <div class="col-md-3 col-sm-6 col-12 mb-1">
                         <div class="info-box-pay border">
                             <div class="info-box-content-pay">
-                                <span class="info-box-number-pay text-success"><strong>00 hrs 00 min</strong></span>
-                                <span class="info-box-texts text-dark fs-13 text-capitalize">Manual Time</span>
+                                <span class="info-box-number-pay text-success signout"><strong>00 hrs 00 min</strong></span>
+                                <span class="info-box-texts text-dark fs-13 text-capitalize ">Signout Hours</span>
+
                             </div>
                         </div>
                     </div>
@@ -71,8 +72,8 @@
                     <div class="col-md-3 col-sm-6 col-12 mb-1">
                         <div class="info-box-pay border">
                             <div class="info-box-content-pay">
-                                <span class="info-box-number-pay text-success"><strong>00 hrs 00 min</strong></span>
-                                <span class="info-box-texts text-dark fs-13 text-capitalize">Meeting Time</span>
+                                <span class="info-box-number-pay text-success totaltime"><strong>00 hrs 00 min</strong></span>
+                                <span class="info-box-texts text-dark fs-13 text-capitalize">Total time</span>
                             </div>
                         </div>
                     </div>
@@ -367,6 +368,9 @@
                     date
                 },
                 success: function(response) {
+                    console.log(response);
+                    console.log("dsf,sdkf");
+
                     if (response.status && response.data.length > 0) {
                         const data = response.data[0];
 
@@ -384,6 +388,20 @@
                         const idleFormatted = `${idleHours.toString().padStart(2, '0')} hrs ${idleMinutes.toString().padStart(2, '0')} min`;
 
                         $('.danger.inactive strong').text(idleFormatted);
+                        // signout time 
+                        const signoutParts = data.sign_out_time.split(':');
+                        const signoutHours = parseInt(signoutParts[0]);
+                        const signoutMinutes = parseInt(signoutParts[1]);
+                        const signoutFormatted = `${signoutHours.toString().padStart(2, '0')} hrs ${signoutMinutes.toString().padStart(2, '0')} min`;
+
+                        $('.signout').text(signoutFormatted);
+                        // total time
+                        const totaltimeParts = data.total_time.split(':');
+                        const totaltimeHours = parseInt(totaltimeParts[0]);
+                        const totaltimeMinutes = parseInt(totaltimeParts[1]);
+                        const totaltimeFormatted = `${totaltimeHours.toString().padStart(2, '0')} hrs ${totaltimeMinutes.toString().padStart(2, '0')} min`;
+
+                        $('.totaltime').text(totaltimeFormatted);
                     } else {
                         $('#active-time').text("00 hrs 00 min");
                         $('.danger.inactive strong').text("00 hrs 00 min");
@@ -393,15 +411,261 @@
                     alert('Failed to load time log data.');
                 }
             });
-        }
+
+
+            // $.ajax({
+            //     url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+            //     type: 'GET',
+            //     dataType: 'json',
+            //     data: {
+            //         employee_id: currentEmployeeId,
+            //         date
+            //     },
+            //     success: function(response) {
+            //         console.log(response);
+
+            //         if (response.status && response.data && response.data.length > 0) {
+            //             const data = response.data[0];
+
+            //             // ---------- Active Time ----------
+            //             const activeParts = data.total_active_time.split(':');
+            //             const activeFormatted = `${activeParts[0].padStart(2, '0')} hrs ${activeParts[1].padStart(2, '0')} min`;
+            //             $('#active-time strong').text(activeFormatted);
+
+            //             // ---------- Inactive Time ----------
+            //             const idleParts = data.total_idle_time.split(':');
+            //             const idleFormatted = `${idleParts[0].padStart(2, '0')} hrs ${idleParts[1].padStart(2, '0')} min`;
+            //             $('.danger.inactive strong').text(idleFormatted);
+
+            //             // ---------- Total Time ----------
+            //             const totalParts = data.total_time.split(':');
+            //             const totalFormatted = `${totalParts[0].padStart(2, '0')} hrs ${totalParts[1].padStart(2, '0')} min`;
+            //             $(".info-box-texts:contains('Total time')")
+            //                 .prev(".info-box-number-pay")
+            //                 .find("strong")
+            //                 .text(totalFormatted);
+
+            //             // ---------- Signout Hours (use backend) ----------
+            //             const signoutParts = data.sign_out.split(':');
+            //             const signoutFormatted = `${signoutParts[0].padStart(2, '0')} hrs ${signoutParts[1].padStart(2, '0')} min`;
+            //             $(".info-box-texts:contains('Signout Hours')")
+            //                 .prev(".info-box-number-pay")
+            //                 .find("strong")
+            //                 .text(signoutFormatted);
+
+            //             // ---------- Render Activity Timeline ----------
+            //             renderTimeline(data.start_time, data.end_time, data.total_active_time, data.total_idle_time);
+
+            //         } else {
+            //             // Reset to 00 hrs 00 min if no data
+            //             $('#active-time strong').text("00 hrs 00 min");
+            //             $('.danger.inactive strong').text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Signout Hours')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Total time')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //         }
+            //     },
+            //     error: function() {
+            //         alert('Failed to load time log data.');
+            //     }
+            // });
+            // $.ajax({
+            //     url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+            //     type: 'GET',
+            //     dataType: 'json',
+            //     data: {
+            //         employee_id: currentEmployeeId,
+            //         date
+            //     },
+            //     success: function(response) {
+            //         if (response.status && response.data) {
+            //             const data = response.data;
+
+            //             // ---------- Active Time ----------
+            //             $('#active-time strong').text(data.active);
+
+            //             // ---------- Inactive Time ----------
+            //             $('.danger.inactive strong').text(data.idle);
+
+            //             // ---------- Total Time ----------
+            //             $(".info-box-texts:contains('Total time')")
+            //                 .prev(".info-box-number-pay")
+            //                 .find("strong")
+            //                 .text(data.total_time);
+
+            //             // ---------- Signout Hours ----------
+            //             $(".info-box-texts:contains('Signout Hours')")
+            //                 .prev(".info-box-number-pay")
+            //                 .find("strong")
+            //                 .text(data.sign_out);
+
+            //             // ---------- Render Activity Timeline ----------
+            //             renderTimeline(data.first_in, data.last_out, data.active, data.idle);
+
+            //         } else {
+            //             // Reset to 00 hrs 00 min if no data
+            //             $('#active-time strong').text("00 hrs 00 min");
+            //             $('.danger.inactive strong').text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Signout Hours')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Total time')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //         }
+            //     },
+            //     error: function() {
+            //         alert('Failed to load time log data.');
+            //     }
+            // });
+            // $.ajax({
+            //     url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+            //     type: 'GET',
+            //     dataType: 'json',
+            //     data: {
+            //         employee_id: currentEmployeeId,
+            //         from_date: fromDate,
+            //         to_date: toDate
+            //     },
+            //     success: function(response) {
+            //         if (response.status && response.data) {
+            //             const data = response.data; // now a single object
+
+            //             // ---------- Active Time ----------
+            //             $('#active-time strong').text(data.active);
+
+            //             // ---------- Inactive Time ----------
+            //             $('.danger.inactive strong').text(data.idle);
+
+            //             // ---------- Total Time ----------
+            //             $(".info-box-texts:contains('Total time')")
+            //                 .prev(".info-box-number-pay")
+            //                 .find("strong")
+            //                 .text(data.total_time);
+
+            //             // ---------- Signout Hours ----------
+            //             $(".info-box-texts:contains('Signout Hours')")
+            //                 .prev(".info-box-number-pay")
+            //                 .find("strong")
+            //                 .text(data.sign_out);
+
+            //             // ---------- Render Activity Timeline ----------
+            //             renderTimeline(data.first_in, data.last_out, data.active, data.idle);
+
+            //         } else {
+            //             // Reset to 00 hrs 00 min if no data
+            //             $('#active-time strong').text("00 hrs 00 min");
+            //             $('.danger.inactive strong').text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Signout Hours')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Total time')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //         }
+            //     },
+            //     error: function() {
+            //         alert('Failed to load time log data.');
+            //     }
+            // });
+            // $.ajax({
+            //     url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+            //     type: 'GET',
+            //     dataType: 'json',
+            //     data: {
+            //         employee_id: currentEmployeeId,
+            //         from_date: fromDate,
+            //         to_date: toDate
+            //     },
+            //     success: function(response) {
+            //         if (response.status && response.data) {
+            //             const data = response.data;
+
+            //             $('#active-time strong').text(data.active);
+            //             $('.danger.inactive strong').text(data.idle);
+            //             $(".info-box-texts:contains('Total time')").prev(".info-box-number-pay").find("strong").text(data.total_time);
+            //             $(".info-box-texts:contains('Signout Hours')").prev(".info-box-number-pay").find("strong").text(data.sign_out);
+
+            //             renderTimeline(data.first_in, data.last_out, data.active, data.idle);
+            //         } else {
+            //             $('#active-time strong').text("00 hrs 00 min");
+            //             $('.danger.inactive strong').text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Signout Hours')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Total time')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //         }
+            //     },
+            //     error: function() {
+            //         alert('Failed to load time log data.');
+            //     }
+            // });
+            // $.ajax({
+
+            //     url: '<?= base_url("admin/Time_logs/get_time_logs") ?>',
+            //     type: 'GET',
+            //     dataType: 'json',
+            //     data: {
+            //         employee_id: currentEmployeeId,
+            //         from_date: fromDate,
+            //         to_date: toDate
+            //     },
+            //     success: function(response) {
+            //         console.log(response)
+            //         if (response.status && response.data) {
+            //             const data = response.data;
+
+            //             $('#active-time strong').text(data.active);
+            //             $('.danger.inactive strong').text(data.idle);
+            //             $(".info-box-texts:contains('Total time')").prev(".info-box-number-pay").find("strong").text(data.total_time);
+            //             $(".info-box-texts:contains('Signout Hours')").prev(".info-box-number-pay").find("strong").text(data.sign_out);
+
+            //             renderTimeline(data.first_in, data.last_out, data.active, data.idle);
+            //         } else {
+            //             $('#active-time strong').text("00 hrs 00 min");
+            //             $('.danger.inactive strong').text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Signout Hours')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //             $(".info-box-texts:contains('Total time')").prev(".info-box-number-pay").find("strong").text("00 hrs 00 min");
+            //         }
+            //     },
+            //     error: function() {
+            //         alert('Failed to load time log data.');
+            //     }
+            // });
 
 
 
+            // ---------------- Helper Functions ----------------
+            function calculateSignout(start, end, total) {
+                let shiftSeconds = toSeconds(end) - toSeconds(start);
+                let totalSeconds = toSeconds(total);
+                let signoutSeconds = Math.max(0, shiftSeconds - totalSeconds);
+                return secondsToHrsMin(signoutSeconds);
+            }
 
-        function showToast(message, type) {
-            const toast = $(`<div class="toast toast-${type}">${message}</div>`);
-            $('#toast-container').append(toast);
-            setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
+            function toSeconds(hms) {
+                let [h, m, s] = hms.split(":").map(Number);
+                return h * 3600 + m * 60 + (s || 0);
+            }
+
+            function secondsToHrsMin(sec) {
+                let h = Math.floor(sec / 3600);
+                let m = Math.floor((sec % 3600) / 60);
+                return `${h.toString().padStart(2, '0')} hrs ${m.toString().padStart(2, '0')} min`;
+            }
+
+            // ---------------- Timeline Rendering ----------------
+            function renderTimeline(start, end, active, idle) {
+                let track = $("#timeline-track");
+                track.find(".activity-block").remove(); // clear old blocks
+
+                let shiftSeconds = toSeconds(end) - toSeconds(start);
+                let activeSeconds = toSeconds(active);
+                let idleSeconds = toSeconds(idle);
+
+                // Calculate proportions
+                let activeWidth = (activeSeconds / shiftSeconds) * 100;
+                let idleWidth = (idleSeconds / shiftSeconds) * 100;
+
+                // Append blocks
+                track.append(`<div class="activity-block bg-green" style="left:0%;width:${activeWidth}%"></div>`);
+                track.append(`<div class="activity-block box-danger" style="left:${activeWidth}%;width:${idleWidth}%"></div>`);
+            }
+
+            function showToast(message, type) {
+                const toast = $(`<div class="toast toast-${type}">${message}</div>`);
+                $('#toast-container').append(toast);
+                setTimeout(() => toast.fadeOut(500, () => toast.remove()), 1000);
+            }
         }
 
         $(document).ready(function() {
