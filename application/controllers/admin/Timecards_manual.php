@@ -111,6 +111,7 @@ class Timecards_manual extends Home_Controller
     // }
     public function approve_timecard($manual_id = null, $employee_id = null, $employee_name = null, $employee_email = null, $reason = null, $start_time = null, $end_time = null, $requested_date = null)
     {
+        $employee_id = urldecode($employee_id);
         $employee_name = urldecode($employee_name);
         $employee_email = urldecode($employee_email);
         $reason = urldecode($reason);
