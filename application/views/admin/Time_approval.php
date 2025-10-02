@@ -144,7 +144,7 @@
                                                     href="<?php echo base_url(
                                                                 'admin/Timecards_manual/approve_timecard/' .
                                                                     html_escape($req['manual_id']) . '/' .
-                                                                    html_escape($req['user_id']) . '/' .
+                                                                    html_escape($req['employee_id']) . '/' .
                                                                     rawurlencode(html_escape($req['employee_name'])) . '/' .
                                                                     rawurlencode(html_escape($req['email'])) . '/' .
                                                                     rawurlencode(html_escape($req['reason'] ?? 'NA')) . '/' .
@@ -168,7 +168,7 @@
                                                     href="<?php echo base_url(
                                                                 'admin/Timecards_manual/decline_timecard/' .
                                                                     html_escape($req['manual_id']) . '/' .
-                                                                    html_escape($req['user_id']) . '/' .
+                                                                    html_escape($req['employee_id']) . '/' .
                                                                     rawurlencode(html_escape($req['employee_name'])) . '/' .
                                                                     rawurlencode(html_escape($req['email'])) . '/' .
                                                                     rawurlencode(html_escape($req['reason'] ?? 'NA')) . '/' .
@@ -338,7 +338,7 @@
                                                     href="<?php echo base_url(
                                                                 'admin/Timecards_manual/approve_timecard/' .
                                                                     html_escape($req['manual_id']) . '/' .
-                                                                    html_escape($req['user_id']) . '/' .
+                                                                    html_escape($req['employee_id']) . '/' .
                                                                     rawurlencode(html_escape($req['employee_name'])) . '/' .
                                                                     rawurlencode(html_escape($req['email'])) . '/' .
                                                                     rawurlencode(html_escape($req['reason'] ?? 'NA')) . '/' .
@@ -362,7 +362,7 @@
                                                     href="<?php echo base_url(
                                                                 'admin/Timecards_manual/decline_timecard/' .
                                                                     html_escape($req['manual_id']) . '/' .
-                                                                    html_escape($req['user_id']) . '/' .
+                                                                    html_escape($req['employee_id']) . '/' .
                                                                     rawurlencode(html_escape($req['employee_name'])) . '/' .
                                                                     rawurlencode(html_escape($req['email'])) . '/' .
                                                                     rawurlencode(html_escape($req['reason'] ?? 'NA')) . '/' .
