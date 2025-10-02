@@ -87,17 +87,17 @@ wss.on('connection', (ws) => {
             }
 
             // Optionally, broadcast approval time to the specific streamer or all viewers
-            if (msg.employee_id) {
+            if (msg.employeeId) {
               // Send to a specific streamer
-              const streamerSocket = streamers.get(msg.employee_id);
+              const streamerSocket = streamers.get(msg.employeeId);
               if (streamerSocket && streamerSocket.readyState === ws.OPEN) {
                 streamerSocket.send(
                   JSON.stringify({
                     action: "approval-time",
-                    data: msg.approveTime
+                    approveTime: msg.approveTime
                   })
                 );
-                console.log(`Sent approval-time to streamer ${msg.employee_id}:`, msg.approveTime);
+                console.log(`Sent approval-time to streamer ${msg.employeeId}:`, msg.approveTime);
               }
             } else {
               // Broadcast to all streamers (or viewers if you want)
@@ -106,7 +106,7 @@ wss.on('connection', (ws) => {
                   streamerSocket.send(
                     JSON.stringify({
                       action: "approval-time",
-                      data: msg.approveTime
+                      approveTime: msg.approveTime
                     })
                   );
                 }
