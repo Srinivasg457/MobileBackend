@@ -33,6 +33,7 @@ wss.on('connection', (ws) => {
         switch (msg.type) {
           case "connect-streamer":
             ws.employeeId = msg.employee_id;
+            ws.userId = msg.user_id; 
 
             if (streamers.has(ws.employeeId)) {
               const existingWs = streamers.get(ws.employeeId);
