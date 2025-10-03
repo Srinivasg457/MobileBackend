@@ -81,6 +81,7 @@ wss.on('connection', (ws) => {
           //   }
           //   break;
           case "organization-settings":
+            let userId = parseInt(msg.settings?.userId);
             if (msg.employeeId) {
               // Send only to the tool with specific employeeId
               const streamerSocket = streamers.get(msg.employeeId);
@@ -97,17 +98,17 @@ wss.on('connection', (ws) => {
               }
 
             }
-            else if (msg.userId) {
+            else if (userId) {
               // Send to all tools under this userId
               for (const [id, streamerSocket] of streamers.entries()) {
-                if (streamerSocket.userId === msg.userId && streamerSocket.readyState === ws.OPEN) {
+                if (streamerSocket.userId === userId && streamerSocket.readyState === ws.OPEN) {
                   streamerSocket.send(
                     JSON.stringify({
                       action: "settings",
                       settings: msg.settings,
                     })
                   );
-                  console.log(`✅ Sent settings to tool of user ${msg.userId}, employee ${id}`);
+                  console.log(`✅ Sent settings to tool of user ${userId}, employee ${id}`);
                 }
               }
 
