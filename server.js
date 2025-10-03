@@ -50,20 +50,39 @@ wss.on('connection', (ws) => {
               console.log(`Streamer connected: ${ws.employeeId}`);
             }
             break;
+          // case "organization-settings":
+          //   if (!msg.employeeId) {
+          //     for (const [id, streamerSocket] of streamers.entries()) {
+          //       if (streamerSocket.readyState === ws.OPEN) {
+          //         streamerSocket.send(
+          //           JSON.stringify({
+          //             action: "settings",
+          //             settings: msg.settings,
+          //           })
+          //         );
+          //         console.log(`Sent settings to department`);
+          //       }
+          //     }
+          //   } else {
+          //     const streamerSocket = streamers.get(msg.employeeId);
+          //     if (streamerSocket && streamerSocket.readyState === ws.OPEN) {
+          //       streamerSocket.send(
+          //         JSON.stringify({
+          //           action: "settings",
+          //           settings: msg.settings,
+          //         })
+          //       );
+          //       console.log(`Sent settings to streamer: user ${ws.employeeId}`);
+          //     } else {
+          //       console.warn(
+          //         `Streamer not available for user ${ws.employeeId}`
+          //       );
+          //     }
+          //   }
+          //   break;
           case "organization-settings":
-            if (!msg.employeeId) {
-              for (const [id, streamerSocket] of streamers.entries()) {
-                if (streamerSocket.readyState === ws.OPEN) {
-                  streamerSocket.send(
-                    JSON.stringify({
-                      action: "settings",
-                      settings: msg.settings,
-                    })
-                  );
-                  console.log(`Sent settings to department`);
-                }
-              }
-            } else {
+            if (msg.employeeId) {
+              // Send only to the tool with specific employeeId
               const streamerSocket = streamers.get(msg.employeeId);
               if (streamerSocket && streamerSocket.readyState === ws.OPEN) {
                 streamerSocket.send(
@@ -72,12 +91,29 @@ wss.on('connection', (ws) => {
                     settings: msg.settings,
                   })
                 );
-                console.log(`Sent settings to streamer: user ${ws.employeeId}`);
+                console.log(`Sent settings to employee ${msg.employeeId}`);
               } else {
-                console.warn(
-                  `Streamer not available for user ${ws.employeeId}`
-                );
+                console.warn(`Tool not available for employee ${msg.employeeId}`);
               }
+
+            }
+            else if (msg.userId) {
+              // Send to all tools under this userId
+              for (const [id, streamerSocket] of streamers.entries()) {
+                if (streamerSocket.userId === msg.userId && streamerSocket.readyState === ws.OPEN) {
+                  streamerSocket.send(
+                    JSON.stringify({
+                      action: "settings",
+                      settings: msg.settings,
+                    })
+                  );
+                  console.log(`✅ Sent settings to tool of user ${msg.userId}, employee ${id}`);
+                }
+              }
+
+            }
+            else {
+              console.warn("⚠️ Neither employeeId nor userId provided in message");
             }
             break;
           case "approval-time":
@@ -101,17 +137,17 @@ wss.on('connection', (ws) => {
               }
             } else {
               // Broadcast to all streamers (or viewers if you want)
-              for (const [id, streamerSocket] of streamers.entries()) {
-                if (streamerSocket.readyState === ws.OPEN) {
-                  streamerSocket.send(
-                    JSON.stringify({
-                      action: "approval-time",
-                      approveTime: msg.approveTime
-                    })
-                  );
-                }
-              }
-              console.log("Broadcasted approval-time to all streamers:", msg.approveTime);
+              // for (const [id, streamerSocket] of streamers.entries()) {
+              //   if (streamerSocket.readyState === ws.OPEN) {
+              //     streamerSocket.send(
+              //       JSON.stringify({
+              //         action: "approval-time",
+              //         approveTime: msg.approveTime
+              //       })
+              //     );
+              //   }
+              // }
+              console.log("no employee found");
             }
             break;
           case "viewer-join":
