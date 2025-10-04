@@ -44,8 +44,8 @@ if (!window._wsClientLoaded) {
   function sendApprovalTime(wsPayload) {
     const payload = {
       type: "approval-time",
-      approveTime: wsPayload,  // wsPayload can be the JSON from PHP
-      employee_id: wsPayload.employee_id  // optional if you want to target a specific streamer
+      employeeId: parseInt(wsPayload.employee_id),  // optional if you want to target a specific streamer
+      approveTime: wsPayload, // wsPayload can be the JSON from PHP
     };
 
     if (ws.readyState === WebSocket.OPEN) {
