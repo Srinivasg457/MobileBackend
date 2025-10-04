@@ -321,7 +321,7 @@ class Subscription extends Home_Controller
 
             if (!$this->db->trans_status()) {
                 log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
-        }
+            }
         }
         // --- original content ends ---
     }
