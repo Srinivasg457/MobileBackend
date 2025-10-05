@@ -417,8 +417,9 @@ class Auth extends Home_Controller
                         $plan = $this->input->post('plan', true);
                         $billing = $this->input->post('billing', true);
                         $this->add_package($plan, $billing);
-
-                        $this->add_trial_user_settings($user->id, "");
+                        if ($this->input->post('plan', true) == 'trial') {
+                          $this->add_trial_user_settings($user->id, "");
+                        }
                         //send email verify link
                         if ($this->settings->enable_email_verify == 1) {
                             $link = base_url('verify?code=' . $hash . '&user=' . md5($id));
@@ -538,9 +539,11 @@ class Auth extends Home_Controller
                 );
                 $update_user = $this->security->xss_clean($update_user);
                 $this->common_model->update($update_user, user()->id, 'users');
+                 if(user()->user_type == "trial"){
+                    // ✅ Add trial user settings if needed
+                    $this->add_trial_user_settings(user()->id, $time_zone);
+                 }
 
-                // ✅ Add trial user settings if needed
-                $this->add_trial_user_settings(user()->id, $time_zone);
                 $this->admin_model->intial_department_storing(user()->id, $uid);
                 echo json_encode(array('st' => $status));
                 exit();
@@ -895,140 +898,254 @@ class Auth extends Home_Controller
     // }
 
     // ✅ Payment Success
-    public function payment_success($payment_uid, $id, $pkg, $dummy)
-    {
-        // fetch by puid not id
-        $payment = $this->db->get_where('payment', ['puid' => $payment_uid])->row();
+        public function payment_success($payment_uid, $id, $pkg)
+        {
+            // fetch by puid not id
+            $payment = $this->db->get_where('payment', ['puid' => $payment_uid])->row();
 
-        if (!empty($payment)) {
-            // Update user status
-            $user_data = ['status' => 1];
-            $this->common_model->edit_option($user_data, $payment->user_id, 'users');
+            if (!empty($payment)) {
+                // Update user status
+                $user_data = ['status' => 1];
+                $this->common_model->edit_option($user_data, $payment->user_id, 'users');
 
-            // Update payment status
-            $payment_update = ['status' => 'verified'];
-            $this->common_model->edit_option($payment_update, $payment->id, 'payment');
+                // Update payment status
+                $payment_update = ['status' => 'verified'];
+                $this->common_model->edit_option($payment_update, $payment->id, 'payment');
 
-            // ✅ Referral system
-            $referral_settings = $this->admin_model->get_referral_settings();
-            if (!empty($referral_settings) && $referral_settings->is_enable == 1) {
-                $register_user = $this->admin_model->get_by_referral_user($payment->user_id);
-                if (!empty($register_user)) {
-                    $amount = $payment->amount;
-                    $commission = $referral_settings->commision_rate;
-                    $commission_amount = ($commission * $amount) / 100;
+                // ✅ Referral system
+                $referral_settings = $this->admin_model->get_referral_settings();
+                if (!empty($referral_settings) && $referral_settings->is_enable == 1) {
+                    $register_user = $this->admin_model->get_by_referral_user($payment->user_id);
+                    if (!empty($register_user)) {
+                        $amount = $payment->amount;
+                        $commission = $referral_settings->commision_rate;
+                        $commission_amount = ($commission * $amount) / 100;
 
-                    $ref_data = [
-                        'status'           => 1,
-                        'amount'           => $amount,
-                        'commision'        => $commission,
-                        'commision_amount' => $commission_amount
-                    ];
-                    $this->admin_model->edit_option($ref_data, $register_user->id, 'referrals');
+                        $ref_data = [
+                            'status'           => 1,
+                            'amount'           => $amount,
+                            'commision'        => $commission,
+                            'commision_amount' => $commission_amount
+                        ];
+                        $this->admin_model->edit_option($ref_data, $register_user->id, 'referrals');
 
-                    // update referrer balance
-                    $user = $this->admin_model->get_by_referral_id($register_user->referrar_id);
-                    if (!empty($user)) {
-                        $update_balance = $user->referral_earn + $commission_amount;
-                        $earn_data = ['referral_earn' => $update_balance];
-                        $this->admin_model->edit_option($earn_data, $user->id, 'users');
+                        // update referrer balance
+                        $user = $this->admin_model->get_by_referral_id($register_user->referrar_id);
+                        if (!empty($user)) {
+                            $update_balance = $user->referral_earn + $commission_amount;
+                            $earn_data = ['referral_earn' => $update_balance];
+                            $this->admin_model->edit_option($earn_data, $user->id, 'users');
+                        }
                     }
                 }
             }
-
             // ✅ call org settings setup for this user & package
             $this->add_org_settings($id, $pkg);
+            // ✅ Success message for view
+            $view_data['success_msg'] = 'Success';
+            $view_data['main_content'] = $this->load->view('purchase', $view_data, TRUE);
+            $this->load->view('index', $view_data);
         }
 
-        // ✅ Success message for view
-        $view_data['success_msg'] = 'Success';
-        $view_data['main_content'] = $this->load->view('purchase', $view_data, TRUE);
-        $this->load->view('index', $view_data);
-    }
+    // // ✅ Add Organization Settings
+    // public function add_org_settings($user_id, $pkg)
+    // {
+    //     $package = (int) $pkg;
 
-    // ✅ Add Organization Settings
-    public function add_org_settings($id, $pkg)
+    //     // Get user timezone
+    //     $user = $this->db->select('timezone')->get_where('users', ['id' => $user_id])->row();
+    //     $tz = !empty($user->timezone) ? $user->timezone : 'UTC';
+
+    //     // Only proceed for valid packages
+    //     if (!in_array($package, [2, 3, 4], true)) {
+    //         log_message('error', "Invalid package {$package} for user {$user_id}");
+    //         return false;
+    //     }
+
+    //     // Define package-specific settings
+    //     $flagSets = [
+    //         2 => [ // Silver plan
+    //             'user_id'                  => $user_id,
+    //             'screenshot_flag'          => 1,
+    //             'screenshot_time_interval' => 10,
+    //             'webcam_flag'              => 0,  // Webcam off for silver
+    //             'webcam_time_interval'     => 5,
+    //             'mouse_move_flag'          => 1,
+    //             'mouse_move_threshold'     => 20,
+    //             'key_stroke_flag'          => 1,
+    //             'key_stroke_threshold'     => 40,
+    //             'idle_time_flag'           => 1,
+    //             'timecards_time_interval'  => 5,
+    //             'time_zone'                => $tz,
+    //         ],
+    //         3 => [ // Gold plan
+    //             'user_id'                  => $user_id,
+    //             'screenshot_flag'          => 1,
+    //             'screenshot_time_interval' => 10,
+    //             'webcam_flag'              => 1,  // Webcam on
+    //             'webcam_time_interval'     => 5,
+    //             'mouse_move_flag'          => 1,
+    //             'mouse_move_threshold'     => 20,
+    //             'key_stroke_flag'          => 1,
+    //             'key_stroke_threshold'     => 40,
+    //             'idle_time_flag'           => 1,
+    //             'timecards_time_interval'  => 5,
+    //             'time_zone'                => $tz,
+    //         ],
+    //         4 => [ // Platinum plan
+    //             'user_id'                  => $user_id,
+    //             'screenshot_flag'          => 1,
+    //             'screenshot_time_interval' => 10,
+    //             'webcam_flag'              => 1,
+    //             'webcam_time_interval'     => 5,
+    //             'mouse_move_flag'          => 1,
+    //             'mouse_move_threshold'     => 20,
+    //             'key_stroke_flag'          => 1,
+    //             'key_stroke_threshold'     => 40,
+    //             'idle_time_flag'           => 1,
+    //             'timecards_time_interval'  => 5,
+    //             'time_zone'                => $tz,
+    //         ],
+    //     ];
+
+    //     $flags = $this->security->xss_clean($flagSets[$package]);
+
+    //     $this->db->trans_start();
+
+    //     // Check if org settings already exist
+    //     $exists = $this->db->get_where('org_settings', ['user_id' => $user_id])->row();
+
+    //     if ($exists) {
+    //         // Update existing settings
+    //         // $flags['updated_at'] = my_date_now();
+    //         // $this->db->where('user_id', $user_id)->update('org_settings', $flags);
+    //     } else {
+    //         // Insert new settings
+    //         $flags['created_at'] = my_date_now();
+    //         $flags['updated_at'] = my_date_now();
+    //         $this->db->insert('org_settings', $flags);
+    //     }
+
+    //     $this->db->trans_complete();
+
+    //     if (!$this->db->trans_status()) {
+    //         log_message('error', "Failed to save org_settings for user {$user_id} in package {$package}");
+    //         return false;
+    //     }
+
+    //     return true;
+    // }
+    public function add_org_settings($user_id, $pkg)
     {
-        $user = $this->db->select('timezone')->get_where('users', ['id' => $id])->row();
-        $tz = !empty($user->time_zone) ? $user->time_zone : 'UTC';
+        $package = (int) $pkg;
 
-        if (in_array($pkg, [2, 3, 4], true)) {
-            $flagSets = [
-                2 => [
-                    'user_id'                  => $id,
-                    'screenshot_flag'          => 1,
-                    'screenshot_time_interval' => 10,
-                    'webcam_flag'              => 0,
-                    'webcam_time_interval'     => 5,
-                    'mouse_move_flag'          => 1,
-                    'mouse_move_threshold'     => 20,
-                    'key_stroke_flag'          => 1,
-                    'key_stroke_threshold'     => 40,
-                    'idle_time_flag'           => 1,
-                    'timecards_time_interval'  => 5,
-                    'time_zone'                => $tz,
-                ],
-                3 => [
-                    'user_id'                  => $id,
-                    'screenshot_flag'          => 1,
-                    'screenshot_time_interval' => 10,
-                    'webcam_flag'              => 1,
-                    'webcam_time_interval'     => 5,
-                    'mouse_move_flag'          => 1,
-                    'mouse_move_threshold'     => 20,
-                    'key_stroke_flag'          => 1,
-                    'key_stroke_threshold'     => 40,
-                    'idle_time_flag'           => 1,
-                    'timecards_time_interval'  => 5,
-                    'time_zone'                => $tz,
-                ],
-                4 => [
-                    'user_id'                  => $id,
-                    'screenshot_flag'          => 1,
-                    'screenshot_time_interval' => 10,
-                    'webcam_flag'              => 1,
-                    'webcam_time_interval'     => 5,
-                    'mouse_move_flag'          => 1,
-                    'mouse_move_threshold'     => 20,
-                    'key_stroke_flag'          => 1,
-                    'key_stroke_threshold'     => 40,
-                    'idle_time_flag'           => 1,
-                    'timecards_time_interval'  => 5,
-                    'time_zone'                => $tz,
-                ],
-            ];
+        // Get user timezone
+        $user = $this->db->select('timezone')->get_where('users', ['id' => $user_id])->row();
+        $tz = !empty($user->timezone) ? $user->timezone : 'UTC';
 
-            $flags = $this->security->xss_clean($flagSets[$pkg]);
-
-            $this->db->trans_start();
-
-            $exists = $this->db->get_where('org_settings', ['user_id' => $id])->row();
-
-            if ($exists) {
-                $flags['updated_at'] = my_date_now();
-                $this->db->where('user_id', $id)->update('org_settings', $flags);
-            } else {
-                $flags['created_at'] = my_date_now();
-                $flags['updated_at'] = my_date_now();
-                $this->db->insert('org_settings', $flags);
-
-                // ensure default departments exist
-                $business_uid = $this->db
-                    ->select('uid')
-                    ->get_where('business', ['user_id' => $id])
-                    ->row('uid');
-                if (!empty($business_uid)) {
-                    $this->admin_model->intial_department_storing($id, $business_uid);
-                }
-            }
-
-            $this->db->trans_complete();
-
-            if (!$this->db->trans_status()) {
-                log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
-            }
+        // Only proceed for valid packages
+        if (!in_array($package, [2, 3, 4], true)) {
+            log_message('error', "Invalid package {$package} for user {$user_id}");
+            return false;
         }
+
+        // Define package-specific settings
+        $flagSets = [
+            2 => [ // Silver plan
+                'user_id'                  => $user_id,
+                'screenshot_flag'          => 1,
+                'screenshot_time_interval' => 10,
+                'webcam_flag'              => 0,  // Webcam off for silver
+                'webcam_time_interval'     => 5,
+                'mouse_move_flag'          => 1,
+                'mouse_move_threshold'     => 20,
+                'key_stroke_flag'          => 1,
+                'key_stroke_threshold'     => 40,
+                'idle_time_flag'           => 1,
+                'timecards_time_interval'  => 5,
+                'time_zone'                => $tz,
+            ],
+            3 => [ // Gold plan
+                'user_id'                  => $user_id,
+                'screenshot_flag'          => 1,
+                'screenshot_time_interval' => 10,
+                'webcam_flag'              => 1,  // Webcam on
+                'webcam_time_interval'     => 5,
+                'mouse_move_flag'          => 1,
+                'mouse_move_threshold'     => 20,
+                'key_stroke_flag'          => 1,
+                'key_stroke_threshold'     => 40,
+                'idle_time_flag'           => 1,
+                'timecards_time_interval'  => 5,
+                'time_zone'                => $tz,
+            ],
+            4 => [ // Platinum plan
+                'user_id'                  => $user_id,
+                'screenshot_flag'          => 1,
+                'screenshot_time_interval' => 10,
+                'webcam_flag'              => 1,
+                'webcam_time_interval'     => 5,
+                'mouse_move_flag'          => 1,
+                'mouse_move_threshold'     => 20,
+                'key_stroke_flag'          => 1,
+                'key_stroke_threshold'     => 40,
+                'idle_time_flag'           => 1,
+                'timecards_time_interval'  => 5,
+                'time_zone'                => $tz,
+            ],
+        ];
+
+        $flags = $this->security->xss_clean($flagSets[$package]);
+
+        $this->db->trans_start();
+
+        // Check if org_settings already exist
+        $exists = $this->db->get_where('org_settings', ['user_id' => $user_id])->row();
+
+        if ($exists) {
+            // Fetch last 2 packages from payment table
+            $payments = $this->db
+                ->select('package')
+                ->from('payment')
+                ->where('user_id', $user_id)
+                ->order_by('id', 'DESC')
+                ->limit(2)
+                ->get()
+                ->result();
+
+            if (count($payments) >= 2) {
+                $previous_package = (int) $payments[1]->package; // second latest
+
+                if ($previous_package === 1 && $pkg == 2) {
+                    // Update settings only if previous package was 1
+                    $flags['updated_at'] = my_date_now();
+                    $this->db->where('user_id', $user_id)->update('org_settings', $flags);
+                    log_message('info', "Org settings updated for user {$user_id}, package {$package}");
+                } else {
+                    log_message('info', "User {$user_id} previous package was {$previous_package}, skipping update");
+                }
+            } else {
+                log_message('error', "Not enough payment history for user {$user_id}");
+            }
+        } else {
+            // Insert new settings (first time setup, no payment check needed)
+            $flags['created_at'] = my_date_now();
+            $flags['updated_at'] = my_date_now();
+            $this->db->insert('org_settings', $flags);
+            log_message('info', "Org settings inserted for user {$user_id}, package {$package}");
+        }
+
+        $this->db->trans_complete();
+
+        if (!$this->db->trans_status()) {
+            log_message('error', "Failed to save org_settings for user {$user_id} in package {$package}");
+            return false;
+        }
+
+        return true;
     }
+
+
 
     // ✅ Stripe Payment
     public function stripe_payment()
@@ -1097,7 +1214,7 @@ class Auth extends Home_Controller
                 }
 
                 // ✅ redirect using puid not object
-                redirect(base_url('auth/payment_success/' . $puid . '/' . user()->id . '/' . $id . '/0'));
+                redirect(base_url('auth/payment_success/' . $puid . '/' . user()->id . '/' . $id));
             } else {
                 redirect(base_url('payment-cancel/' . $puid));
             }

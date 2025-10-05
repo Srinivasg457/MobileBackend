@@ -15,7 +15,7 @@
     <?php endif ?>
     <?php if(get_user_info() == FALSE){$uval = 'd-none';} ?>
     
-    <div class="col-md-8">
+    <div class="col-md-12">
       <form method="post" action="<?php echo base_url('admin/payment/update') ?>" role="form" class="form-horizontal">
         
         <div class="row">
@@ -202,7 +202,7 @@
       </form>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-4 hide">
       
       <div class="box">
         <div class="box-header with-border">

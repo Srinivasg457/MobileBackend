@@ -153,7 +153,7 @@ class Razorpay extends Home_Controller
                     $this->session->unset_userdata('ci_subscription_keys');
                 }
                 
-                redirect(base_url('payment-success/'.$puid));
+                redirect(base_url('auth/payment_success/' . $puid . '/' . user()->id . '/' . $package_id));
                 
  
             } else {

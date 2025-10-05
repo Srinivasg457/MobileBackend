@@ -13,6 +13,7 @@
                 <div class="pay-boxs">
 
                     <div class="text-center mt-20">
+                        <?php print_r($success); ?>
                         <?php if (isset($success_msg) && $success_msg=='Success'): ?>
                             <h1 class="text-success"><i class="icon-check"></i> <br><?php echo trans('done') ?></h1>
                             <h5 class="text-successs"><?php echo trans('payment-success-msg') ?></h5><br>

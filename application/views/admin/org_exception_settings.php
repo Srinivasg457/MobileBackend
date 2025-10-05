@@ -255,8 +255,9 @@
                                 <div class="col-md-4 mb-5 form-group">
                                     <label>Webcam Flag:</label><br>
                                     <div>
-                                        <label class="toggle-switch ">
-                                            <input type="checkbox" class="toggle-flag" name="webcam_flag" value="1" checked data-toggle="toggle" data-onstyle="info" data-width="100">
+                                        <label class="toggle-switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
+                                            <input type="checkbox" class="toggle-flag" name="webcam_flag" value="1" data-toggle="toggle" data-onstyle="info" data-width="100"
+                                                <?= (!is_plan_basic()) ? 'checked' : 'disabled' ?>>
                                         </label>
                                     </div>
                                 </div>
@@ -265,12 +266,12 @@
                                     <select name="webcam_time_interval" class="form-control interval-field"
                                         <?php echo is_plan_basic() ? 'disabled' : ''; ?>>
                                         <?php if (is_plan_standard()): ?>
-                                            <option value="5">5</option>
+                                            <option value="5" selected>5</option>
                                             <option value="10">10</option>
                                         <?php else: ?>
                                             <option value="1">1</option>
                                             <option value="2">2</option>
-                                            <option value="5">5</option>
+                                            <option value="5" selected>5</option>
                                             <option value="10">10</option>
                                         <?php endif; ?>
                                     </select>
@@ -562,7 +563,7 @@
             $('select[name="screenshot_time_interval"]').val(settings.screenshot.interval);
 
             $('input[name="webcam_flag"]').prop('checked', settings.webcam.flag == 1).change();
-            $('select[name="webcam_time_interval"]').val(settings.webcam.interval).change();
+            // $('select[name="webcam_time_interval"]').val(settings.webcam.interval).change();
 
             $('input[name="mouse_move_flag"]').prop('checked', settings.mouse_movement.flag == 1).change();
             // Set threshold if needed, e.g.

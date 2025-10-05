@@ -84,10 +84,20 @@ class Admin_model extends CI_Model {
 
     // update function
     function update_payment($action, $user_id, $table){
+        // $this->db->where('user_id', $user_id);
         $this->db->where('user_id', $user_id);
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
         $this->db->update($table,$action);
         return;
-    } 
+    }
+    function update_latest_payment($data, $user_id, $table)
+    {
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+        $this->db->update($table, $data);
+    }
 
     // update function
     function update_payment_record($action, $invoice_id, $table){

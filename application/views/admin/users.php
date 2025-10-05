@@ -54,14 +54,31 @@
 
                   <div class="form-group mb-4">
                     <label><?php echo trans('plan') ?> <span class="text-danger">*</span></label>
-                    <select class="form-control" name="package" required>
-                      <option value=""><?php echo trans('select') ?></option>
-                      <?php foreach ($packages as $package): ?>
-                        <option <?php if ($package->id == $payment->package_id) {
-                                  echo "selected";
-                                } ?> value="<?php echo html_escape($package->id) ?>"><?php echo html_escape($package->name) ?></option>
-                      <?php endforeach ?>
-                    </select>
+                    <?php if (isset($page_title) && $page_title == "Edit"): ?>
+                      <select class="form-control" name="package" required>
+                        <option value=""><?php echo trans('select') ?></option>
+                        <?php foreach ($packages as $package): ?>
+                          <?php if ($package->id >= $payment->package_id): // show only >= current 
+                          ?>
+                            <option
+                              value="<?php echo html_escape($package->id) ?>"
+                              <?php if ($package->id == $payment->package_id) echo "selected"; ?>>
+                              <?php echo html_escape($package->name) ?>
+                            </option>
+                          <?php endif; ?>
+                        <?php endforeach ?>
+                      </select>
+                    <?php
+                    else: ?>
+                      <select class="form-control" name="package" required>
+                        <option value=""><?php echo trans('select') ?></option>
+                        <?php foreach ($packages as $package): ?>
+                          <option <?php if ($package->id == $payment->package_id) {
+                                    echo "selected";
+                                  } ?> value="<?php echo html_escape($package->id) ?>"><?php echo html_escape($package->name) ?></option>
+                        <?php endforeach ?>
+                      </select>
+                    <?php endif; ?>
                   </div>
 
                   <div class="form-group mb-4">
@@ -337,7 +354,7 @@
                           <li><a class="dropdown-item" href="<?php echo base_url('admin/users/status_action/1/' . $user->id) ?>"><i class="fa fa-check"></i> <?php echo trans('activate') ?></a></li>
                         <?php endif ?>
 
-                        <li><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo trans('edit') ?></a></li>
+                        <li class="hide"><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo trans('edit') ?></a></li>
 
                         <li><a class="dropdown-item delete_item" data-val="User" data-id="<?php echo html_escape($user->id); ?>" href="<?php echo base_url('admin/users/delete/' . $user->id); ?>" class="on-defaults remove-row delete_item"><i class="fa fa-trash-o"></i> <?php echo trans('delete') ?></a></li>
 

@@ -112,7 +112,7 @@ class Paystack extends Home_Controller
                         // payment code end
 
                         //echo "Transaction was successful";
-                        $this->success($puid);
+                        $this->success($puid, user()->id, $package_id);
 
                     }else{
                         // the transaction was not successful, do not deliver value'
@@ -147,8 +147,9 @@ class Paystack extends Home_Controller
         $this->load->view('paystack_inline', $data);
     }
 
-    public function success($puid) {
-        redirect(base_url('payment-success/'.$puid));
+    public function success($puid, $id , $package_id) {
+        // redirect(base_url('payment-success/'.$puid));
+        redirect(base_url('auth/payment_success/' . $puid . '/' . $id . '/' . $package_id));
     }
 
     public function fail($puid='') {
