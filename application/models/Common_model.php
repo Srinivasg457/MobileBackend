@@ -1,50 +1,56 @@
 <?php
-class Common_model extends CI_Model {
+class Common_model extends CI_Model
+{
 
     // insert function
-	public function insert($data,$table){
-        $this->db->insert($table,$data);        
+    public function insert($data, $table)
+    {
+        $this->db->insert($table, $data);
         return $this->db->insert_id();
     }
 
     // edit function
-    function edit_option($action, $id, $table){
-        $this->db->where('id',$id);
-        $this->db->update($table,$action);
+    function edit_option($action, $id, $table)
+    {
+        $this->db->where('id', $id);
+        $this->db->update($table, $action);
         return;
-    } 
+    }
 
     // edit function
-    function edit_option_md5($action, $id, $table){
+    function edit_option_md5($action, $id, $table)
+    {
         $this->db->where('md5(id)', $id);
-        $this->db->update($table,$action);
+        $this->db->update($table, $action);
         return;
-    } 
+    }
 
     // update function
-    function update($action,$id,$table){
-        $this->db->where('id',$id);
-        $this->db->update($table,$action);
+    function update($action, $id, $table)
+    {
+        $this->db->where('id', $id);
+        $this->db->update($table, $action);
     }
 
     // delete function
-    function delete($id,$table){
+    function delete($id, $table)
+    {
         if (settings()->type == 'live') {
             $this->db->delete($table, array('id' => $id));
         }
         return;
     }
 
-  
+
 
     // get function
     function get($table)
     {
         $this->db->select();
         $this->db->from($table);
-        $this->db->order_by('id','DESC');
+        $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -55,9 +61,9 @@ class Common_model extends CI_Model {
         $this->db->select();
         $this->db->from($table);
         $this->db->where('user_id', $this->session->userdata('id'));
-        $this->db->order_by('user_id','DESC');
+        $this->db->order_by('user_id', 'DESC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -66,9 +72,9 @@ class Common_model extends CI_Model {
     {
         $this->db->select();
         $this->db->from($table);
-        $this->db->order_by('id','DESC');
+        $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -77,9 +83,9 @@ class Common_model extends CI_Model {
     {
         $this->db->select();
         $this->db->from($table);
-        $this->db->order_by('id','ASC');
+        $this->db->order_by('id', 'ASC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -88,87 +94,89 @@ class Common_model extends CI_Model {
     {
         $this->db->select();
         $this->db->from($table);
-        $this->db->order_by('orders','ASC');
+        $this->db->order_by('orders', 'ASC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
     // select by id
-    function select_option($id,$table)
+    function select_option($id, $table)
     {
         $this->db->select();
         $this->db->from($table);
         $this->db->where('id', $id);
         $query = $this->db->get();
-        $query = $query->result_array();  
+        $query = $query->result_array();
         return $query;
-    } 
+    }
 
     // select by id
-    function get_by_id($id,$table)
+    function get_by_id($id, $table)
     {
         $this->db->select();
         $this->db->from($table);
         $this->db->where('id', $id);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
-    } 
+    }
 
     // select by id
-    function get_by_md5($id,$table)
+    function get_by_md5($id, $table)
     {
         $this->db->select();
         $this->db->from($table);
         $this->db->where('md5(id)', $id);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
-    } 
+    }
 
     // get by slug
-    function get_by_slug($slug,$table)
+    function get_by_slug($slug, $table)
     {
         $this->db->select();
         $this->db->from($table);
         $this->db->where('slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
-    } 
+    }
 
 
-    public function get_last_id($table){
+    public function get_last_id($table)
+    {
         $this->db->select('*');
         $this->db->from($table);
         $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        if($query->num_rows() > 0) {                 
+        if ($query->num_rows() > 0) {
             return $query->row()->id;
-        }else{
+        } else {
             return 0;
         }
     }
 
 
-   function check_follower($id)
-   {
+    function check_follower($id)
+    {
         $this->db->select();
         $this->db->from('follower');
         $this->db->where('action_id', $this->session->userdata('id'));
         $this->db->where('follower_id', $id);
         $this->db->limit(1);
-        $this->db->query('SET SQL_BIG_SELECTS=1'); 
+        $this->db->query('SET SQL_BIG_SELECTS=1');
         $query = $this->db->get();
-        if($query->num_rows() == 1) {                 
+        if ($query->num_rows() == 1) {
             return $query->result();
-        }else{
+        } else {
             return 0;
         }
     }
 
-    public function remove_follower($id,$table){
+    public function remove_follower($id, $table)
+    {
         $this->db->delete($table, array('follower_id' => $id, 'action_id' => $this->session->userdata('id')));
         return;
     }
@@ -177,12 +185,12 @@ class Common_model extends CI_Model {
     {
         $this->db->select('*');
         $this->db->from('users');
-        $this->db->where('email', $email); 
+        $this->db->where('email', $email);
         $this->db->limit(1);
         $query = $this->db->get();
-        if($query->num_rows() == 1) {                 
+        if ($query->num_rows() == 1) {
             return $query->result();
-        }else{
+        } else {
             return false;
         }
     }
@@ -191,12 +199,12 @@ class Common_model extends CI_Model {
     {
         $this->db->select('*');
         $this->db->from('users');
-        $this->db->where('user_name', $name); 
+        $this->db->where('user_name', $name);
         $this->db->limit(1);
         $query = $this->db->get();
-        if($query->num_rows() == 1) {                 
+        if ($query->num_rows() == 1) {
             return $query->result();
-        }else{
+        } else {
             return 0;
         }
     }
@@ -209,7 +217,7 @@ class Common_model extends CI_Model {
         $this->db->from('pages');
         $this->db->where('slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -237,7 +245,7 @@ class Common_model extends CI_Model {
         $this->db->from('category');
         $this->db->where('parent_id', $id);
         $query = $this->db->get();
-        $query = $query->result_array();  
+        $query = $query->result_array();
         return $query;
     }
 
@@ -248,19 +256,19 @@ class Common_model extends CI_Model {
         $this->db->from('settings s');
         $this->db->join('language as l', 'l.id = s.lang', 'LEFT');
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
-    function get_slug_by_language($slug,$table)
+    function get_slug_by_language($slug, $table)
     {
         $this->db->select();
         $this->db->from($table);
         $this->db->where('slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
-    } 
+    }
 
     // get business
     function get_business_old($uid)
@@ -269,13 +277,13 @@ class Common_model extends CI_Model {
         $this->db->from('business b');
         if ($uid != 0) {
             $this->db->where('b.uid', $uid);
-        }else{
+        } else {
             $this->db->where('b.is_primary', 1);
         }
         $this->db->where('b.user_id', $this->session->userdata('id'));
         $this->db->join('country t', 't.id = b.country', 'LEFT');
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -283,7 +291,7 @@ class Common_model extends CI_Model {
     // get business
     function get_business($uid)
     {
-        
+
         if ($this->session->userdata('role') != 'user') {
             $this->db->where('id', $this->session->userdata('parent'));
             $query = $this->db->get('users_role');
@@ -293,37 +301,33 @@ class Common_model extends CI_Model {
             $this->db->from('business b');
             if ($uid != 0) {
                 $this->db->where('b.uid', $uid);
-            }else{
+            } else {
                 if (isset($user) && $user->business_id != 0) {
                     $this->db->where('b.uid', $user->business_id);
-                }else{
+                } else {
                     $this->db->where('b.is_primary', 1);
                 }
             }
             $this->db->where('b.user_id', $this->session->userdata('id'));
             $this->db->join('country t', 't.id = b.country', 'LEFT');
             $query = $this->db->get();
-            $query = $query->row();  
+            $query = $query->row();
             return $query;
-
         } else {
-           
+
             $this->db->select('b.*, t.name as country, t.id as country_id, t.currency_name, t.currency_code, t.currency_symbol');
             $this->db->from('business b');
             if ($uid != 0) {
                 $this->db->where('b.uid', $uid);
-            }else{
+            } else {
                 $this->db->where('b.is_primary', 1);
             }
             $this->db->where('b.user_id', $this->session->userdata('id'));
             $this->db->join('country t', 't.id = b.country', 'LEFT');
             $query = $this->db->get();
-            $query = $query->row();  
+            $query = $query->row();
             return $query;
-
         }
-
-
     }
 
 
@@ -336,7 +340,7 @@ class Common_model extends CI_Model {
         $this->db->where('b.user_id', $this->session->userdata('id'));
         $this->db->join('country t', 't.id = b.country', 'LEFT');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -352,21 +356,21 @@ class Common_model extends CI_Model {
         }
         $this->db->join('country t', 't.id = b.country', 'LEFT');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
 
     // select by id
-    function select_option_md5($id,$table)
+    function select_option_md5($id, $table)
     {
         $this->db->select();
         $this->db->from($table);
         $this->db->where(md5('id'), $id);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
-    } 
+    }
 
     //get user by id
     public function get_user_by_slug($slug)
@@ -376,7 +380,7 @@ class Common_model extends CI_Model {
         $this->db->join('google_fonts f', 'u.site_font = f.id', 'LEFT');
         $this->db->where('u.slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -387,9 +391,9 @@ class Common_model extends CI_Model {
         $this->db->select();
         $this->db->from('services');
         $this->db->where('user_id', $user_id);
-        $this->db->order_by('id','ASC');
+        $this->db->order_by('id', 'ASC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -401,7 +405,7 @@ class Common_model extends CI_Model {
         $this->db->from('country');
         $this->db->where('currency_code', $currency);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -411,12 +415,12 @@ class Common_model extends CI_Model {
         $this->db->select('*');
         $this->db->from('package');
         $query = $this->db->get();
-        $query = $query->result_array();  
+        $query = $query->result_array();
 
         foreach ($query as $key => $value) {
             $this->db->select('*');
             $this->db->from('features f');
-            $this->db->where('f.package_id',$value['id']);
+            $this->db->where('f.package_id', $value['id']);
             $query2 = $this->db->get();
             $query2 = $query2->result_array();
             $query[$key]['features'] = $query2;
@@ -432,7 +436,7 @@ class Common_model extends CI_Model {
         $this->db->select_max('dis_year');
         $this->db->from('package');
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -449,16 +453,16 @@ class Common_model extends CI_Model {
                 $this->db->where('u.account_type', $_GET['sort']);
             }
             if (isset($_GET['sort']) && $_GET['sort'] == 'views') {
-                $this->db->order_by('u.hit','DESC');
-            }else{
-                $this->db->order_by('u.id','DESC');
+                $this->db->order_by('u.hit', 'DESC');
+            } else {
+                $this->db->order_by('u.id', 'DESC');
             }
         }
         if (!empty($_GET['skill'])) {
             $this->db->join('skills as s', 's.user_id = u.id', 'LEFT');
             $this->db->where('s.slug', $_GET['skill']);
         }
-        $this->db->order_by('u.hit','DESC');
+        $this->db->order_by('u.hit', 'DESC');
 
         if ($total == 1) {
             $query = $this->db->get();
@@ -470,7 +474,7 @@ class Common_model extends CI_Model {
             return $query;
         }
     }
-    
+
 
     //increase post hit
     public function increase_user_hit($id)
@@ -531,7 +535,7 @@ class Common_model extends CI_Model {
         $this->db->from('follower');
         $this->db->where('follower_id', $id);
         $query = $this->db->get();
-        $query = $query->num_rows();  
+        $query = $query->num_rows();
         return $query;
     }
 
@@ -542,18 +546,18 @@ class Common_model extends CI_Model {
         $this->db->from('follower');
         $this->db->where('action_id', $id);
         $query = $this->db->get();
-        $query = $query->num_rows();  
+        $query = $query->num_rows();
         return $query;
     }
 
-     // get all users
+    // get all users
     function get_total_portfolio($id)
     {
         $this->db->select();
         $this->db->from('portfolio');
         $this->db->where('user_id', $id);
         $query = $this->db->get();
-        $query = $query->num_rows();  
+        $query = $query->num_rows();
         return $query;
     }
 
@@ -565,7 +569,7 @@ class Common_model extends CI_Model {
         $this->db->select();
         $this->db->from('features');
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -577,7 +581,7 @@ class Common_model extends CI_Model {
         $this->db->from('payment');
         $this->db->where('puid', $payment_id);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -589,7 +593,7 @@ class Common_model extends CI_Model {
         $this->db->where('user_id', $this->session->userdata('id'));
         $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -608,7 +612,7 @@ class Common_model extends CI_Model {
         }
         $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        $query = $query->num_rows();  
+        $query = $query->num_rows();
         return $query;
     }
 
@@ -626,7 +630,7 @@ class Common_model extends CI_Model {
         }
         $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        $query = $query->num_rows();  
+        $query = $query->num_rows();
         return $query;
     }
 
@@ -638,7 +642,7 @@ class Common_model extends CI_Model {
         $this->db->from('package');
         $this->db->where('slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         if ($query->is_active == 1) {
             return true;
         } else {
@@ -653,7 +657,7 @@ class Common_model extends CI_Model {
         $this->db->from('package_features');
         $this->db->where('slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -667,9 +671,68 @@ class Common_model extends CI_Model {
         $this->db->where('p.user_id', $user_id);
         $this->db->order_by('p.id', 'DESC');
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
+
+   function get_features_for_given_package()
+{
+    // ✅ Get the user id (either employee or org user)
+    $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
+
+    // ✅ Fetch the latest payment for this user to get the package
+    $payment = $this->db->select('p.*, k.id as package_id, k.name as package_name, k.slug')
+        ->from('payment p')
+        ->join('package k', 'k.id = p.package', 'LEFT')
+        ->where('p.user_id', $user_id)
+        ->order_by('p.id', 'DESC')
+        ->get()
+        ->row();
+
+    if (!$payment) {
+        return []; // No payment found
+    }
+
+    $package_id = (int) $payment->package_id;
+
+    // ✅ Fetch the package details to ensure it's active
+    $package = $this->db->select('*')
+        ->from('package')
+        ->where('id', $package_id)
+        ->where('is_active', 1)
+        ->get()
+        ->row();
+
+    if (!$package) {
+        return []; // Package not active or doesn't exist
+    }
+
+    // ✅ Determine the feature column based on package
+    switch ($package_id) {
+        case 1:
+            $pack_feature_name = "free";
+            break;
+        case 2:
+            $pack_feature_name = "basic";
+            break;
+        case 3:
+            $pack_feature_name = "standard";
+            break;
+        case 4:
+            $pack_feature_name = "premium";
+            break;
+        default:
+            return []; // Invalid package
+    }
+
+    // ✅ Fetch features for this package
+    $features = $this->db->select("id, name, slug, {$pack_feature_name} AS pack_feature")
+        ->from('package_features')
+        ->get()
+        ->result();
+
+    return $features;
+}
 
 
     // get_payment
@@ -681,7 +744,7 @@ class Common_model extends CI_Model {
         $this->db->where('p.user_id', $user_id);
         $this->db->order_by('p.id', 'DESC');
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -693,10 +756,10 @@ class Common_model extends CI_Model {
         $this->db->from('package');
         $this->db->where('id', $id);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
-    
+
     // get_package
     function get_package_by_slug($slug)
     {
@@ -704,7 +767,7 @@ class Common_model extends CI_Model {
         $this->db->from('package');
         $this->db->where('slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -721,7 +784,7 @@ class Common_model extends CI_Model {
             $this->db->join('users u', 'u.id = action_id', 'LEFT');
         }
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -735,12 +798,12 @@ class Common_model extends CI_Model {
         $this->db->where('user_id', $user_id);
         $this->db->order_by('orders');
         $query = $this->db->get();
-        $query = $query->result_array();  
+        $query = $query->result_array();
 
         foreach ($query as $key => $value) {
-     
+
             $this->db->from('skills');
-            $this->db->where('parent_id',$value['id']);
+            $this->db->where('parent_id', $value['id']);
             $this->db->where('user_id', $user_id);
             $this->db->order_by('orders');
             $query2 = $this->db->get();
@@ -759,12 +822,12 @@ class Common_model extends CI_Model {
         $this->db->where('user_id', $user_id);
         $this->db->order_by('orders');
         $query = $this->db->get();
-        $query = $query->result_array();  
+        $query = $query->result_array();
 
         foreach ($query as $key => $value) {
-     
+
             $this->db->from('experience');
-            $this->db->where('parent_id',$value['id']);
+            $this->db->where('parent_id', $value['id']);
             $this->db->where('user_id', $user_id);
             $this->db->order_by('orders');
             $query2 = $this->db->get();
@@ -775,151 +838,165 @@ class Common_model extends CI_Model {
     }
 
     // get testimonials
-    function get_testimonials($user_id){
+    function get_testimonials($user_id)
+    {
         $this->db->select();
         $this->db->from('testimonials');
         $this->db->where('user_id', $user_id);
         $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
     // get categories
-    function get_categories(){
+    function get_categories()
+    {
         $this->db->select();
         $this->db->from('category');
         $this->db->where('parent_id', 0);
         $this->db->order_by('cat_order', 'ASC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
-   
+
     // get subcategories
-    function get_subcategories(){
+    function get_subcategories()
+    {
         $this->db->select();
         $this->db->from('category');
         $this->db->where('parent_id !=', 0);
         $this->db->where('sub', 0);
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
 
 
     // get subcategories
-    function sub_sub_categories(){
+    function sub_sub_categories()
+    {
         $this->db->select();
         $this->db->from('category');
         $this->db->where('sub', 1);
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
 
     // get categories
-    function get_skills(){
+    function get_skills()
+    {
         $this->db->select();
         $this->db->from('skills');
         $this->db->where('user_id', $this->session->userdata('id'));
         $this->db->where('parent_id', 0);
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
-   
+
     // get subcategories
-    function get_subskills(){
+    function get_subskills()
+    {
         $this->db->select();
         $this->db->from('skills');
         $this->db->where('user_id', $this->session->userdata('id'));
         $this->db->where('parent_id !=', 0);
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
     // get categories
-    function get_experience(){
+    function get_experience()
+    {
         $this->db->select();
         $this->db->from('experience');
         $this->db->where('user_id', $this->session->userdata('id'));
         $this->db->where('parent_id', 0);
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
-   
+
     // get subcategories
-    function get_subexperience(){
+    function get_subexperience()
+    {
         $this->db->select();
         $this->db->from('experience');
         $this->db->where('user_id', $this->session->userdata('id'));
         $this->db->where('parent_id !=', 0);
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
     // get categories
-    function get_portfolio_categories(){
+    function get_portfolio_categories()
+    {
         $this->db->select();
         $this->db->from('portfolio_category');
         $this->db->where('user_id', $this->session->userdata('id'));
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
     // get testimonials
-    function get_portfolio_category($user_id){
+    function get_portfolio_category($user_id)
+    {
         $this->db->select();
         $this->db->from('portfolio_category');
         $this->db->where('user_id', $user_id);
         $this->db->order_by('id', 'DESC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
     // get expire payments
-    function get_expire_payments(){
+    function get_expire_payments()
+    {
         $this->db->select();
         $this->db->from('payment');
         $this->db->where('expire_on', date('Y-m-d'));
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
     // get expire payments
-    function get_reminder_expire_payments(){
+    function get_reminder_expire_payments()
+    {
         $this->db->select();
         $this->db->from('payment');
         $this->db->where('expire_on', date('Y-m-d', strtotime("+7 day")));
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
     // get trial users
-    function get_trial_users(){
+    function get_trial_users()
+    {
         $this->db->select();
         $this->db->from('users');
         $this->db->where('trial_expire', date('Y-m-d'));
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
     // get home blog posts
-    function get_home_blog_posts($limit){
+    function get_home_blog_posts($limit)
+    {
         $this->db->select('b.*, c.slug as category_slug, c.name as category');
         $this->db->from('blog_posts b');
         $this->db->join('blog_category c', 'c.id = b.category_id', 'LEFT');
@@ -928,11 +1005,12 @@ class Common_model extends CI_Model {
         $query = $this->db->get();
         $query = $query->result();
         return $query;
-    } 
+    }
 
 
     // get blog posts
-    function get_blog_posts($total, $limit, $offset){
+    function get_blog_posts($total, $limit, $offset)
+    {
         $this->db->select('b.*, c.slug as category_slug, c.name as category');
         $this->db->from('blog_posts b');
         $this->db->join('blog_category c', 'c.id = b.category_id', 'LEFT');
@@ -946,18 +1024,19 @@ class Common_model extends CI_Model {
             $query = $query->result();
             return $query;
         }
-    } 
+    }
 
     // get_categories
-    function get_blog_categories(){
+    function get_blog_categories()
+    {
         $this->db->select('b.category_id, c.slug as category_slug, c.name as category');
         $this->db->from('blog_posts b');
         $this->db->join('blog_category c', 'c.id = b.category_id', 'LEFT');
         $this->db->group_by('b.category_id');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
-    } 
+    }
 
 
     //get posts categories
@@ -967,7 +1046,7 @@ class Common_model extends CI_Model {
         $this->db->from('blog_category');
         $this->db->where('slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
@@ -978,7 +1057,7 @@ class Common_model extends CI_Model {
         $this->db->select();
         $this->db->from('blog_category');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -991,11 +1070,11 @@ class Common_model extends CI_Model {
         $this->db->join('blog_category c', 'p.category_id = c.id', 'LEFT');
         $this->db->where('p.slug', $slug);
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
-  
+
 
 
     //get latest posts
@@ -1011,7 +1090,7 @@ class Common_model extends CI_Model {
         $this->db->order_by('p.id', 'DESC');
         $this->db->limit(3);
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -1026,18 +1105,19 @@ class Common_model extends CI_Model {
 
     //get comments by img
     public function get_comments_by_post($post_id)
-    {   
+    {
         $this->db->select('c.*');
         $this->db->from('comments c');
         $this->db->where('c.post_id', $post_id);
         $this->db->order_by('c.id', 'DESC');
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
-   
+
     // delete tags
-    function delete_tags($post_id, $table){
+    function delete_tags($post_id, $table)
+    {
         $this->db->delete($table, array('post_id' => $post_id));
         return;
     }
@@ -1053,9 +1133,9 @@ class Common_model extends CI_Model {
         $this->db->join('blog_category as c', 'c.id = p.category_id', 'LEFT');
         $this->db->where('p.status', 1);
         $this->db->where('p.category_id', $id);
-        
+
         $this->db->order_by('p.id', 'DESC');
-        
+
         if ($total == 1) {
             $query = $this->db->get();
             $query = $query->num_rows();
@@ -1077,9 +1157,9 @@ class Common_model extends CI_Model {
         $this->db->where('p.status', 1);
         $this->db->where('p.category_id', $id);
         $query = $this->db->get();
-        if($query->num_rows() == 1) {                 
+        if ($query->num_rows() == 1) {
             return $query->row();
-        }else{
+        } else {
             return 0;
         }
     }
@@ -1097,7 +1177,7 @@ class Common_model extends CI_Model {
         $this->db->order_by('rand()');
         $this->db->limit(8);
         $query = $this->db->get();
-        $query = $query->result();  
+        $query = $query->result();
         return $query;
     }
 
@@ -1112,11 +1192,12 @@ class Common_model extends CI_Model {
     // } 
 
     //get latest users
-    function get_latest_users(){
+    function get_latest_users()
+    {
         $this->db->select('u.*');
         $this->db->from('users u');
         $this->db->where('u.status', 1);
-        $this->db->order_by('u.id','DESC');
+        $this->db->order_by('u.id', 'DESC');
         $this->db->limit(6);
         $query = $this->db->get();
         $query = $query->result();
@@ -1124,10 +1205,11 @@ class Common_model extends CI_Model {
     }
 
     // get all posts
-    function get_latest_messages(){
+    function get_latest_messages()
+    {
         $this->db->select('c.*');
         $this->db->from('contacts c');
-        $this->db->order_by('c.id','DESC');
+        $this->db->order_by('c.id', 'DESC');
         $this->db->limit(8);
         $query = $this->db->get();
         $query = $query->result();
@@ -1136,11 +1218,12 @@ class Common_model extends CI_Model {
 
 
     // get all users
-    function get_all_users(){
+    function get_all_users()
+    {
         $this->db->select('u.*');
         $this->db->from('users u');
         $this->db->where('u.role', 'user');
-        $this->db->order_by('u.id','DESC');
+        $this->db->order_by('u.id', 'DESC');
         $this->db->query('SET SQL_BIG_SELECTS=1');
         $query = $this->db->get();
         $query = $query->result();
@@ -1151,19 +1234,20 @@ class Common_model extends CI_Model {
 
 
     // get images by user
-    function get_total_info(){
+    function get_total_info()
+    {
         $this->db->select('p.id');
         $this->db->select('(SELECT count(posts.id)
                             FROM posts 
                             WHERE (status = 1)
                             )
-                            AS post',TRUE);
-        
+                            AS post', TRUE);
+
         $this->db->select('(SELECT count(users.id)
                             FROM users 
                             WHERE (status = 1)
                             )
-                            AS user',TRUE);
+                            AS user', TRUE);
 
         $this->db->from('posts p');
         $query = $this->db->get();
@@ -1172,217 +1256,213 @@ class Common_model extends CI_Model {
     }
 
 
-     //get user info
+    //get user info
     function get_user_info()
     {
         $this->db->select('u.*');
         $this->db->from('users u');
         $this->db->where('u.id', $this->session->userdata('id'));
         $query = $this->db->get();
-        $query = $query->row();  
+        $query = $query->row();
         return $query;
     }
 
 
     // image upload function with resize option
-    function upload_image($max_size){
-            
+    function upload_image($max_size)
+    {
+
+        // set upload path
+        $config['upload_path']  = "./uploads/";
+        $config['allowed_types'] = 'gif|jpg|png|jpeg';
+        $config['max_size']     = '92000';
+        $config['max_width']    = '92000';
+        $config['max_height']   = '92000';
+
+        $this->load->library('upload', $config);
+
+        if ($this->upload->do_upload("photo")) {
+
+
+            $data = $this->upload->data();
+
             // set upload path
-            $config['upload_path']  = "./uploads/";
-            $config['allowed_types']= 'gif|jpg|png|jpeg';
-            $config['max_size']     = '92000';
-            $config['max_width']    = '92000';
-            $config['max_height']   = '92000';
+            $source             = "./uploads/" . $data['file_name'];
+            $destination_thumb  = "./uploads/thumbnail/";
+            $destination_medium = "./uploads/medium/";
+            $main_img = $data['file_name'];
+            // Permission Configuration
+            chmod($source, 0777);
 
-            $this->load->library('upload', $config);
+            /* Resizing Processing */
+            // Configuration Of Image Manipulation :: Static
+            $this->load->library('image_lib');
+            $img['image_library'] = 'GD2';
+            $img['create_thumb']  = TRUE;
+            $img['maintain_ratio'] = TRUE;
 
-            if ($this->upload->do_upload("photo")) {
+            /// Limit Width Resize
+            $limit_medium   = $max_size;
+            $limit_thumb    = 150;
 
-                
-                $data = $this->upload->data();
+            // Size Image Limit was using (LIMIT TOP)
+            $limit_use  = $data['image_width'] > $data['image_height'] ? $data['image_width'] : $data['image_height'];
 
-                // set upload path
-                $source             = "./uploads/".$data['file_name'] ;
-                $destination_thumb  = "./uploads/thumbnail/" ;
-                $destination_medium = "./uploads/medium/" ;
-                $main_img = $data['file_name'];
-                // Permission Configuration
-                chmod($source, 0777) ;
-
-                /* Resizing Processing */
-                // Configuration Of Image Manipulation :: Static
-                $this->load->library('image_lib') ;
-                $img['image_library'] = 'GD2';
-                $img['create_thumb']  = TRUE;
-                $img['maintain_ratio']= TRUE;
-
-                /// Limit Width Resize
-                $limit_medium   = $max_size ;
-                $limit_thumb    = 150;
-
-                // Size Image Limit was using (LIMIT TOP)
-                $limit_use  = $data['image_width'] > $data['image_height'] ? $data['image_width'] : $data['image_height'] ;
-
-                // Percentase Resize
-                if ($limit_use > $limit_medium || $limit_use > $limit_thumb) {
-                    $percent_medium = $limit_medium/$limit_use ;
-                    $percent_thumb  = $limit_thumb/$limit_use ;
-                }
-
-                //// Making THUMBNAIL ///////
-                $img['width']  = $limit_use > $limit_thumb ?  $data['image_width'] * $percent_thumb : $data['image_width'] ;
-                $img['height'] = $limit_use > $limit_thumb ?  $data['image_height'] * $percent_thumb : $data['image_height'] ;
-
-                // Configuration Of Image Manipulation :: Dynamic
-                $img['thumb_marker'] = '_thumb-'.floor($img['width']).'x'.floor($img['height']) ;
-                $img['quality']      = ' 100%' ;
-                $img['source_image'] = $source ;
-                $img['new_image']    = $destination_thumb ;
-
-                $thumb_nail = $data['raw_name']. $img['thumb_marker'].$data['file_ext'];
-                // Do Resizing
-                $this->image_lib->initialize($img);
-                $this->image_lib->resize();
-                $this->image_lib->clear() ;
-
-                ////// Making MEDIUM /////////////
-                $img['width']   = $limit_use > $limit_medium ?  $data['image_width'] * $percent_medium : $data['image_width'] ;
-                $img['height']  = $limit_use > $limit_medium ?  $data['image_height'] * $percent_medium : $data['image_height'] ;
-
-                // Configuration Of Image Manipulation :: Dynamic
-                $img['thumb_marker'] = '_medium-'.floor($img['width']).'x'.floor($img['height']) ;
-                $img['quality']      = '100%' ;
-                $img['source_image'] = $source ;
-                $img['new_image']    = $destination_medium ;
-
-                $mid = $data['raw_name']. $img['thumb_marker'].$data['file_ext'];
-                // Do Resizing
-                $this->image_lib->initialize($img);
-                $this->image_lib->resize();
-                $this->image_lib->clear() ;
-
-                // set upload path
-                $images = 'uploads/medium/'.$mid;
-                $thumb  = 'uploads/thumbnail/'.$thumb_nail;
-                unlink($source) ;
-
-                return array(
-                    'images' => $images,
-                    'thumb' => $thumb
-                );
+            // Percentase Resize
+            if ($limit_use > $limit_medium || $limit_use > $limit_thumb) {
+                $percent_medium = $limit_medium / $limit_use;
+                $percent_thumb  = $limit_thumb / $limit_use;
             }
-            else {
-                echo "Failed! to upload image" ;
-            }
-            
+
+            //// Making THUMBNAIL ///////
+            $img['width']  = $limit_use > $limit_thumb ?  $data['image_width'] * $percent_thumb : $data['image_width'];
+            $img['height'] = $limit_use > $limit_thumb ?  $data['image_height'] * $percent_thumb : $data['image_height'];
+
+            // Configuration Of Image Manipulation :: Dynamic
+            $img['thumb_marker'] = '_thumb-' . floor($img['width']) . 'x' . floor($img['height']);
+            $img['quality']      = ' 100%';
+            $img['source_image'] = $source;
+            $img['new_image']    = $destination_thumb;
+
+            $thumb_nail = $data['raw_name'] . $img['thumb_marker'] . $data['file_ext'];
+            // Do Resizing
+            $this->image_lib->initialize($img);
+            $this->image_lib->resize();
+            $this->image_lib->clear();
+
+            ////// Making MEDIUM /////////////
+            $img['width']   = $limit_use > $limit_medium ?  $data['image_width'] * $percent_medium : $data['image_width'];
+            $img['height']  = $limit_use > $limit_medium ?  $data['image_height'] * $percent_medium : $data['image_height'];
+
+            // Configuration Of Image Manipulation :: Dynamic
+            $img['thumb_marker'] = '_medium-' . floor($img['width']) . 'x' . floor($img['height']);
+            $img['quality']      = '100%';
+            $img['source_image'] = $source;
+            $img['new_image']    = $destination_medium;
+
+            $mid = $data['raw_name'] . $img['thumb_marker'] . $data['file_ext'];
+            // Do Resizing
+            $this->image_lib->initialize($img);
+            $this->image_lib->resize();
+            $this->image_lib->clear();
+
+            // set upload path
+            $images = 'uploads/medium/' . $mid;
+            $thumb  = 'uploads/thumbnail/' . $thumb_nail;
+            unlink($source);
+
+            return array(
+                'images' => $images,
+                'thumb' => $thumb
+            );
+        } else {
+            echo "Failed! to upload image";
+        }
     }
 
 
     //multiple image upload with resize option
-    public function do_upload($photo) {                   
+    public function do_upload($photo)
+    {
         $config['upload_path']  = "./uploads/";
-        $config['allowed_types']= 'gif|jpg|png|jpeg';
+        $config['allowed_types'] = 'gif|jpg|png|jpeg';
         $config['max_size']     = '20000';
         $config['max_width']    = '20000';
         $config['max_height']   = '20000';
- 
-        $this->load->library('upload', $config);                
-        
-            if ($this->upload->do_upload($photo)) {
-                $data       = $this->upload->data(); 
-                /* PATH */
-                $source             = "./uploads/".$data['file_name'] ;
-                $destination_thumb  = "./uploads/thumbnail/" ;
-                $destination_medium = "./uploads/medium/" ;
-                $destination_big    = "./uploads/big/" ;
 
-                // Permission Configuration
-                chmod($source, 0777) ;
+        $this->load->library('upload', $config);
 
-                /* Resizing Processing */
-                // Configuration Of Image Manipulation :: Static
-                $this->load->library('image_lib') ;
-                $img['image_library'] = 'GD2';
-                $img['create_thumb']  = TRUE;
-                $img['maintain_ratio']= TRUE;
+        if ($this->upload->do_upload($photo)) {
+            $data       = $this->upload->data();
+            /* PATH */
+            $source             = "./uploads/" . $data['file_name'];
+            $destination_thumb  = "./uploads/thumbnail/";
+            $destination_medium = "./uploads/medium/";
+            $destination_big    = "./uploads/big/";
 
-                /// Limit Width Resize
-                $limit_big   = 1000 ;
-                $limit_medium    = 400 ;
-                $limit_thumb    = 100 ;
+            // Permission Configuration
+            chmod($source, 0777);
 
-                // Size Image Limit was using (LIMIT TOP)
-                $limit_use  = $data['image_width'] > $data['image_height'] ? $data['image_width'] : $data['image_height'] ;
+            /* Resizing Processing */
+            // Configuration Of Image Manipulation :: Static
+            $this->load->library('image_lib');
+            $img['image_library'] = 'GD2';
+            $img['create_thumb']  = TRUE;
+            $img['maintain_ratio'] = TRUE;
 
-                // Percentase Resize
-                if ($limit_use > $limit_big || $limit_use > $limit_thumb || $limit_use > $limit_medium) {
-                    $percent_big = $limit_big/$limit_use ;
-                    $percent_medium  = $limit_medium/$limit_use ;
-                    $percent_thumb  = $limit_thumb/$limit_use ;
-                }
+            /// Limit Width Resize
+            $limit_big   = 1000;
+            $limit_medium    = 400;
+            $limit_thumb    = 100;
 
-                //// Making THUMBNAIL ///////
-                $img['width']  = $limit_use > $limit_thumb ?  $data['image_width'] * $percent_thumb : $data['image_width'] ;
-                $img['height'] = $limit_use > $limit_thumb ?  $data['image_height'] * $percent_thumb : $data['image_height'] ;
+            // Size Image Limit was using (LIMIT TOP)
+            $limit_use  = $data['image_width'] > $data['image_height'] ? $data['image_width'] : $data['image_height'];
 
-                // Configuration Of Image Manipulation :: Dynamic
-                $img['thumb_marker'] = '_thumb-'.floor($img['width']).'x'.floor($img['height']) ;
-                $img['quality']      = '99%' ;
-                $img['source_image'] = $source ;
-                $img['new_image']    = $destination_thumb ;
-
-                $thumb_nail = $data['raw_name']. $img['thumb_marker'].$data['file_ext'];
-                // Do Resizing
-                $this->image_lib->initialize($img);
-                $this->image_lib->resize();
-                $this->image_lib->clear() ;                 
-
-                //// Making MEDIUM ///////
-                $img['width']  = $limit_use > $limit_medium ?  $data['image_width'] * $percent_medium : $data['image_width'] ;
-                $img['height'] = $limit_use > $limit_medium ?  $data['image_height'] * $percent_medium : $data['image_height'] ;
-
-                // Configuration Of Image Manipulation :: Dynamic
-                $img['thumb_marker'] = '_medium-'.floor($img['width']).'x'.floor($img['height']) ;
-                $img['quality']      = '99%' ;
-                $img['source_image'] = $source ;
-                $img['new_image']    = $destination_medium ;
-
-                $medium = $data['raw_name']. $img['thumb_marker'].$data['file_ext'];
-                // Do Resizing
-                $this->image_lib->initialize($img);
-                $this->image_lib->resize();
-                $this->image_lib->clear() ;               
-
-                ////// Making BIG /////////////
-                $img['width']   = $limit_use > $limit_big ?  $data['image_width'] * $percent_big : $data['image_width'] ;
-                $img['height']  = $limit_use > $limit_big ?  $data['image_height'] * $percent_big : $data['image_height'] ;
-
-                // Configuration Of Image Manipulation :: Dynamic
-                $img['thumb_marker'] = '_big-'.floor($img['width']).'x'.floor($img['height']) ;
-                $img['quality']      = '99%' ;
-                $img['source_image'] = $source ;
-                $img['new_image']    = $destination_big ;
-
-                $album_picture = $data['raw_name']. $img['thumb_marker'].$data['file_ext'];
-                // Do Resizing
-                $this->image_lib->initialize($img);
-                $this->image_lib->resize();
-                $this->image_lib->clear() ;
-
-                $data_image = array(
-                    'thumb' => 'uploads/thumbnail/'.$thumb_nail,
-                    'medium' => 'uploads/medium/'.$medium,
-                    'big' => 'uploads/big/'.$album_picture
-                );
-
-                unlink($source) ;   
-                return $data_image;   
-    
+            // Percentase Resize
+            if ($limit_use > $limit_big || $limit_use > $limit_thumb || $limit_use > $limit_medium) {
+                $percent_big = $limit_big / $limit_use;
+                $percent_medium  = $limit_medium / $limit_use;
+                $percent_thumb  = $limit_thumb / $limit_use;
             }
-            else {
-                return FALSE ;
-            }
-       
+
+            //// Making THUMBNAIL ///////
+            $img['width']  = $limit_use > $limit_thumb ?  $data['image_width'] * $percent_thumb : $data['image_width'];
+            $img['height'] = $limit_use > $limit_thumb ?  $data['image_height'] * $percent_thumb : $data['image_height'];
+
+            // Configuration Of Image Manipulation :: Dynamic
+            $img['thumb_marker'] = '_thumb-' . floor($img['width']) . 'x' . floor($img['height']);
+            $img['quality']      = '99%';
+            $img['source_image'] = $source;
+            $img['new_image']    = $destination_thumb;
+
+            $thumb_nail = $data['raw_name'] . $img['thumb_marker'] . $data['file_ext'];
+            // Do Resizing
+            $this->image_lib->initialize($img);
+            $this->image_lib->resize();
+            $this->image_lib->clear();
+
+            //// Making MEDIUM ///////
+            $img['width']  = $limit_use > $limit_medium ?  $data['image_width'] * $percent_medium : $data['image_width'];
+            $img['height'] = $limit_use > $limit_medium ?  $data['image_height'] * $percent_medium : $data['image_height'];
+
+            // Configuration Of Image Manipulation :: Dynamic
+            $img['thumb_marker'] = '_medium-' . floor($img['width']) . 'x' . floor($img['height']);
+            $img['quality']      = '99%';
+            $img['source_image'] = $source;
+            $img['new_image']    = $destination_medium;
+
+            $medium = $data['raw_name'] . $img['thumb_marker'] . $data['file_ext'];
+            // Do Resizing
+            $this->image_lib->initialize($img);
+            $this->image_lib->resize();
+            $this->image_lib->clear();
+
+            ////// Making BIG /////////////
+            $img['width']   = $limit_use > $limit_big ?  $data['image_width'] * $percent_big : $data['image_width'];
+            $img['height']  = $limit_use > $limit_big ?  $data['image_height'] * $percent_big : $data['image_height'];
+
+            // Configuration Of Image Manipulation :: Dynamic
+            $img['thumb_marker'] = '_big-' . floor($img['width']) . 'x' . floor($img['height']);
+            $img['quality']      = '99%';
+            $img['source_image'] = $source;
+            $img['new_image']    = $destination_big;
+
+            $album_picture = $data['raw_name'] . $img['thumb_marker'] . $data['file_ext'];
+            // Do Resizing
+            $this->image_lib->initialize($img);
+            $this->image_lib->resize();
+            $this->image_lib->clear();
+
+            $data_image = array(
+                'thumb' => 'uploads/thumbnail/' . $thumb_nail,
+                'medium' => 'uploads/medium/' . $medium,
+                'big' => 'uploads/big/' . $album_picture
+            );
+
+            unlink($source);
+            return $data_image;
+        } else {
+            return FALSE;
+        }
     }
-
 }
