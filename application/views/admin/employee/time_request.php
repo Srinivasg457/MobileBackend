@@ -118,6 +118,7 @@
                                         <a
                                             data-val="edit request"
                                             data-id="<?= $req['manual_id']; ?>"
+                                            data-type="<?= $req['type']; ?>"
                                             data-date="<?= $req['date_added']; ?>"
                                             data-start="<?= substr($req['timestamp_start'], 0, 5) ?>"
                                             data-end="<?= substr($req['timestamp_end'], 0, 5) ?>"
@@ -128,7 +129,9 @@
                                             data-placement="top"
                                             title="Edit"
                                             data-original-title="Edit">
-                                            <i class="fa fa-pencil"></i> </a>
+                                            <i class="fa fa-pencil"></i>
+                                        </a>
+
 
                                         <a
                                             data-val="delete"
@@ -215,7 +218,7 @@
                     <div class="form-row mt-2">
                         <div class="col form-group">
                             <label class="control-label" for="type">Request Type</label>
-                            <select name="type" id="type" class="form-control single_select" required>
+                            <select name="type" id="type" class="form-control" required>
                                 <option value="">-- Select Request Type --</option>
                                 <option value="1">Manual Time</option>
                                 <option value="2">Client Meeting</option>
@@ -357,26 +360,43 @@
         });
         $(document).on('click', '.edit-request', function(e) {
             e.preventDefault();
+
             const row = $(this).closest('tr');
 
-            // fetch details from HTML data attributes or from the table cells
-            const id = $(this).data('id'); // set data-id in anchor (see below)
-            const type = row.find('td:nth-child(2)').text().trim() === 'Meeting' ? 1 : 0;
+            // Optional label mapping (if needed later)
+            const type_labels = {
+                1: 'Manual Time',
+                2: 'Client Meeting',
+                3: 'Training',
+                4: 'On-site Work',
+                5: 'Other Offline Work',
+                6: 'Internet Issues'
+            };
+
+            // Fetch details from HTML data attributes
+            const id = $(this).data('id');
+            const type = $(this).data('type');
             const date = $(this).data('date');
             const start = $(this).data('start');
             const end = $(this).data('end');
             const reason = $(this).data('reason');
 
+
+            // Populate modal fields
             $('#manual_id').val(id);
-            $('#type').val(type);
+            $('#type').val(String(type)); // ensure it matches <option value="x">
             $('#requested_date').val(date);
             $('#time_start').val(start);
             $('#time_end').val(end);
             $('#reason').val(reason);
 
+            // Optional: show label if needed
+            // $('#type_label').text(type_labels[type] || 'Unknown');
+
             $('#requestFormModalLabel').text('Edit Request');
             $('#requestFormModal').modal('show');
         });
+
     });
 </script>
 </script>

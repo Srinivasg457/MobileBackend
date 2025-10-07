@@ -136,7 +136,7 @@
       right: 20px;
       width: 50px;
       height: 50px;
-      background-color: #1e272a;
+      background-color: #0ca374;
       border-radius: 50%;
       cursor: pointer;
       z-index: 9999;
@@ -151,15 +151,15 @@
 
     @keyframes pulse {
       0% {
-        box-shadow: 0 0 0 0 rgba(30, 39, 42, 0.7);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
       }
 
       70% {
-        box-shadow: 0 0 0 15px rgba(30, 39, 42, 0);
+        box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
       }
 
       100% {
-        box-shadow: 0 0 0 0 rgba(30, 39, 42, 0);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
       }
     }
 
@@ -192,7 +192,7 @@
       content: "Need Help?";
       position: absolute;
       bottom: 70px;
-      background: #1e272a;
+      background: #0ca374;
       color: #fff;
       padding: 4px 8px;
       border-radius: 5px;
@@ -208,7 +208,7 @@
       transform: translateY(0);
     }
 
-    /* Chat Window with animation */
+    /* Chat Window */
     .chat-bot #chat-window {
       display: none;
       position: fixed;
@@ -239,8 +239,8 @@
     }
 
     .chat-bot #chat-window .header {
-      background: #1e272a;
-      color: #fff;
+      background: #0ca374;
+      color: black;
       padding: 10px;
       text-align: center;
       position: relative;
@@ -253,7 +253,7 @@
       top: 5px;
       cursor: pointer;
       font-size: 14px;
-      background: #333a3d;
+      background: #0ca374;
       color: #fff;
       border: none;
       padding: 1px 15px;
@@ -283,7 +283,7 @@
     }
 
     .chat-bot .user-message {
-      background: #333a3d;
+      background: #0ca374;
       color: #fff;
       float: right;
       text-align: right;
@@ -298,7 +298,7 @@
     }
 
     .chat-bot #quick-replies button {
-      background: #333a3d;
+      background: #0ca374;
       color: white;
       border: none;
       padding: 5px 10px;
@@ -325,7 +325,7 @@
 
     .chat-bot #chat-input button {
       padding: 6px 12px;
-      background: #333a3d;
+      background: #0ca374;
       color: #fff;
       border: none;
       outline: none;
@@ -334,16 +334,16 @@
     }
 
     .chat-bot #chat-input button:hover {
-      background: rgba(15, 183, 131, 0.8);
+      background: rgba(12, 163, 116, 0.8);
     }
 
-    /* Tooltip on hover  */
+    /* Tooltip on hover */
     .chat-bot #chat-input button::after {
       content: "Send";
       position: absolute;
       bottom: 70px;
       right: 10px;
-      background: #333a3d;
+      background: #0ca374;
       color: #fff;
       padding: 4px 8px;
       border-radius: 5px;

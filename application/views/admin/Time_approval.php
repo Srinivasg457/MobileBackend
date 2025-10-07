@@ -35,7 +35,7 @@
                             <th>Request Date</th>
                             <th>Reason</th>
                             <th>Created Date</th>
-                            <th>Verification</th>
+                            <!-- <th>Verification</th> -->
                             <th>Approval Status</th>
                             <th>View</th>
                             <th>Actions</th>
@@ -69,7 +69,7 @@
                                                                     ?> </p>
                                     </td>
                                     <td><?= date('Y-m-d', strtotime($req['created_at'])) ?></td>
-                                    <td>
+                                    <!-- <td>
                                         <?php if ($req['verification_status'] == -1) : ?>
                                             <span class="validation_status validation_invalid">Invalid</span>
                                         <?php elseif ($req['verification_status'] == 1) : ?>
@@ -77,7 +77,7 @@
                                         <?php elseif ($req['verification_status'] == 0) : ?>
                                             <span class="validation_status validation_review">Review</span>
                                         <?php endif; ?>
-                                    </td>
+                                    </td> -->
                                     <td>
                                         <?php if ($req['approved'] == -1) : ?>
                                             <span class="status declined">Declined</span>
@@ -227,7 +227,7 @@
                             <th>Request Date</th>
                             <th>Reason</th>
                             <th>Created Date</th>
-                            <th>Verfication</th>
+                            <!-- <th>Verfication</th> -->
                             <th>Approval Status</th>
                             <th>View</th>
                             <th>Actions</th>
@@ -262,7 +262,7 @@
                                                                     ?> </p>
                                     </td>
                                     <td><?= date('Y-m-d', strtotime($req['created_at'])) ?></td>
-                                    <td>
+                                    <!-- <td>
                                         <?php if ($req['verification_status'] == -1) : ?>
                                             <span class="validation_status validation_invalid">Invalid</span>
                                         <?php elseif ($req['verification_status'] == 1) : ?>
@@ -270,7 +270,7 @@
                                         <?php elseif ($req['verification_status'] == 0) : ?>
                                             <span class="validation_status validation_review">Review</span>
                                         <?php endif; ?>
-                                    </td>
+                                    </td> -->
                                     <td>
                                         <?php if ($req['approved'] == -1) : ?>
                                             <span class="status declined">Declined</span>
