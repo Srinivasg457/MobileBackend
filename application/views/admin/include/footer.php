@@ -817,19 +817,19 @@ endforeach ?>
 </script>
 <script>
   $(document).ready(function() {
-    function toggleFieldsBasedOnPlanName() {
-      var selectedPlanText = $('select[name="package"] option:selected').text().trim();
-      if (selectedPlanText === 'SelectAll Packages') {
-        return;
-      }
 
-      console.log(selectedPlanText);
-      if (selectedPlanText === 'TrialAll Packages' || selectedPlanText === 'Trial') {
+    function toggleFieldsBasedOnPlanValue() {
+      var selectedPlanValue = $('select[name="package"]').val(); // Get selected value
+
+      console.log("Selected plan value:", selectedPlanValue);
+
+      if (selectedPlanValue === '1') {
+        // ===> Apply Trial-like behavior when value = 1
+
         // Show and select 'week' in billing type
         $('select[name="billing_type"] option[value="week"]').show();
         $('select[name="billing_type"] option[value="monthly"]').hide();
         $('select[name="billing_type"] option[value="yearly"]').hide();
-
         $('select[name="billing_type"]').val('week');
 
         // Show only 'verified' in payment status
@@ -837,24 +837,27 @@ endforeach ?>
         $('select[name="payment_status"]').val('verified');
 
       } else {
+        // ===> Default behavior for other plans
         $('select[name="billing_type"] option[value="week"]').hide();
         $('select[name="billing_type"] option[value="monthly"]').show();
         $('select[name="billing_type"] option[value="yearly"]').show();
+
         $('select[name="payment_status"] option[value="pending"]').show();
         $('select[name="billing_type"]').val('');
-
+        $('select[name="payment_status"]').val('');
       }
     }
-    <?php if (isset($page_title) && $page_title == "Edit") { ?>
-      var selectedPlanText = $('select[name="package"] option:selected').text().trim();
-      if (!selectedPlanText === 'TrialAll Packages' || !selectedPlanText === 'Trial') {
-        toggleFieldsBasedOnPlanName();
-      }
-    <?php } ?>
-    // Change event
+
+    // ✅ Fix typo: "Offilne" → "Offline"
+    // <?php if (isset($page_title) && $page_title == "Offline Payment") { ?>
+    //   toggleFieldsBasedOnPlanValue();
+    // <?php } ?>
+
+    // Trigger on change
     $('select[name="package"]').on('change', function() {
-      toggleFieldsBasedOnPlanName();
+      toggleFieldsBasedOnPlanValue();
     });
+
   });
 </script>
 <!-- 1.  include the shared WS client (root‑relative path) -->
