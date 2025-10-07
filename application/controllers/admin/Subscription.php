@@ -303,27 +303,36 @@ class Subscription extends Home_Controller
 
         if ($exists) {
             // Fetch last 2 packages from payment table
-            $payments = $this->db
-                ->select('package')
-                ->from('payment')
-                ->where('user_id', $user_id)
-                ->order_by('id', 'DESC')
-                ->limit(2)
-                ->get()
-                ->result();
+            // $payments = $this->db
+            //     ->select('package')
+            //     ->from('payment')
+            //     ->where('user_id', $user_id)
+            //     ->order_by('id', 'DESC')
+            //     ->limit(2)
+            //     ->get()
+            //     ->result();
 
-            if (count($payments) >= 2) {
-                $previous_package = (int) $payments[1]->package; // second latest
+            // if (count($payments) >= 2) {
+            //     $previous_package = (int) $payments[1]->package; // second latest
 
-                if ($previous_package === 1 && $pkg == 2) {
-                    // Update settings only if previous package was 1
-                    $flags['updated_at'] = my_date_now();
-                    $this->db->where('user_id', $user_id)->update('org_settings', $flags);
-                    log_message('info', "Org settings updated for user {$user_id}, package {$package}");
-                } else {
-                    log_message('info', "User {$user_id} previous package was {$previous_package}, skipping update");
-                }
-            } else {
+            if ($pkg == 2) {
+                // if (isset($flags['webcam_flag'])) {
+                //     $flags['webcam_flag'] = 0; // Reset or set webcam to 0
+                // }
+                // // Update settings only if previous package was 1
+                // $flags['updated_at'] = my_date_now();
+                // $this->db->where('user_id', $user_id)->update('org_settings', $flags);
+                $this->db->where('user_id', $user_id)->update('org_settings', [
+                    'webcam_flag' => 0, // Reset or set webcam to 0
+                    'updated_at'  => my_date_now(), // Update timestamp
+                ]);
+                log_message('info', "Org settings updated for user {$user_id}, package {$package}");
+            }
+            // else {
+            //     log_message('info', "User {$user_id} previous package was {$previous_package}, skipping update");
+            // }
+
+            else {
                 log_message('error', "Not enough payment history for user {$user_id}");
             }
         } else {
@@ -343,6 +352,7 @@ class Subscription extends Home_Controller
 
         return true;
     }
+
     public function upgrade_plans()
     {
         if (!empty(settings()->sid) && settings()->sid == '2020-02-02') {

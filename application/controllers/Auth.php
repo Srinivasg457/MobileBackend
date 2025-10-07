@@ -418,7 +418,7 @@ class Auth extends Home_Controller
                         $billing = $this->input->post('billing', true);
                         $this->add_package($plan, $billing);
                         if ($this->input->post('plan', true) == 'trial') {
-                          $this->add_trial_user_settings($user->id, "");
+                            $this->add_trial_user_settings($user->id, "");
                         }
                         //send email verify link
                         if ($this->settings->enable_email_verify == 1) {
@@ -539,10 +539,10 @@ class Auth extends Home_Controller
                 );
                 $update_user = $this->security->xss_clean($update_user);
                 $this->common_model->update($update_user, user()->id, 'users');
-                 if(user()->user_type == "trial"){
+                if (user()->user_type == "trial") {
                     // ✅ Add trial user settings if needed
                     $this->add_trial_user_settings(user()->id, $time_zone);
-                 }
+                }
 
                 $this->admin_model->intial_department_storing(user()->id, $uid);
                 echo json_encode(array('st' => $status));
@@ -898,54 +898,57 @@ class Auth extends Home_Controller
     // }
 
     // ✅ Payment Success
-        public function payment_success($payment_uid, $id, $pkg)
-        {
-            // fetch by puid not id
-            $payment = $this->db->get_where('payment', ['puid' => $payment_uid])->row();
+    public function payment_success($payment_uid, $id, $pkg)
+    {
+        // fetch by puid not id
+        $payment = $this->db->get_where('payment', ['puid' => $payment_uid])->row();
 
-            if (!empty($payment)) {
-                // Update user status
-                $user_data = ['status' => 1];
-                $this->common_model->edit_option($user_data, $payment->user_id, 'users');
+        if (!empty($payment)) {
+            // Update user status
+            $user_data = ['status' => 1];
+            $this->common_model->edit_option($user_data, $payment->user_id, 'users');
 
-                // Update payment status
-                $payment_update = ['status' => 'verified'];
-                $this->common_model->edit_option($payment_update, $payment->id, 'payment');
+            // Update payment status
+            $payment_update = ['status' => 'verified'];
+            $this->common_model->edit_option($payment_update, $payment->id, 'payment');
 
-                // ✅ Referral system
-                $referral_settings = $this->admin_model->get_referral_settings();
-                if (!empty($referral_settings) && $referral_settings->is_enable == 1) {
-                    $register_user = $this->admin_model->get_by_referral_user($payment->user_id);
-                    if (!empty($register_user)) {
-                        $amount = $payment->amount;
-                        $commission = $referral_settings->commision_rate;
-                        $commission_amount = ($commission * $amount) / 100;
+            // ✅ Referral system
+            $referral_settings = $this->admin_model->get_referral_settings();
+            if (!empty($referral_settings) && $referral_settings->is_enable == 1) {
+                $register_user = $this->admin_model->get_by_referral_user($payment->user_id);
+                if (!empty($register_user)) {
+                    $amount = $payment->amount;
+                    $commission = $referral_settings->commision_rate;
+                    $commission_amount = ($commission * $amount) / 100;
 
-                        $ref_data = [
-                            'status'           => 1,
-                            'amount'           => $amount,
-                            'commision'        => $commission,
-                            'commision_amount' => $commission_amount
-                        ];
-                        $this->admin_model->edit_option($ref_data, $register_user->id, 'referrals');
+                    $ref_data = [
+                        'status'           => 1,
+                        'amount'           => $amount,
+                        'commision'        => $commission,
+                        'commision_amount' => $commission_amount
+                    ];
+                    $this->admin_model->edit_option($ref_data, $register_user->id, 'referrals');
 
-                        // update referrer balance
-                        $user = $this->admin_model->get_by_referral_id($register_user->referrar_id);
-                        if (!empty($user)) {
-                            $update_balance = $user->referral_earn + $commission_amount;
-                            $earn_data = ['referral_earn' => $update_balance];
-                            $this->admin_model->edit_option($earn_data, $user->id, 'users');
-                        }
+                    // update referrer balance
+                    $user = $this->admin_model->get_by_referral_id($register_user->referrar_id);
+                    if (!empty($user)) {
+                        $update_balance = $user->referral_earn + $commission_amount;
+                        $earn_data = ['referral_earn' => $update_balance];
+                        $this->admin_model->edit_option($earn_data, $user->id, 'users');
                     }
                 }
             }
-            // ✅ call org settings setup for this user & package
-            $this->add_org_settings($id, $pkg);
-            // ✅ Success message for view
-            $view_data['success_msg'] = 'Success';
-            $view_data['main_content'] = $this->load->view('purchase', $view_data, TRUE);
-            $this->load->view('index', $view_data);
         }
+        // ✅ call org settings setup for this user & package
+        $this->add_org_settings($id, $pkg);
+        // ✅ Success message for view
+        $view_data['get_features'] = $this->common_model->get_features_for_given_package();
+        $current_features = $this->common_model->get_my_package();
+        $view_data['success_msg'] = 'Success';
+        $view_data['current_features'] = $current_features;  // Features data
+        $view_data['main_content'] = $this->load->view('purchase', $view_data, TRUE);
+        $this->load->view('index', $view_data);
+    }
 
     // // ✅ Add Organization Settings
     // public function add_org_settings($user_id, $pkg)
