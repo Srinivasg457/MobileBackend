@@ -3,24 +3,27 @@
   <section class="content">
 
     <div class="container">
-      <div class="row">
-        <div class="box add_area <?php if (isset($page_title) && $page_title == "Edit") {
+      <div class="row <?php if (isset($page_title) && $page_title == "Offline Payment"): echo "justify-content-center"; ?> <?php endif; ?>">
+        <div class="box add_area <?php if ((isset($page_title) && $page_title == "Offline Payment" || $page_title == "Edit")) {
                                     echo "d-block";
                                   } else {
                                     echo "hide";
-                                  } ?>">
+                                  } ?>
+                                  <?php if (isset($page_title) && $page_title == "Offline Payment"): echo "col-xl-5"; ?> <?php endif; ?>">
           <div class="box-header with-border">
             <?php if (isset($page_title) && $page_title == "Edit"): ?>
               <h3 class="box-title"><?php echo trans('edit') ?></h3>
+            <?php elseif (isset($page_title) && $page_title == "Offline Payment"): ?>
+              <h3 class="box-title"><?php echo trans('offline-payment') ?> </h3>
             <?php else: ?>
               <h3 class="box-title"><?php echo trans('create-new') ?> </h3>
             <?php endif; ?>
 
             <div class="box-tools pull-right">
-              <?php if (isset($page_title) && $page_title == "Edit"): ?>
+              <?php if ((isset($page_title) && $page_title == "Offline Payment" || $page_title == "Edit")): ?>
                 <a href="<?php echo base_url('admin/users') ?>" class="pull-right btn btn-secondary btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
               <?php else: ?>
-                <a href="#" class="text-right btn btn-secondary cancel_btn btn-sm"><?php echo trans('back') ?></a>
+                <a href="#" class="text-right btn btn-secondary cancel_btn btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
               <?php endif; ?>
             </div>
           </div>
@@ -28,163 +31,179 @@
           <div class="box-body pl-0">
             <?php if (isset($page_title) && $page_title == "Edit"): ?>
               <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/users/edit_org') ?>" role="form">
-              <?php else: ?>
-                <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/users/add') ?>" role="form">
-                <?php endif; ?>
+              <?php elseif (isset($page_title) && $page_title == "Offline Payment"): ?>
+                <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/payment/offline_payment') ?>" role="form">
+                <?php else: ?>
+                  <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/users/add') ?>" role="form">
+                  <?php endif; ?>
 
-                <div class="box-body">
+                  <div class="box-body">
 
-                  <div class="form-group">
-                    <label> <?php echo trans('name') ?> <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" required name="name" value="<?php echo html_escape($user[0]['name']); ?>">
-                  </div>
+                    <div class="form-group">
+                      <label> <?php echo trans('name') ?> <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" required name="name" value="<?php echo html_escape($user[0]['name']); ?>"
+                        <?php if (isset($page_title) && $page_title == "Offline Payment"): ?>Disabled<?php endif; ?>>
+                    </div>
 
-                  <div class="form-group">
-                    <label> <?php echo trans('email') ?> <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" name="email"
-                      value="<?php echo html_escape($user[0]['email']); ?>"
-                      <?php if (isset($page_title) && $page_title == "Edit"): ?>readonly<?php endif; ?>
-                      required>
-                  </div>
+                    <div class="form-group">
+                      <label> <?php echo trans('email') ?> <span class="text-danger">*</span></label>
+                      <input type="email" class="form-control" name="email"
+                        value="<?php echo html_escape($user[0]['email']); ?>"
+                        <?php if ((isset($page_title) && $page_title == "Offline Payment" || $page_title == "Edit")): ?>Disabled<?php endif; ?>
+                        required>
+                    </div>
 
-                  <div class="form-group <?php if (isset($page_title) && $page_title == "Edit"): ?>hide<?php endif; ?>">
-                    <label><?php echo trans('password') ?> <span class="text-danger">*</span></label>
-                    <input type="password" class="form-control" name="password" placeholder="<?php echo trans('set-or-reset-password') ?>" value="">
-                  </div>
+                    <div class="form-group <?php if ((isset($page_title) && $page_title == "Offline Payment" || $page_title == "Edit")): ?>hide<?php endif; ?>">
+                      <label><?php echo trans('password') ?> <span class="text-danger">*</span></label>
+                      <input type="password" class="form-control" name="password" placeholder="<?php echo trans('set-or-reset-password') ?>" value="">
+                    </div>
 
-                  <div class="form-group mb-4">
-                    <label><?php echo trans('plan') ?> <span class="text-danger">*</span></label>
-                    <?php if (isset($page_title) && $page_title == "Edit"): ?>
-                      <select class="form-control" name="package" required>
-                        <option value=""><?php echo trans('select') ?></option>
-                        <?php foreach ($packages as $package): ?>
-                          <?php if ($package->id >= $payment->package_id): // show only >= current 
-                          ?>
-                            <option
-                              value="<?php echo html_escape($package->id) ?>"
-                              <?php if ($package->id == $payment->package_id) echo "selected"; ?>>
-                              <?php echo html_escape($package->name) ?>
-                            </option>
-                          <?php endif; ?>
-                        <?php endforeach ?>
-                      </select>
-                    <?php
-                    else: ?>
-                      <select class="form-control" name="package" required>
-                        <option value=""><?php echo trans('select') ?></option>
-                        <?php foreach ($packages as $package): ?>
-                          <option <?php if ($package->id == $payment->package_id) {
-                                    echo "selected";
-                                  } ?> value="<?php echo html_escape($package->id) ?>"><?php echo html_escape($package->name) ?></option>
-                        <?php endforeach ?>
-                      </select>
-                    <?php endif; ?>
-                  </div>
-
-                  <div class="form-group mb-4">
-                    <label><?php echo trans('subscription-type') ?> <span class="text-danger">*</span></label>
-                    <select class="form-control" name="billing_type" required>
-                      <option value=""><?php echo trans('select') ?></option>
-                      <option <?php if ('week' == $payment->billing_type) {
-                                echo "selected";
-                              } ?> value="week"><?php echo 'week' ?></option>
-
-                      <option <?php if ('monthly' == $payment->billing_type) {
-                                echo "selected";
-                              } ?> value="monthly"><?php echo trans('monthly') ?></option>
-                      <option <?php if ('yearly' == $payment->billing_type) {
-                                echo "selected";
-                              } ?> value="yearly"><?php echo trans('yearly') ?></option>
-                      <?php if (settings()->enable_lifetime == 1): ?>
-                        <option <?php if ('lifetime' == $payment->billing_type) {
-                                  echo "selected";
-                                } ?> value="lifetime"><?php echo trans('lifetime') ?></option>
-                      <?php endif ?>
-                    </select>
-                  </div>
-
-                  <div class="form-group mb-4">
-                    <label><?php echo trans('payment-status') ?></label>
-                    <select class="form-control" name="payment_status" required>
-                      <option value=""><?php echo trans('select') ?></option>
-                      <option <?php if ($payment->status == 'verified') {
-                                echo "selected";
-                              } ?> value="verified"><?php echo trans('verified') ?></option>
-                      <option <?php if ($payment->status == 'pending') {
-                                echo "selected";
-                              } ?> value="pending"><?php echo trans('pending') ?></option>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label><?php echo trans('country') ?></label>
-                    <select class="selectfield textfield--grey single_select col-sm-12" required name="country" id="country" style="width: 100%">
-                      <option value=""><?php echo trans('select') ?></option>
-                      <?php foreach ($countries as $country): ?>
-                        <option value="<?php echo html_escape($country->id); ?>"
-                          <?php if (isset($user[0]['country']) && $user[0]['country'] == $country->id) echo "selected"; ?>>
-                          <?php echo html_escape($country->name); ?>
-                        </option>
-                      <?php endforeach ?>
-                    </select>
-                  </div>
-
-
-                  <div class="form-group">
-
-                    <label class="form-label">Select Timezone:</label>
-                    <select name="time_zone" id="timezone_select" required
-                      class="selectfield textfield--grey single_select col-sm-12 wd-100">
-                      <?php if (isset($page_title) && $page_title == "Edit") : ?>
-                        <option value="<?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>"> <?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>
-                        </option>
-                      <?php else: ?>
-                        <option value="">Select</option>
+                    <div class="form-group mb-4 <?php if (isset($page_title) && $page_title == "Edit"): echo "hide";
+                                                endif; ?>">
+                      <label><?php echo trans('plan') ?> <span class="text-danger">*</span></label>
+                      <?php if (isset($page_title) && $page_title == "Offline Payment"): ?>
+                        <select class="form-control" name="package" required
+                          <?php if (isset($page_title) && $page_title == "Edit"): ?> Disabled <?php endif; ?>>
+                          <option value=""><?php echo trans('select') ?></option>
+                          <?php foreach ($packages as $package): ?>
+                            <?php if ($package->id >= $payment->package_id): // show only >= current 
+                            ?>
+                              <option
+                                value="<?php echo html_escape($package->id) ?>"
+                                <?php if ($package->id == $payment->package_id) echo "selected"; ?>>
+                                <?php echo html_escape($package->name) . ' (Monthly: ' . ' ' . price_formatted($package->monthly_price, 'site') . ' Yearly: ' . ' ' . price_formatted($package->yearly_price, 'site') . ')' ?>
+                              </option>
+                            <?php endif; ?>
+                          <?php endforeach ?>
+                        </select>
+                      <?php
+                      else: ?>
+                        <select class="form-control" name="package" required>
+                          <option value=""><?php echo trans('select') ?></option>
+                          <?php foreach ($packages as $package): ?>
+                            <option <?php if ($package->id == $payment->package_id) {
+                                      echo "selected";
+                                    } ?> value="<?php echo html_escape($package->id) ?>"><?php echo html_escape($package->name) . ' (Monthly: ' . ' ' . price_formatted($package->monthly_price, 'site') . ' Yearly: ' . ' ' . price_formatted($package->yearly_price, 'site') . ')' ?></option>
+                          <?php endforeach ?>
+                        </select>
                       <?php endif; ?>
-
-                    </select>
-
-                  </div>
-
-                  <div class="form-group clearfix">
-                    <label><?php echo trans('status') ?></label><br>
-
-                    <div class="icheck-primary radio radio-inline d-inline mr-4 mt-2">
-                      <input type="radio" id="radioPrimary1" value="1" name="status" <?php if (isset($user[0]['status']) && $user[0]['status'] == 1) {
-                                                                                        echo "checked";
-                                                                                      } ?>>
-                      <label for="radioPrimary1"> <?php echo trans('active') ?>
-                      </label>
                     </div>
 
-                    <div class="icheck-primary radio radio-inline d-inline">
-                      <input type="radio" id="radioPrimary2" value="2" name="status" <?php if (isset($user[0]['status']) && $user[0]['status'] == 2) {
-                                                                                        echo "checked";
-                                                                                      } ?>>
-                      <label for="radioPrimary2"> <?php echo trans('inactive') ?>
-                      </label>
+                    <div class="form-group mb-4 <?php if (isset($page_title) && $page_title == "Edit"): echo "hide";
+                                                endif; ?>">
+                      <label><?php echo trans('subscription-type') ?> <span class=" text-danger">*</span></label>
+                      <select class="form-control" name="billing_type" required
+                        <?php if (isset($page_title) && $page_title == "Edit"): ?> Disabled <?php endif; ?>>
+                        <option value=""><?php echo trans('select') ?></option>
+                        <option <?php if ('week' == $payment->billing_type) {
+                                  echo "selected";
+                                } ?> value="week"><?php echo 'week' ?></option>
+
+                        <option <?php if ('monthly' == $payment->billing_type) {
+                                  echo "selected";
+                                } ?> value="monthly"><?php echo trans('monthly') ?></option>
+                        <option <?php if ('yearly' == $payment->billing_type) {
+                                  echo "selected";
+                                } ?> value="yearly"><?php echo trans('yearly') ?></option>
+                        <?php if (settings()->enable_lifetime == 1): ?>
+                          <option <?php if ('lifetime' == $payment->billing_type) {
+                                    echo "selected";
+                                  } ?> value="lifetime"><?php echo trans('lifetime') ?></option>
+                        <?php endif ?>
+                      </select>
+                    </div>
+
+                    <div class="form-group mb-4 <?php if (isset($page_title) && $page_title == "Edit"): echo "hide";
+                                                endif; ?>">
+                      <label><?php echo trans('payment-status') ?></label>
+                      <select class="form-control" name="payment_status" <?php if (isset($page_title) && $page_title == "Edit"): ?> Disabled <?php endif; ?> required>
+                        <option value=""><?php echo trans('select') ?></option>
+                        <option <?php if ($payment->status == 'verified') {
+                                  echo "selected";
+                                } ?> value="verified"><?php echo trans('verified') ?></option>
+                        <option <?php if ($payment->status == 'pending') {
+                                  echo "selected";
+                                } ?> value="pending"><?php echo trans('pending') ?></option>
+                      </select>
+                    </div>
+
+                    <div class="form-group <?php if (isset($page_title) && $page_title == "Offline Payment"): echo "hide";
+                                            endif; ?>">
+                      <label><?php echo trans('country') ?></label>
+                      <select class="selectfield textfield--grey single_select col-sm-12" required name="country" id="country" style="width: 100%"
+                        <?php if (isset($page_title) && $page_title == "Offline Payment"): ?>Disabled<?php endif; ?>>
+                        <option value=""><?php echo trans('select') ?></option>
+                        <?php foreach ($countries as $country): ?>
+                          <option value="<?php echo html_escape($country->id); ?>"
+                            <?php if (isset($user[0]['country']) && $user[0]['country'] == $country->id) echo "selected"; ?>>
+                            <?php echo html_escape($country->name); ?>
+                          </option>
+                        <?php endforeach ?>
+                      </select>
+                    </div>
+
+
+                    <div class="form-group <?php if (isset($page_title) && $page_title == "Offline Payment"): echo "hide";
+                                            endif; ?>">
+
+                      <label class=" form-label">Select Timezone:</label>
+                      <select name="time_zone" id="timezone_select" required
+                        class="selectfield textfield--grey single_select col-sm-12 wd-100"
+                        <?php if (isset($page_title) && $page_title == "Offline Payment"): ?>Disabled<?php endif; ?>>
+                        <?php if (isset($page_title) && $page_title == "Offline Payment" || $page_title == "Edit") : ?>
+                          <option value="<?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>"> <?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>
+                          </option>
+                        <?php else: ?>
+                          <option value="">Select</option>
+                        <?php endif; ?>
+
+                      </select>
+
+                    </div>
+
+                    <div class="form-group clearfix <?php if ((isset($page_title) && $page_title == "Offline Payment")): ?>hide<?php endif; ?>">
+                      <label><?php echo trans('status') ?></label><br>
+
+                      <div class=" icheck-primary radio radio-inline d-inline mr-4 mt-2">
+                        <input type="radio" id="radioPrimary1" value="1" name="status" <?php if (isset($page_title) && $page_title == "Offline Payment"): ?>Disabled<?php endif; ?>
+                          <?php if (isset($user[0]['status']) && $user[0]['status'] == 1) {
+                            echo "checked";
+                          } ?>>
+                        <label for="radioPrimary1"> <?php echo trans('active') ?>
+                        </label>
+                      </div>
+
+                      <div class="icheck-primary radio radio-inline d-inline">
+                        <input type="radio" id="radioPrimary2" value="2" name="status" <?php if (isset($page_title) && $page_title == "Offline Payment"): ?>Disabled<?php endif; ?>
+                          <?php if (isset($user[0]['status']) && $user[0]['status'] == 2) {
+                            echo "checked";
+                          } ?>>
+                        <label for="radioPrimary2"> <?php echo trans('inactive') ?>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+
+
+
+                  <div class="row mb-20 pl-20">
+                    <div class="col-sm-12">
+                      <input type="hidden" name="id" value="<?php echo html_escape($user['0']['id']); ?>">
+                      <!-- csrf token -->
+                      <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
+                
+                      <?php if (isset($page_title) && $page_title == "Edit"): ?>
+                        <button type="submit" class="btn btn-info pull-left"><?php echo trans('save-changes') ?></button>
+                        <?php elseif (isset($page_title) && $page_title == "Offline Payment"): ?>
+                        <button type="submit" class="btn btn-info pull-left"><?php echo trans('add-payment') ?></button>
+                      <?php else: ?>
+                        <button type="submit" class="btn btn-info pull-left"> <?php echo trans('save') ?></button>
+                      <?php endif; ?>
                     </div>
                   </div>
 
-                </div>
-
-
-
-                <div class="row mb-20 pl-20">
-                  <div class="col-sm-12">
-                    <input type="hidden" name="id" value="<?php echo html_escape($user['0']['id']); ?>">
-                    <!-- csrf token -->
-                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
-
-                    <?php if (isset($page_title) && $page_title == "Edit"): ?>
-                      <button type="submit" class="btn btn-info pull-left"><?php echo trans('save-changes') ?></button>
-                    <?php else: ?>
-                      <button type="submit" class="btn btn-info pull-left"> <?php echo trans('save') ?></button>
-                    <?php endif; ?>
-                  </div>
-                </div>
-
-                </form>
+                  </form>
           </div>
         </div>
       </div>
@@ -194,7 +213,7 @@
 
 
 
-    <?php if (isset($page_title) && $page_title != "Edit"): ?>
+    <?php if (isset($page_title) && $page_title == "Users"): ?>
       <div class="list_area container">
 
         <form class="user_sort_form" role="search" autocomplete="off" action="<?php echo base_url('admin/users') ?>" method="get">
@@ -354,7 +373,8 @@
                           <li><a class="dropdown-item" href="<?php echo base_url('admin/users/status_action/1/' . $user->id) ?>"><i class="fa fa-check"></i> <?php echo trans('activate') ?></a></li>
                         <?php endif ?>
 
-                        <li class="hide"><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo trans('edit') ?></a></li>
+                        <li class=""><a href="<?php echo base_url('admin/users/offline_payment/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-money"></i> <?php echo trans('offline-payment') ?></a></li>
+                        <li class=""><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo trans('edit') ?></a></li>
 
                         <li><a class="dropdown-item delete_item" data-val="User" data-id="<?php echo html_escape($user->id); ?>" href="<?php echo base_url('admin/users/delete/' . $user->id); ?>" class="on-defaults remove-row delete_item"><i class="fa fa-trash-o"></i> <?php echo trans('delete') ?></a></li>
 

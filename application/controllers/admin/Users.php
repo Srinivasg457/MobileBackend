@@ -61,6 +61,18 @@ class Users extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/users',$data,TRUE);
         $this->load->view('admin/index',$data);
     }
+    public function offline_payment($id)
+    {
+        $data = array();
+        $data['page_title'] = 'Offline Payment';
+        $data['packages'] = $this->admin_model->select_asc('package');
+        $data['user'] = $this->admin_model->select_option($id, 'users');
+        $data['business'] = $this->admin_model->get_user_by_id($id, 'business');
+        $data['payment'] = $this->admin_model->get_user_payment($id);
+        $data['countries'] = $this->admin_model->select_asc('country');
+        $data['main_content'] = $this->load->view('admin/users', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
 
 
     public function add()
@@ -553,6 +565,56 @@ class Users extends Home_Controller {
 
             //validate inputs
             $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
+            $this->form_validation->set_rules('id', trans('id'), 'required');
+
+
+            if ($this->form_validation->run() === false) {
+                $this->session->set_flashdata('error', validation_errors());
+                redirect(base_url('admin/users'));
+            } else {
+                if ($id != '') {
+                    $new_password = $this->input->post('password');
+                    if (empty($new_password)) {
+                        $user = $this->admin_model->get_by_id($id, 'users');
+                        $password = $user->password;
+                        $email = $user->email;
+                    } else {
+                        $password = hash_password($this->input->post('password'));
+                    }
+                } 
+
+
+                $udata = array(
+                    'name' => $this->input->post('name', true),
+                    'user_name' => str_slug($this->input->post('name', true)),
+                    'slug' => str_slug($this->input->post('name', true)),
+                    'email' => $email,
+                    'verify_code' => 0,
+                    'thumb' => 'assets/front/img/avatar.png',
+                    'password' => $password,
+                    'status' => $this->input->post('status', true),
+                    // 'email_verified' => 1,
+                    // 'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
+                    // 'created_at' => my_date_now(),
+                    'country'  => $this->input->post('country', true),
+                    'timezone' => $this->input->post('time_zone', true),
+                );
+
+                if ($id != '') {
+                    $this->admin_model->edit_option($udata, $id, 'users');
+                    $this->session->set_flashdata('msg', trans('updated-successfully'));
+                }
+                redirect(base_url('admin/users'));
+            }
+        }
+    }
+    public function add_offline_payment()
+    {
+        if ($_POST) {
+            $id = $this->input->post('id', true);
+
+            //validate inputs
+            $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
             $this->form_validation->set_rules('email', trans('email'), 'required|max_length[100]');
 
             if ($this->form_validation->run() === false) {
@@ -694,111 +756,10 @@ class Users extends Home_Controller {
                 } else {
                     $this->admin_model->update_payment($pdata, $id, 'payment');
                 }
-                $pkg  = (int) $this->input->post('package', true);
-                $tz   = $this->security->xss_clean($this->input->post('time_zone', true)) ?: 'UTC';
-
-                 $this->add_org_settings($id, $pkg, $tz, $payment->package_id);
 
                 redirect(base_url('admin/users'));
             }
         }
-    }
-    public function add_org_settings($user_id, $pkg, $tz, $prev_package)
-    {
-        $package = (int) $pkg;
-
-        // Only proceed for valid packages
-        if (!in_array($package, [2, 3, 4], true)) {
-            log_message('error', "Invalid package {$package} for user {$user_id}");
-            return false;
-        }
-
-        // Define package-specific settings
-        $flagSets = [
-            2 => [ // Silver plan
-                'user_id'                  => $user_id,
-                'screenshot_flag'          => 1,
-                'screenshot_time_interval' => 10,
-                'webcam_flag'              => 0,  // Webcam off for silver
-                'webcam_time_interval'     => 5,
-                'mouse_move_flag'          => 1,
-                'mouse_move_threshold'     => 20,
-                'key_stroke_flag'          => 1,
-                'key_stroke_threshold'     => 40,
-                'idle_time_flag'           => 1,
-                'timecards_time_interval'  => 5,
-                'time_zone'                => $tz,
-            ],
-            3 => [ // Gold plan
-                'user_id'                  => $user_id,
-                'screenshot_flag'          => 1,
-                'screenshot_time_interval' => 10,
-                'webcam_flag'              => 1,  // Webcam on
-                'webcam_time_interval'     => 5,
-                'mouse_move_flag'          => 1,
-                'mouse_move_threshold'     => 20,
-                'key_stroke_flag'          => 1,
-                'key_stroke_threshold'     => 40,
-                'idle_time_flag'           => 1,
-                'timecards_time_interval'  => 5,
-                'time_zone'                => $tz,
-            ],
-            4 => [ // Platinum plan
-                'user_id'                  => $user_id,
-                'screenshot_flag'          => 1,
-                'screenshot_time_interval' => 10,
-                'webcam_flag'              => 1,
-                'webcam_time_interval'     => 5,
-                'mouse_move_flag'          => 1,
-                'mouse_move_threshold'     => 20,
-                'key_stroke_flag'          => 1,
-                'key_stroke_threshold'     => 40,
-                'idle_time_flag'           => 1,
-                'timecards_time_interval'  => 5,
-                'time_zone'                => $tz,
-            ],
-        ];
-
-        $flags = $this->security->xss_clean($flagSets[$package]);
-
-        $this->db->trans_start();
-
-        // Check if org_settings already exist
-        $exists = $this->db->get_where('org_settings', ['user_id' => $user_id])->row();
-
-        if ($exists) {
-            // Fetch last 2 packages from payment table
-
-            if ($prev_package == 1) {
-                $previous_package = $prev_package; // second latest
-
-                if ($previous_package == 1 && $pkg == 2) {
-                    // Update settings only if previous package was 1
-                    $flags['updated_at'] = my_date_now();
-                    $this->db->where('user_id', $user_id)->update('org_settings', $flags);
-                    log_message('info', "Org settings updated for user {$user_id}, package {$package}");
-                } else {
-                    log_message('info', "User {$user_id} previous package was {$previous_package}, skipping update");
-                }
-            } else {
-                log_message('error', "Not enough payment history for user {$user_id}");
-            }
-        } else {
-            // Insert new settings (first time setup, no payment check needed)
-            $flags['created_at'] = my_date_now();
-            $flags['updated_at'] = my_date_now();
-            $this->db->insert('org_settings', $flags);
-            log_message('info', "Org settings inserted for user {$user_id}, package {$package}");
-        }
-
-        $this->db->trans_complete();
-
-        if (!$this->db->trans_status()) {
-            log_message('error', "Failed to save org_settings for user {$user_id} in package {$package}");
-            return false;
-        }
-
-        return true;
     }
 
     //all pro users list

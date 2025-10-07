@@ -190,9 +190,10 @@ class Payment extends Home_Controller {
         }
         
         if($_POST)
-        {   
+        {
+            $id = $this->input->post('id', true);
             $package = $this->common_model->get_by_id($this->input->post('package'), 'package');
-            $payment = $this->common_model->check_user_payment($this->input->post('user'));
+            // $payment = $this->common_model->check_user_payment($id);
 
             if($this->input->post('billing_type') =='monthly'):
                 if (settings()->enable_discount == 1){
@@ -211,28 +212,28 @@ class Payment extends Home_Controller {
             endif;
 
             //validate inputs
-            $this->form_validation->set_rules('user', "User", 'required');
-            $this->form_validation->set_rules('package', "Package", 'required');
-            $this->form_validation->set_rules('status', "Payment status", 'required');
+            // $this->form_validation->set_rules('user', "User", 'required');
+            // $this->form_validation->set_rules('package', "Package", 'required');
+            // $this->form_validation->set_rules('payment_status', "Payment status", 'required');
 
-            if ($this->form_validation->run() === false) {
-                $this->session->set_flashdata('errors', validation_errors());
-                redirect(base_url('admin/payment'));
-            } else {
-                $payments = $this->admin_model->get_previous_payments($this->input->post('user', true));
+            // if ($this->form_validation->run() === false) {
+            //     $this->session->set_flashdata('errors', validation_errors());
+            //     redirect(base_url('admin/payment'));
+            // } else {
+                $payments = $this->admin_model->get_previous_payments($id);
                 foreach ($payments as $pay) {
                     $this->common_model->edit_option(['status' => 'expired'], $pay->id, 'payment');
                 }
 
                 // Save new payment
                 $pay_data = [
-                        'user_id' => $this->input->post('user', true),
+                        'user_id' => $id,
                         'puid' => random_string('numeric',5),
                         'package' => $this->input->post('package', true),
                         'billing_type' => $this->input->post('billing_type', true),
                         'payment_type' => 'Manual',
                         'amount' => $amount,
-                        'status' => $this->input->post('status', true),
+                        'status' => $this->input->post('payment_status', true),
                         'created_at' => my_date_now(),
                         'expire_on' => $expire_on
                 ];
@@ -252,131 +253,22 @@ class Payment extends Home_Controller {
                 $user_data = array(
                     'user_type' => 'registered'      
                 );
-                $this->admin_model->edit_option($user_data, $this->input->post('user'), 'users');
+                $this->admin_model->edit_option($user_data, $id, 'users');
 
                 // if (empty($payment)) {
                 //     $this->admin_model->insert($data, 'payment');
                 // } else {
                 //     $this->admin_model->update_payment($data, $this->input->post('user'), 'payment');
                 // }
-                $this->add_org_settings($this->input->post('user', true), $this->input->post('package', true));
+                $this->admin_model->add_org_settings($id, $this->input->post('package', true));
                 $this->session->set_flashdata('msg', trans('payment-added-successfully')); 
-                redirect(base_url('admin/Payment'));
+                redirect(base_url('admin/users'));
 
-            }
+            // }
         }      
         
     }
 
-    public function add_org_settings($user_id, $pkg)
-    {
-        $package = (int) $pkg;
-
-        // Get user timezone
-        $user = $this->db->select('timezone')->get_where('users', ['id' => $user_id])->row();
-        $tz = !empty($user->timezone) ? $user->timezone : 'UTC';
-
-        // Only proceed for valid packages
-        if (!in_array($package, [2, 3, 4], true)) {
-            log_message('error', "Invalid package {$package} for user {$user_id}");
-            return false;
-        }
-
-        // Define package-specific settings
-        $flagSets = [
-            2 => [ // Silver plan
-                'user_id'                  => $user_id,
-                'screenshot_flag'          => 1,
-                'screenshot_time_interval' => 10,
-                'webcam_flag'              => 0,  // Webcam off for silver
-                'webcam_time_interval'     => 5,
-                'mouse_move_flag'          => 1,
-                'mouse_move_threshold'     => 20,
-                'key_stroke_flag'          => 1,
-                'key_stroke_threshold'     => 40,
-                'idle_time_flag'           => 1,
-                'timecards_time_interval'  => 5,
-                'time_zone'                => $tz,
-            ],
-            3 => [ // Gold plan
-                'user_id'                  => $user_id,
-                'screenshot_flag'          => 1,
-                'screenshot_time_interval' => 10,
-                'webcam_flag'              => 1,  // Webcam on
-                'webcam_time_interval'     => 5,
-                'mouse_move_flag'          => 1,
-                'mouse_move_threshold'     => 20,
-                'key_stroke_flag'          => 1,
-                'key_stroke_threshold'     => 40,
-                'idle_time_flag'           => 1,
-                'timecards_time_interval'  => 5,
-                'time_zone'                => $tz,
-            ],
-            4 => [ // Platinum plan
-                'user_id'                  => $user_id,
-                'screenshot_flag'          => 1,
-                'screenshot_time_interval' => 10,
-                'webcam_flag'              => 1,
-                'webcam_time_interval'     => 5,
-                'mouse_move_flag'          => 1,
-                'mouse_move_threshold'     => 20,
-                'key_stroke_flag'          => 1,
-                'key_stroke_threshold'     => 40,
-                'idle_time_flag'           => 1,
-                'timecards_time_interval'  => 5,
-                'time_zone'                => $tz,
-            ],
-        ];
-
-        $flags = $this->security->xss_clean($flagSets[$package]);
-
-        $this->db->trans_start();
-
-        // Check if org_settings already exist
-        $exists = $this->db->get_where('org_settings', ['user_id' => $user_id])->row();
-
-        if ($exists) {
-            // Fetch last 2 packages from payment table
-            $payments = $this->db
-                ->select('package')
-                ->from('payment')
-                ->where('user_id', $user_id)
-                ->order_by('id', 'DESC')
-                ->limit(2)
-                ->get()
-                ->result();
-
-            if (count($payments) >= 2) {
-                $previous_package = (int) $payments[1]->package; // second latest
-
-                if ($previous_package === 1 && $pkg == 2) {
-                    // Update settings only if previous package was 1
-                    $flags['updated_at'] = my_date_now();
-                    $this->db->where('user_id', $user_id)->update('org_settings', $flags);
-                    log_message('info', "Org settings updated for user {$user_id}, package {$package}");
-                } else {
-                    log_message('info', "User {$user_id} previous package was {$previous_package}, skipping update");
-                }
-            } else {
-                log_message('error', "Not enough payment history for user {$user_id}");
-            }
-        } else {
-            // Insert new settings (first time setup, no payment check needed)
-            $flags['created_at'] = my_date_now();
-            $flags['updated_at'] = my_date_now();
-            $this->db->insert('org_settings', $flags);
-            log_message('info', "Org settings inserted for user {$user_id}, package {$package}");
-        }
-
-        $this->db->trans_complete();
-
-        if (!$this->db->trans_status()) {
-            log_message('error', "Failed to save org_settings for user {$user_id} in package {$package}");
-            return false;
-        }
-
-        return true;
-    }
 
     public function convert_payment($amount='', $from_currency='', $biz_curr='')
     {

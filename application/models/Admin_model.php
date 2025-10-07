@@ -1027,6 +1027,109 @@ class Admin_model extends CI_Model {
         return $query->row();
     }
 
+    public function add_org_settings($user_id, $pkg)
+    {
+        $package = (int) $pkg;
+
+        // Get user timezone
+        $user = $this->db->select('timezone')->get_where('users', ['id' => $user_id])->row();
+        $tz = !empty($user->timezone) ? $user->timezone : 'UTC';
+
+        // Only proceed for valid packages
+        if (!in_array($package, [2, 3, 4], true)) {
+            log_message('error', "Invalid package {$package} for user {$user_id}");
+            return false;
+        }
+
+        // Define package-specific settings
+        $flagSets = [
+            2 => [ // Silver plan
+                'user_id'                  => $user_id,
+                'screenshot_flag'          => 1,
+                'screenshot_time_interval' => 10,
+                'webcam_flag'              => 0,  // Webcam off for silver
+                'webcam_time_interval'     => 5,
+                'mouse_move_flag'          => 1,
+                'mouse_move_threshold'     => 20,
+                'key_stroke_flag'          => 1,
+                'key_stroke_threshold'     => 40,
+                'idle_time_flag'           => 1,
+                'timecards_time_interval'  => 5,
+                'time_zone'                => $tz,
+            ],
+            3 => [ // Gold plan
+                'user_id'                  => $user_id,
+                'screenshot_flag'          => 1,
+                'screenshot_time_interval' => 10,
+                'webcam_flag'              => 1,  // Webcam on
+                'webcam_time_interval'     => 5,
+                'mouse_move_flag'          => 1,
+                'mouse_move_threshold'     => 20,
+                'key_stroke_flag'          => 1,
+                'key_stroke_threshold'     => 40,
+                'idle_time_flag'           => 1,
+                'timecards_time_interval'  => 5,
+                'time_zone'                => $tz,
+            ],
+            4 => [ // Platinum plan
+                'user_id'                  => $user_id,
+                'screenshot_flag'          => 1,
+                'screenshot_time_interval' => 10,
+                'webcam_flag'              => 1,
+                'webcam_time_interval'     => 5,
+                'mouse_move_flag'          => 1,
+                'mouse_move_threshold'     => 20,
+                'key_stroke_flag'          => 1,
+                'key_stroke_threshold'     => 40,
+                'idle_time_flag'           => 1,
+                'timecards_time_interval'  => 5,
+                'time_zone'                => $tz,
+            ],
+        ];
+
+        $flags = $this->security->xss_clean($flagSets[$package]);
+
+        $this->db->trans_start();
+
+        // Check if org_settings already exist
+        $exists = $this->db->get_where('org_settings', ['user_id' => $user_id])->row();
+        
+        if ($exists) {
+            if ($pkg == 2) {
+                // $this->db->where('user_id', $user_id)->update('org_settings', [
+                //     'webcam_flag' => 0, // Reset or set webcam to 0
+                //     'updated_at'  => "2025-10-11", // Update timestamp
+                // ]);
+                $this->db->update(
+                    'org_settings',
+                    [
+                        'webcam_flag' => 0, // Reset or set webcam to 0
+                        'updated_at'  => get_user_datetime_only($user_id), // Update timestamp
+                    ],
+                    ['user_id' => $user_id]
+                );
+                log_message('info', "Org settings updated for user {$user_id}, package {$package}");
+            } else {
+                log_message('error', "Not enough payment history for user {$user_id}");
+            }
+        } else {
+            // Insert new settings (first time setup, no payment check needed)
+            $flags['created_at'] = get_user_datetime_only($user_id);
+            $flags['updated_at'] = get_user_datetime_only($user_id);
+            $this->db->insert('org_settings', $flags);
+            log_message('info', "Org settings inserted for user {$user_id}, package {$package}");
+        }
+
+        $this->db->trans_complete();
+
+        if (!$this->db->trans_status()) {
+            log_message('error', "Failed to save org_settings for user {$user_id} in package {$package}");
+            return false;
+        }
+
+        return true;
+    }
+
     public function intial_department_storing($user_id, $business_id)
     {
         // Fetch default departments
