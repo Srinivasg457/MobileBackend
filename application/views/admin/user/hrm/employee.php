@@ -3,14 +3,14 @@
   <!-- Main content -->
   <section class="content ">
 
-    <div class="col-md-8 m-auto box add_area mt-50" style="display: <?php if ($page_title == "Edit") {
+    <div class="col-md-8 m-auto box add_area mt-50" style="display: <?php if ($page_title == "Employee Edit") {
                                                                       echo "block";
                                                                     } else {
                                                                       echo "none";
                                                                     } ?>">
 
       <div class="box-header">
-        <?php if (isset($page_title) && $page_title == "Edit"): ?>
+        <?php if (isset($page_title) && $page_title == "Employee Edit"): ?>
           <h3><?php echo trans('edit-employee') ?> <a href="<?php echo base_url('admin/hrm/employees') ?>" class="pull-right btn btn-default rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
           <h3><?php echo trans('add-new-employee') ?> <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_btn"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
@@ -19,13 +19,42 @@
 
       <form id="cat-form" method="post" enctype="multipart/form-data" class="validate-form mt-20 p-30" action="<?php echo base_url('admin/hrm/employee_add') ?>" role="form">
 
+
         <div class="form-group">
-          <?php if (isset($page_title) && $page_title == "Edit"): ?>
+          <label><?php echo trans('upload-image') ?></label><br>
+
+          <?php
+          // Determine the initial image to show
+          $initial_img = base_url('assets/front/img/avatar.png'); // default image
+
+          if (isset($page_title) && $page_title == "Employee Edit" && !empty($employee[0]['thumb'])) {
+            $initial_img = base_url($employee[0]['thumb']);
+          }
+          ?>
+
+          <!-- Image preview -->
+          <img id="preview" src="<?php echo $initial_img; ?>" alt="Preview"
+            style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; margin-bottom: 15px; display: block;">
+
+          <!-- File input -->
+          <input type="file" id="imgInp" name="photo" accept="image/*">
+        </div>
+
+        <!-- <div class="form-group">
+          <?php if (isset($page_title) && $page_title == "Employee Edit"): ?>
             <img src="<?php echo base_url($employee[0]['thumb']) ?>"> <br><br>
           <?php endif ?>
-          <label><?php echo trans('upload-image') ?></label><br>
-          <input type="file" id="imgInp" name="photo">
-        </div>
+          <!-- <label><?php echo trans('upload-image') ?></label><br>
+          <input type="file" id="imgInp" name="photo"> -->
+        <label><?php echo trans('upload-image') ?></label><br>
+
+        <!-- Default image shown initially
+          <img id="preview" src="<?php echo base_url('assets/front/img/avatar.png'); ?>" alt="Preview" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%; margin-bottom: 10px; display: block;">
+
+          File input
+          <input type="file" id="imgInp" name="photo" accept="image/*"> 
+
+        </div> -->
 
 
         <div class="form-group">
@@ -47,20 +76,20 @@
 
             <!-- Role Field -->
             <div style="flex: 1;">
-              <label class="col-sm-12 control-label p-0" for="example-input-normal" ><?php echo 'Role <span style="color:red">*</span>'; ?></label>
-             
-            <select class="form-control single_select"name="role" id="role" required >
-              <option value=""><?php echo trans('select'); ?></option>
-              <?php if (!empty($roles)): ?>
-                <?php foreach ($roles as $role): ?>
-                  <option value="<?php echo html_escape($role['id']); ?>"
-                    <?php if (!empty($employee) && $employee[0]['role_id'] == $role['id']) echo 'selected'; ?>>
-                    <?php echo html_escape($role['name']); ?>
-                  </option>
-                <?php endforeach; ?>
-              <?php endif; ?>
-            </select>
-    
+              <label class="col-sm-12 control-label p-0" for="example-input-normal"><?php echo 'Role <span style="color:red">*</span>'; ?></label>
+
+              <select class="form-control single_select" name="role" id="role" required>
+                <option value=""><?php echo trans('select'); ?></option>
+                <?php if (!empty($roles)): ?>
+                  <?php foreach ($roles as $role): ?>
+                    <option value="<?php echo html_escape($role['id']); ?>"
+                      <?php if (!empty($employee) && $employee[0]['role_id'] == $role['id']) echo 'selected'; ?>>
+                      <?php echo html_escape($role['name']); ?>
+                    </option>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </select>
+
             </div>
           </div>
           <label><?php echo trans('employee-name') ?> <span class="text-danger">*</span></label>
@@ -69,7 +98,7 @@
 
         <div class="form-group">
           <label><?php echo trans('email') ?> <span class="text-danger">*</span></label>
-          <input type="email" class="form-control" required <?php if ($page_title == "Edit") {
+          <input type="email" class="form-control" required <?php if ($page_title == "Employee Edit") {
                                                               echo "readonly";
                                                             } else {
                                                               echo "";
@@ -141,7 +170,7 @@
 
         <div class="row m-t-30">
           <div class="col-sm-12">
-            <?php if (isset($page_title) && $page_title == "Edit"): ?>
+            <?php if (isset($page_title) && $page_title == "Employee Edit"): ?>
               <button type="submit" class="btn btn-info btn-rounded pull-left"><i class="fa fa-check"></i> <?php echo trans('save-changes') ?></button>
             <?php else: ?>
               <button type="submit" class="btn btn-info btn-rounded pull-left"><i class="fa fa-check"></i> <?php echo trans('save') ?></button>
@@ -156,7 +185,7 @@
     <div class="col-md-8 m-auto box mt-50" id="bulk_upload_area" style="display: none;">
       <div class="box-header">
         <h3>
-          bulk-upload-employee
+          Bulk-Upload-Employee
           <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_bulk"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
         </h3>
       </div>
@@ -164,7 +193,7 @@
       <form method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/hrm/employee_import') ?>" class="validate-form mt-20 p-30">
 
         <div class="form-group">
-          <label class="">upload-excel-file  (.xlsx or .csv)</label>
+          <label class="">upload-excel-file (.xlsx or .csv)</label>
           <input type="file" class="form-control mb-5" name="import_file" accept=".csv, .xls, .xlsx" required>
         </div>
 
@@ -180,10 +209,10 @@
       </form>
     </div>
 
-    <?php if (isset($page_title) && $page_title != "Edit"): ?>
+    <?php if (isset($page_title) && $page_title != "Employee Edit"): ?>
       <div class="list_area container">
 
-        <?php if (isset($page_title) && $page_title == "Edit"): ?>
+        <?php if (isset($page_title) && $page_title == "Employee Edit"): ?>
           <h3 class="box-title"><?php echo trans('edit-employee') ?> <a href="<?php echo base_url('admin/hrm/employees') ?>" class="pull-right btn btn-primary rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
 
@@ -254,7 +283,6 @@
 
                   <td class="actions" width="15%">
                     <a href="<?php echo base_url('admin/hrm/employee_edit/' . html_escape($employee->id)); ?>" class="on-default edit-row" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a>
-
                     <a data-val="employee" data-id="<?php echo html_escape($employee->id); ?>" href="<?php echo base_url('admin/hrm/employee_delete/' . html_escape($employee->id)); ?>" class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></a>
                   </td>
                 </tr>
@@ -283,5 +311,12 @@
       $('#bulk_upload_area').hide();
       $('.list_area').show();
     });
+  });
+
+  document.getElementById('imgInp').addEventListener('change', function(event) {
+    const [file] = event.target.files;
+    if (file) {
+      document.getElementById('preview').src = URL.createObjectURL(file);
+    }
   });
 </script>
