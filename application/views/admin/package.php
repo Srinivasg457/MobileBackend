@@ -70,7 +70,7 @@
                         <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
                       <?php else: ?>
                         <!-- <?php echo trans('monthly') ?> -->
-                        <strong><?php echo html_escape($feature->free); ?></strong> <span class="vr"></span>
+                        <strong><?php echo html_escape($feature->free); ?></strong> <span class=""></span>
                         <!-- <?php echo trans('yearly') ?><strong><?php echo html_escape($feature->year_basic); ?></strong> -->
                       <?php endif ?>
                     </td>
@@ -79,7 +79,7 @@
                         <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
                       <?php else: ?>
                         <!-- <?php echo trans('monthly') ?> -->
-                        <strong><?php echo html_escape($feature->basic); ?></strong> <span class="vr"></span>
+                        <strong><?php echo html_escape($feature->basic); ?></strong> <span class=""></span>
                         <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_basic); ?></strong> -->
                       <?php endif ?>
                     </td>
@@ -88,7 +88,7 @@
                         <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
                       <?php else: ?>
                         <!-- <?php echo trans('monthly') ?>  -->
-                        <strong><?php echo html_escape($feature->standard); ?></strong><span class="vr"></span>
+                        <strong><?php echo html_escape($feature->standard); ?></strong><span class=""></span>
                         <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_standared); ?></strong> -->
                       <?php endif ?>
                     </td>
@@ -97,7 +97,7 @@
                         <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
                       <?php else: ?>
                         <!-- <?php echo trans('monthly') ?>  -->
-                        <strong><?php echo html_escape($feature->premium); ?></strong><span class="vr"></span>
+                        <strong><?php echo html_escape($feature->premium); ?></strong><span class=""></span>
                         <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_premium); ?></strong> -->
                       <?php endif ?>
                     </td>
@@ -106,7 +106,7 @@
                         <p class="mb-0 feature-item"><i class="fa fa-times text-danger"></i></p>
                       <?php else: ?>
                         <!-- <?php echo trans('monthly') ?>  -->
-                        <strong><?php echo html_escape($feature->customization); ?></strong> <span class="vr"></span>
+                        <strong><?php echo html_escape($feature->customization); ?></strong> <span class=""></span>
                         <!-- <?php echo trans('yearly') ?> <strong><?php echo html_escape($feature->year_basic); ?></strong> -->
                       <?php endif ?>
                     </td>

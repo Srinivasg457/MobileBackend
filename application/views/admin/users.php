@@ -23,7 +23,10 @@
               <?php if ((isset($page_title) && $page_title == "Offline Payment" || $page_title == "Edit")): ?>
                 <a href="<?php echo base_url('admin/users') ?>" class="pull-right btn btn-secondary btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
               <?php else: ?>
-                <a href="#" class="text-right btn btn-secondary cancel_btn btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
+                <a href="#" class="pull-right btn btn-secondary cancel_btn btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
+
+                <a href="<?php echo base_url('admin/custom_plan') ?>" class="pull-right btn btn-info btn-sm rounded mx-5">
+                  <i class="fa fa-plus"></i> Create Custom User</a>
               <?php endif; ?>
             </div>
           </div>
@@ -192,10 +195,10 @@
                       <input type="hidden" name="id" value="<?php echo html_escape($user['0']['id']); ?>">
                       <!-- csrf token -->
                       <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
-                
+
                       <?php if (isset($page_title) && $page_title == "Edit"): ?>
                         <button type="submit" class="btn btn-info pull-left"><?php echo trans('save-changes') ?></button>
-                        <?php elseif (isset($page_title) && $page_title == "Offline Payment"): ?>
+                      <?php elseif (isset($page_title) && $page_title == "Offline Payment"): ?>
                         <button type="submit" class="btn btn-info pull-left"><?php echo trans('add-payment') ?></button>
                       <?php else: ?>
                         <button type="submit" class="btn btn-info pull-left"> <?php echo trans('save') ?></button>
