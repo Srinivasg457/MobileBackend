@@ -297,10 +297,10 @@ class Auth extends Home_Controller
                 }
 
                 /* ----------  Non‑CEO employees ---------- */
-                if (! $this->auth_model->is_organization_subscribed($employee->user_id)) {
-                    echo json_encode(['st' => 5]);   // “upgrade your plan”
-                    exit();
-                }
+                // if (! $this->auth_model->is_organization_subscribed($employee->user_id)) {
+                //     echo json_encode(['st' => 5]);   // “upgrade your plan”
+                //     exit();
+                // }
 
                 $emp_session = [
                     'employee_id'        => $employee->id,
