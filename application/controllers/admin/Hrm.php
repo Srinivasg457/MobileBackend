@@ -647,7 +647,7 @@ class Hrm extends Home_Controller
     public function employee_edit($id)
     {
         $data = array();
-        $data['page_title'] = 'Edit';
+        $data['page_title'] = 'Employee Edit';
         $data['roles'] = $this->get_roles();
         $data['employee'] = $this->admin_model->select_option($id, 'employees');
         $data['countries'] = $this->hrm_model->get_countries();

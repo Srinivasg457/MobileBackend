@@ -1,8 +1,9 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Profile extends Home_Controller {
+class Profile extends Home_Controller
+{
 
-	public function __construct()
+    public function __construct()
     {
         parent::__construct();
         //check auth
@@ -34,7 +35,7 @@ class Profile extends Home_Controller {
 
     //switch business
     public function switch_business($business = "")
-    {   
+    {
         $business = ($business != "") ? $business : $this->business->uid;
         $active_business = array('active_business' => $business);
         $this->session->set_userdata($active_business);
@@ -43,14 +44,15 @@ class Profile extends Home_Controller {
 
 
     //update user profile
-    public function update(){
-        
+    public function update()
+    {
+
         check_status();
         if ($_POST) {
 
             $data = array(
                 'name' => $this->input->post('name', true),
-                'email' => $this->input->post('email', true),
+                // 'email' => $this->input->post('email', true),
                 'country' => $this->input->post('country', true),
                 'address' => $this->input->post('address', true),
                 'city' => $this->input->post('city', true),
@@ -60,27 +62,28 @@ class Profile extends Home_Controller {
                 'timezone' => $this->input->post('time_zone', true),
 
             );
-            
-           // insert photos
-            if($_FILES['photo']['name'] != ''){
+
+            // insert photos
+            if ($_FILES['photo']['name'] != '') {
                 $up_load = $this->admin_model->upload_image('800');
                 $data_img = array(
                     'image' => $up_load['images'],
                     'thumb' => $up_load['thumb']
                 );
-                $this->admin_model->edit_option($data_img, user()->id, 'users');   
+                $this->admin_model->edit_option($data_img, user()->id, 'users');
             }
 
             $data = $this->security->xss_clean($data);
             $this->admin_model->edit_option($data, user()->id, 'users');
-            $this->session->set_flashdata('msg', trans('msg-updated')); 
+            $this->session->set_flashdata('msg', trans('msg-updated'));
             redirect(base_url('admin/profile'));
         }
     }
 
     //update user profile
-    public function update_role(){
-        
+    public function update_role()
+    {
+
         check_status();
 
         if ($_POST) {
@@ -92,20 +95,20 @@ class Profile extends Home_Controller {
                 'address' => $this->input->post('address', true),
                 'city' => $this->input->post('city', true)
             );
-            
-           // insert photos
-            if($_FILES['photo']['name'] != ''){
+
+            // insert photos
+            if ($_FILES['photo']['name'] != '') {
                 $up_load = $this->admin_model->upload_image('800');
                 $data_img = array(
                     'image' => $up_load['images'],
                     'thumb' => $up_load['thumb']
                 );
-                $this->admin_model->edit_option($data_img, auth('parent'), 'users_role');   
+                $this->admin_model->edit_option($data_img, auth('parent'), 'users_role');
             }
 
             $data = $this->security->xss_clean($data);
             $this->admin_model->edit_option($data, auth('parent'), 'users_role');
-            $this->session->set_flashdata('msg', trans('msg-updated')); 
+            $this->session->set_flashdata('msg', trans('msg-updated'));
             redirect(base_url('admin/profile'));
         }
     }
@@ -119,14 +122,14 @@ class Profile extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/user/change_password', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
-    
+
 
     //change password
     public function change()
-    {   
+    {
         check_status();
-        
-        if($_POST){
+
+        if ($_POST) {
 
             if (auth('role') == 'user') {
                 $id = user()->id;
@@ -137,21 +140,21 @@ class Profile extends Home_Controller {
                 $user = $this->admin_model->get_by_id($id, 'users_role');
                 $table = 'users_role';
             }
-            
 
-            if(password_verify($this->input->post('old_pass', true), $user->password)){
+
+            if (password_verify($this->input->post('old_pass', true), $user->password)) {
                 if ($this->input->post('new_pass', true) == $this->input->post('confirm_pass', true)) {
-                    $data=array(
+                    $data = array(
                         'password' => hash_password($this->input->post('new_pass', true))
                     );
                     $data = $this->security->xss_clean($data);
                     $this->admin_model->edit_option($data, $id, $table);
-                    echo json_encode(array('st'=>1));
+                    echo json_encode(array('st' => 1));
                 } else {
-                    echo json_encode(array('st'=>2));
+                    echo json_encode(array('st' => 2));
                 }
             } else {
-                echo json_encode(array('st'=>0));
+                echo json_encode(array('st' => 0));
             }
         }
     }
@@ -167,8 +170,9 @@ class Profile extends Home_Controller {
         $this->load->view('admin/index', $data);
     }
 
-    public function update_twilio_settings(){
-        
+    public function update_twilio_settings()
+    {
+
         check_status();
 
         if ($_POST) {
@@ -180,15 +184,13 @@ class Profile extends Home_Controller {
                 'enable_sms_notify' => $this->input->post('enable_sms_notify', true),
                 'enable_sms_alert' => $this->input->post('enable_sms_alert', true)
             );
-            
-           
+
+
 
             $data = $this->security->xss_clean($data);
             $this->admin_model->edit_option($data, user()->id, 'users');
-            $this->session->set_flashdata('msg', trans('msg-updated')); 
+            $this->session->set_flashdata('msg', trans('msg-updated'));
             redirect(base_url('admin/profile/twilio_settings'));
         }
     }
-
-
 }
