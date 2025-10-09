@@ -102,6 +102,8 @@ $route['admin/subscription/current_plan'] = 'admin/subscription/currentPlan';
 $route['admin/subscription/upgrade_plan'] = 'admin/subscription';
 $route['admin/time_approval/history'] = 'admin/Timecards_manual/Time_Approval_History';
 $route['admin/time_approval'] = 'admin/Timecards_manual/Time_Approval';
+$route['admin/custom_plan'] = 'admin/Custom_plan';
+
 
 
 //employee sites
