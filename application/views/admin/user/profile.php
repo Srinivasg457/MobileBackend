@@ -1,12 +1,16 @@
 <div class="content-wrapper">
     <section class="content container">
 
-    <?php if(auth('role') == 'user'){$action = 'update';}else{$action = 'update_role';} ?>
+        <?php if (auth('role') == 'user') {
+            $action = 'update';
+        } else {
+            $action = 'update_role';
+        } ?>
 
-    <form method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/profile/'.$action) ?>" role="form" class="form-horizontal">
+        <form method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/profile/' . $action) ?>" role="form" class="form-horizontal">
             <div class="nav-tabs-custom">
 
-            <?php include"include/profile_menu.php"; ?>
+                <?php include "include/profile_menu.php"; ?>
 
                 <div class="row m-5 mt-20">
                     <div class="col-md-8 box">
@@ -40,7 +44,11 @@
                             <div class="form-group m-t-20">
                                 <label class=" control-label" for="example-input-normal"><?php echo trans('email') ?></label>
                                 <div class="">
-                                    <input type="text" name="email" value="<?php echo html_escape($user->email); ?>" class="form-control" readonly>
+                                    <input type="text" <?php if ($page_title == "Personal Information") {
+                                                            echo "readonly";
+                                                        } else {
+                                                            echo "";
+                                                        } ?> name="email" value="<?php echo html_escape($user->email); ?>" class="form-control" readonly>
                                 </div>
                             </div>
 
@@ -108,7 +116,7 @@
 
                     <div class="box-footer">
                         <!-- csrf token -->
-                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
+                        <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
                         <button type="submit" class="btn btn-info waves-effect rounded w-md waves-light"><i class="fa fa-check"></i> <?php echo trans('save-changes') ?></button>
                     </div>
 
