@@ -20,6 +20,9 @@ class Custom_plan extends Home_Controller {
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Custom Plan';
+        $data['countries'] = $this->admin_model->select_asc('country');
+        // $data['features'] = $this->admin_model->select_asc('package_features');
+        $data['features'] = $this->admin_model->select_asc('package_features');
         $data['main_content'] = $this->load->view('admin/custom_plan', $data, TRUE);
         $this->load->view('admin/index', $data);
     }

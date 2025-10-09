@@ -407,7 +407,7 @@ class Auth_model extends CI_Model {
         if ($user->user_type === 'registered') {
             $payment = $this->db->select('billing_type, status')
                 ->where('user_id', $user_id)
-                ->order_by('created_at', 'DESC')
+                ->order_by('id', 'DESC')
                 ->limit(1)
                 ->get('payment')
                 ->row();
