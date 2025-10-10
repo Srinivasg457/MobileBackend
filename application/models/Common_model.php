@@ -745,8 +745,16 @@ class Common_model extends CI_Model
         $this->db->order_by('p.id', 'DESC');
         $query = $this->db->get();
         $query = $query->row();
+
+        // ✅ If user has package id 5, override values
+        if (!empty($query) && $query->package == 5) {
+            $query->package_name = 'Custom';
+        }
+
+        // Return the complete object (all original fields)
         return $query;
     }
+
 
 
     // get_package

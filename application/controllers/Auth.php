@@ -267,41 +267,6 @@ class Auth extends Home_Controller
                 $employee->is_registered == 1 &&
                 password_verify($password, $employee->password)
             ) {
-                $is_ceo = $this->auth_model->is_CEO($employee->role_id);   // check CEO role
-
-                /* ----------  CEO gets a regular org-user session  ---------- */
-                if ($is_ceo) {
-                    // Fetch organization owner info (from 'users' table)
-                    $orgUser = $this->auth_model->get_user_by_id($employee->user_id);
-
-                    $slug  = $orgUser ? $orgUser->slug  : '';
-                    $thumb = $orgUser ? $orgUser->thumb : '';
-                    $email = $orgUser ? $orgUser->email : $employee->email;
-
-                    $org_session = [
-                        'id'        => $orgUser ? $orgUser->id : $employee->user_id,
-                        'user_type' => 'org_user',
-                        'name'      => $employee->name,
-                        'slug'      => $slug,
-                        'thumb'     => $thumb,
-                        'email'     => $email,
-                        'role'      => 'user',        // 👈 treat CEO as regular org user
-                        'parent'    => $orgUser ? $orgUser->id : $employee->user_id,
-                        'logged_in' => TRUE,
-                        'is_org_ceo' => TRUE,
-                        'ceo_id'     => $employee->id
-                    ];
-
-                    $this->session->set_userdata($this->security->xss_clean($org_session));
-                    
-                    echo json_encode([
-                        'st'  => 1,
-                        'url' => base_url('admin/dashboard/business')   // 👈 user dashboard
-                    ]);
-                    exit();
-                }
-
-                /* ----------  Non‑CEO employees ---------- */
                 if (! $this->auth_model->is_organization_subscribed($employee->user_id)) {
                     echo json_encode(['st' => 5]);   // “upgrade your plan”
                     exit();
@@ -549,7 +514,7 @@ class Auth extends Home_Controller
                     $this->add_trial_user_settings(user()->id, $time_zone);
                 }
 
-                $this->admin_model->intial_department_storing(user()->id, $uid);
+                // $this->admin_model->intial_department_storing(user()->id, $uid);
                 echo json_encode(array('st' => $status));
                 exit();
             }

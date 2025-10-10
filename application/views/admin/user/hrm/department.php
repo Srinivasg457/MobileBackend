@@ -1,8 +1,5 @@
 <div class="content-wrapper">
-  <?php
-  $restricted_departments = ['Executive', 'Manager', 'Team Lead', 'Human Resource'];
-  $can_view_all_departments = $this->auth_model->is_access_for_all_role();
-  ?>
+
   <!-- Main content -->
   <section class="content ">
 
@@ -14,53 +11,37 @@
 
       <div class="box-header">
         <?php if (isset($page_title) && $page_title == "Edit"): ?>
-          <h3><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/departments') ?>" class="pull-right btn btn-default rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
+          <h3><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/department') ?>" class="pull-right btn btn-default rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php else: ?>
-          <h3><?php echo "Department Management" ?> <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_btn"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
+          <h3><?php echo trans('add-new-department') ?> <a href="#" class="pull-right btn btn-default btn-sm rounded cancel_btn"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
         <?php endif; ?>
       </div>
 
       <form id="cat-form" method="post" enctype="multipart/form-data" class="validate-form mt-20 p-30" action="<?php echo base_url('admin/hrm/department_add') ?>" role="form" novalidate>
 
-        <?php
-        // Map existing department names and their status (e.g., from 'departments' table)
-        $dept_status_map = [];
-        foreach ($departments as $dept) {
-          $dept_status_map[trim($dept->department_id)] = $dept->status;
-        }
-        ?>
+        <div class="form-group">
+          <label><?php echo trans('department-name') ?> <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" required name="name" value="<?php echo html_escape($department[0]['name']); ?>">
+        </div>
 
-        <?php foreach ($default_departments as $index => $default_dept): ?>
-          <?php
-          $dept_name = trim($default_dept->name);
-          if (!$can_view_all_departments && in_array($dept_name, $restricted_departments)) {
-            continue; // Skip restricted departments
-          }
-          ?> <?php
-              $dept_id   = $default_dept->id;
-              $dept_name = trim($default_dept->name);
-              $status    = isset($dept_status_map[$dept_id]) ? 1 : 0;
-              ?>
-          <div class="form-group row align-items-center my-4">
-            <div class="col-sm-7 ps-5">
-              <label class="mb-1 font-weight-bold"><?= $dept_name ?></label>
-              <input type="hidden" name="name[]" value="<?= $dept_name ?>">
-              <input type="hidden" name="department_id[]" value="<?= $dept_id ?>">
-              <input type="hidden" name="status[]" id="dept-status-<?= $index ?>" value="<?= $status ?>">
-            </div>
-
-            <div class="col-sm-5 d-flex align-items-center justify-content-between">
-              <div class="icheck-primary radio radio-inline mr-3">
-                <input type="radio" name="status_<?= $index ?>" id="show_<?= $index ?>" value="1" <?= ($status == 1) ? 'checked' : '' ?>>
-                <label for="show_<?= $index ?>">Active</label>
-              </div>
-              <div class="icheck-danger radio radio-inline">
-                <input type="radio" name="status_<?= $index ?>" id="hide_<?= $index ?>" value="0" <?= ($status == 0) ? 'checked' : '' ?>>
-                <label for="hide_<?= $index ?>">Inactive</label>
-              </div>
-            </div>
+        <div class="form-group">
+          <div class="icheck-primary radio radio-inline d-inline mr-4 mt-2">
+            <input type="radio" id="radioPrimary1" value="1" name="status" <?php if (!empty($department) && $department[0]['status'] == 1) {
+                                                                              echo "checked";
+                                                                            } ?>>
+            <label for="radioPrimary1"> <?php echo trans('show') ?>
+            </label>
           </div>
-        <?php endforeach; ?>
+
+          <div class="icheck-primary radio radio-inline d-inline">
+            <input type="radio" id="radioPrimary2" value="0" name="status" <?php if (!empty($department) && $department[0]['status'] == 0) {
+                                                                              echo "checked";
+                                                                            } ?>>
+            <label for="radioPrimary2"> <?php echo trans('hide') ?>
+            </label>
+          </div>
+        </div>
+
 
         <input type="hidden" name="id" value="<?php echo html_escape($department['0']['id']); ?>">
         <!-- csrf token -->
@@ -86,80 +67,53 @@
     <?php if (isset($page_title) && $page_title != "Edit"): ?>
       <div class="list_area container">
 
-        <?php if (isset($page_title) && $page_title == "Edit"): ?>
-          <h3 class="box-title"><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/departments') ?>" class="pull-right btn btn-primary rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
-        <?php else: ?>
-          <h3 class="box-title"><?php echo ('Departments') ?>
-            <?php if ($can_edit): ?>
-              <a href="#" class="pull-right btn btn-info btn-sm rounded add_btn"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></a>
-          </h3>
-        <?php else: ?>
-          <button data-toggle="tooltip" data-placement="top" title="permission denied to manage Departments" class=" pull-right btn btn-default btn-sm m-5"><i class="fa fa-plus"></i> <?php echo "Manage Departments" ?></button>
-        <?php endif; ?>
+          <?php if (isset($page_title) && $page_title == "Edit"): ?>
+            <h3 class="box-title"><?php echo trans('edit-department') ?> <a href="<?php echo base_url('admin/hrm/department') ?>" class="pull-right btn btn-primary rounded btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a></h3>
+          <?php else: ?>
+            <h3 class="box-title"><?php echo trans('departments') ?> <a href="#" class="pull-right btn btn-info btn-sm rounded add_btn"><i class="fa fa-plus"></i> <?php echo trans('add-new-department') ?></a></h3>
+          <?php endif; ?>
 
+          <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
+            <table class="table table-hover cushover <?php if (count($departments) > 10) {
+                                                        echo "datatable";
+                                                      } ?>" id="dg_table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th><?php echo trans('name') ?></th>
+                  <th><?php echo trans('status') ?></th>
+                  <th><?php echo trans('action') ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php $i = 1;
+                foreach ($departments as $department): ?>
+                  <tr id="row_<?php echo html_escape($department->id); ?>">
+
+                    <td><?php echo $i; ?></td>
+                    <td><?php echo html_escape($department->name); ?></td>
+                    <td>
+                      <?php if ($department->status == 1): ?>
+                        <span class="label label-success">Active</span>
+                      <?php else: ?>
+                        <span class="label label-danger">Dective</span>
+                      <?php endif ?>
+                    </td>
+
+                    <td class="actions" width="15%">
+                      <a href="<?php echo base_url('admin/hrm/department_edit/' . html_escape($department->id)); ?>" class="on-default edit-row" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a> &nbsp;
+
+                      <a data-val="department" data-id="<?php echo html_escape($department->id); ?>" href="<?php echo base_url('admin/hrm/department_delete/' . html_escape($department->id)); ?>" class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></a>
+                    </td>
+                  </tr>
+
+                <?php $i++;
+                endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
       <?php endif; ?>
-
-      <div class="col-md-12 col-sm-12 col-xs-12 scroll table-responsive mt-20 p-0">
-        <table class="table table-hover cushover <?php if (count($departments) > 10) {
-                                                    echo "datatable";
-                                                  } ?>" id="dg_table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th><?php echo trans('name') ?></th>
-              <th><?php echo trans('status') ?></th>
-              <th><?php echo trans('action') ?></th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php $i = 1;
-            foreach ($departments as $department): ?>
-              <?php
-              if (!$can_view_all_departments && in_array(trim($department->name), $restricted_departments)) {
-                continue; // Hide restricted department from list
-              }
-              ?>
-              <tr id="row_<?php echo html_escape($department->id); ?>">
-
-                <td><?php echo $i; ?></td>
-                <td><?php echo html_escape($department->name); ?></td>
-                <td>
-                  <?php if ($department->status == 1): ?>
-                    <span class="label label-success">Active</span>
-                  <?php else: ?>
-                    <span class="label label-danger">Dective</span>
-                  <?php endif ?>
-                </td>
-
-                <td class="actions" width="15%">
-                  <a href="<?php echo base_url('admin/hrm/department_edit/' . html_escape($department->id)); ?>" class="on-default edit-row hide" data-placement="top" title="Edit"><i class="fa fa-pencil"></i></a> &nbsp;
-                  <?php if ($can_edit): ?>
-                    <a data-val="department" data-id="<?php echo html_escape($department->id); ?>" href="<?php echo base_url('admin/hrm/department_delete/' . html_escape($department->id)); ?>" class="on-default remove-row delete_item" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></a>
-                  <?php else: ?>
-                    <a class="on-default" data-toggle="tooltip" data-placement="top" title="permission deined to delete department"><i class="fa fa-trash-o"></i></a>
-                  <?php endif; ?>
-                </td>
-              </tr>
-
-            <?php $i++;
-            endforeach; ?>
-          </tbody>
-        </table>
-      </div>
-
-      </div>
-    <?php endif; ?>
 
   </section>
 </div>
-
-
-<script>
-  $(document).ready(function() {
-    $('input[type=radio]').on('change', function() {
-      var index = $(this).attr('name').split('_')[1];
-      var value = $(this).val();
-      $('#dept-status-' + index).val(value);
-    });
-  });
-</script>

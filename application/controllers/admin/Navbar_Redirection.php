@@ -26,7 +26,6 @@ class Navbar_Redirection extends Home_Controller
     // }
     /**
      * Attach organisation‑owner block to an employee session
-     * using the *same* key names & values that CEOs receive.
      *
      * Runs once per session.  Safe to call at the top of index().
      */
@@ -51,7 +50,6 @@ class Navbar_Redirection extends Home_Controller
             return;                                   // defensive guard
         }
 
-        // 3. Build the org‑user block (same fields CEO gets)
         $orgBlock = [
             'id'        => $orgUser->id,
             'user_type' => 'org_user',
@@ -61,6 +59,7 @@ class Navbar_Redirection extends Home_Controller
             'email'     => $orgUser->email ?? $this->session->userdata('employee_email'),
             'role'      => 'user',          // treat as regular org user
             'parent'    => $orgUser->id,
+            'is_org_admin' => true,
             'logged_in' => true
         ];
 
@@ -82,6 +81,7 @@ class Navbar_Redirection extends Home_Controller
             'email',
             'role',
             'parent',
+            'is_org_admin',
             'logged_in'
         ]);
     }

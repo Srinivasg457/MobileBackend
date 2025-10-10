@@ -127,6 +127,16 @@ if (!function_exists('get_user_time_value')) {
 	}
 }
 
+//get time
+if (!function_exists('get_department')) {
+	function get_department($dept_id)
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->admin_model->get_department($dept_id);
+	}
+}
+
 //check pack
 if (!function_exists('is_pack_trial')) {
 	function is_pack_trial()

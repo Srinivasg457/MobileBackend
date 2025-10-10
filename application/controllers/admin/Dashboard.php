@@ -215,28 +215,6 @@ class Dashboard extends Home_Controller {
                     echo json_encode(array('st' => 0)); // old password incorrect
                 }
             }
-            elseif($this->session->userdata('is_org_ceo')){
-                // CEO user
-                $employee_id = $this->session->userdata('ceo_id');
-                $user_id = $this->session->userdata('id'); // assuming this is the user_id
-
-                $user = $this->admin_model->get_by_employeeId($employee_id, $user_id, 'employees');
-
-                if (password_verify($this->input->post('old_pass', true), $user->password)) {
-                    if ($this->input->post('new_pass', true) == $this->input->post('confirm_pass', true)) {
-                        $data = array(
-                            'password' => hash_password($this->input->post('new_pass', true))
-                        );
-                        $data = $this->security->xss_clean($data);
-                        $this->admin_model->edit_option_employee($data, $employee_id, $user_id, 'employees');
-                        echo json_encode(array('st' => 1)); // success
-                    } else {
-                        echo json_encode(array('st' => 2)); // password mismatch
-                    }
-                } else {
-                    echo json_encode(array('st' => 0)); // old password incorrect
-                }
-            } 
             else {
                 // Admin user
                 $user = $this->admin_model->get_by_id($id, 'users');
