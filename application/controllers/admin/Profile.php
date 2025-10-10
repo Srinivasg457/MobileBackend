@@ -15,6 +15,9 @@ class Profile extends Home_Controller
 
     public function index()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         $data = array();
         $data['page_title'] = 'Personal Information';
         $data['page'] = 'Settings';

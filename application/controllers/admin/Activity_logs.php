@@ -11,9 +11,9 @@ class Activity_logs extends Home_Controller
 
     public function index()
     {
-        // if (!$this->session->userdata('logged_in')) {
-        //     redirect('login');
-        // }
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(1);
         $data = array();
         $data['is_employee_admin'] = true;
@@ -370,7 +370,13 @@ public function get_employee_activity()
 }
 public function Time_Cards()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(2);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'employee_activity';
@@ -378,9 +384,6 @@ public function Time_Cards()
         $data['main_page'] = 'Analytics';
         $data['main_content'] = $this->load->view('admin/time_cards', $data, TRUE);
         $this->load->view('admin/index', $data);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription/upgrade_plan');
-        }
     }
 
 }

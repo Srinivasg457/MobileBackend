@@ -14,13 +14,16 @@ class Timecards_manual extends Home_Controller
 
     public function Time_Approval()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(9);
         $data['page_title'] = 'Time_Approval';
         $data['can_edit'] = $this->auth_model->get_permission(9);
         $data['is_employee_admin'] = true;
         $data['is_request_page'] = true;
         $data['time_cards'] = $this->get_timecards2();
-        $data['main_content'] = $this->load->view('admin/Time_approval', $data, TRUE);
+        $data['main_content'] = $this->load->view('admin/Time_  approval', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
@@ -29,6 +32,9 @@ class Timecards_manual extends Home_Controller
 
     public function Time_Approval_History()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(9);
         $data['page_title'] = 'Time_Approval';
         $data['can_edit'] = $this->auth_model->get_permission(9);

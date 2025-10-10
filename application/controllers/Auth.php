@@ -191,7 +191,7 @@ class Auth extends Home_Controller
     {
         if ($_POST) {
 
-            $email = $this->input->post('email');
+            $email = $this->input->post('user_name');
             $password = $this->input->post('password');
             // $auth_code = $this->input->post('auth_code'); // Assuming you'll have an input field for this
 
@@ -232,17 +232,22 @@ class Auth extends Home_Controller
                 if (password_verify($password, $user->password)) {
                     $user_id = ($user->role == 'subadmin' || $user->role == 'editor' || $user->role == 'viewer') ? $user->parent_id : $user->id;
                     $session_data = array(
-                        'id' => $user_id,
-                        'user_type' => 'org_user',
-                        'name' => $user->name,
-                        'slug' => $user->slug,
-                        'thumb' => $user->thumb,
-                        'email' => $user->email,
-                        'role' => $user->role,
-                        'parent' => $user->id,
-                        'logged_in' => TRUE,
-                        'is_org_admin'  => True
+                        'id'         => $user_id,
+                        'user_type'  => 'org_user',
+                        'name'       => $user->name,
+                        'slug'       => $user->slug,
+                        'thumb'      => $user->thumb,
+                        'email'      => $user->email,
+                        'role'       => $user->role,
+                        'parent'     => $user->id,
+                        'logged_in'  => TRUE
                     );
+
+                    // Add extra session key only if user is admin
+                    if ($user->role == 'user') {
+                        $session_data['is_org_admin'] = TRUE;
+                    }
+
                     $session_data = $this->security->xss_clean($session_data);
                     $this->session->set_userdata($session_data);
 
@@ -288,7 +293,7 @@ class Auth extends Home_Controller
                     ];
 
                     $this->session->set_userdata($this->security->xss_clean($org_session));
-
+                    
                     echo json_encode([
                         'st'  => 1,
                         'url' => base_url('admin/dashboard/business')   // 👈 user dashboard

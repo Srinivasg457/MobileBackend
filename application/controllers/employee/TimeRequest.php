@@ -8,6 +8,9 @@ class TimeRequest extends Home_Controller
         parent::__construct();
         $this->load->helper(['url', 'form']);
         $this->load->library('session');
+        if (!is_employee()) {
+            redirect(base_url());
+        }
     }
 
     // Show form + requests

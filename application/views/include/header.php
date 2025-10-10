@@ -41,7 +41,7 @@
 
   <?php if (text_dir() == 'rtl'): ?>
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/admin/css/custom-rtl.css">
-        <link rel="stylesheet" href="<?php echo base_url()?>assets/admin/css/bootstrap-rtl.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/admin/css/bootstrap-rtl.min.css" crossorigin="anonymous">
   <?php endif ?>
 
   <?php $rgb = hex2rgb(settings()->site_color) ?>
@@ -50,8 +50,8 @@
 
   <?php if (isset($page_title) && $page_title == 'Register'): ?>
 
-        <link rel="stylesheet" href="<?php echo base_url() ?>assets/front/css/cristal.min.css?var=<?=settings()->version;?>&time=<?=time();?>" type="text/css">
-        <link rel="stylesheet" href="<?php echo base_url() ?>assets/front/css/style.min.css?var=<?=settings()->version;?>&time=<?=time();?>" type="text/css">
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/front/css/cristal.min.css?var=<?= settings()->version; ?>&time=<?= time(); ?>" type="text/css">
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/front/css/style.min.css?var=<?= settings()->version; ?>&time=<?= time(); ?>" type="text/css">
     <link href="<?php echo base_url() ?>assets/front/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/front/css/simple-line-icons.css">
 
@@ -550,7 +550,7 @@
 
         <li class="st-nav-section st-nav-secondary nav-item">
 
-          <?php if (is_admin()): ?>
+          <!-- <?php if (is_admin()): ?>
             <a class="btn btn-outline me-2 px-3" href="<?php echo base_url('auth/logout') ?>"><i class="bi bi-box-arrow-right d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('logout') ?></span> </a>
 
             <a class="btn btn-solid px-3" href="<?php echo base_url('admin/dashboard') ?>"><i class="bi bi-speedometer2 d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('dashboard') ?></span></a>
@@ -563,6 +563,27 @@
             <?php else: ?>
               <a class="btn btn-solid px-3" href="<?php echo base_url('admin/dashboard/business') ?>"><i class="fas fa-tachometer-alt d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('dashboard') ?></span></a>
             <?php endif ?>
+          <?php else: ?>
+            <a class="btn btn-outline me-2 px-3" href="<?php echo base_url('login') ?>"><i class="bi bi-box-arrow-in-left d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('sign-in') ?></span> </a>
+
+            <a class="btn btn-solid px-3" href="<?php echo base_url('register') ?><?php if (settings()->trial_days != 0) {
+                                                                                    echo '?trial=start';
+                                                                                  } ?>"><i class="bi bi-person-add d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('create-account') ?></span></a>
+          <?php endif ?> -->
+
+
+
+
+          <?php if (is_admin()): ?>
+            <a class="btn btn-outline me-2 px-3" href="<?php echo base_url('auth/logout') ?>"><i class="bi bi-box-arrow-right d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('logout') ?></span> </a>
+
+            <a class="btn btn-solid px-3" href="<?php echo base_url('admin/dashboard') ?>"><i class="bi bi-speedometer2 d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('dashboard') ?></span></a>
+          <?php elseif (is_employee()): ?>
+            <a class="btn btn-outline me-2 px-3" href="<?php echo base_url('auth/logout') ?>"><i class="fas fa-sign-out-alt d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('logout') ?></span> </a>
+            <a class="btn btn-solid px-3" href="<?php echo base_url('employee/dashboard') ?>"><i class="bi bi-speedometer2 d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('dashboard') ?></span></a>
+          <?php elseif (is_org_admin()): ?>
+            <a class="btn btn-outline me-2 px-3" href="<?php echo base_url('auth/logout') ?>"><i class="fas fa-sign-out-alt d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('logout') ?></span> </a>
+            <a class="btn btn-solid px-3" href="<?php echo base_url('admin/dashboard/business') ?>"><i class="bi bi-speedometer2 d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('dashboard') ?></span></a>
           <?php else: ?>
             <a class="btn btn-outline me-2 px-3" href="<?php echo base_url('login') ?>"><i class="bi bi-box-arrow-in-left d-none d-md-inline me-md-0 me-lg-1"></i> <span class="d-md-none d-lg-inline"><?php echo trans('sign-in') ?></span> </a>
 

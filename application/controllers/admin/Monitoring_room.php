@@ -12,19 +12,23 @@ class Monitoring_room extends Home_Controller {
 
     public function index()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(8);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
+        if (is_plan_basic()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Live Monitoring';
         $data['can_edit'] = $this->auth_model->get_permission(8);
         $data['main_content'] = $this->load->view('admin/monitoring_room', $data, TRUE);
         $this->load->view('admin/index', $data);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription/upgrade_plan');
-        }
-        if(is_plan_basic()){
-            redirect('/admin/subscription/upgrade_plan'); 
-        }
+
     }
     //     public function list_employees_by_user()
     // {

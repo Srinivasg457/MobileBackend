@@ -407,7 +407,7 @@ class Auth_model extends CI_Model {
         if ($user->user_type === 'registered') {
             $payment = $this->db->select('billing_type, status')
                 ->where('user_id', $user_id)
-                ->order_by('created_at', 'DESC')
+                ->order_by('id', 'DESC')
                 ->limit(1)
                 ->get('payment')
                 ->row();
@@ -467,7 +467,17 @@ class Auth_model extends CI_Model {
     public function is_employee()
     {
 
-        if ($this->session->userdata('employee_id') && $this->session->userdata('is_employee')) {
+        if ($this->session->userdata('is_employee_admin') || $this->session->userdata('is_employee')) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+    public function is_org_admin()
+    {
+
+        if ($this->session->userdata('is_org_admin')) {
             return TRUE;
         } else {
             return FALSE;

@@ -9,6 +9,9 @@ class Employee extends Home_Controller
         parent::__construct();
         $this->load->helper('security');
         $this->load->library('form_validation');
+        if (!is_employee()) {
+            redirect(base_url());
+        }
     }
      public function index(){
         // if (!$this->session->userdata('logged_in')) {
