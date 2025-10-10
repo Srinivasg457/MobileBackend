@@ -13,6 +13,10 @@ class Application_Tracker extends Home_Controller
     }
     public function index()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
+
         require_feature(13);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
