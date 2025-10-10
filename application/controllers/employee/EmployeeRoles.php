@@ -10,6 +10,9 @@ class EmployeeRoles extends Home_Controller {
     }
 
     public function index() {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(11);
         $data = array();
         $data['is_employee_admin'] = true;
@@ -24,6 +27,9 @@ class EmployeeRoles extends Home_Controller {
     }
     public function role()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(11);
         $data = array();
         $data['is_employee_admin'] = true;

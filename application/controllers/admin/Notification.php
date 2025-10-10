@@ -13,6 +13,9 @@ class Notification extends Home_Controller {
 
     public function index()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(3);
         $data = array();
         $data['is_employee_admin'] = true;
@@ -29,6 +32,9 @@ class Notification extends Home_Controller {
 
     public function desktop()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(3);
         $data = array();
         $data['is_employee_admin'] = true;

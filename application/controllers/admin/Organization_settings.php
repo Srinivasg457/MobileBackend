@@ -14,6 +14,9 @@ class Organization_settings extends Home_Controller
 
     public function index(): void
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
@@ -27,6 +30,9 @@ class Organization_settings extends Home_Controller
     }
     public function Organization_settings_edit()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(4);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
@@ -44,6 +50,9 @@ class Organization_settings extends Home_Controller
 
     public function org_exception_settings()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(5);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
@@ -61,6 +70,9 @@ class Organization_settings extends Home_Controller
     }
     public function no_org_exception_settings()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(5);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');

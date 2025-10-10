@@ -14,6 +14,9 @@ class Subscription extends Home_Controller
 
     public function index()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         $data = array();
         $this->upgrade_plans();
         $data['is_employee_admin'] = true;
@@ -40,6 +43,9 @@ class Subscription extends Home_Controller
     }
     public function currentPlan()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         $data = array();
         $this->upgrade_plans();
         $data['is_employee_admin'] = true;

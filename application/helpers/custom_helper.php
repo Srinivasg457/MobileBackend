@@ -11,6 +11,16 @@
 	    }
 	}
 
+//check org admin
+if (!function_exists('is_org_admin')) {
+	function is_org_admin()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_org_admin();
+	}
+}
+
 //check employee
 if (!function_exists('is_employee')) {
 	function is_employee()

@@ -9,10 +9,13 @@ class EmployeeDashboard extends Home_Controller
         parent::__construct();
         $this->load->helper('security');
         $this->load->library('form_validation');
-        //  Session check for logged-in employee
-        if (!$this->session->userdata('employee_logged_in')) {
-            redirect('login'); // Redirect to the login page if not logged in as an employee
+        if (!is_employee()) {
+            redirect(base_url());
         }
+        //  Session check for logged-in employee
+        // if (!$this->session->userdata('employee_logged_in')) {
+        //     redirect('login'); // Redirect to the login page if not logged in as an employee
+        // }
         // $this->load->model('employee_model'); // Create a new model for employee-specific data
     }
 

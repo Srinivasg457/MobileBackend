@@ -19,6 +19,9 @@ class Hrm extends Home_Controller
 
     public function departments()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(12);
         $data = array();
         $data['is_employee_admin'] = true;
@@ -235,6 +238,9 @@ class Hrm extends Home_Controller
 
     public function employees()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(10);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');

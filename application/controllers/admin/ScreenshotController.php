@@ -12,6 +12,9 @@ class ScreenshotController extends Home_Controller
     }
     public function index()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(6);
         $data = array();
         $data['is_employee_admin'] = true;
@@ -26,6 +29,9 @@ class ScreenshotController extends Home_Controller
     }
     public function webCam()
     {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
         require_feature(7);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
@@ -43,6 +49,9 @@ class ScreenshotController extends Home_Controller
     }
     public function EmployeewebCam()
     {
+        if (!is_employee()) {
+            redirect(base_url());
+        }
         $data = array();
         $data['page_title'] = 'Employee Webcam screenshots';
         $data['main_page'] = 'Analytics';

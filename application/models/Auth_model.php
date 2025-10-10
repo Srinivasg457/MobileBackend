@@ -467,7 +467,17 @@ class Auth_model extends CI_Model {
     public function is_employee()
     {
 
-        if ($this->session->userdata('employee_id') && $this->session->userdata('is_employee')) {
+        if ($this->session->userdata('is_employee_admin') || $this->session->userdata('is_employee')) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+    public function is_org_admin()
+    {
+
+        if ($this->session->userdata('is_org_admin')) {
             return TRUE;
         } else {
             return FALSE;

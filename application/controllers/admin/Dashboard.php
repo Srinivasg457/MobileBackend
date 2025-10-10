@@ -5,6 +5,7 @@ class Dashboard extends Home_Controller {
     public function __construct()
     {
         parent::__construct();
+        
     }
 
     public function index()
@@ -48,38 +49,12 @@ class Dashboard extends Home_Controller {
     public function business()
     {
 
-        // //cron_recurring_payments();
-        // $data = array();
-        // $data['is_employee_admin'] = true;
-        // $data['page_title'] = 'User Dashboard';
-        // $data['currency'] = html_escape($this->business->currency_symbol);
-        // $data['settings'] = $this->admin_model->get('settings');
-        // $data['users'] = $this->admin_model->get_latest_users(6);
-        // $data['user'] = $this->admin_model->get_user_total();
-        // $data['overdues'] = $this->admin_model->get_invoice_report_types($type=1, $limit=5);
-        // $data['pending'] = $this->admin_model->get_invoice_report_types($type=0, $limit=5);
-        // $data['paids'] = $this->admin_model->get_invoice_report_types($type=2, $limit=5);
-        // $data['upcoming_payments'] = $this->admin_model->get_upcomming_recurring_payments();
-        // $data['net_income'] = $this->admin_model->get_income_by_year();
-        // $data['income_report'] = $this->admin_model->get_income_report();
-        // for ($i = 1; $i <= 13; $i++) {
-        //     $months[] = date("Y-m", strtotime(date('Y-m-01')." -$i months"));
-        // }
-
-        // for ($i = 0; $i <= 11; $i++) {
-        //     $income = $this->admin_model->get_income_report_by_date(date("Y-m", strtotime( date('Y-m-01')." -$i months")));
-        //     $expense = $this->admin_model->get_expense_report_by_date(date("Y-m", strtotime( date('Y-m-01')." -$i months")));
-        //     $expense2 = $this->admin_model->get_expense_report_by_date2(date("Y-m", strtotime( date('Y-m-01')." -$i months")));
-        //     $months[] = array("date" => month_show(date("Y-m", strtotime( date('Y-m-01')." -$i months"))));
-        //     $incomes[] = array("total" => $income);
-        //     $expenses[] = array("total" => $expense+$expense2);
-        // }
-        // $data['income_axis'] = json_encode(array_column($months, 'date'),JSON_NUMERIC_CHECK);
-        // $data['income_data'] = json_encode(array_column($incomes, 'total'),JSON_NUMERIC_CHECK);
-        // $data['expense_data'] = json_encode(array_column($expenses, 'total'),JSON_NUMERIC_CHECK);
-        if (!is_subscribed()) {
-            redirect('/admin/subscription/upgrade_plan');
+        if (!is_org_admin()) {
+            redirect(base_url());
         }
+        // if (!is_subscribed()) {
+        //     redirect('/admin/subscription/upgrade_plan');
+        // }
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Dashboard';
@@ -115,7 +90,7 @@ class Dashboard extends Home_Controller {
             }
             $data['output'] = $this->get_this_week_work_time_data($from_date, $to_date, $user_id, $employee_id); // 👈 Add this line
             $data['response_data'] = $this->get_last_week_total_active_hours($user_id, $employee_id); // 👈 Add this line
-        $data['response'] = $this->get_day_wise_application_usage($from_date, $to_date,$user_id, $employee_id); // 👈 Add this line
+            $data['response'] = $this->get_day_wise_application_usage($from_date, $to_date,$user_id, $employee_id); // 👈 Add this line
             $data['usage_json'] = json_encode($data['response']['applications']);
 
             $data['yesterday_idle_alert'] = $this->get_yesterday_comparison_summary($user_id, $employee_id);
