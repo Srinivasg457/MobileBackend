@@ -615,6 +615,11 @@
         color: #0FB783;
       }
 
+      .app-time-unpro {
+        font-weight: 600;
+        color: #EF4444;
+      }
+
       .progress-container {
         height: 8px;
         background-color: #e9ecef;
@@ -628,6 +633,13 @@
         border-radius: 4px;
         /* background: linear-gradient(to right, #5d5dff, #66ccff); */
         background: linear-gradient(to right, #0FB783, #4EE5A1);
+      }
+
+      .progress-bar-red {
+        height: 100%;
+        border-radius: 4px;
+        /* background: linear-gradient(to right, #5d5dff, #66ccff); */
+        background: linear-gradient(to right, #EF4444, #F87171);
       }
     }
 
