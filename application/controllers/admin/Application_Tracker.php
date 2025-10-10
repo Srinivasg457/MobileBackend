@@ -43,9 +43,25 @@ class Application_Tracker extends Home_Controller
 
         // Only fetch response if employee exists
         if (!empty($employee_id)) {
-            $data['response'] = $this->get_application_usage_grouped_by_app($employee_id, $date, $order);
+            // Get productive and unproductive usage data
+            $data['productive_usage'] = $this->get_app_productive_usage($employee_id, $date, $order);
+            $data['unproductive_usage'] = $this->get_app_unproductive_usage($employee_id, $date, $order);
+
+            // Calculate overall combined data
+            $data['overall_usage'] = [
+                'status' => 'success',
+                'data' => [
+                    'total_applications' => $data['productive_usage']['data']['total_applications'] + $data['unproductive_usage']['data']['total_applications'],
+                    'total_usage_time' => $this->seconds_to_time(
+                        $this->time_to_seconds($data['productive_usage']['data']['total_usage_time']) +
+                            $this->time_to_seconds($data['unproductive_usage']['data']['total_usage_time'])
+                    ),
+                    'raw_total_usage_seconds' => $data['productive_usage']['data']['raw_total_usage_seconds'] + $data['unproductive_usage']['data']['raw_total_usage_seconds'],
+                ]
+            ];
         } else {
-            $data['response'] = [
+            // If no employee_id is provided, set default responses for both productive and unproductive data
+            $data['productive_usage'] = $data['unproductive_usage'] = [
                 'status' => 'success',
                 'data' => [
                     'total_applications' => 0,
@@ -54,11 +70,22 @@ class Application_Tracker extends Home_Controller
                     'applications'       => []
                 ]
             ];
+
+            // Overall usage will also be empty in this case
+            $data['overall_usage'] = $data['productive_usage']; // Same as productive usage as no data is available
         }
 
         $data['main_content'] = $this->load->view('admin/application_tracker', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
+// Convert time (hh:mm:ss) to total seconds
+public function time_to_seconds($time) {
+    // Split the time into hours, minutes, and seconds
+    list($hours, $minutes, $seconds) = explode(':', $time);
+
+    // Convert hours and minutes to seconds and sum them up
+    return ($hours * 3600) + ($minutes * 60) + $seconds;
+}
 
 
     public function employee_application_tracker()
@@ -216,9 +243,9 @@ class Application_Tracker extends Home_Controller
     // }
 
 
+    // productive usage
 
-
-    public function get_application_usage_grouped_by_app($employee_id, $date, $listOrder)
+    public function get_app_productive_usage($employee_id, $date, $listOrder)
     {
         try {
             // --- Get inputs (POST or GET) ---
@@ -359,6 +386,290 @@ class Application_Tracker extends Home_Controller
                 ]));
         }
     }
+    public function get_app_unproductive_usage($employee_id, $date, $listOrder)
+    {
+        try {
+            // --- Get inputs (POST or GET) ---
+            $order = $listOrder == "descending" ? true : false;
+            $user_id = $this->session->userdata('id') ?? $this->session->userdata('employee_org_id');
+
+            $start_date_raw = $this->input->get_post('start_date');
+            $end_date_raw = $this->input->get_post('end_date');
+            $application_name = $this->input->get_post('application_name');
+
+            $limit = (int) $this->input->get_post('limit', TRUE) ?: 2000;
+            $offset = (int) $this->input->get_post('offset', TRUE) ?: 0;
+
+            $debug = (int) $this->input->get_post('debug', TRUE);
+
+            // --- Basic validation for employee/user ---
+            if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+                return $this->output
+                    ->set_status_header(400)
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Invalid or missing employee_id or user_id'
+                    ]));
+            }
+
+            // --- Normalize / parse date filters ---
+            $start_date = $this->normalize_date_filter($start_date_raw, 'start');
+            $end_date = $this->normalize_date_filter($end_date_raw, 'end');
+
+            // Build main query using Query Builder
+            $this->db->start_cache();
+            $this->db->select('application_name, window_title, SUM(duration_seconds) AS total_seconds')
+                ->from('application_usage_logs')
+                ->where('employee_id', (int)$employee_id)
+                ->where('user_id', (int)$user_id);
+
+            // Apply date filter
+            if (!empty($date)) {
+                $this->db->where('log_date', $date);
+            } else {
+                if ($start_date !== null) {
+                    $this->db->where('log_date >=', $start_date);
+                }
+                if ($end_date !== null) {
+                    $this->db->where('log_date <=', $end_date);
+                }
+            }
+
+            if (!empty($application_name)) {
+                $this->db->like('application_name', $application_name);
+            }
+
+            $this->db->group_by(['application_name', 'window_title'])
+                ->order_by('total_seconds', 'DESC');
+
+            $this->db->stop_cache();
+
+            // Debug - show compiled SQL and exit if requested
+            if ($debug === 1) {
+                $sql = $this->db->get_compiled_select();
+                $this->db->flush_cache();
+                echo $sql;
+                exit;
+            }
+
+            // Get total matching groups (without limit) for pagination metadata
+            $count_query = $this->db->select('COUNT(DISTINCT CONCAT(application_name, window_title)) AS total')->get();
+            $total_rows = (int) $count_query->row()->total;
+
+            // Add limit and offset for actual data fetch
+            if ($limit > 0) {
+                $this->db->limit($limit, $offset);
+            }
+
+            $query = $this->db->get();
+            $result = $query->result_array();
+
+            // Clear cached where/selects
+            $this->db->flush_cache();
+
+            // Format time and prepare data structure
+            $grouped = [];
+            $total_usage_seconds = 0;
+
+            foreach ($result as $row) {
+                $seconds = (int)$row['total_seconds'];
+                $total_usage_seconds += $seconds;
+
+                $row['formatted_time'] = $this->seconds_to_time($seconds);
+
+                if (!isset($grouped[$row['application_name']])) {
+                    $grouped[$row['application_name']] = [
+                        'total_seconds' => 0,
+                        'formatted_time' => '',
+                        'windows' => []
+                    ];
+                }
+
+                $grouped[$row['application_name']]['total_seconds'] += $seconds;
+                $grouped[$row['application_name']]['formatted_time'] = $this->seconds_to_time(
+                    $grouped[$row['application_name']]['total_seconds']
+                );
+                $grouped[$row['application_name']]['windows'][] = [
+                    'window_title' => $row['window_title'],
+                    'total_seconds' => $seconds,
+                    'formatted_time' => $row['formatted_time']
+                ];
+            }
+            $order ? arsort($grouped) : asort($grouped);
+            // Format output
+            $response = [
+                'status' => 'success',
+                'meta' => [
+                    'total_rows' => $total_rows,
+                    'limit' => $limit,
+                    'offset' => $offset,
+                ],
+                'data' => [
+                    'total_applications' => count($grouped),
+                    'total_usage_time' => $this->seconds_to_time($total_usage_seconds),
+                    'raw_total_usage_seconds' => $total_usage_seconds,
+                    'applications' => $grouped
+                ]
+            ];
+
+            return $response;
+        } catch (Exception $e) {
+            log_message('error', 'get_application_usage_grouped_by_app failed: ' . $e->getMessage());
+
+            return $this->output
+                ->set_status_header(500)
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Failed to get application usage data',
+                    'error_details' => $e->getMessage()
+                ]));
+        }
+    }
+
+
+    // public function get_application_usage_grouped_by_app($employee_id, $date, $listOrder)
+    // {
+    //     try {
+    //         // --- Get inputs (POST or GET) ---
+    //         $order = $listOrder == "descending" ? true : false;
+    //         $user_id = $this->session->userdata('id') ?? $this->session->userdata('employee_org_id');
+
+    //         $start_date_raw = $this->input->get_post('start_date');
+    //         $end_date_raw = $this->input->get_post('end_date');
+    //         $application_name = $this->input->get_post('application_name');
+
+    //         $limit = (int) $this->input->get_post('limit', TRUE) ?: 2000;
+    //         $offset = (int) $this->input->get_post('offset', TRUE) ?: 0;
+
+    //         $debug = (int) $this->input->get_post('debug', TRUE);
+
+    //         // --- Basic validation for employee/user ---
+    //         if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
+    //             return $this->output
+    //                 ->set_status_header(400)
+    //                 ->set_content_type('application/json')
+    //                 ->set_output(json_encode([
+    //                     'status' => 'error',
+    //                     'message' => 'Invalid or missing employee_id or user_id'
+    //                 ]));
+    //         }
+
+    //         // --- Normalize / parse date filters ---
+    //         $start_date = $this->normalize_date_filter($start_date_raw, 'start');
+    //         $end_date = $this->normalize_date_filter($end_date_raw, 'end');
+
+    //         // Build main query using Query Builder
+    //         $this->db->start_cache();
+    //         $this->db->select('application_name, window_title, SUM(duration_seconds) AS total_seconds')
+    //             ->from('application_usage_logs')
+    //             ->where('employee_id', (int)$employee_id)
+    //             ->where('user_id', (int)$user_id);
+
+    //         // Apply date filter
+    //         if (!empty($date)) {
+    //             $this->db->where('log_date', $date);
+    //         } else {
+    //             if ($start_date !== null) {
+    //                 $this->db->where('log_date >=', $start_date);
+    //             }
+    //             if ($end_date !== null) {
+    //                 $this->db->where('log_date <=', $end_date);
+    //             }
+    //         }
+
+    //         if (!empty($application_name)) {
+    //             $this->db->like('application_name', $application_name);
+    //         }
+
+    //         $this->db->group_by(['application_name', 'window_title'])
+    //             ->order_by('total_seconds', 'DESC');
+
+    //         $this->db->stop_cache();
+
+    //         // Debug - show compiled SQL and exit if requested
+    //         if ($debug === 1) {
+    //             $sql = $this->db->get_compiled_select();
+    //             $this->db->flush_cache();
+    //             echo $sql;
+    //             exit;
+    //         }
+
+    //         // Get total matching groups (without limit) for pagination metadata
+    //         $count_query = $this->db->select('COUNT(DISTINCT CONCAT(application_name, window_title)) AS total')->get();
+    //         $total_rows = (int) $count_query->row()->total;
+
+    //         // Add limit and offset for actual data fetch
+    //         if ($limit > 0) {
+    //             $this->db->limit($limit, $offset);
+    //         }
+
+    //         $query = $this->db->get();
+    //         $result = $query->result_array();
+
+    //         // Clear cached where/selects
+    //         $this->db->flush_cache();
+
+    //         // Format time and prepare data structure
+    //         $grouped = [];
+    //         $total_usage_seconds = 0;
+
+    //         foreach ($result as $row) {
+    //             $seconds = (int)$row['total_seconds'];
+    //             $total_usage_seconds += $seconds;
+
+    //             $row['formatted_time'] = $this->seconds_to_time($seconds);
+
+    //             if (!isset($grouped[$row['application_name']])) {
+    //                 $grouped[$row['application_name']] = [
+    //                     'total_seconds' => 0,
+    //                     'formatted_time' => '',
+    //                     'windows' => []
+    //                 ];
+    //             }
+
+    //             $grouped[$row['application_name']]['total_seconds'] += $seconds;
+    //             $grouped[$row['application_name']]['formatted_time'] = $this->seconds_to_time(
+    //                 $grouped[$row['application_name']]['total_seconds']
+    //             );
+    //             $grouped[$row['application_name']]['windows'][] = [
+    //                 'window_title' => $row['window_title'],
+    //                 'total_seconds' => $seconds,
+    //                 'formatted_time' => $row['formatted_time']
+    //             ];
+    //         }
+    //         $order ? arsort($grouped) : asort($grouped);
+    //         // Format output
+    //         $response = [
+    //             'status' => 'success',
+    //             'meta' => [
+    //                 'total_rows' => $total_rows,
+    //                 'limit' => $limit,
+    //                 'offset' => $offset,
+    //             ],
+    //             'data' => [
+    //                 'total_applications' => count($grouped),
+    //                 'total_usage_time' => $this->seconds_to_time($total_usage_seconds),
+    //                 'raw_total_usage_seconds' => $total_usage_seconds,
+    //                 'applications' => $grouped
+    //             ]
+    //         ];
+
+    //         return $response;
+    //     } catch (Exception $e) {
+    //         log_message('error', 'get_application_usage_grouped_by_app failed: ' . $e->getMessage());
+
+    //         return $this->output
+    //             ->set_status_header(500)
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => 'error',
+    //                 'message' => 'Failed to get application usage data',
+    //                 'error_details' => $e->getMessage()
+    //             ]));
+    //     }
+    // }
 
     // public function get_application_usage_logs($employee_id, $date, $order)
     // {
