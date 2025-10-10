@@ -72,7 +72,7 @@
                                 <div class="app-details">
                                     <div class="app-name">
                                         <div class="form-group my-0">
-                                            <h4>Productive Usage<small> - <?= $productive_usage['data']['total_usage_time'] ?></small></h4>
+                                            <h4>Productive Hours<small> - <?= $productive_usage['data']['total_usage_time'] ?></small></h4>
                                             <!-- <p class="text-muted"><i class="bi bi-clock mr-5"></i>Total time tracked</p> -->
                                         </div>
                                     </div>
@@ -86,17 +86,17 @@
                                         <?= number_format(($productive_usage['data']['raw_total_usage_seconds'] / $overall_usage['data']['raw_total_usage_seconds']) * 100, 1); ?>% of total
                                     </div>
                                     <button type="button" class="btn btn-default show-windows-modal" data-id="productive">
-                                        <i class="bi bi-window-stack mr-5"></i>
+                                        <i class="bi bi-diagram-3 mr-5"></i>
                                         Usage History (<?= $productive_usage['data']['total_applications'] ?>)
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="py-4" style="<?= $isLast ? '' : 'border-bottom: 1px solid #dee2e6;' ?>">
+                            <div class="py-4">
                                 <div class="app-details">
                                     <div class="app-name">
                                         <div class="form-group my-0">
-                                            <h4>Unproductive Usage<small> - <?= $unproductive_usage['data']['total_usage_time'] ?></small></h4>
+                                            <h4>Unproductive Hours<small> - <?= $unproductive_usage['data']['total_usage_time'] ?></small></h4>
                                             <!-- <p class="text-muted"><i class="bi bi-clock mr-5"></i>Total time tracked</p> -->
                                         </div>
                                     </div>
@@ -110,7 +110,7 @@
                                         <?= number_format(($unproductive_usage['data']['raw_total_usage_seconds'] / $overall_usage['data']['raw_total_usage_seconds']) * 100, 1); ?>% of total
                                     </div>
                                     <button type="button" class="btn btn-default show-windows-modal" data-id="unproductive" data-windows='<?= json_encode($appData['windows']) ?>'>
-                                        <i class="bi bi-window-stack mr-5"></i>
+                                        <i class="bi bi-diagram-3 mr-5"></i>
                                         Usage History (<?= $unproductive_usage['data']['total_applications'] ?>)
                                     </button>
                                 </div>

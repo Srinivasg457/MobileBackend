@@ -16,7 +16,7 @@ class Application_Tracker extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-
+        
         require_feature(13);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
@@ -248,7 +248,6 @@ public function time_to_seconds($time) {
 
 
     // productive usage
-
     public function get_app_productive_usage($employee_id, $date, $listOrder)
     {
         try {
@@ -280,12 +279,164 @@ public function time_to_seconds($time) {
             $start_date = $this->normalize_date_filter($start_date_raw, 'start');
             $end_date = $this->normalize_date_filter($end_date_raw, 'end');
 
+            // Define productive applications and browser work-related keywords
+            $productive_apps = [
+                // Development Tools
+                'code',
+                'visual studio code',
+                'phpstorm',
+                'webstorm',
+                'sublime text',
+                'atom',
+                'eclipse',
+                'intellij idea',
+                'android studio',
+                'pycharm',
+                'netbeans',
+                'xcode',
+                'postman',
+                'git',
+                'docker',
+                'terminal',
+                'gnome-terminal',
+                'command prompt',
+                'powershell',
+
+                // Database & Server Tools
+                'mysql workbench',
+                'phpmyadmin',
+                'pgadmin',
+                'mongodb compass',
+                'heidisql',
+                'dbeaver',
+                'redis desktop manager',
+                'xampp',
+                'wamp',
+                'laragon',
+
+                // Project Management & Collaboration
+                'jira',
+                'trello',
+                'asana',
+                'clickup',
+                'notion',
+                'monday.com',
+                'basecamp',
+                'microsoft teams',
+                'teams-for-linux',
+                'slack',
+                'zoom',
+                'google meet',
+                'skype',
+
+                // Documentation / Office Work
+                'microsoft word',
+                'microsoft excel',
+                'microsoft powerpoint',
+                'google docs',
+                'google sheets',
+                'google slides',
+                'adobe acrobat',
+                'notepad++',
+                'onenote',
+                'evernote',
+                'gnome-text-editor',
+
+                // Design & Creative Tools
+                'figma',
+                'adobe xd',
+                'photoshop',
+                'illustrator',
+                'canva',
+                'coreldraw',
+
+                // Cloud / Hosting / DevOps
+                'aws console',
+                'google cloud console',
+                'azure portal',
+                'digitalocean',
+                'filezilla',
+                'putty',
+                'cyberduck',
+                'xlsx',
+
+                // Work-related applications from your data
+                'work-room'
+            ];
+
+            $browser_work_keywords = [
+                'xlsx',
+                'jira',
+                'github',
+                'stack overflow',
+                'gitlab',
+                'bitbucket',
+                'confluence',
+                'trello',
+                'asana',
+                'clickup',
+                'notion',
+                'monday.com',
+                'basecamp',
+                'aws',
+                'google cloud',
+                'azure',
+                'digitalocean',
+                'workroom',
+                'dashboard',
+                'atlassian',
+                'outlook',
+                'mail',
+                'figma',
+                'adobe xd',
+                'localhost',
+                '127.0.0.1',
+                'dev',
+                'development',
+                'mysql',
+                'postgresql',
+                'mongodb',
+                'redis',
+                'visual studio code',
+                'postman',
+                'docker',
+                'kubernetes'
+            ];
+
             // Build main query using Query Builder
             $this->db->start_cache();
             $this->db->select('application_name, window_title, SUM(duration_seconds) AS total_seconds')
                 ->from('application_usage_logs')
                 ->where('employee_id', (int)$employee_id)
                 ->where('user_id', (int)$user_id);
+
+            // Apply productive apps filter
+            $this->db->group_start();
+
+            // Direct productive apps match
+            foreach ($productive_apps as $app) {
+                $this->db->or_like('LOWER(application_name)', strtolower($app));
+            }
+
+            // Browser with work-related content
+            $this->db->or_group_start();
+            $this->db->group_start();
+            $this->db->like('LOWER(application_name)', 'chrome');
+            $this->db->or_like('LOWER(application_name)', 'firefox');
+            $this->db->or_like('LOWER(application_name)', 'edge');
+            $this->db->or_like('LOWER(application_name)', 'safari');
+            $this->db->or_like('LOWER(application_name)', 'browser');
+            $this->db->group_end();
+
+            // Check window title for work-related content
+            $this->db->group_start();
+            foreach ($browser_work_keywords as $keyword) {
+                $this->db->or_like('LOWER(window_title)', strtolower($keyword));
+            }
+            $this->db->group_end();
+            $this->db->group_end();
+
+            $this->db->group_end();
 
             // Apply date filter
             if (!empty($date)) {
@@ -359,7 +510,9 @@ public function time_to_seconds($time) {
                     'formatted_time' => $row['formatted_time']
                 ];
             }
+
             $order ? arsort($grouped) : asort($grouped);
+
             // Format output
             $response = [
                 'status' => 'success',
@@ -378,18 +531,21 @@ public function time_to_seconds($time) {
 
             return $response;
         } catch (Exception $e) {
-            log_message('error', 'get_application_usage_grouped_by_app failed: ' . $e->getMessage());
+            log_message('error', 'get_app_productive_usage failed: ' . $e->getMessage());
 
             return $this->output
                 ->set_status_header(500)
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'error',
-                    'message' => 'Failed to get application usage data',
+                    'message' => 'Failed to get productive application usage data',
                     'error_details' => $e->getMessage()
                 ]));
         }
     }
+
+
+
     public function get_app_unproductive_usage($employee_id, $date, $listOrder)
     {
         try {
@@ -421,12 +577,140 @@ public function time_to_seconds($time) {
             $start_date = $this->normalize_date_filter($start_date_raw, 'start');
             $end_date = $this->normalize_date_filter($end_date_raw, 'end');
 
+            // Define productive applications and browser work-related keywords
+            $productive_apps = [
+                'youtube',
+                'netflix',
+                'amazon prime video',
+                'disney+',
+                'hotstar',
+                'spotify',
+                'soundcloud',
+                'vlc',
+                'mx player',
+                'gom player',
+                'windows media player',
+                'itunes',
+                'facebook',
+                'instagram',
+                'twitter',
+                'snapchat',
+                'tiktok',
+                'linkedin',
+                'pinterest',
+                'reddit',
+                'epic games launcher',
+                'valorant',
+                'pubg',
+                'fortnite',
+                'call of duty',
+                'free fire',
+                'minecraft',
+                'roblox',
+                'amazon',
+                'flipkart',
+                'myntra',
+                'ajio',
+                'meesho',
+                'ebay',
+                'olx',
+                'whatsapp',
+                'telegram',
+                'discord',
+                'signal',
+                'facebook messenger',
+                'opera gx',
+                'brave',
+                'uc browser',
+                'chrome://games',
+                'photos',
+                'gallery',
+                'camera',
+                'music',
+                'movies',
+                'video player',
+                'media player',
+                'news',
+                'weather'
+            ];
+
+            $browser_work_keywords = [
+                'youtube',
+                'netflix',
+                'prime video',
+                'disney+',
+                'hotstar',
+                'mx player',
+                'vlc',
+                'spotify',
+                'soundcloud',
+                'apple music',
+                'youtube music',
+                'facebook',
+                'instagram',
+                'threads',
+                'snapchat',
+                'reddit',
+                'tiktok',
+                'pinterest',
+                'tumblr',
+                'discord',
+                'whatsapp',
+                'telegram',
+                'messenger',
+                'amazon',
+                'flipkart',
+                'myntra',
+                'ajio',
+                'meesho',
+                'snapdeal',
+                'ebay',
+                'olx',
+                'google news',
+                'times of india',
+                'moneycontrol',
+                'cricbuzz',
+                'espn',
+                'ndtv',
+                'weather',
+                'movies',
+                'music',
+                'entertainment'
+            ];
             // Build main query using Query Builder
             $this->db->start_cache();
             $this->db->select('application_name, window_title, SUM(duration_seconds) AS total_seconds')
                 ->from('application_usage_logs')
                 ->where('employee_id', (int)$employee_id)
                 ->where('user_id', (int)$user_id);
+
+            // Apply productive apps filter
+            $this->db->group_start();
+
+            // Direct productive apps match
+            foreach ($productive_apps as $app) {
+                $this->db->or_like('LOWER(application_name)', strtolower($app));
+            }
+
+            // Browser with work-related content
+            $this->db->or_group_start();
+            $this->db->group_start();
+            $this->db->like('LOWER(application_name)', 'chrome');
+            $this->db->or_like('LOWER(application_name)', 'firefox');
+            $this->db->or_like('LOWER(application_name)', 'edge');
+            $this->db->or_like('LOWER(application_name)', 'safari');
+            $this->db->or_like('LOWER(application_name)', 'browser');
+            $this->db->group_end();
+
+            // Check window title for work-related content
+            $this->db->group_start();
+            foreach ($browser_work_keywords as $keyword) {
+                $this->db->or_like('LOWER(window_title)', strtolower($keyword));
+            }
+            $this->db->group_end();
+            $this->db->group_end();
+
+            $this->db->group_end();
 
             // Apply date filter
             if (!empty($date)) {
@@ -500,7 +784,9 @@ public function time_to_seconds($time) {
                     'formatted_time' => $row['formatted_time']
                 ];
             }
+
             $order ? arsort($grouped) : asort($grouped);
+
             // Format output
             $response = [
                 'status' => 'success',
@@ -519,298 +805,16 @@ public function time_to_seconds($time) {
 
             return $response;
         } catch (Exception $e) {
-            log_message('error', 'get_application_usage_grouped_by_app failed: ' . $e->getMessage());
+            log_message('error', 'get_app_productive_usage failed: ' . $e->getMessage());
 
             return $this->output
                 ->set_status_header(500)
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'error',
-                    'message' => 'Failed to get application usage data',
+                    'message' => 'Failed to get productive application usage data',
                     'error_details' => $e->getMessage()
                 ]));
         }
     }
-
-
-    // public function get_application_usage_grouped_by_app($employee_id, $date, $listOrder)
-    // {
-    //     try {
-    //         // --- Get inputs (POST or GET) ---
-    //         $order = $listOrder == "descending" ? true : false;
-    //         $user_id = $this->session->userdata('id') ?? $this->session->userdata('employee_org_id');
-
-    //         $start_date_raw = $this->input->get_post('start_date');
-    //         $end_date_raw = $this->input->get_post('end_date');
-    //         $application_name = $this->input->get_post('application_name');
-
-    //         $limit = (int) $this->input->get_post('limit', TRUE) ?: 2000;
-    //         $offset = (int) $this->input->get_post('offset', TRUE) ?: 0;
-
-    //         $debug = (int) $this->input->get_post('debug', TRUE);
-
-    //         // --- Basic validation for employee/user ---
-    //         if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
-    //             return $this->output
-    //                 ->set_status_header(400)
-    //                 ->set_content_type('application/json')
-    //                 ->set_output(json_encode([
-    //                     'status' => 'error',
-    //                     'message' => 'Invalid or missing employee_id or user_id'
-    //                 ]));
-    //         }
-
-    //         // --- Normalize / parse date filters ---
-    //         $start_date = $this->normalize_date_filter($start_date_raw, 'start');
-    //         $end_date = $this->normalize_date_filter($end_date_raw, 'end');
-
-    //         // Build main query using Query Builder
-    //         $this->db->start_cache();
-    //         $this->db->select('application_name, window_title, SUM(duration_seconds) AS total_seconds')
-    //             ->from('application_usage_logs')
-    //             ->where('employee_id', (int)$employee_id)
-    //             ->where('user_id', (int)$user_id);
-
-    //         // Apply date filter
-    //         if (!empty($date)) {
-    //             $this->db->where('log_date', $date);
-    //         } else {
-    //             if ($start_date !== null) {
-    //                 $this->db->where('log_date >=', $start_date);
-    //             }
-    //             if ($end_date !== null) {
-    //                 $this->db->where('log_date <=', $end_date);
-    //             }
-    //         }
-
-    //         if (!empty($application_name)) {
-    //             $this->db->like('application_name', $application_name);
-    //         }
-
-    //         $this->db->group_by(['application_name', 'window_title'])
-    //             ->order_by('total_seconds', 'DESC');
-
-    //         $this->db->stop_cache();
-
-    //         // Debug - show compiled SQL and exit if requested
-    //         if ($debug === 1) {
-    //             $sql = $this->db->get_compiled_select();
-    //             $this->db->flush_cache();
-    //             echo $sql;
-    //             exit;
-    //         }
-
-    //         // Get total matching groups (without limit) for pagination metadata
-    //         $count_query = $this->db->select('COUNT(DISTINCT CONCAT(application_name, window_title)) AS total')->get();
-    //         $total_rows = (int) $count_query->row()->total;
-
-    //         // Add limit and offset for actual data fetch
-    //         if ($limit > 0) {
-    //             $this->db->limit($limit, $offset);
-    //         }
-
-    //         $query = $this->db->get();
-    //         $result = $query->result_array();
-
-    //         // Clear cached where/selects
-    //         $this->db->flush_cache();
-
-    //         // Format time and prepare data structure
-    //         $grouped = [];
-    //         $total_usage_seconds = 0;
-
-    //         foreach ($result as $row) {
-    //             $seconds = (int)$row['total_seconds'];
-    //             $total_usage_seconds += $seconds;
-
-    //             $row['formatted_time'] = $this->seconds_to_time($seconds);
-
-    //             if (!isset($grouped[$row['application_name']])) {
-    //                 $grouped[$row['application_name']] = [
-    //                     'total_seconds' => 0,
-    //                     'formatted_time' => '',
-    //                     'windows' => []
-    //                 ];
-    //             }
-
-    //             $grouped[$row['application_name']]['total_seconds'] += $seconds;
-    //             $grouped[$row['application_name']]['formatted_time'] = $this->seconds_to_time(
-    //                 $grouped[$row['application_name']]['total_seconds']
-    //             );
-    //             $grouped[$row['application_name']]['windows'][] = [
-    //                 'window_title' => $row['window_title'],
-    //                 'total_seconds' => $seconds,
-    //                 'formatted_time' => $row['formatted_time']
-    //             ];
-    //         }
-    //         $order ? arsort($grouped) : asort($grouped);
-    //         // Format output
-    //         $response = [
-    //             'status' => 'success',
-    //             'meta' => [
-    //                 'total_rows' => $total_rows,
-    //                 'limit' => $limit,
-    //                 'offset' => $offset,
-    //             ],
-    //             'data' => [
-    //                 'total_applications' => count($grouped),
-    //                 'total_usage_time' => $this->seconds_to_time($total_usage_seconds),
-    //                 'raw_total_usage_seconds' => $total_usage_seconds,
-    //                 'applications' => $grouped
-    //             ]
-    //         ];
-
-    //         return $response;
-    //     } catch (Exception $e) {
-    //         log_message('error', 'get_application_usage_grouped_by_app failed: ' . $e->getMessage());
-
-    //         return $this->output
-    //             ->set_status_header(500)
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Failed to get application usage data',
-    //                 'error_details' => $e->getMessage()
-    //             ]));
-    //     }
-    // }
-
-    // public function get_application_usage_logs($employee_id, $date, $order)
-    // {
-    //     // --- Get inputs (POST or GET) ---
-    //     $this->$employee_id = $employee_id;
-    //     $this->$date = $date;
-    //     $this->$order = $order == "descending" ? true : false;
-    //     $user_id     = $this->input->get_post('user_id') ?? $this->session->userdata('employee_org_id') ?? $this->session->userdata('id');
-
-    //     $start_date_raw  = $this->input->get_post('start_date');
-    //     $end_date_raw    = $this->input->get_post('end_date');
-    //     $application_name = $this->input->get_post('application_name');
-
-    //     $limit  = (int) $this->input->get_post('limit', TRUE) ?: 2000;
-    //     $offset = (int) $this->input->get_post('offset', TRUE) ?: 0;
-
-    //     $debug = (int) $this->input->get_post('debug', TRUE);
-
-    //     // --- Basic validation for employee/user ---
-    //     if (empty($employee_id) || empty($user_id) || !is_numeric($employee_id) || !is_numeric($user_id)) {
-    //         return $this->output
-    //             ->set_status_header(400)
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Invalid or missing employee_id or user_id'
-    //             ]));
-    //     }
-
-    //     // --- Normalize / parse date filters ---
-    //     $start_date = $this->normalize_date_filter($start_date_raw, 'start');
-    //     $end_date   = $this->normalize_date_filter($end_date_raw, 'end');
-
-    //     // If only one boundary present ensure comparators are proper
-    //     // Build main query using Query Builder
-    //     $this->db->start_cache();
-    //     $this->db->select('log_id, employee_id, user_id, log_date, start_time, end_time, duration_seconds, application_name, window_title, website_url, created_at, updated_at');
-    //     $this->db->from('application_usage_logs');
-    //     $this->db->where('employee_id', (int)$employee_id);
-    //     $this->db->where('user_id', (int)$user_id);
-    //     // $this->db->where('log_date', (int)$date);
-
-    //     // Apply date filter
-    //     if (!empty($date)) {
-    //         $this->db->where('log_date', $date);
-    //     } else {
-    //         if ($start_date !== null) {
-    //             $this->db->where('log_date >=', $start_date);
-    //         }
-    //         if ($end_date !== null) {
-    //             $this->db->where('log_date <=', $end_date);
-    //         }
-    //     }
-
-    //     if (!empty($application_name)) {
-    //         // Partial match, case-insensitive depending on DB collation; optionally force lower
-    //         $this->db->like('application_name', $application_name);
-    //     }
-    //     $this->db->stop_cache();
-
-    //     // Debug - show compiled SQL and exit if requested
-    //     if ($debug === 1) {
-    //         $sql = $this->db->get_compiled_select();
-    //         $this->db->flush_cache();
-    //         echo $sql;
-    //         exit;
-    //     }
-
-    //     // Get total matching rows (without limit) for pagination metadata
-    //     $count_query = $this->db->select('COUNT(*) AS total')->get();
-    //     $total_rows = (int) $count_query->row()->total;
-
-    //     // Add ordering, limit, offset for actual data fetch
-    //     $this->db->order_by('start_time', 'DESC');
-    //     if ($limit > 0) {
-    //         $this->db->limit($limit, $offset);
-    //     }
-
-    //     $query = $this->db->get();
-    //     $logs = $query->result_array();
-
-    //     // Clear cached where/selects
-    //     $this->db->flush_cache();
-
-    //     // If duration_seconds missing for some rows, compute from start_time and end_time
-    //     foreach ($logs as &$r) {
-    //         if ((int)$r['duration_seconds'] <= 0) {
-    //             $r['duration_seconds'] = $this->compute_duration_seconds($r['start_time'], $r['end_time']);
-    //         }
-    //     }
-    //     unset($r);
-
-    //     // Aggregate calculations
-    //     $total_usage_seconds = 0;
-    //     $app_breakdown = [];
-    //     $daily_breakdown = [];
-
-    //     foreach ($logs as $log) {
-    //         $duration = (int)$log['duration_seconds'];
-    //         $app_name = isset($log['application_name']) ? trim($log['application_name']) : 'Unknown';
-    //         $log_date = isset($log['log_date']) ? $log['log_date'] : null;
-
-    //         // total
-    //         $total_usage_seconds += $duration;
-
-    //         // per-app (case-normalized to avoid Chrome vs chrome splits — tweak as needed)
-    //         $key = $app_name; // or strtolower($app_name) if you want normalized keys
-    //         if (!isset($app_breakdown[$key])) $app_breakdown[$key] = 0;
-    //         $app_breakdown[$key] += $duration;
-
-    //         // daily breakdown
-    //         if ($log_date) {
-    //             if (!isset($daily_breakdown[$log_date])) $daily_breakdown[$log_date] = [];
-    //             if (!isset($daily_breakdown[$log_date][$key])) $daily_breakdown[$log_date][$key] = 0;
-    //             $daily_breakdown[$log_date][$key] += $duration;
-    //         }
-    //     }
-
-    //     // Format output
-    //     $response = [
-    //         'status' => 'success',
-    //         'meta' => [
-    //             'total_rows' => $total_rows,
-    //             'limit' => $limit,
-    //             'offset' => $offset,
-    //         ],
-    //         'data' => [
-    //             'total_logs_returned' => count($logs),
-    //             'total_usage_time' => $this->seconds_to_time($total_usage_seconds),
-    //             'raw_total_usage_seconds' => $total_usage_seconds,
-    //             'top_applications' => $this->sort_and_format_apps($app_breakdown),
-    //             'daily_breakdown' => $this->format_daily_breakdown($daily_breakdown, $this->$order),
-    //             'raw_logs' => $logs
-    //         ]
-    //     ];
-
-    //     return $response; // return array to caller
-
-    // }
 }
