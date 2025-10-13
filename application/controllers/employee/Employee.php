@@ -9,14 +9,11 @@ class Employee extends Home_Controller
         parent::__construct();
         $this->load->helper('security');
         $this->load->library('form_validation');
+    }
+     public function index(){
         if (!is_employee()) {
             redirect(base_url());
         }
-    }
-     public function index(){
-        // if (!$this->session->userdata('logged_in')) {
-        //     redirect('login');
-        // }
         $data = array();
         $data['page_title'] = 'Employee Dashboard';
         $data['is_employee_admin'] = false;
@@ -29,6 +26,9 @@ class Employee extends Home_Controller
     }
 
     public function screenshot(){
+        if (!is_employee()) {
+            redirect(base_url());
+        }
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }

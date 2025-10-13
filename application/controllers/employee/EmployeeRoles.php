@@ -16,9 +16,9 @@ class EmployeeRoles extends Home_Controller {
         require_feature(13);
         $data = array();
         $data['is_employee_admin'] = true;
-        $data['can_edit'] = $this->auth_model->get_permission(11);
+        $data['can_edit'] = $this->auth_model->get_permission(13);
         $data['page_title'] = 'Create Roles & Permission';
-        $data['departments'] = $this->admin_model->get_by_user('departments');
+        $data['departments'] = $this->admin_model->get_by_user_status('departments');
         $data['main_content'] = $this->load->view('admin/employee/hrm/role_permission', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
@@ -35,7 +35,7 @@ class EmployeeRoles extends Home_Controller {
         $data['is_employee_admin'] = true;
         $data['can_edit'] = $this->auth_model->get_permission(13);
         $data['page_title'] = 'Roles & Permission';
-        $data['departments'] = $this->admin_model->get_by_user('departments');
+        $data['departments'] = $this->admin_model->get_by_user_status('departments');
         $data['roles'] = $this->admin_model->select_by_user('employee_roles');
         $data['main_content'] = $this->load->view('admin/user/hrm/role', $data, TRUE);
         $this->load->view('admin/index', $data);
