@@ -223,6 +223,37 @@ class Auth_model extends CI_Model {
         }
     }
 
+    //check features for showing navigation bar
+    public function check_role_access()
+    {
+        $employee_id = $this->session->userdata('employee_id');
+        $user_id = $this->session->userdata('id') ?: $this->session->userdata('employee_org_id');
+
+        // Get the employee's role_id
+        $this->db->select('role_id');
+        $this->db->from('employees');
+        $this->db->where('id', $employee_id);
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get();
+
+        if ($query->num_rows() == 0) {
+            return false; // Employee not found
+        }
+
+        $role_id = $query->row()->role_id;
+
+        // Check if role_id exists in role_feature_access
+        $this->db->select('id');
+        $this->db->from('role_feature_access');
+        $this->db->where('role_id', $role_id);
+        $access_query = $this->db->get();
+
+        if ($access_query->num_rows() > 0) {
+            return true; // Role has feature access
+        } else {
+            return false; // Role does not have access
+        }
+    }
 
     // check valid user by id
     public function validate_id($id)
