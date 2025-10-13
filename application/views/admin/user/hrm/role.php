@@ -18,7 +18,7 @@
 
                 <div class="form-group">
                     <label><?php echo 'Departments' ?> <span class="text-danger">*</span></label>
-                    <select class="form-control" name="department">
+                    <select class="form-control single_select" name="department">
                         <option value=""><?php echo trans('select') ?></option>
                         <?php foreach ($departments as $department): ?>
                             <option value="<?php echo html_escape($department->id); ?>"
