@@ -628,7 +628,9 @@
       </ul>
       <?php if (is_employee()): ?>
         <div class="d-flex justify-content-start mt-20">
-            <div>
+          <div>
+
+            <?php if (check_role_access()): ?>
               <?php if (!$is_employee_admin): ?>
                 <a href="<?php echo base_url('admin/Navbar_Redirection') ?>" class="btn btn-secondary bg-dark upgrade_btn">
                   <i class="bi bi-arrow-right-square mr-5"></i> <span><?php echo "nav to admin" ?></span>
@@ -638,7 +640,9 @@
                   <i class="bi bi-arrow-left-square mr-5"></i> <span><?php echo "nav to your account" ?></span>
                 </a>
               <?php endif; ?>
-            </div>
+            <?php endif; ?>
+
+          </div>
         <?php else: ?>
           <?php if (is_admin()): ?>
             <a href="#" class="btn btn-secondary upgrade_btn mt-20">
