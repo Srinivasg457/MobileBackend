@@ -216,7 +216,7 @@
 
 
 
-    <?php if (isset($page_title) && $page_title == "Users"): ?>
+    <?php  if (isset($page_title) && $page_title == "Users"): ?>
       <div class="list_area container">
 
         <form class="user_sort_form" role="search" autocomplete="off" action="<?php echo base_url('admin/users') ?>" method="get">

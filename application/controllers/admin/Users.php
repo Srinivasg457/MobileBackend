@@ -185,7 +185,7 @@ class Users extends Home_Controller {
                             'time_zone' => $this->input->post('time_zone', true)
                         );
                         $this->common_model->insert($org_settings, 'org_settings');
-                        $this->admin_model->intial_department_storing($id, $uid);   // (user_id, business_uid)
+                        // $this->admin_model->intial_department_storing($id, $uid);   // (user_id, business_uid)
                     }
 
                 }
@@ -300,7 +300,7 @@ class Users extends Home_Controller {
                             ->select('uid')
                             ->get_where('business', ['user_id' => $id])
                             ->row('uid');
-                        $this->admin_model->intial_department_storing($id, $business_uid);
+                        // $this->admin_model->intial_department_storing($id, $business_uid);
                     }
 
                     $this->db->trans_complete();
@@ -717,7 +717,7 @@ class Users extends Home_Controller {
                             'time_zone' => $this->input->post('time_zone', true)
                         );
                         $this->common_model->insert($org_settings, 'org_settings');
-                        $this->admin_model->intial_department_storing($id, $uid);   // (user_id, business_uid)
+                        // $this->admin_model->intial_department_storing($id, $uid);   // (user_id, business_uid)
                     }
                 }
 

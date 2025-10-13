@@ -30,107 +30,9 @@ class Monitoring_room extends Home_Controller {
         $this->load->view('admin/index', $data);
 
     }
-    //     public function list_employees_by_user()
-    // {
-    //     // Get user_id from GET or POST (based on your request method)
-    //     $user_id = $this->session->userdata('id');
-
-    //     // 1. Validate user ID
-    //     if (empty($user_id) || !is_numeric($user_id)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_status_header(400)
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'Valid user ID required'
-    //             ]));
-    //     }
-
-    //     // 2. Get employees from the employees table matching the provided user_id
-    //     $employees = $this->db
-    //         ->select('id, name, email')
-    //         ->where('user_id', $user_id)
-    //         ->get('employees')
-    //         ->result_array();
-
-    //     // 3. Return response
-    //     if (!empty($employees)) {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_status_header(200)
-    //             ->set_output(json_encode([
-    //                 'status' => 'success',
-    //                 'user_id' => (int)$user_id,
-    //                 'employees' => $employees,
-    //             ]));
-    //     } else {
-    //         return $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_status_header(404)
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'message' => 'No employees found for the given user ID'
-    //             ]));
-    //     }
-    // }
-    public function list_employees_by_user()
-{
-    // Get user_id from session first
-    $user_id = $this->session->userdata('id');
-
-    // If not found in session, try to get from header
-    if (empty($user_id)) {
-        $user_id = $this->input->get_request_header('user_id', TRUE);
-    }
-
-    // 1. Validate user ID
-    if (empty($user_id) || !is_numeric($user_id)) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'Valid user ID required'
-            ]));
-    }
-
-    // 2. Get employees from the employees table matching the provided user_id
-    $employees = $this->db
-        ->select('id, name, email, country, role_id') // Select the employee details you need
-        ->where('user_id', $user_id)
-        ->get('employees')
-        ->result_array();
-
-    // 2. Filter out CEOs using your helper
-    $filtered = array_filter($employees, function ($emp) {
-        return !is_CEO($emp['role_id']); // Exclude if CEO
-    });
-
-    // 3. Reindex the array (array_filter preserves keys)
-    $filtered = array_values($filtered);
-
-    // 3. Return response
-    if ($filtered) {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(200)
-            ->set_output(json_encode([
-                'status' => 'success',
-                'user_id' => (int)$user_id,
-                'employees' => $filtered,
-            ]));
-    } else {
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(404)
-            ->set_output(json_encode([
-                'status' => 'error',
-                'message' => 'No employees found for the given user ID'
-            ]));
-    }
-}
-    public function list_employees_by_name()
+        public function list_employees_by_user()
     {
+        // Get user_id from GET or POST (based on your request method)
         $user_id = $this->session->userdata('id');
 
         // 1. Validate user ID
@@ -144,38 +46,34 @@ class Monitoring_room extends Home_Controller {
                 ]));
         }
 
-        // 2. Get optional name filter from query
-        $name = $this->input->get('name');
+        // 2. Get employees from the employees table matching the provided user_id
+        $employees = $this->db
+            ->select('id, name, email')
+            ->where('user_id', $user_id)
+            ->get('employees')
+            ->result_array();
 
-        // 3. Build query
-        $this->db->select('id, name, email, role_id')
-            ->from('employees')
-            ->where('user_id', $user_id);
-
-        if (!empty($name)) {
-            $this->db->like('LOWER(name)', strtolower($name));
+        // 3. Return response
+        if (!empty($employees)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode([
+                    'status' => 'success',
+                    'user_id' => (int)$user_id,
+                    'employees' => $employees,
+                ]));
+        } else {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(404)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'No employees found for the given user ID'
+                ]));
         }
-
-        $this->db->order_by('name', 'ASC');
-        $employees = $this->db->get()->result_array();
-        // 2. Filter out CEOs using your helper
-        $filtered = array_filter($employees, function ($emp) {
-            return !is_CEO($emp['role_id']); // Exclude if CEO
-        });
-
-        // 3. Reindex the array (array_filter preserves keys)
-        $filtered = array_values($filtered);
-
-        // 4. Return response
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(200)
-            ->set_output(json_encode([
-                'status' => 'success',
-                'user_id' => (int)$user_id,
-                'employees' => $filtered
-            ]));
     }
+   
     public function list_employees_ordered()
 {
     $user_id = $this->session->userdata('id') ?? $this->input->get('user_id');
@@ -208,13 +106,6 @@ class Monitoring_room extends Home_Controller {
 
     $this->db->order_by('name', $order);
     $employees = $this->db->get()->result_array();
-        // 2. Filter out CEOs using your helper
-        $filtered = array_filter($employees, function ($emp) {
-            return !is_CEO($emp['role_id']); // Exclude if CEO
-        });
-
-        // 3. Reindex the array (array_filter preserves keys)
-        $filtered = array_values($filtered);
 
     // 4. Return response
     return $this->output
@@ -224,7 +115,7 @@ class Monitoring_room extends Home_Controller {
             'status' => 'success',
             'user_id' => (int)$user_id,
             'order' => $order,
-            'employees' => $filtered
+            'employees' => $employees
         ]));
 }
 

@@ -13,7 +13,7 @@ class EmployeeRoles extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(11);
+        require_feature(13);
         $data = array();
         $data['is_employee_admin'] = true;
         $data['can_edit'] = $this->auth_model->get_permission(11);
@@ -30,186 +30,38 @@ class EmployeeRoles extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(11);
+        require_feature(13);
         $data = array();
         $data['is_employee_admin'] = true;
-        $data['can_edit'] = $this->auth_model->get_permission(11);
+        $data['can_edit'] = $this->auth_model->get_permission(13);
         $data['page_title'] = 'Roles & Permission';
-        $data['departments'] = $this->admin_model->get_by_user_status('departments');
-        $data['default_roles'] = $this->admin_model->select_asc('default_roles');
-        $data['roles'] = $this->admin_model->get_role_by_user_status('employee_roles');
+        $data['departments'] = $this->admin_model->get_by_user('departments');
+        $data['roles'] = $this->admin_model->select_by_user('employee_roles');
         $data['main_content'] = $this->load->view('admin/user/hrm/role', $data, TRUE);
         $this->load->view('admin/index', $data);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
     }
-    // public function create_role() {
-    //     $input = $this->get_input_data();
-
-    //     $this->form_validation->set_data($input);
-    //     $this->form_validation->set_rules('user_id', 'Organization ID', 'required|integer');
-    //     $this->form_validation->set_rules('department_id', 'Department ID', 'required|integer');
-    //     $this->form_validation->set_rules('role_name', 'Role Name', 'required|max_length[100]');
-    //     $this->form_validation->set_rules('description', 'Description', 'trim|max_length[500]');
-
-    //     if ($this->form_validation->run() === FALSE) {
-    //         return $this->json_response(400, 'Validation failed', [
-    //             'errors' => $this->form_validation->error_array()
-    //         ]);
-    //     }
-
-    //     $user_id = $input['user_id'];
-    //     $department_id = $input['department_id'];
-    //     $role_name = $input['role_name'];
-    //     $description = $input['description'] ?? null;
-
-    //     $existing = $this->db
-    //         ->where([
-    //             'user_id' => $user_id,
-    //             'department_id' => $department_id,
-    //             'role_name' => $role_name
-    //         ])
-    //         ->get('employee_roles')
-    //         ->row();
-
-    //     if ($existing) {
-    //         return $this->json_response(409, 'Role already exists in this organization and department');
-    //     }
-
-    //     $data = [
-    //         'user_id' => $user_id,
-    //         'department_id' => $department_id,
-    //         'role_name' => $role_name,
-    //         'description' => $description,
-    //         'created_at' => get_user_datetime_only($user_id), // Using helper function
-    //         'updated_at' => get_user_datetime_only($user_id)  // Using helper function
-    //     ];
-
-    //     $this->db->trans_start();
-    //     $this->db->insert('employee_roles', $data);
-    //     $role_id = $this->db->insert_id();
-    //     $this->db->trans_complete();
-
-    //     if ($this->db->trans_status() === FALSE) {
-    //         log_message('error', 'Database error: ' . $this->db->error()['message']);
-    //         return $this->json_response(500, 'Database operation failed');
-    //     }
-
-    //     return $this->json_response(201, 'Role created successfully', [
-    //         'role_id' => $role_id,
-    //         'role_name' => $role_name
-    //     ]);
-    // }
-    /**
-     * Give freshly‑created roles their default permissions.
-     *
-     * • If the role definition is 1  → insert ALL features
-     * • If the role definition is 4 or 5 → insert features 3,5,10,11,12
-     *
-     * Call this immediately after inserting into employee_roles.
-     *
-     * @param int $user_id  The user we just assigned the role to
-     */
-    /**
-     * Give newly‑created roles their default permissions.
-     *
-     * • role_id 1 or 2 → all features
-     * • role_id 3      → features 6,3,9,8,1
-     * • role_id 4 or 5 → features 3,5,10,11,12
-     *
-     * Call right after inserting into employee_roles.
-     *
-     * @param int $user_id  The user we just assigned the role to
-     */
-    /**
-     * Give every NEW “super” role (role_id 1‑5) its default permissions.
-     * A role is “new” if it has no rows yet in role_feature_access.
-     * Nothing is updated; existing roles are ignored.
-     */
-    // public function grant_super_role_access(int $user_id): void
-    // {
-    //     /* ------------------------------------------------------------
-    //  * 1.  Find *new* employee_roles rows that need permissions
-    //  * ------------------------------------------------------------ */
-    //     $empRoles = $this->db->query(
-    //         "SELECT er.id, er.role_id
-    //        FROM employee_roles er
-    //       WHERE er.user_id = ?
-    //         AND er.role_id IN (1,2,3,4,5)
-    //         AND er.status  = 1
-    //         AND NOT EXISTS (
-    //               SELECT 1
-    //                 FROM role_feature_access r
-    //                WHERE r.role_id = er.id
-    //                  AND r.user_id = er.user_id
-    //              )",
-    //         [$user_id]
-    //     )->result();
-
-    //     if (empty($empRoles)) {
-    //         return;                                // nothing new to insert
-    //     }
-
-    //     /* ------------------------------------------------------------
-    //  * 2.  Prepare one big insert batch
-    //  * ------------------------------------------------------------ */
-    //     $now   = get_user_datetime_only($user_id);
-    //     $batch = [];
-
-    //     foreach ($empRoles as $er) {
-    //         switch ((int) $er->role_id) {
-    //             case 1:  // fall‑through
-    //             case 2:  // full access
-    //                 $ids = $this->db->select('id')->from('app_features')
-    //                     ->get()->result_array();
-    //                 $featureIds = array_column($ids, 'id');
-    //                 break;
-
-    //             case 3:
-    //                 $featureIds = [6, 3, 9, 8, 1];
-    //                 break;
-
-    //             case 4:  // fall‑through
-    //             case 5:
-    //                 $featureIds = [3, 5, 10, 11, 12];
-    //                 break;
-
-    //             default:
-    //                 continue 2;                    // skip unknown role
-    //         }
-
-    //         foreach ($featureIds as $fid) {
-    //             $batch[] = [
-    //                 'role_id'    => $er->id,       // PK in employee_roles
-    //                 'user_id'    => $user_id,
-    //                 'feature_id' => $fid,
-    //                 'is_read'    => 1,
-    //                 'is_write'   => 1,
-    //                 'is_action'  => 1,
-    //                 'is_delete'  => 1,
-    //                 'status'     => 1,
-    //                 'created_at' => $now,
-    //                 'updated_at' => $now,
-    //             ];
-    //         }
-    //     }
-
-    //     /* ------------------------------------------------------------
-    //  * 3.  Insert (duplicates impossible by design)
-    //  * ------------------------------------------------------------ */
-    //     if (!empty($batch)) {
-    //         $this->db->insert_batch('role_feature_access', $batch);
-
-    //         if ($this->db->error()['code']) {
-    //             log_message(
-    //                 'error',
-    //                 'grant_super_role_access(): ' . json_encode($this->db->error())
-    //             );
-    //         }
-    //     }
-    // }
-
+    public function role_edit($id)
+    {
+        if (!is_org_admin()) {
+            redirect(base_url());
+        }
+        require_feature(13);
+        $data = array();
+        $data['is_employee_admin'] = true;
+        $data['can_edit'] = $this->auth_model->get_permission(13);
+        $data['page_title'] = 'Edit';
+        $data['departments'] = $this->admin_model->get_by_user('departments');
+        $data['role'] = $this->admin_model->select_option($id,'employee_roles');
+        $data['main_content'] = $this->load->view('admin/user/hrm/role', $data, TRUE);
+        $this->load->view('admin/index', $data);
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
+    }
+    
     /* --------------------------------------------------------------------------
  * 1.  Template: which features each *default* role should get on day‑one
  * -------------------------------------------------------------------------- */
@@ -732,6 +584,7 @@ class EmployeeRoles extends Home_Controller {
             ->from('employee_roles as er')
             ->join('departments as d', 'er.department_id = d.id', 'left')
             ->where('er.user_id', $user_id)
+            ->where('er.status', 1)
             ->get()
             ->result();
 

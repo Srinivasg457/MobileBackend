@@ -69,15 +69,15 @@ class Auth_model extends CI_Model {
             ->get('employees')
             ->result_array();
 
-        // Filter out CEOs using your helper
-        $filtered = array_filter($employees, function ($emp) {
-            return !is_CEO($emp['role_id']);
-        });
+        // // Filter out CEOs using your helper
+        // $filtered = array_filter($employees, function ($emp) {
+        //     return !is_CEO($emp['role_id']);
+        // });
 
         // Reindex the array
-        $filtered = array_values($filtered);
+        // $filtered = array_values($filtered);
 
-        return $filtered;
+        return $employees;
     }
     public function get_random_employee_id()
     {
@@ -99,7 +99,7 @@ class Auth_model extends CI_Model {
             redirect('login');
         }
         
-        if (!$this->session->userdata('is_org_admin') && !$this->session->userdata('is_org_ceo')) {
+        if (!$this->session->userdata('is_org_admin')) {
  
         $CI = &get_instance();
         $allowed = get_allowed_feature_ids();   // <- your existing helper
@@ -761,42 +761,6 @@ public function is_plan_standard()
         )->row();
     }
 
-    public function is_CEO($role_id)
-    {
-        if (!$role_id) {
-            // 1️⃣  Get role_id from session
-            $role_id = (int) $this->session->userdata('role_id');        }
-    
-        if (!$role_id) {
-            return false;                       // no role in session
-        }
-
-        // 2️⃣  Fetch that role from employee_roles
-        $role = $this->db->select('role_id')       // or 'slug' if that’s your column
-            ->from('employee_roles')
-            ->where('id', $role_id)
-            ->limit(1)
-            ->get()
-            ->row();
-
-        if (!$role) {
-            return false;                       // role not found
-        }
-
-        // 3️⃣  Compare name to “CEO” (case‑insensitive)
-        return $role->role_id == 1;
-    }
-    public function is_user_ceo()
-    {
-            // 1️⃣  Get from session
-            $is_ceo = (int) $this->session->userdata('is_org_ceo');
-        
-
-        if (!$is_ceo) {
-            return false;                       // no role in session
-        }
-       return true;
-    }
     public function get_allowed_feature_ids()
     {
         $user_id = $this->session->userdata('id');
@@ -815,10 +779,9 @@ public function is_plan_standard()
 
     public function is_access_for_all_role()
     {
-        $is_ceo = (int) $this->session->userdata('is_org_ceo');
         $is_org_admin = (int) $this->session->userdata('is_org_admin');
 
-        if($is_ceo === 1 || $is_org_admin === 1){
+        if($is_org_admin === 1){
             return true;
         }
         return false;
@@ -835,7 +798,6 @@ public function is_plan_standard()
     {
         // Always allow CEO or Org Admin
         if (
-            (int) $this->session->userdata('is_org_ceo') === 1 ||
             (int) $this->session->userdata('is_org_admin') === 1
         ) {
             return true;

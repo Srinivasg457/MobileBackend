@@ -127,7 +127,7 @@
                 </ul>
               </li>
             <?php endif; ?>
-            <?php if ($can(13)): ?>
+            <?php if ($can(11)): ?>
               <li class="<?php if (isset($page_title) && $page_title == "application_tracker") {
                             echo "active";
                           } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -185,7 +185,7 @@
               <li class="<?php if (isset($page_title) && $page_title == "Department") {
                             echo "active";
                           } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                <a href="<?php echo base_url('admin/hrm/departments') ?>">
+                <a href="<?php echo base_url('admin/hrm/department') ?>">
                   <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('departments') ?></span>
                 </a>
               </li>
@@ -199,7 +199,7 @@
                 </a>
               </li>
             <?php endif; ?>
-            <?php if ($can(11)): ?>
+            <?php if ($can(13)): ?>
               <li class="<?php if (isset($page_title) && $page_title == "Create Roles & Permission") {
                             echo "active";
                           } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
@@ -514,7 +514,7 @@
             <li class="<?php if (isset($page_title) && $page_title == "Department") {
                           echo "active";
                         } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('admin/hrm/departments') ?>">
+              <a href="<?php echo base_url('admin/hrm/department') ?>">
                 <i class="bi bi-list-check mr-5"></i> <span><?php echo trans('departments') ?></span>
               </a>
             </li>
@@ -628,7 +628,6 @@
       </ul>
       <?php if (is_employee()): ?>
         <div class="d-flex justify-content-start mt-20">
-          <?php if (check_department()): ?>
             <div>
               <?php if (!$is_employee_admin): ?>
                 <a href="<?php echo base_url('admin/Navbar_Redirection') ?>" class="btn btn-secondary bg-dark upgrade_btn">
@@ -640,7 +639,6 @@
                 </a>
               <?php endif; ?>
             </div>
-          <?php endif; ?>
         <?php else: ?>
           <?php if (is_admin()): ?>
             <a href="#" class="btn btn-secondary upgrade_btn mt-20">

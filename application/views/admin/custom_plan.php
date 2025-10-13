@@ -8,6 +8,13 @@
             background-color: #0FB783;
             color: white;
         }
+
+        .toggle-switch {
+            >.toggle {
+                width: 90px !important;
+                height: 35px !important;
+            }
+        }
     </style>
     <!-- Main content -->
     <section class="content">
@@ -15,34 +22,37 @@
             <h3 class="box-title"><?php echo trans('') ?></h3>
         </div> -->
 
-
         <div class="container">
             <div class="row">
                 <div class="box add_area d-block">
                     <div class="box-header with-border">
                         <h3 class="box-title"><?php echo trans('create-new') ?></h3>
                         <div class="box-tools pull-right">
-                            <a href="<?php echo base_url('admin/users') ?>" class="text-right btn btn-secondary  btn-sm"><i class="fa fa-angle-left"></i><?php echo trans('back') ?></a>
+                            <a href="<?php echo base_url('admin/users') ?>" class="text-right btn btn-secondary  btn-sm"><i class="fa fa-angle-left"></i> <?php echo trans('back') ?></a>
                         </div>
                     </div>
 
                     <div class="box-body pl-0">
-                        <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/users/add') ?>" role="form">
+                        <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/custom_plan/add') ?>" role="form">
                             <div class="box-body">
 
                                 <div class="form-group">
                                     <label><?php echo trans('name') ?> <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" required name="name" value="<?php echo html_escape($user[0]['name']); ?>">
+                                    <input type="text" class="form-control" required name="name" value="">
                                 </div>
 
                                 <div class="form-group">
                                     <label><?php echo trans('email') ?> <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" required name="email" value="<?php echo html_escape($user[0]['email']); ?>">
+                                    <input type="email" class="form-control" required name="email" value="">
                                 </div>
 
                                 <div class="form-group">
                                     <label><?php echo trans('password') ?> <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control" name="password" placeholder="<?php echo trans('set-or-reset-password') ?>" value="">
+                                    <input type="password" class="form-control" name="password"  value="">
+                                </div>
+                                <div class="form-group">
+                                    <label><?php echo "Plan Price" ?> <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="amount" value="">
                                 </div>
 
                                 <div class="form-group mb-4">
@@ -53,9 +63,12 @@
                                     <div class="input-group">
                                         <input type="text" name="package_name" value="Customized Plan" class=" form-control" readonly style="cursor:pointer;">
                                         <div class="input-group-addon custom_plan_div" style="cursor:pointer;">
-                                            <span type="button" class="" id="customPlanBtn">
+                                            <span type="button" class="" id="customPlanBtn" data-toggle="modal" data-target="#customPlanModal">
                                                 <i class="fa fa-puzzle-piece"></i> <?php echo 'Customize Features' ?>
                                             </span>
+                                            <!-- <button type="button" class="btn btn-info" data-toggle="modal" data-target="#customPlanModal">
+                                                <i class="fa fa-puzzle-piece"></i> Customize Features
+                                            </button> -->
                                         </div>
                                     </div>
                                 </div>
@@ -131,14 +144,104 @@
                                     <button type="submit" class="btn btn-info pull-left"><?php echo trans('save') ?></button>
                                 </div>
                             </div>
+                            <!-- Custom Plan Modal -->
+                            <div class="modal fade" id="customPlanModal" tabindex="-1" role="dialog" aria-labelledby="customPlanModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content" style=" margin-top: 10% !important">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="customPlanModalLabel">Customize Features & Options</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
 
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <?php foreach ($features as $feature): ?>
+                                                    <div class="col-md-4  form-group">
+
+                                                        <label class="control-label"><?= $feature->name ?>:</label>
+                                                        <div>
+                                                            <label class="toggle-switch ">
+                                                                <input type="checkbox" class="toggle-flag" name="features[<?= $feature->id ?>][flag]" value="1" data-toggle="toggle" data-onstyle="info" data-width="100" checked>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-8 mb-5 form-group">
+                                                        <label class="control-label">Select:</label>
+                                                        <!-- Feature Option -->
+                                                        <select name="features[<?= $feature->id ?>][option]" class="form-control single_select">
+                                                            <option value="basic"><?= $feature->basic ?></option>
+                                                            <option value="standard"><?= $feature->standard ?></option>
+                                                            <option value="premium"><?= $feature->premium ?></option>
+                                                        </select>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <!-- CSRF Token -->
+                                            <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                                            <button type="button" class="btn btn-info" data-dismiss="modal">Save Features</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
-
-
     </section>
 </div>
+<script>
+    $(document).ready(function() {
+
+        // Initialize toggle selects
+        // $('.toggle-flag').each(function() {
+        //     var $toggle = $(this);
+        //     var $select = $toggle.closest('.col-md-4').next('.col-md-8').find('select');
+
+        //     // Set initial state
+        //     if (!$toggle.is(':checked')) {
+        //         $select.prop('disabled', true).val('');
+        //         $toggle.data('value', 0);
+        //     } else {
+        //         $toggle.data('value', 1);
+        //     }
+        // });
+
+        // On toggle change
+        $('.toggle-flag').change(function() {
+            var $toggle = $(this);
+            var $select = $toggle.closest('.col-md-4').next('.col-md-8').find('select');
+
+            if ($toggle.is(':checked')) {
+                $select.prop('disabled', false);
+                $toggle.data('value', 1);
+            } else {
+                $select.prop('disabled', true).val('');
+                $toggle.data('value', 0);
+            }
+        });
+
+        // On form submit, replace toggles with hidden inputs
+        // $('#customPlanForm').submit(function(e) {
+        //     $('.toggle-flag').each(function() {
+        //         var $toggle = $(this);
+        //         var name = $toggle.attr('name');
+        //         var value = $toggle.data('value');
+
+        //         // Remove toggle from form and replace with hidden input
+        //         $toggle.removeAttr('name');
+        //         $('<input>').attr({
+        //             type: 'hidden',
+        //             name: name,
+        //             value: value
+        //         }).appendTo('#customPlanForm');
+        //     });
+        // });
+
+    });
+</script>

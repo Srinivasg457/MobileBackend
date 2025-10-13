@@ -1059,23 +1059,16 @@ public function get_last_screenshot()
             ->get('employees')
             ->result_array();
 
-        // 2. Filter out CEOs using your helper
-        $filtered = array_filter($employees, function ($emp) {
-            return !is_CEO($emp['role_id']); // Exclude if CEO
-        });
-
-        // 3. Reindex the array (array_filter preserves keys)
-        $filtered = array_values($filtered);
 
         // 3. Return response
-        if ($filtered) {
+        if ($employees) {
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(200)
                 ->set_output(json_encode([
                     'status' => 'success',
                     'user_id' => (int)$user_id,
-                    'employees' => $filtered,
+                    'employees' => $employees,
                 ]));
         } else {
             return $this->output

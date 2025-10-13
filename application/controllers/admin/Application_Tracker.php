@@ -17,7 +17,7 @@ class Application_Tracker extends Home_Controller
             redirect(base_url());
         }
         
-        require_feature(13);
+        require_feature(11);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }

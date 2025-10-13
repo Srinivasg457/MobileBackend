@@ -132,6 +132,7 @@ class Admin_model extends CI_Model {
         return $query;
     }
 
+
     // select by function
     function get_user_by_id($id, $table)
     {
@@ -245,8 +246,16 @@ class Admin_model extends CI_Model {
         $query = $query->result();  
         return $query;
     }
-
-
+   public function get_department($Depart_id)
+{
+        $this->db->select('name');
+        $this->db->from("departments");
+        $this->db->where('user_id', $this->session->userdata('id'));
+        $this->db->where('id', $Depart_id);
+        $query = $this->db->get();
+        $query = $query->row();
+        return $query;
+}
     // select by function
     function get_by_user_and_type($table, $type)
     {
