@@ -21,6 +21,17 @@ if (!function_exists('is_org_admin')) {
 	}
 }
 
+//check custom_plan
+if (!function_exists('is_custom_plan_user')) {
+	function is_custom_plan_user()
+	{
+		// Get a reference to the controller object
+		$ci = &get_instance();
+		return $ci->auth_model->is_custom_plan_user();
+	}
+}
+
+
 //check employee
 if (!function_exists('is_employee')) {
 	function is_employee()

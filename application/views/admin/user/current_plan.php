@@ -68,13 +68,19 @@
                                         <?php echo ucfirst(html_escape($user->status)) ?>
 
                                         <?php if ($user->status != 'verified'): ?>
-                                            <?php  $billing_type = $user->billing_type == 'monthly' ? "monthly":"yearly" ?>
-                                            <div class="mt-3">
-                                                <a href="<?php echo base_url('admin/subscription/upgrade/' . $user->slug . '/' .$billing_type) ?>"
-                                                    class="btn btn-default btn-sm">
-                                                    <i class="fa fa-credit-card"></i> <?php echo 'Complete Payment' ?>
-                                                </a>
-                                            </div>
+                                            <?php if (is_custom_plan_user()): ?>
+                                                <div class="mt-3">
+                                                    <span style="color:red">Your request has been sent. Please wait for the admin to take further action.</span>
+                                                </div>
+                                            <?php else: ?>
+                                                <?php $billing_type = $user->billing_type == 'monthly' ? "monthly" : "yearly" ?>
+                                                <div class="mt-3">
+                                                    <a href="<?php echo base_url('admin/subscription/upgrade/' . $user->slug . '/' . $billing_type) ?>"
+                                                        class="btn btn-default btn-sm">
+                                                        <i class="fa fa-credit-card"></i> <?php echo 'Complete Payment' ?>
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </div>
 
