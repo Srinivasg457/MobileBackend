@@ -24,23 +24,205 @@ class Subscription extends Home_Controller
         $data['main_page'] = 'plan&pack';
         $data['user'] = $this->common_model->get_my_package();
 
-        if (user()->user_type == 'trial') {
-            $data['packages'] = $this->admin_model->get_active_packages('package');
-            $data['features'] = $this->admin_model->select_asc('package_features');
-            $page_load = 'trial_subscription';
-        } else {
-            $data['packages'] = $this->admin_model->get_active_packages_for_subscription('package');
-            $data['features'] = $this->admin_model->get_features_for_subscription('package_features');
-            $page_load = 'subscription';
-        }
-        if (empty($data['packages'])) {
-            $data['no_active_package'] = 1;
+
+        if (is_custom_plan_user()) {
+
+            $data['page_title'] = 'Custom_plan';
+            $data['custom_plan'] = $this->get_custom_plan_feature();
             $data['main_content'] = $this->load->view('include/no_employees_view.php', $data, TRUE);
             $this->load->view('admin/index', $data);
+        } else {
+
+            if (user()->user_type == 'trial') {
+                $data['packages'] = $this->admin_model->get_active_packages('package');
+                $data['features'] = $this->admin_model->select_asc('package_features');
+                $page_load = 'trial_subscription';
+            } else {
+                $data['packages'] = $this->admin_model->get_active_packages_for_subscription('package');
+                $data['features'] = $this->admin_model->get_features_for_subscription('package_features');
+                $page_load = 'subscription';
+            }
+            if (empty($data['packages'])) {
+                $data['no_active_package'] = 1;
+                $data['main_content'] = $this->load->view('include/no_employees_view.php', $data, TRUE);
+                $this->load->view('admin/index', $data);
+            } else {
+                $data['main_content'] = $this->load->view('admin/user/' . $page_load, $data, TRUE);
+                $this->load->view('admin/index', $data);
+            }
         }
-        $data['main_content'] = $this->load->view('admin/user/' . $page_load, $data, TRUE);
-        $this->load->view('admin/index', $data);
     }
+
+    // custom_plan
+
+    public function custom_plan_payment()
+    {
+        // Generate unique payment UID
+        $puid = random_string('numeric', 10);
+
+        // Get user ID from session
+        $user_id = user()->id; // or $this->session->userdata('id');
+
+        // Get the user’s latest payment info (if needed)
+        $payment = $this->admin_model->get_user_payment($user_id);
+
+        // Get billing type from previous payment (or default)
+        $billing_type = isset($payment->billing_type) ? $payment->billing_type : 'monthly';
+
+        // Get the selected package details
+        $package = 5; // custom plan package ID
+        if (empty($package)) {
+            $this->session->set_flashdata('error', 'Package not found.');
+            redirect(base_url('admin/subscription'));
+            return;
+        }
+
+        // Calculate amount and expiry date
+        if ($billing_type === 'monthly') {
+            $amount = (settings()->enable_discount == 1)
+                ? get_discount($package->monthly_price, $package->dis_month)
+                : round($package->monthly_price);
+            $expire_on = date('Y-m-d', strtotime('+1 month'));
+        } else {
+            $amount = (settings()->enable_discount == 1)
+                ? get_discount($package->yearly_price, $package->dis_year)
+                : round($package->yearly_price);
+            $expire_on = date('Y-m-d', strtotime('+12 months'));
+        }
+
+        // Expire previous active payments
+        $payments = $this->admin_model->get_previous_payments($user_id);
+        if (!empty($payments)) {
+            foreach ($payments as $pay) {
+                $this->common_model->edit_option(['status' => 'expired'], $pay->id, 'payment');
+            }
+        }
+
+        // Save new payment record
+        $pay_data = [
+            'user_id'      => $user_id,
+            'puid'         => $puid,
+            'package'      => $package,
+            'billing_type' => $billing_type,
+            'payment_type' => 'Manual',
+            'status'       => 'pending',
+            'created_at'   => my_date_now(),
+            'expire_on' => $expire_on
+        ];
+
+        $this->common_model->insert($pay_data, 'payment');
+
+        // Flash message and redirect
+        $this->session->set_flashdata('msg', 'Your request has been sent. Please wait for the admin to take further action.');
+        redirect(base_url('admin/subscription/current_plan'));
+    }
+
+    // get_custom_plan_feature
+
+    public function get_custom_plan_feature()
+    {
+        $user_id = $this->session->userdata('id'); // Assuming 'id' is the correct session key for user_id
+
+        if ($user_id) {
+            $this->db->select('user_id');
+            $this->db->from('custom_plan_user');
+            $this->db->where('user_id', $user_id); // Ensure the user_id exists in custom_plan_user
+            $query = $this->db->get();
+
+            if ($query->num_rows() >= 1) {
+                $this->db->select('*');
+                $this->db->from('custom_plan_feature');
+                $this->db->where('customer_id', $user_id); // Match customer_id with user_id
+                $this->db->order_by('id', 'DESC'); // Order by id in descending order
+                $this->db->limit(1); // Limit to 1 result to get the first feature based on id DESC
+                $feature_query = $this->db->get();
+
+                if ($feature_query->num_rows() == 1) {
+                    return $this->map_flags_to_features($feature_query->row());  // Return a single row (not an array of rows)
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    // Map flags to their corresponding feature levels (basic, standard, premium)
+    private function map_flags_to_features($feature)
+    {
+        // Initialize an array to store the mapped features
+        $mapped_features = [];
+
+        // Map each flag to the corresponding feature
+        if ($feature->activity_log_flag) {
+            $mapped_features['activity_log'] = $this->fetch_package_feature_values($feature->activity_log_flag, 1, $feature->activity_log_feature);
+        }
+        if ($feature->time_cards_flag) {
+            $mapped_features['time_cards'] = $this->fetch_package_feature_values($feature->time_cards_flag, 2, $feature->time_cards_feature);
+        }
+        if ($feature->notification_flag) {
+            $mapped_features['notification'] = $this->fetch_package_feature_values($feature->notification_flag, 3, $feature->notification_feature);
+        }
+        if ($feature->organization_settings_flag) {
+            $mapped_features['organization_settings'] = $this->fetch_package_feature_values($feature->organization_settings_flag, 4, $feature->organization_settings_feature);
+        }
+        if ($feature->employee_settings_flag) {
+            $mapped_features['employee_settings'] = $this->fetch_package_feature_values($feature->employee_settings_flag, 5, $feature->employee_settings_feature);
+        }
+        if ($feature->screenshots_flag) {
+            $mapped_features['screenshots'] = $this->fetch_package_feature_values($feature->screenshots_flag, 6, $feature->screenshots_feature);
+        }
+        if ($feature->webcam_screenshots_flag) {
+            $mapped_features['webcam_screenshots'] = $this->fetch_package_feature_values($feature->webcam_screenshots_flag, 7, $feature->webcam_screenshots_feature);
+        }
+        if ($feature->live_monitoring_flag) {
+            $mapped_features['live_monitoring'] = $this->fetch_package_feature_values($feature->live_monitoring_flag, 8, $feature->live_monitoring_feature);
+        }
+        if ($feature->time_approval_flag) {
+            $mapped_features['time_approval'] = $this->fetch_package_feature_values($feature->time_approval_flag, 9, $feature->time_approval_feature);
+        }
+        if ($feature->no_of_employees_flag) {
+            $mapped_features['no_of_employees'] = $this->fetch_package_feature_values($feature->no_of_employees_flag, 10, $feature->no_of_employees_feature);
+        }
+        if ($feature->application_usage_flag) {
+            $mapped_features['application_usage'] = $this->fetch_package_feature_values($feature->application_usage_flag, 11, $feature->application_usage_feature);
+        }
+
+        // Return the mapped features
+        return $mapped_features;
+    }
+
+    // Helper function to fetch package feature values based on the feature_id and feature column (basic, standard, premium)
+    private function fetch_package_feature_values($flag, $feature_id, $feature_column)
+    {
+        $features_with_values = null;
+
+        if ($flag) {
+            // Query the package_features table to fetch the feature value (basic, standard, premium) using the feature column
+            $this->db->select('name, ' . $feature_column . ' as feature'); // Select the appropriate feature value column
+            $this->db->from('package_features');
+            $this->db->where('id', $feature_id); // Match the feature ID
+
+            // Execute the query
+            $query = $this->db->get();
+
+            // Check if the package feature is found and return the value
+            if ($query->num_rows() == 1) {
+                $package_feature = $query->row();
+                $features_with_values = $package_feature->feature; // Get the feature value (basic, standard, premium)
+            }
+        }
+
+        // If the flag is not set (0 or null), return null
+        return $features_with_values;
+    }
+
+
+
+
     public function currentPlan()
     {
         if (!is_org_admin()) {

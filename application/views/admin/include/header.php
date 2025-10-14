@@ -76,6 +76,10 @@
   ?>
 
   <style type="text/css">
+    .box .custom-warning {
+      background-color: #fbf2ce !important;
+    }
+
     /* Emoji container
   .chat-bot  #emoji-container {
       position: relative;

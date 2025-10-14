@@ -1,10 +1,11 @@
 <?php
-class Auth_model extends CI_Model {
+class Auth_model extends CI_Model
+{
 
     public function edit_option_md5($action, $id, $table)
     {
-        $this->db->where('md5(id)',$id);
-        $this->db->update($table,$action);
+        $this->db->where('md5(id)', $id);
+        $this->db->update($table, $action);
         return;
     }
 
@@ -92,27 +93,27 @@ class Auth_model extends CI_Model {
 
         return $random_employee['id'];
     }
-   public function require_feature(int $featureId): void
+    public function require_feature(int $featureId): void
     {
         // for security purpose
         if (!$this->session->userdata('logged_in') && !$this->session->userdata('employee_logged_in')) {
             redirect('login');
         }
-        
+
         if (!$this->session->userdata('is_org_admin')) {
- 
-        $CI = &get_instance();
-        $allowed = get_allowed_feature_ids();   // <- your existing helper
 
-        if (!in_array($featureId, $allowed, true)) {
-            // Either redirect...
-            redirect('error-404');
+            $CI = &get_instance();
+            $allowed = get_allowed_feature_ids();   // <- your existing helper
 
-            // ...or show a 403:
-            // show_error('Forbidden', 403, 'Access denied');
-            exit;
+            if (!in_array($featureId, $allowed, true)) {
+                // Either redirect...
+                redirect('error-404');
+
+                // ...or show a 403:
+                // show_error('Forbidden', 403, 'Access denied');
+                exit;
+            }
         }
-    }
     }
     //is admin
     public function is_admin()
@@ -133,7 +134,7 @@ class Auth_model extends CI_Model {
 
     //is user
     public function is_user()
-    {   
+    {
         get_header_info();
         //check logged in
         if (!$this->is_logged_in()) {
@@ -148,6 +149,29 @@ class Auth_model extends CI_Model {
         }
     }
 
+    //is custom_plan
+    public function is_custom_plan_user()
+    {
+
+        if (!$this->is_logged_in()) {
+            return false;
+        }
+
+        $user = user();  // Assuming user() returns current logged-in user object
+
+        if ($user->role == 'user') {
+            // Get the latest payment record for the user ordered by id descending
+            $this->db->where('user_id', $user->id);
+            $this->db->order_by('id', 'DESC');
+            $payment = $this->db->get('payment', 1)->row(); // limit 1 for latest record
+
+            if ($payment && $payment->package == 5) {
+                return true;  // Latest package is 5
+            }
+        }
+
+        return false;
+    }
 
     //is pro user
     public function is_pro_user()
@@ -182,12 +206,12 @@ class Auth_model extends CI_Model {
     {
         $this->db->select('*');
         $this->db->from('users_role');
-        $this->db->where('email', $email); 
+        $this->db->where('email', $email);
         $this->db->limit(1);
         $query = $this->db->get();
-        if($query->num_rows() == 1) {                 
+        if ($query->num_rows() == 1) {
             return $query->result();
-        }else{
+        } else {
             $result = $this->check_email($email);
             return $result;
         }
@@ -199,12 +223,12 @@ class Auth_model extends CI_Model {
     {
         $this->db->select('*');
         $this->db->from('users');
-        $this->db->where('email', $email); 
+        $this->db->where('email', $email);
         $this->db->limit(1);
         $query = $this->db->get();
-        if($query->num_rows() == 1) {                 
+        if ($query->num_rows() == 1) {
             return $query->result();
-        }else{
+        } else {
             return false;
         }
     }
@@ -260,14 +284,12 @@ class Auth_model extends CI_Model {
     {
         $this->db->select('*');
         $this->db->from('users');
-        $this->db->where('md5(id)', $id); 
+        $this->db->where('md5(id)', $id);
         $this->db->limit(1);
         $query = $this->db->get();
-        if($query -> num_rows() == 1)
-        {                 
+        if ($query->num_rows() == 1) {
             return $query->row();
-        }
-        else{
+        } else {
             return false;
         }
     }
@@ -277,12 +299,12 @@ class Auth_model extends CI_Model {
     {
         $this->db->select('*');
         $this->db->from('users');
-        $this->db->where('verify_code', $code); 
+        $this->db->where('verify_code', $code);
         $this->db->limit(1);
         $query = $this->db->get();
-        if($query->num_rows() == 1) {                 
+        if ($query->num_rows() == 1) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -291,23 +313,24 @@ class Auth_model extends CI_Model {
 
     // check valid user
     function validate_user()
-    {            
-        
+    {
+
         $this->db->select('*');
         $this->db->from('users');
         $this->db->where('email', $this->input->post('user_name'));
         $this->db->or_where('user_name', $this->input->post('user_name'));
         $this->db->limit(1);
-        $query = $this->db->get();   
-        if($query->num_rows() == 1){                 
-           return $query->row();
-        }else{
+        $query = $this->db->get();
+        if ($query->num_rows() == 1) {
+            return $query->row();
+        } else {
             $result = $this->validate_role();
             return $result;
         }
     }
-   // check valid employee
-    function validate_employee(){
+    // check valid employee
+    function validate_employee()
+    {
         $this->db->select('*');
         $this->db->from('employees');
         $this->db->where('email', $this->input->post('user_name'));
@@ -322,17 +345,15 @@ class Auth_model extends CI_Model {
 
     // check valid staff
     function validate_role()
-    {   
+    {
         $this->db->select('*');
         $this->db->from('users_role');
         $this->db->where('email', $this->input->post('user_name'));
         $this->db->limit(1);
-        $query = $this->db->get();   
-        if($query->num_rows() > 0)
-        {                 
-           return $query->row();
-        }
-        else{
+        $query = $this->db->get();
+        if ($query->num_rows() > 0) {
+            return $query->row();
+        } else {
             return FALSE;
         }
     }
@@ -345,7 +366,7 @@ class Auth_model extends CI_Model {
         $settings = get_settings();
 
         if ($settings->mail_protocol == "mail") {
-            $config = Array(
+            $config = array(
                 'protocol' => 'mail',
                 'smtp_host' => $settings->mail_host,
                 'smtp_port' => $settings->mail_port,
@@ -357,7 +378,7 @@ class Auth_model extends CI_Model {
                 'wordwrap' => TRUE
             );
         } else {
-            $config = Array(
+            $config = array(
                 'protocol' => 'smtp',
                 'smtp_host' => $settings->mail_host,
                 'smtp_port' => $settings->mail_port,
@@ -515,10 +536,8 @@ class Auth_model extends CI_Model {
         }
     }
 
-    public function check_role_department(){
+    public function check_role_department() {}
 
-    }
-    
     // public function is_pack_trial()
     // {
 
@@ -533,23 +552,23 @@ class Auth_model extends CI_Model {
     // }
 
     public function is_pack_trial()
-{
-    $user_id = user()->id;
-    $this->db->where('id', $user_id);
-    $user = $this->db->get('users')->row();
+    {
+        $user_id = user()->id;
+        $this->db->where('id', $user_id);
+        $user = $this->db->get('users')->row();
 
-    if ($user && strtolower($user->user_type) === 'trial') {
-        // Check if trial has expired
-        if (isset($user->trial_expire)) {
-            $today = date('Y-m-d');
-            if ($user->trial_expire >= $today) {
-                return true; // Still in trial period
+        if ($user && strtolower($user->user_type) === 'trial') {
+            // Check if trial has expired
+            if (isset($user->trial_expire)) {
+                $today = date('Y-m-d');
+                if ($user->trial_expire >= $today) {
+                    return true; // Still in trial period
+                }
             }
+            return false; // Either no expiration date set or trial has expired
         }
-        return false; // Either no expiration date set or trial has expired
+        return false;
     }
-    return false;
-}
     function has_verified_package($packageIds)
     {
         // $CI = &get_instance();          // CodeIgniter super‑object
@@ -559,16 +578,16 @@ class Auth_model extends CI_Model {
             return false;               // not logged in
         }
 
-         $CI= $this->db->select('*')
+        $CI = $this->db->select('*')
             ->from('payment')
             ->where('user_id', $user->id)
             ->where('package', $packageIds)
             ->order_by('id', 'DESC')   // newest first
             ->limit(1);
 
-        if($CI->status == "pending"){
+        if ($CI->status == "pending") {
             return false;
-        }  
+        }
         return true;    // TRUE if a row exists
     }
 
@@ -576,53 +595,53 @@ class Auth_model extends CI_Model {
  |  Thin wrappers for readability
  |  (package IDs: Basic=2, Standard=3, Premium=4, Custom=5)
  -------------------------------------------------*/
- public function is_plan_basic()
-{
-    $user_id = user()->id;
+    public function is_plan_basic()
+    {
+        $user_id = user()->id;
 
         $this->db->where('user_id', $user_id);
         $this->db->where('package', 2);
         $this->db->order_by('id', 'DESC'); // latest id first
         $payment = $this->db->get('payment')->row();
-    if ($payment) {
-        // Check if package hasn't expired (assuming there's an expire_date column)
-        if ($payment->status === 'verified') {
-            $today = date('Y-m-d');
-            if ($payment->expire_on >= $today) {
-                return true; // Package 2 is active
+        if ($payment) {
+            // Check if package hasn't expired (assuming there's an expire_date column)
+            if ($payment->status === 'verified') {
+                $today = date('Y-m-d');
+                if ($payment->expire_on >= $today) {
+                    return true; // Package 2 is active
+                }
             }
         }
+
+        return false;
     }
-    
-    return false;
-}
-public function is_plan_standard()
-{
-    $user_id = user()->id;
-    
-    $this->db->where('user_id', $user_id);
-    $this->db->where('package', 3);
-    $this->db->order_by('id', 'DESC'); // latest id first
+    public function is_plan_standard()
+    {
+        $user_id = user()->id;
+
+        $this->db->where('user_id', $user_id);
+        $this->db->where('package', 3);
+        $this->db->order_by('id', 'DESC'); // latest id first
         $payment = $this->db->get('payment')->row();
 
-    if ($payment) {
-        // Check if package hasn't expired (assuming there's an expire_date column)
-        if ($payment->status === 'verified') {
-            $today = date('Y-m-d');
-            if ($payment->expire_on >= $today) {
-                return true; // Package 3 is active
+        if ($payment) {
+            // Check if package hasn't expired (assuming there's an expire_date column)
+            if ($payment->status === 'verified') {
+                $today = date('Y-m-d');
+                if ($payment->expire_on >= $today) {
+                    return true; // Package 3 is active
+                }
+            } else {
+                // If no expiration date, assume it's active
+                return true;
             }
-        } else {
-            // If no expiration date, assume it's active
-            return true;
         }
+
+        return false;
     }
-    
-    return false;
-}
     function is_pack_premium()
     {
-        return $this-> has_verified_package(4);
+        return $this->has_verified_package(4);
     }
     function is_pack_customization()
     {
@@ -662,7 +681,7 @@ public function is_plan_standard()
 
         if (!$user_id) {
             $user_id = $ci->session->userdata('id');
-        }        
+        }
 
         // Validate
         if (empty($user_id) || !is_numeric($user_id)) {
@@ -690,10 +709,10 @@ public function is_plan_standard()
         $ci = &get_instance();
 
         // If no user_id passed, get from session
-        if(!$user_id){
+        if (!$user_id) {
             $user_id = $ci->session->userdata('id');
         }
-        
+
         if (empty($user_id)) {
             return null;
         }
@@ -760,7 +779,7 @@ public function is_plan_standard()
 
         // Fetch department row from the departments table
         $query = $this->db->get_where('departments', ['id' => $department_id], 1);
-        
+
 
         // Return the result (as object)
         return $query->row();  // Use ->row_array() if you prefer an array
@@ -806,13 +825,13 @@ public function is_plan_standard()
 
         // Flatten to a simple int array
         return array_map('intval', array_column($rows, 'feature_id'));
-    }                                      
+    }
 
     public function is_access_for_all_role()
     {
         $is_org_admin = (int) $this->session->userdata('is_org_admin');
 
-        if($is_org_admin === 1){
+        if ($is_org_admin === 1) {
             return true;
         }
         return false;
