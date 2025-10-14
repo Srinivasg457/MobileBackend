@@ -52,9 +52,9 @@ class Dashboard extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        // if (!is_subscribed()) {
-        //     redirect('/admin/subscription/upgrade_plan');
-        // }
+        if (!is_subscribed()) {
+            redirect('/admin/subscription/upgrade_plan');
+        }
         $data = array();
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Dashboard';
