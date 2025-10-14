@@ -249,8 +249,8 @@ class Users extends Home_Controller {
                         3 => [
                             'user_id'                  => $id,
                             'screenshot_flag'          => 1,
-                            'screenshot_time_interval' => 10,
-                            'webcam_flag'              => 1,
+                            'screenshot_time_interval' => 5,
+                            'webcam_flag'              => 0,
                             'webcam_time_interval'     => 5,
                             'mouse_move_flag'          => 1,
                             'mouse_move_threshold'     => 20,
@@ -263,7 +263,7 @@ class Users extends Home_Controller {
                         4 => [
                             'user_id'                  => $id,
                             'screenshot_flag'          => 1,
-                            'screenshot_time_interval' => 10,
+                            'screenshot_time_interval' => 2,
                             'webcam_flag'              => 1,
                             'webcam_time_interval'     => 5,
                             'mouse_move_flag'          => 1,
@@ -284,12 +284,24 @@ class Users extends Home_Controller {
                     $exists = $this->db->get_where('org_settings', ['user_id' => $id])->row();
 
                     if ($exists) {
-                        $current_pkg = !empty($payment) ?  $payment->package_id : null;
-                        $new_pkg     = $plan;
-                        $skipOrgSave = ($current_pkg == 3 && $new_pkg == 4);
-                         if(!$skipOrgSave){
-                        $flags['updated_at'] = my_date_now();
-                        $this->db->where('user_id', $id)->update('org_settings', $flags);
+                        unset($flags['idle_time_flag'], $flags['timecards_time_interval']);
+
+                        if ($pkg == 2) {
+                            // $this->db->where('user_id', $user_id)->update('org_settings', [
+                            //     'webcam_flag' => 0, // Reset or set webcam to 0
+                            //     'updated_at'  => "2025-10-11", // Update timestamp
+                            // ]);
+                            $this->db->update(
+                                'org_settings',
+                                [
+                                    'webcam_flag' => 0, // Reset or set webcam to 0
+                                    'updated_at'  => get_user_datetime_only($id), // Update timestamp
+                                ],
+                                ['user_id' => $id]
+                            );
+                            log_message('info', "Org settings updated for user {$id}, package {$package}");
+                        } else {
+                            log_message('error', "Not enough payment history for user {id}");
                          }
                     } else {
                         $flags['created_at'] = my_date_now();

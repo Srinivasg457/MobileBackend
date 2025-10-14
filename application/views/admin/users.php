@@ -375,9 +375,12 @@
                         <?php if ($user->status == 2 || $user->status == 0): ?>
                           <li><a class="dropdown-item" href="<?php echo base_url('admin/users/status_action/1/' . $user->id) ?>"><i class="fa fa-check"></i> <?php echo trans('activate') ?></a></li>
                         <?php endif ?>
+                         <?php if (($payment_status == 'pending') && (get_user_payment_details($user->id)->package_name == "Custom") ) { ?>
+                                     <li class=""><a href="<?php echo base_url('admin/custom_plan/verify_payment/' . $user->id) ?>" class="dropdown-item"> <i class="fa fa-check-circle"></i>Approve custom plan</a></li>
+                        <?php } ?>
 
                         <li class=""><a href="<?php echo base_url('admin/users/offline_payment/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-money"></i> <?php echo trans('offline-payment') ?></a></li>
-                        <li class=""><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo trans('edit') ?></a></li>
+                        <!-- <li class=""><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo "Edit User" ?></a></li> -->
 
                         <li><a class="dropdown-item delete_item" data-val="User" data-id="<?php echo html_escape($user->id); ?>" href="<?php echo base_url('admin/users/delete/' . $user->id); ?>" class="on-defaults remove-row delete_item"><i class="fa fa-trash-o"></i> <?php echo trans('delete') ?></a></li>
 

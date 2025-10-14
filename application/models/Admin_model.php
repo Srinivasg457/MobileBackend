@@ -144,7 +144,17 @@ class Admin_model extends CI_Model {
         $query = $query->row();  
         return $query;
     }
-
+    function get_feature_by_id($id, $table)
+    {
+        $this->db->select();
+        $this->db->from($table);
+        $this->db->where('customer_id', $id);
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+        $query = $this->db->get();
+        $query = $query->row();
+        return $query;
+    }
     // select by function
     // function get_by_user_status($table)
     // {
