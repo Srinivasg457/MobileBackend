@@ -14,6 +14,72 @@ class Admin_model extends CI_Model {
         return;
     } 
 
+    // custom plan
+    public function custom_plans($feature_id)
+    {
+        $user_id = $this->session->userdata('id');
+        if (is_custom_plan_user()) {
+
+            // Get the user's payment
+            $payment = $this->common_model->get_user_payment();
+            $pack_id = $payment->package;
+
+            // Map feature IDs to custom plan columns
+            $feature_map = [
+                1  => 'activity_log_feature',
+                2  => 'time_cards_feature',
+                3  => 'notification_feature',
+                4  => 'organization_settings_feature',
+                5  => 'employee_settings_feature',
+                6  => 'screenshots_feature',
+                7  => 'webcam_screenshots_feature',
+                8  => 'live_monitoring_feature',
+                9  => 'time_approval_feature',
+                10 => 'no_of_employees_feature',
+                11 => 'application_usage_feature'
+            ];
+
+            if (!isset($feature_map[$feature_id])) {
+                return null; // feature ID not found
+            }
+
+            $plan_name   = $feature_map[$feature_id];
+            if ($plan_name) {
+                // Select the slug column dynamically from package_features table
+                $this->db->select($plan_name);
+                $this->db->from('custom_plan_feature');
+                $this->db->where('customer_id', $user_id);
+                $this->db->order_by('id', 'DESC');
+                $this->db->limit(1);
+                $query = $this->db->get();
+
+                return $query->row()->$plan_name; // return a single row
+            }
+        } else {
+            // Get the user's payment
+            $payment = $this->common_model->get_user_payment();
+            $pack_id = $payment->package;
+
+            // Get the package
+            $query = $this->db->get_where('package', ['id' => $pack_id]);
+            $plan = $query->row(); // use row() since it's a single row
+
+            if ($plan) {
+                // Select the slug column dynamically from package_features table
+                // $this->db->select('name, ' . $plan->slug);
+                // $this->db->from('package_features');
+                // $this->db->where('id', $feature_id);
+                // $query = $this->db->get();
+
+                return $plan->slug; // return a single row
+            }
+
+            return null; // if package not found
+
+        }
+        return null; // if package not found
+    }
+    
     // employee edit function
     function edit_option_employee($action, $id, $user_id, $table)
     {

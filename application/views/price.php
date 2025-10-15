@@ -256,34 +256,34 @@
               <hr>
               <div class="card-body">
                 <div class="row">
-                  <div class="col-4 text-end">
+                  <div class="col-4">
                     <p class="mt-2 mb-3">
                       <i class="fa fa-check  me-2"></i>
                     </p>
                   </div>
                   <div class="col-8 text-start">
-                    <p class="mt-2 mb-3">
+                    <p class="mt-2 mb-3" style="margin-left: -55px;">
                       Custom features for your team.
                     </p>
                   </div>
-                  <div class="col-4 text-end">
+                  <div class="col-4">
                     <p class="mt-2 mb-3">
                       <i class="fa fa-cogs  me-2"></i>
                     </p>
                   </div>
-                  <div class="col-8 text-start">
+                  <div class="col-8 text-start" style="margin-left: -55px;">
                     <p class="mt-2 mb-3">
                       Flexible and scalable plan.
                     </p>
                   </div>
 
 
-                  <div class="col-4 text-end">
+                  <div class="col-4 ">
                     <p class="mt-2 mb-3">
                       <i class="fa fa-user-shield me-2"></i>
                     </p>
                   </div>
-                  <div class="col-8 text-start">
+                  <div class="col-8 text-start" style="margin-left: -55px;">
                     <p class="mt-2 mb-3">
                       Admin-managed settings.
                     </p>
@@ -291,24 +291,24 @@
 
 
 
-                  <div class="col-4 text-end">
+                  <div class="col-4">
                     <p class="mt-2 mb-3">
                       <i class="fa fa-sync  me-2"></i>
                     </p>
                   </div>
-                  <div class="col-8 text-start">
+                  <div class="col-8 text-start" style="margin-left: -55px;">
                     <p class="mt-2 mb-3">
                       Easy renew and upgrade. </p>
                   </div>
 
 
 
-                  <div class="col-4 text-end">
+                  <div class="col-4">
                     <p class="mt-2 mb-3">
                       <i class="fa fa-envelope  me-2"></i>
                     </p>
                   </div>
-                  <div class="col-8 text-start">
+                  <div class="col-8 text-start" style="margin-left: -55px;">
                     <p class="mt-2 mb-3">
                       Contact admin for changes.
                     </p>
@@ -321,8 +321,8 @@
                 </p>
 
                 <div class="d-flex justify-content-center gap-2">
-                  <a href="mailto:<?php echo settings()->email; ?>" class="btn btn-light btn-sm">
-                    <i class="fa fa-envelope"></i> Contact Admin
+                  <a href="<?php echo base_url('contact'); ?>" class="btn btn-outline-primary btn-block">
+                    <i class="fa fa-envelope"></i> Contact
                   </a>
                 </div>
               </div>
