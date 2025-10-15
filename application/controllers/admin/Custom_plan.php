@@ -186,14 +186,14 @@ class Custom_plan extends Home_Controller {
 
             $id = $this->input->post('id', true);
 
-            // Validate inputs
-            $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
-            // $this->form_validation->set_rules('email', trans('email'), 'required|max_length[100]');
+            // // Validate inputs
+            // $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
+            // // $this->form_validation->set_rules('email', trans('email'), 'required|max_length[100]');
 
-            if ($this->form_validation->run() === false) {
-                $this->session->set_flashdata('error', validation_errors());
-                redirect(base_url('admin/users'));
-            } 
+            // if ($this->form_validation->run() === false) {
+            //     $this->session->set_flashdata('error', validation_errors());
+            //     redirect(base_url('admin/users'));
+            // } 
             // else {
                 // if ($id != '') {
                 //     $new_password = $this->input->post('password');
@@ -225,16 +225,16 @@ class Custom_plan extends Home_Controller {
 
                 // Create user record
                 $udata = array(
-                    'name' => $this->input->post('name', true),
-                    'user_name' => str_slug($this->input->post('name', true)),
-                    'slug' => str_slug($this->input->post('name', true)),
+                    // 'name' => $this->input->post('name', true),
+                    // 'user_name' => str_slug($this->input->post('name', true)),
+                    // 'slug' => str_slug($this->input->post('name', true)),
                     // 'email' => $mail,
                     // 'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
-                    'status' => $this->input->post('status', true),
-                    'country' => $this->input->post('country', true),
-                    'timezone' => $this->input->post('time_zone', true),
+                    // 'status' => $this->input->post('status', true),
+                    // 'country' => $this->input->post('country', true),
+                    // 'timezone' => $this->input->post('time_zone', true),
                 );
-                    $this->admin_model->edit_option($udata, $id, 'users');
+                    // $this->admin_model->edit_option($udata, $id, 'users');
                     $this->session->set_flashdata('msg', 'Updated Successfully.');
 
 
@@ -258,21 +258,34 @@ class Custom_plan extends Home_Controller {
                 );
                     $this->admin_model->update_payment($pdata, $id, 'payment');
                     $this->session->set_flashdata('msg', 'Updated Successfully.');
-                
 
-                // Create custom plan user record
-                $cdata = array(
-                    'user_id' => $id,
-                    'plan_name' => "Custom",
-                    'start_date' => my_date_now(),
-                    'end_date' => $expire_on,
-                    'updated_at' => my_date_now(),
-                );
-                $this->admin_model->edit_option($cdata, $id, 'custom_plan_user');
-                $this->session->set_flashdata('msg', 'Updated Successfully.');
 
-                // Save modal features data
-                $features = $this->input->post('features');
+            // Create custom plan user record
+            // Check if a custom plan already exists for this user
+            $exists = $this->db->get_where('custom_plan_user', ['user_id' => $id])->row();
+
+            $cdata = array(
+                'user_id'    => $id,
+                'plan_name'  => "Custom",
+                'start_date' => my_date_now(),
+                'end_date'   => $expire_on,
+                'updated_at' => my_date_now(),
+            );
+
+            if ($exists) {
+                // Update existing record
+                $this->db->where('user_id', $id);
+                $this->db->update('custom_plan_user', $cdata);
+            } else {
+                // Insert new record
+                $this->db->insert('custom_plan_user', $cdata);
+            }
+
+            $this->session->set_flashdata('msg', 'Updated Successfully.');
+
+
+            // Save modal features data
+            $features = $this->input->post('features');
                 $this->save_custom_plan_features($id, $features);
                 $this->add_org_settings($id, $features, $this->input->post('time_zone', true));
 
