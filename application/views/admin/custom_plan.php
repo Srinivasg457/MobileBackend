@@ -26,6 +26,8 @@
                         <?php
                         if (isset($page_title) && $page_title == "Edit"): ?>
                             <h3 class="box-title"><?php echo "Edit" ?> </h3>
+                        <?php elseif (isset($page_title) && $page_title == "Add Custom Plan"): ?>
+                            <h3 class="box-title"><?php echo "Add Custom Plan" ?> </h3>
                         <?php else: ?>
                             <h3 class="box-title"><?php echo trans('create-new') ?> </h3>
                         <?php endif; ?>
@@ -35,7 +37,7 @@
                     </div>
 
                     <div class="box-body pl-0">
-                        <?php if (isset($page_title) && $page_title == "Edit"): ?>
+                        <?php if (isset($page_title) && ($page_title == "Edit" || $page_title == "Add Custom Plan")): ?>
                             <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/custom_plan/update') ?>" role="form">
                             <?php else: ?>
                                 <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/custom_plan/add') ?>" role="form">
@@ -52,17 +54,22 @@
                                         <input type="email" class="form-control" required name="email" value="<?php echo html_escape($user[0]['email']); ?>"
                                             <?php if (isset($page_title) && $page_title == "Edit"): ?>Disabled<?php endif; ?>>
                                     </div>
-                                    <?php if (isset($page_title) && $page_title == "Edit"): ?>
+                                    <?php if (isset($page_title) && ($page_title == "Edit" || $page_title == "Add Custom Plan")): ?>
                                     <?php else: ?>
                                         <div class="form-group">
                                             <label><?php echo trans('password') ?> <span class="text-danger">*</span></label>
-                                            <input type="password" class="form-control" name="password" value="<?php echo html_escape($user[0]['password']); ?>">
+                                            <input type="password" class="form-control" name="password" value="<?php echo html_escape($user[0]['password']); ?>" required>
                                         </div>
                                     <?php endif; ?>
 
                                     <div class="form-group">
                                         <label><?php echo "Plan Price" ?> <span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control" name="amount" value="<?php echo html_escape($payment->amount); ?>">
+                                        <?php if (isset($page_title) && $page_title == "Add Custom Plan"): ?>
+                                            <input type="number" class="form-control" name="amount" value="0" required>
+                                        <?php else: ?>
+                                            <input type="number" class="form-control" name="amount" value="<?php echo html_escape($payment->amount); ?>" required>
+                                        <?php endif; ?>
+
                                     </div>
 
                                     <div class="form-group mb-4">
@@ -209,7 +216,7 @@
                                                                         data-toggle="toggle"
                                                                         data-onstyle="info"
                                                                         data-width="100"
-                                                                        <?php if (isset($page_title) && $page_title == "Edit"): ?>
+                                                                        <?php if (!empty($current_feature) && isset($page_title) && $page_title == "Edit"): ?>
                                                                         <?= $flag_value == 1 ? 'checked' : ''; ?>
                                                                         <?php else: ?>
                                                                         checked
@@ -222,8 +229,8 @@
                                                         <div class="col-md-8 mb-5 form-group">
                                                             <label class="control-label">Select:</label>
                                                             <select name="features[<?= $feature->id ?>][option]" class="form-control single_select"
-                                                                <?php if (isset($page_title) && $page_title == "Edit"): ?>
-                                                                <?= $flag_value == 1 ? 'disabled' : ''; ?>
+                                                                <?php if (!empty($current_feature) && isset($page_title) && $page_title == "Edit"): ?>
+                                                                <?= $flag_value == 0 ? 'disabled' : ''; ?>
                                                                 <?php else: ?>
                                                                 <?php endif; ?>>
                                                                 <option value="basic" <?= $feature_value == 'basic' ? 'selected' : '' ?>><?= $feature->basic ?></option>

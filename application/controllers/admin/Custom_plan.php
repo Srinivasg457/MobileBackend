@@ -41,6 +41,21 @@ class Custom_plan extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/custom_plan', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
+
+    public function add_custom_plan($id)
+    {
+        $data = array();
+        $data['page_title'] = 'Add Custom Plan';
+        $data['packages'] = $this->admin_model->select_asc('package');
+        $data['user'] = $this->admin_model->select_option($id, 'users');
+        $data['business'] = $this->admin_model->get_user_by_id($id, 'business');
+        $data['payment'] = $this->admin_model->get_user_payment($id);
+        $data['current_feature'] = $this->admin_model->get_feature_by_id($id, 'custom_plan_feature');
+        $data['features'] = $this->admin_model->select_asc('package_features');
+        $data['countries'] = $this->admin_model->select_asc('country');
+        $data['main_content'] = $this->load->view('admin/custom_plan', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
     public function add()
     {
         if ($_POST) {

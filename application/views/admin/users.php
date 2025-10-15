@@ -373,6 +373,7 @@
                         <?php if ((get_user_payment_details($user->id)->package_name == "Custom")): ?>
                           <li class=""><a href="<?php echo base_url('admin/custom_plan/edit/' . $user->id) ?>" class="dropdown-item"> <i class="fa fa-pencil"></i> <?php echo "Edit User" ?></a></li>
                         <?php else: ?>
+                          <li class=""><a href="<?php echo base_url('admin/custom_plan/add_custom_plan/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-plus-circle"></i> <?php echo "Add Custom Plan" ?></a></li>
                           <li class=""><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo "Edit User" ?></a></li>
                         <?php endif; ?>
 
