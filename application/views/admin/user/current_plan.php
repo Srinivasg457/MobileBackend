@@ -44,7 +44,7 @@
                                     </div>
 
                                     <div>
-                                        <a target="_blank" href="<?php echo base_url('admin/payment/lists') ?>" class="pull-right btn btn-default btn-xs mt-1 brd-30"><i class="fa fa-file-text-o"></i> <?php echo trans('view-invoice') ?></a>
+                                        <a target="" href="<?php echo base_url('admin/payment/lists') ?>" class="pull-right btn btn-default btn-xs mt-1 brd-30"><i class="fa fa-file-text-o"></i> <?php echo trans('view-invoice') ?></a>
                                         <a href="<?php echo base_url('admin/subscription/upgrade_plan') ?>" class="pull-right btn btn-info btn-xs mt-1 mr-4"><i class="fa fa-diamond" aria-hidden="true"></i> <?php echo trans('upgrade-plan') ?></a>
                                     </div>
 
@@ -54,7 +54,15 @@
 
                                 <?php if ($user->package_name != 'Trial'): ?>
                                     <div class="box-body" style="padding: 20px 30px;">
-                                        <p><?php echo trans('your-subscription') ?>: <strong><?php echo html_escape($user->package_name) ?> <?php echo trans('plan') ?></strong></p>
+                                        <p><?php echo trans('your-subscription') ?>:
+                                            <strong>
+                                                <?php if (is_custom_plan_user()): echo "Custom"  ?>
+                                                <?php else: ?>
+                                                    <?php echo html_escape($user->package_name) ?>
+                                                <?php endif; ?>
+                                                <?php echo trans('plan') ?>
+                                            </strong>
+                                        </p>
                                         <p><?php echo trans('price') ?>: <strong><?php echo price_formatted($user->amount, 'site') ?> </strong></p>
                                         <p><?php echo trans('billing-frequency') ?> : <strong><?php echo ucfirst(html_escape($user->billing_type)) ?></strong> </p>
                                         <p><?php echo trans('last-billing') ?> : <strong><?php echo my_date_show($user->created_at) ?></strong> </p>

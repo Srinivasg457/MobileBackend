@@ -570,6 +570,57 @@ class Users extends Home_Controller {
     // }
 
 
+    // public function edit_org()
+    // {
+    //     if ($_POST) {
+    //         $id = $this->input->post('id', true);
+
+    //         //validate inputs
+    //         $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
+    //         $this->form_validation->set_rules('id', trans('id'), 'required');
+
+
+    //         if ($this->form_validation->run() === false) {
+    //             $this->session->set_flashdata('error', validation_errors());
+    //             redirect(base_url('admin/users'));
+    //         } else {
+    //             if ($id != '') {
+    //                 $new_password = $this->input->post('password');
+    //                 if (empty($new_password)) {
+    //                     $user = $this->admin_model->get_by_id($id, 'users');
+    //                     $password = $user->password;
+    //                     $email = $user->email;
+    //                 } else {
+    //                     $password = hash_password($this->input->post('password'));
+    //                 }
+    //             } 
+
+
+    //             $udata = array(
+    //                 'name' => $this->input->post('name', true),
+    //                 'user_name' => str_slug($this->input->post('name', true)),
+    //                 'slug' => str_slug($this->input->post('name', true)),
+    //                 'email' => $email,
+    //                 'verify_code' => 0,
+    //                 'thumb' => 'assets/front/img/avatar.png',
+    //                 'password' => $password,
+    //                 'status' => $this->input->post('status', true),
+    //                 // 'email_verified' => 1,
+    //                 // 'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
+    //                 // 'created_at' => my_date_now(),
+    //                 'country'  => $this->input->post('country', true),
+    //                 'timezone' => $this->input->post('time_zone', true),
+    //             );
+
+    //             if ($id != '') {
+    //                 $this->admin_model->edit_option($udata, $id, 'users');
+    //                 $this->session->set_flashdata('msg', trans('updated-successfully'));
+    //             }
+    //             redirect(base_url('admin/users'));
+    //         }
+    //     }
+    // }
+
     public function edit_org()
     {
         if ($_POST) {
@@ -577,33 +628,56 @@ class Users extends Home_Controller {
 
             //validate inputs
             $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
-            $this->form_validation->set_rules('id', trans('id'), 'required');
-
+            // $this->form_validation->set_rules('email', trans('email'), 'required|max_length[100]');
 
             if ($this->form_validation->run() === false) {
                 $this->session->set_flashdata('error', validation_errors());
                 redirect(base_url('admin/users'));
             } else {
                 if ($id != '') {
-                    $new_password = $this->input->post('password');
-                    if (empty($new_password)) {
+                    // $new_password = $this->input->post('password');
+                    // if (empty($new_password)) {
                         $user = $this->admin_model->get_by_id($id, 'users');
-                        $password = $user->password;
-                        $email = $user->email;
-                    } else {
-                        $password = hash_password($this->input->post('password'));
-                    }
-                } 
+                        // $password = $user->password;
+                    // } else {
+                        // $password = hash_password($this->input->post('password'));
+                    // }
+                } else {
+                    // $new_password = $this->input->post('password');
+                    // $password = hash_password($this->input->post('password'));
+                }
+                // $mail = $this->input->post('email', true);
+                // $email = $this->auth_model->check_email($mail);
+                // Manually check email in employees table
+                // $this->db->where('LOWER(email)', $mail);
+                // $exists_in_employees = $this->db->get('employees')->row();
 
+                // if ($email || $exists_in_employees) {
+                //     $this->session->set_flashdata('msg', trans('email-exist'));
+                //     redirect(base_url('admin/users'));
+                // }
+                $package = $this->input->post('package', true);
+
+                if ($package == 1) {
+                    $user_type = 'trial';
+                    $trial_expire = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
+                } else {
+                    $user_type = 'registered';
+                    $trial_expire = date('Y-m-d');
+                }
 
                 $udata = array(
                     'name' => $this->input->post('name', true),
                     'user_name' => str_slug($this->input->post('name', true)),
                     'slug' => str_slug($this->input->post('name', true)),
-                    'email' => $email,
-                    'verify_code' => 0,
-                    'thumb' => 'assets/front/img/avatar.png',
-                    'password' => $password,
+                    // 'email' => $this->input->post('email', true),
+                    // 'verify_code' => 0,
+                    // 'thumb' => 'assets/front/img/avatar.png',
+                    // 'password' => $password,
+                    // 'role' => 'user',
+                    // 'account_type' => 'pro',
+                    'user_type' => $user_type,
+                    'trial_expire' => $trial_expire,
                     'status' => $this->input->post('status', true),
                     // 'email_verified' => 1,
                     // 'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
@@ -613,9 +687,206 @@ class Users extends Home_Controller {
                 );
 
                 if ($id != '') {
+                    
                     $this->admin_model->edit_option($udata, $id, 'users');
                     $this->session->set_flashdata('msg', trans('updated-successfully'));
+                } else {
+                    $udata = array(
+                        'name' => $this->input->post('name', true),
+                        'user_name' => str_slug($this->input->post('name', true)),
+                        'slug' => str_slug($this->input->post('name', true)),
+                        'email' => $this->input->post('email', true),
+                        'verify_code' => 0,
+                        'thumb' => 'assets/front/img/avatar.png',
+                        'password' => $password,
+                        'role' => 'user',
+                        'account_type' => 'pro',
+                        'user_type' => $user_type,
+                        'trial_expire' => $trial_expire,
+                        'status' => 1,
+                        'email_verified' => 1,
+                        'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
+                        'created_at' => my_date_now(),
+                        'country'  => $this->input->post('country', true),
+                        'timezone' => $this->input->post('time_zone', true),
+                    );
+                    $id = $this->admin_model->insert($udata, 'users');
+                    $this->session->set_flashdata('msg', trans('inserted-successfully'));
+
+                    $rand_uid = substr(random_string('numeric', 5) . mt_rand(), 0, 8);
+                    $uid = ltrim($rand_uid, '0');
+
+                    $company_name = 'Company ' . $uid;
+
+                    $data = array(
+                        'user_id' => $id,
+                        'uid' => $uid,
+                        'is_autoload_amount' => 0,
+                        'enable_stock' => 0,
+                        'name' => $company_name,
+                        'slug' => str_slug($company_name),
+                        'country' => $this->input->post('country', true),
+                        'category' => $this->input->post('category', true),
+                        'is_primary' => 1
+                    );
+                    $this->common_model->insert($data, 'business');
+
+                    // Add org_settings for trial users
+                    if ($user_type == 'trial') {
+                        $org_settings = array(
+                            'user_id' => $id,
+                            'screenshot_flag' => 1, // Enable screenshot by default for trial
+                            'screenshot_time_interval' => 10, // Default 5 minutes interval
+                            'webcam_flag' => 1, // Enable webcam by default for trial
+                            'webcam_time_interval' => 10, // Default 5 minutes interval
+                            'mouse_move_flag' => 1, // Enable mouse tracking
+                            'mouse_move_threshold' => 20, // Default threshold
+                            'key_stroke_flag' => 1, // Enable keystroke tracking
+                            'key_stroke_threshold' => 40, // Default threshold
+                            'idle_time_flag' => 1, // Enable idle time tracking
+                            'timecards_time_interval' => 5, // Default 5 minutes interval
+                            'created_at' => my_date_now(),
+                            'updated_at' => my_date_now(),
+                            'time_zone' => $this->input->post('time_zone', true)
+                        );
+                        $this->common_model->insert($org_settings, 'org_settings');
+                        // $this->admin_model->intial_department_storing($id, $uid);   // (user_id, business_uid)
+                    }
                 }
+
+                $payment = $this->admin_model->get_user_payment($id);
+
+                $plan = $this->input->post('package', true);
+                $billing = $this->input->post('billing_type', true);
+
+                $package = $this->common_model->get_by_id($plan, 'package');
+                if ($billing == 'week') {
+                    $price = $package->monthly_price;
+                    $expire_on = date('Y-m-d', strtotime('+1 week'));
+                } elseif ($billing == 'monthly') {
+                    $price = $package->monthly_price;
+                    $expire_on = date('Y-m-d', strtotime('+1 month'));
+                } else {
+                    // yearly
+                    $price = $package->yearly_price;
+                    $expire_on = date('Y-m-d', strtotime('+12 month'));
+                }
+
+                $pdata = array(
+                    'puid' => random_string('numeric', 5),
+                    'user_id' => $id,
+                    'package' => $this->input->post('package', true),
+                    'billing_type' => $this->input->post('billing_type', true),
+                    'amount' => $price,
+                    'status' => $this->input->post('payment_status', true),
+                    'created_at' => my_date_now(),
+                    'expire_on' => $expire_on
+                );
+
+                // Insert or update payment
+                if (empty($payment)) {
+                    $this->admin_model->insert($pdata, 'payment');
+                } else {
+                    $this->admin_model->update_payment($pdata, $id, 'payment');
+                }
+                $pkg  = (int) $this->input->post('package', true);
+                $tz   = $this->security->xss_clean($this->input->post('time_zone', true)) ?: 'UTC';
+
+                if (in_array($pkg, [2, 3, 4], true)) {
+
+                    // Define full flags for each package
+                    $flagSets = [
+                        2 => [
+                            'user_id'                  => $id,
+                            'screenshot_flag'          => 1,
+                            'screenshot_time_interval' => 10,
+                            'webcam_flag'              => 0,
+                            'webcam_time_interval'     => 10,
+                            'mouse_move_flag'          => 1,
+                            'mouse_move_threshold'     => 20,
+                            'key_stroke_flag'          => 1,
+                            'key_stroke_threshold'     => 40,
+                            'idle_time_flag'           => 1,
+                            'timecards_time_interval'  => 5,
+                            'time_zone'                => $tz,
+                        ],
+                        3 => [
+                            'user_id'                  => $id,
+                            'screenshot_flag'          => 1,
+                            'screenshot_time_interval' => 5,
+                            'webcam_flag'              => 0,
+                            'webcam_time_interval'     => 10,
+                            'mouse_move_flag'          => 1,
+                            'mouse_move_threshold'     => 20,
+                            'key_stroke_flag'          => 1,
+                            'key_stroke_threshold'     => 40,
+                            'idle_time_flag'           => 1,
+                            'timecards_time_interval'  => 5,
+                            'time_zone'                => $tz,
+                        ],
+                        4 => [
+                            'user_id'                  => $id,
+                            'screenshot_flag'          => 1,
+                            'screenshot_time_interval' => 2,
+                            'webcam_flag'              => 1,
+                            'webcam_time_interval'     => 10,
+                            'mouse_move_flag'          => 1,
+                            'mouse_move_threshold'     => 20,
+                            'key_stroke_flag'          => 1,
+                            'key_stroke_threshold'     => 40,
+                            'idle_time_flag'           => 1,
+                            'timecards_time_interval'  => 5,
+                            'time_zone'                => $tz,
+                        ],
+                    ];
+
+                    // Clean for security
+                    $flags = $this->security->xss_clean($flagSets[$pkg]);
+
+                    $this->db->trans_start();
+
+                    $exists = $this->db->get_where('org_settings', ['user_id' => $id])->row();
+
+                    if ($exists) {
+                        unset($flags['idle_time_flag'], $flags['timecards_time_interval']);
+
+                        if ($pkg == 2) {
+                            // $this->db->where('user_id', $user_id)->update('org_settings', [
+                            //     'webcam_flag' => 0, // Reset or set webcam to 0
+                            //     'updated_at'  => "2025-10-11", // Update timestamp
+                            // ]);
+                            $this->db->update(
+                                'org_settings',
+                                [
+                                    'webcam_flag' => 0, // Reset or set webcam to 0
+                                    'updated_at'  => get_user_datetime_only($id), // Update timestamp
+                                ],
+                                ['user_id' => $id]
+                            );
+                            log_message('info', "Org settings updated for user {$id}, package {$package}");
+                        } else {
+                            log_message('error', "Not enough payment history for user {id}");
+                        }
+                    } else {
+                        $flags['created_at'] = my_date_now();
+                        $flags['updated_at'] = my_date_now();
+                        $this->db->insert('org_settings', $flags);
+                        // ensure default departments exist for non-trial sign-ups
+                        // $business_uid = $this->db
+                        //     ->select('uid')
+                        //     ->get_where('business', ['user_id' => $id])
+                        //     ->row('uid');
+                        // $this->admin_model->intial_department_storing($id, $business_uid);
+                    }
+
+                    $this->db->trans_complete();
+
+                    if (!$this->db->trans_status()) {
+                        log_message('error', "Failed to save org_settings for user {$id} in package {$pkg}");
+                    }
+                }
+
+
                 redirect(base_url('admin/users'));
             }
         }
@@ -666,21 +937,21 @@ class Users extends Home_Controller {
                 }
 
                 $udata = array(
-                    'name' => $this->input->post('name', true),
-                    'user_name' => str_slug($this->input->post('name', true)),
-                    'slug' => str_slug($this->input->post('name', true)),
-                    'email' => $this->input->post('email', true),
-                    'verify_code' => 0,
-                    'thumb' => 'assets/front/img/avatar.png',
-                    'password' => $password,
-                    'role' => 'user',
-                    'account_type' => 'pro',
+                    // 'name' => $this->input->post('name', true),
+                    // 'user_name' => str_slug($this->input->post('name', true)),
+                    // 'slug' => str_slug($this->input->post('name', true)),
+                    // 'email' => $this->input->post('email', true),
+                    // 'verify_code' => 0,
+                    // 'thumb' => 'assets/front/img/avatar.png',
+                    // 'password' => $password,
+                    // 'role' => 'user',
+                    // 'account_type' => 'pro',
                     'user_type' => $user_type,
                     'trial_expire' => $trial_expire,
-                    'status' => 1,
-                    'email_verified' => 1,
-                    'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
-                    'created_at' => my_date_now(),
+                    // 'status' => 1,
+                    // 'email_verified' => 1,
+                    // 'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
+                    // 'created_at' => my_date_now(),
                     'country'  => $this->input->post('country', true),
                     'timezone' => $this->input->post('time_zone', true),
                 );
@@ -689,6 +960,25 @@ class Users extends Home_Controller {
                     $this->admin_model->edit_option($udata, $id, 'users');
                     $this->session->set_flashdata('msg', trans('updated-successfully'));
                 } else {
+                    $udata = array(
+                        'name' => $this->input->post('name', true),
+                        'user_name' => str_slug($this->input->post('name', true)),
+                        'slug' => str_slug($this->input->post('name', true)),
+                        'email' => $this->input->post('email', true),
+                        'verify_code' => 0,
+                        'thumb' => 'assets/front/img/avatar.png',
+                        'password' => $password,
+                        'role' => 'user',
+                        'account_type' => 'pro',
+                        'user_type' => $user_type,
+                        'trial_expire' => $trial_expire,
+                        'status' => 1,
+                        'email_verified' => 1,
+                        'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
+                        'created_at' => my_date_now(),
+                        'country'  => $this->input->post('country', true),
+                        'timezone' => $this->input->post('time_zone', true),
+                    );
                     $id = $this->admin_model->insert($udata, 'users');
                     $this->session->set_flashdata('msg', trans('inserted-successfully'));
 

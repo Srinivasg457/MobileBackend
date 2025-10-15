@@ -61,12 +61,10 @@
                       <input type="password" class="form-control" name="password" placeholder="<?php echo trans('set-or-reset-password') ?>" value="">
                     </div>
 
-                    <div class="form-group mb-4 <?php if (isset($page_title) && $page_title == "Edit"): echo "hide";
-                                                endif; ?>">
+                    <div class="form-group mb-4">
                       <label><?php echo trans('plan') ?> <span class="text-danger">*</span></label>
                       <?php if (isset($page_title) && $page_title == "Offline Payment"): ?>
-                        <select class="form-control" name="package" required
-                          <?php if (isset($page_title) && $page_title == "Edit"): ?> Disabled <?php endif; ?>>
+                        <select class="form-control" name="package" required>
                           <option value=""><?php echo trans('select') ?></option>
                           <?php foreach ($packages as $package): ?>
                             <?php if ($package->id >= $payment->package_id): // show only >= current 
@@ -92,11 +90,9 @@
                       <?php endif; ?>
                     </div>
 
-                    <div class="form-group mb-4 <?php if (isset($page_title) && $page_title == "Edit"): echo "hide";
-                                                endif; ?>">
+                    <div class="form-group mb-4">
                       <label><?php echo trans('subscription-type') ?> <span class=" text-danger">*</span></label>
-                      <select class="form-control" name="billing_type" required
-                        <?php if (isset($page_title) && $page_title == "Edit"): ?> Disabled <?php endif; ?>>
+                      <select class="form-control" name="billing_type" required>
                         <option value=""><?php echo trans('select') ?></option>
                         <option <?php if ('week' == $payment->billing_type) {
                                   echo "selected";
@@ -116,10 +112,9 @@
                       </select>
                     </div>
 
-                    <div class="form-group mb-4 <?php if (isset($page_title) && $page_title == "Edit"): echo "hide";
-                                                endif; ?>">
+                    <div class="form-group mb-4">
                       <label><?php echo trans('payment-status') ?></label>
-                      <select class="form-control" name="payment_status" <?php if (isset($page_title) && $page_title == "Edit"): ?> Disabled <?php endif; ?> required>
+                      <select class="form-control" name="payment_status" required>
                         <option value=""><?php echo trans('select') ?></option>
                         <option <?php if ($payment->status == 'verified') {
                                   echo "selected";
@@ -216,7 +211,7 @@
 
 
 
-    <?php  if (isset($page_title) && $page_title == "Users"): ?>
+    <?php if (isset($page_title) && $page_title == "Users"): ?>
       <div class="list_area container">
 
         <form class="user_sort_form" role="search" autocomplete="off" action="<?php echo base_url('admin/users') ?>" method="get">
@@ -375,12 +370,13 @@
                         <?php if ($user->status == 2 || $user->status == 0): ?>
                           <li><a class="dropdown-item" href="<?php echo base_url('admin/users/status_action/1/' . $user->id) ?>"><i class="fa fa-check"></i> <?php echo trans('activate') ?></a></li>
                         <?php endif ?>
-                         <?php if (($payment_status == 'pending') && (get_user_payment_details($user->id)->package_name == "Custom") ) { ?>
-                                     <li class=""><a href="<?php echo base_url('admin/custom_plan/verify_payment/' . $user->id) ?>" class="dropdown-item"> <i class="fa fa-check-circle"></i>Approve custom plan</a></li>
-                        <?php } ?>
+                        <?php if ((get_user_payment_details($user->id)->package_name == "Custom")): ?>
+                          <li class=""><a href="<?php echo base_url('admin/custom_plan/edit/' . $user->id) ?>" class="dropdown-item"> <i class="fa fa-pencil"></i> <?php echo "Edit User" ?></a></li>
+                        <?php else: ?>
+                          <li class=""><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo "Edit User" ?></a></li>
+                        <?php endif; ?>
 
                         <li class=""><a href="<?php echo base_url('admin/users/offline_payment/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-money"></i> <?php echo trans('offline-payment') ?></a></li>
-                        <!-- <li class=""><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo "Edit User" ?></a></li> -->
 
                         <li><a class="dropdown-item delete_item" data-val="User" data-id="<?php echo html_escape($user->id); ?>" href="<?php echo base_url('admin/users/delete/' . $user->id); ?>" class="on-defaults remove-row delete_item"><i class="fa fa-trash-o"></i> <?php echo trans('delete') ?></a></li>
 

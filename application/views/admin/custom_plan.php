@@ -24,8 +24,8 @@
                 <div class="box add_area d-block">
                     <div class="box-header with-border">
                         <?php
-                        if (isset($page_title) && $page_title == "Verify Payment"): ?>
-                            <h3 class="box-title"><?php echo "Verify Payment" ?> </h3>
+                        if (isset($page_title) && $page_title == "Edit"): ?>
+                            <h3 class="box-title"><?php echo "Edit" ?> </h3>
                         <?php else: ?>
                             <h3 class="box-title"><?php echo trans('create-new') ?> </h3>
                         <?php endif; ?>
@@ -35,7 +35,7 @@
                     </div>
 
                     <div class="box-body pl-0">
-                        <?php if (isset($page_title) && $page_title == "Verify Payment"): ?>
+                        <?php if (isset($page_title) && $page_title == "Edit"): ?>
                             <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/custom_plan/update') ?>" role="form">
                             <?php else: ?>
                                 <form method="post" enctype="multipart/form-data" class="validate-form" action="<?php echo base_url('admin/custom_plan/add') ?>" role="form">
@@ -44,16 +44,15 @@
 
                                     <div class="form-group">
                                         <label><?php echo trans('name') ?> <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" required name="name" value="<?php echo html_escape($user[0]['name']); ?>"
-                                            <?php if (isset($page_title) && $page_title == "Verify Payment"): ?>Disabled<?php endif; ?>>
+                                        <input type="text" class="form-control" required name="name" value="<?php echo html_escape($user[0]['name']); ?>">
                                     </div>
 
                                     <div class="form-group">
                                         <label><?php echo trans('email') ?> <span class="text-danger">*</span></label>
                                         <input type="email" class="form-control" required name="email" value="<?php echo html_escape($user[0]['email']); ?>"
-                                            <?php if (isset($page_title) && $page_title == "Verify Payment"): ?>Disabled<?php endif; ?>>
+                                            <?php if (isset($page_title) && $page_title == "Edit"): ?>Disabled<?php endif; ?>>
                                     </div>
-                                    <?php if (isset($page_title) && $page_title == "Verify Payment"): ?>
+                                    <?php if (isset($page_title) && $page_title == "Edit"): ?>
                                     <?php else: ?>
                                         <div class="form-group">
                                             <label><?php echo trans('password') ?> <span class="text-danger">*</span></label>
@@ -112,29 +111,28 @@
                                             <option <?php if ($payment->status == 'pending') echo "selected"; ?> value="pending"><?php echo trans('pending') ?></option>
                                         </select>
                                     </div>
-                                    <?php if (isset($page_title) && $page_title == "Verify Payment"): ?>
-                                    <?php else: ?>
-                                        <div class="form-group">
-                                            <label><?php echo trans('country') ?></label>
-                                            <select class="selectfield textfield--grey single_select col-sm-12" required name="country" id="country" style="width: 100%">
-                                                <option value=""><?php echo trans('select') ?></option>
-                                                <?php foreach ($countries as $country): ?>
-                                                    <option value="<?php echo html_escape($country->id); ?>" <?php if (isset($user[0]['country']) && $user[0]['country'] == $country->id) echo "selected"; ?>>
-                                                        <?php echo html_escape($country->name); ?>
-                                                    </option>
-                                                <?php endforeach ?>
-                                            </select>
-                                        </div>
 
-                                        <div class="form-group">
-                                            <label class="form-label">Select Timezone:</label>
-                                            <select name="time_zone" id="timezone_select" required class="selectfield textfield--grey single_select col-sm-12 wd-100">
-                                                <option value="<?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>">
-                                                    <?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : 'Select'; ?>
+                                    <div class="form-group">
+                                        <label><?php echo trans('country') ?></label>
+                                        <select class="selectfield textfield--grey single_select col-sm-12" required name="country" id="country" style="width: 100%">
+                                            <option value=""><?php echo trans('select') ?></option>
+                                            <?php foreach ($countries as $country): ?>
+                                                <option value="<?php echo html_escape($country->id); ?>" <?php if (isset($user[0]['country']) && $user[0]['country'] == $country->id) echo "selected"; ?>>
+                                                    <?php echo html_escape($country->name); ?>
                                                 </option>
-                                            </select>
-                                        </div>
-                                    <?php endif; ?>
+                                            <?php endforeach ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Select Timezone:</label>
+                                        <select name="time_zone" id="timezone_select" required class="selectfield textfield--grey single_select col-sm-12 wd-100">
+                                            <option value="<?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>">
+                                                <?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : 'Select'; ?>
+                                            </option>
+                                        </select>
+                                    </div>
+
                                     <div class="form-group clearfix">
                                         <label><?php echo trans('status') ?></label><br>
                                         <div class="icheck-primary radio radio-inline d-inline mr-4 mt-2">
@@ -211,7 +209,7 @@
                                                                         data-toggle="toggle"
                                                                         data-onstyle="info"
                                                                         data-width="100"
-                                                                        <?php if (isset($page_title) && $page_title == "Verify Payment"): ?>
+                                                                        <?php if (isset($page_title) && $page_title == "Edit"): ?>
                                                                         <?= $flag_value == 1 ? 'checked' : ''; ?>
                                                                         <?php else: ?>
                                                                         checked
@@ -223,7 +221,11 @@
 
                                                         <div class="col-md-8 mb-5 form-group">
                                                             <label class="control-label">Select:</label>
-                                                            <select name="features[<?= $feature->id ?>][option]" class="form-control single_select" <?= $flag_value == 1 ? '' : 'disabled'; ?>>
+                                                            <select name="features[<?= $feature->id ?>][option]" class="form-control single_select"
+                                                                <?php if (isset($page_title) && $page_title == "Edit"): ?>
+                                                                <?= $flag_value == 1 ? 'disabled' : ''; ?>
+                                                                <?php else: ?>
+                                                                <?php endif; ?>>
                                                                 <option value="basic" <?= $feature_value == 'basic' ? 'selected' : '' ?>><?= $feature->basic ?></option>
                                                                 <option value="standard" <?= $feature_value == 'standard' ? 'selected' : '' ?>><?= $feature->standard ?></option>
                                                                 <option value="premium" <?= $feature_value == 'premium' ? 'selected' : '' ?>><?= $feature->premium ?></option>
