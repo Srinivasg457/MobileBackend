@@ -389,7 +389,7 @@
         if (priceVal == 'trial') {
             $('.trial-plan').show();
             $('.paid-plan').hide();
-            // $('.trail-plan').hide();
+            $('.custom').hide();
             $('.monthly_show').hide();
             $('.yearly_show').hide();
             $('.price_year').hide();
@@ -401,6 +401,7 @@
         } else if (priceVal == 'monthly') {
             $('.trial-plan').hide();
             $('.paid-plan').show();
+            $('.custom').hide();
             $('.monthly_show').show();
             $('.yearly_show').hide();
             $('.price_year').hide();
@@ -409,6 +410,16 @@
             $('.yearly_row').hide();
             $('.bill_type').html(msg_per_month);
             $('.billing_type').val('monthly');
+        } else if (priceVal == 'custom') {
+            $('.custom').show();
+            $('.trial-plan').hide();
+            $('.paid-plan').hide();
+            $('.monthly_show').hide();
+            $('.yearly_show').hide();
+            $('.price_year').hide();
+            $('.price_month').hide();
+            $('.monthly_row').hide();
+            $('.yearly_row').hide();
         } else {
             $('.trial-plan').hide();
             $('.paid-plan').show();

@@ -36,6 +36,9 @@
 
                 <input type="radio" class="btn-check switch_price" name="payment_type" id="yearly-1" value="yearly" autocomplete="off">
                 <label class="btn btn-outline-primary custom-btngp" for="yearly-1"><?php echo trans('yearly') ?></label>
+
+                <input type="radio" class="btn-check switch_price" name="payment_type" id="custom-1" value="custom" autocomplete="off">
+                <label class="btn btn-outline-primary custom-btngp" for="custom-1"><?php echo 'custom' ?></label>
               </div>
             </div>
           </div>
@@ -217,7 +220,7 @@
                 <div class="card-body pb-5">
                   <?php
                   $url = base_url('register?plan=' . $package->slug);
-                    $billing = isset($_GET['billing']) ? $_GET['billing'] : 'monthly'; // default
+                  $billing = isset($_GET['billing']) ? $_GET['billing'] : 'monthly'; // default
 
                   if ($package->slug == 'trial') {
                     $url .= '&billing=week';
@@ -240,6 +243,92 @@
             </div>
           <?php $i++;
           endforeach; ?>
+          <div class="col-md-4 mt-5 border-0 custom hide">
+            <div class="card pricing-card text-center  text-dark pb-3">
+              <div class="pricing card-headerh p-2  d-flex align-items-center flex-column">
+                <p class="bold fs-40 text-light mb-1">
+                  <?php echo html_escape($current_features->package_name); ?>
+                </p>
+                <p class="fs-16 bold text-dark mb-0">
+                  Customized Plan
+                </p>
+              </div>
+              <hr>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-4 text-end">
+                    <p class="mt-2 mb-3">
+                      <i class="fa fa-check  me-2"></i>
+                    </p>
+                  </div>
+                  <div class="col-8 text-start">
+                    <p class="mt-2 mb-3">
+                      Custom features for your team.
+                    </p>
+                  </div>
+                  <div class="col-4 text-end">
+                    <p class="mt-2 mb-3">
+                      <i class="fa fa-cogs  me-2"></i>
+                    </p>
+                  </div>
+                  <div class="col-8 text-start">
+                    <p class="mt-2 mb-3">
+                      Flexible and scalable plan.
+                    </p>
+                  </div>
+
+
+                  <div class="col-4 text-end">
+                    <p class="mt-2 mb-3">
+                      <i class="fa fa-user-shield me-2"></i>
+                    </p>
+                  </div>
+                  <div class="col-8 text-start">
+                    <p class="mt-2 mb-3">
+                      Admin-managed settings.
+                    </p>
+                  </div>
+
+
+
+                  <div class="col-4 text-end">
+                    <p class="mt-2 mb-3">
+                      <i class="fa fa-sync  me-2"></i>
+                    </p>
+                  </div>
+                  <div class="col-8 text-start">
+                    <p class="mt-2 mb-3">
+                      Easy renew and upgrade. </p>
+                  </div>
+
+
+
+                  <div class="col-4 text-end">
+                    <p class="mt-2 mb-3">
+                      <i class="fa fa-envelope  me-2"></i>
+                    </p>
+                  </div>
+                  <div class="col-8 text-start">
+                    <p class="mt-2 mb-3">
+                      Contact admin for changes.
+                    </p>
+                  </div>
+
+                </div>
+
+                <p class="small text-muted mb-4">
+                  For any changes, renewals, or feature upgrades, please contact the admin directly.
+                </p>
+
+                <div class="d-flex justify-content-center gap-2">
+                  <a href="mailto:<?php echo settings()->email; ?>" class="btn btn-light btn-sm">
+                    <i class="fa fa-envelope"></i> Contact Admin
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>
