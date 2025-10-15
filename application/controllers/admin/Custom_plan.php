@@ -27,10 +27,10 @@ class Custom_plan extends Home_Controller {
         $this->load->view('admin/index', $data);
     }
 
-    public function verify_payment($id)
+    public function edit($id)
     {
         $data = array();
-        $data['page_title'] = 'Verify Payment';
+        $data['page_title'] = 'Edit';
         $data['packages'] = $this->admin_model->select_asc('package');
         $data['user'] = $this->admin_model->select_option($id, 'users');
         $data['business'] = $this->admin_model->get_user_by_id($id, 'business');
@@ -172,13 +172,14 @@ class Custom_plan extends Home_Controller {
             $id = $this->input->post('id', true);
 
             // Validate inputs
-            // $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
+            $this->form_validation->set_rules('name', trans('name'), 'required|max_length[100]');
             // $this->form_validation->set_rules('email', trans('email'), 'required|max_length[100]');
 
-            // if ($this->form_validation->run() === false) {
-            //     $this->session->set_flashdata('error', validation_errors());
-            //     redirect(base_url('admin/users'));
-            // } else {
+            if ($this->form_validation->run() === false) {
+                $this->session->set_flashdata('error', validation_errors());
+                redirect(base_url('admin/users'));
+            } 
+            // else {
                 // if ($id != '') {
                 //     $new_password = $this->input->post('password');
                 //     if (empty($new_password)) {
@@ -191,7 +192,7 @@ class Custom_plan extends Home_Controller {
                 //     $password = hash_password($this->input->post('password'));
                 // }
 
-                $mail = strtolower($this->input->post('email', true));
+                // $mail = strtolower($this->input->post('email', true));
                 // $email = $this->auth_model->check_email($mail);
 
                 // Check if email exists in employees table
@@ -208,17 +209,18 @@ class Custom_plan extends Home_Controller {
                 // $trial_expire = date('Y-m-d');
 
                 // Create user record
-                // $udata = array(
-                //     'name' => $this->input->post('name', true),
-                //     'user_name' => str_slug($this->input->post('name', true)),
-                //     'slug' => str_slug($this->input->post('name', true)),
-                //     'email' => $mail,
-                //     'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
-                //     'country' => $this->input->post('country', true),
-                //     'timezone' => $this->input->post('time_zone', true),
-                // );
-                //     $this->admin_model->edit_option($udata, $id, 'users');
-                //     $this->session->set_flashdata('msg', 'Updated Successfully.');
+                $udata = array(
+                    'name' => $this->input->post('name', true),
+                    'user_name' => str_slug($this->input->post('name', true)),
+                    'slug' => str_slug($this->input->post('name', true)),
+                    // 'email' => $mail,
+                    // 'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
+                    'status' => $this->input->post('status', true),
+                    'country' => $this->input->post('country', true),
+                    'timezone' => $this->input->post('time_zone', true),
+                );
+                    $this->admin_model->edit_option($udata, $id, 'users');
+                    $this->session->set_flashdata('msg', 'Updated Successfully.');
 
 
                 // Payment setup

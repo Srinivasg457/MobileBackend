@@ -888,28 +888,50 @@ class Admin_model extends CI_Model {
     // get_payment
     function get_user_payment_details($puid)
     {
-        $this->db->select('p.*, k.name as package_name, k.slug, u.name as user_name, u.phone, u.address, u.email');
+        $this->db->select("
+        p.*, 
+        CASE 
+            WHEN p.package = 5 THEN 'Custom'
+            ELSE k.name
+        END AS package_name, 
+        k.slug, 
+        u.name AS user_name, 
+        u.phone, 
+        u.address, 
+        u.email
+    ");
         $this->db->from('payment p');
         $this->db->join('package k', 'k.id = p.package', 'LEFT');
         $this->db->join('users u', 'u.id = p.user_id', 'LEFT');
         $this->db->where('p.puid', $puid);
         $query = $this->db->get();
-        $query = $query->row();  
-        return $query;
+        return $query->row();
     }
+
 
     // get_payment
     function get_users_payment_lists($user_id)
     {
-        $this->db->select('p.*, k.name as package_name, k.slug, u.name as user_name, u.phone, u.address, u.email');
+        $this->db->select("
+        p.*, 
+        CASE 
+            WHEN p.package = 5 THEN 'Custom'
+            ELSE k.name
+        END AS package_name, 
+        k.slug, 
+        u.name AS user_name, 
+        u.phone, 
+        u.address, 
+        u.email
+    ");
         $this->db->from('payment p');
         $this->db->join('package k', 'k.id = p.package', 'LEFT');
         $this->db->join('users u', 'u.id = p.user_id', 'LEFT');
         $this->db->where('p.user_id', $user_id);
         $this->db->order_by('p.id', 'DESC');
+
         $query = $this->db->get();
-        $query = $query->result();  
-        return $query;
+        return $query->result();
     }
 
 
