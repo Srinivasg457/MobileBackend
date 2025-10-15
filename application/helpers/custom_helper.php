@@ -84,6 +84,13 @@ if (!function_exists('require_feature')) {
 		return $ci->auth_model->require_feature($featureId);
 	}
 }
+if (!function_exists('custom_plans')) {
+	function custom_plans($featureId)
+	{
+		$ci = &get_instance();
+		return $ci->admin_model->custom_plans($featureId);
+	}
+}
 
 if (!function_exists('get_random_employee_id')) {
 	function get_random_employee_id()

@@ -16,6 +16,7 @@ class Activity_logs extends Home_Controller
         }
         require_feature(1);
         $data = array();
+        $data['custom'] = custom_plans(1);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Activity Log Admin';
         $data['can_edit'] = $this->auth_model->get_permission(1);

@@ -3,7 +3,7 @@
             <h3>Application Usage Tracker</h3>
             <form id="dateRangeForm" class="user_filter_form" role="search" autocomplete="off" action="<?php echo base_url('admin/application_tracker') ?>" method="post">
                 <div class="row mb-5 reprt-box">
-                    <div class="form-group col-lg-4 my-3"><label class="control-label">Employee </label>
+                    <div class="form-group col-lg-3 my-3"><label class="control-label">Employee </label>
                         <select name="employee_id" id="employee_search" class="form-control single_select">
                             <?php if (!empty($employees)): ?>
                                 <option value="">-- Select Employee --</option>
@@ -17,8 +17,8 @@
                             <?php endif; ?>
                         </select>
                     </div>
-                    <div class="form-group col-lg-4 my-3">
-                        <label class="control-label">Date</label>
+                    <div class="form-group col-lg-3 my-3">
+                        <label class="control-label">Start Date</label>
                         <?php
                         $today = date('Y-m-d');
                         $min_date = '';
@@ -36,8 +36,12 @@
                         }
                         ?>
 
-                        <input type="date" id="datePicker" class="form-control" name="date"
-                            value="<?= $date ?>"
+                        <!-- ✅ Start Date Input -->
+                        <input type="date"
+                            id="startdatepicker"
+                            class="form-control"
+                            name="start_date"
+                            value="<?= isset($start_date) ? $start_date : $today ?>"
                             <?= !empty($min_date) ? "min='$min_date' max='$today'" : '' ?>
                             onfocus="this.showPicker()">
 
@@ -45,7 +49,19 @@
                             <small class="text-muted"><?= $help_text ?></small>
                         <?php endif; ?>
                     </div>
-                    <div class="form-group col-lg-4 my-3">
+
+                    <!-- ✅ End Date Input -->
+                    <div class="form-group col-lg-3 my-3">
+                        <label class="control-label">End Date</label>
+                        <input type="date"
+                            id="enddatepicker"
+                            class="form-control"
+                            name="end_date"
+                            value="<?= isset($end_date) ? $end_date : $today ?>"
+                            <?= !empty($min_date) ? "min='$min_date' max='$today'" : '' ?>
+                            onfocus="this.showPicker()">
+                    </div>
+                    <div class="form-group col-lg-3 my-3">
                         <label class="control-label">Sort By</label>
                         <select name="order" id="sortOrder" class="form-control single_select">
                             <option value="ascending" <?= ($order == "ascending") ? 'selected' : '' ?>>Ascending</option>
@@ -109,7 +125,7 @@
                                     <div class="text-muted">
                                         <?= number_format(($unproductive_usage['data']['raw_total_usage_seconds'] / $overall_usage['data']['raw_total_usage_seconds']) * 100, 1); ?>% of total
                                     </div>
-                                    <button type="button" class="btn btn-default show-windows-modal" data-id="unproductive" data-windows='<?= json_encode($appData['windows']) ?>'>
+                                    <button type="button" class="btn btn-default show-windows-modal" data-id="unproductive" data-windows='<?= htmlspecialchars(json_encode($appData['windows']), ENT_QUOTES, 'UTF-8') ?>'>
                                         <i class="bi bi-diagram-3 mr-5"></i>
                                         Usage History (<?= $unproductive_usage['data']['total_applications'] ?>)
                                     </button>
@@ -161,7 +177,7 @@
                                     </div>
                                     <button type="button" class="btn btn-default show-windows-modal"
                                         data-app="<?= htmlspecialchars($appName) ?>"
-                                        data-windows='<?= json_encode($appData['windows']) ?>'>
+                                        data-windows='<?= htmlspecialchars(json_encode($appData['windows']), ENT_QUOTES, 'UTF-8') ?>'>
                                         <i class="bi bi-window-stack mr-5"></i>
                                         Windows (<?= count($appData['windows']) ?>)
                                     </button>
@@ -212,7 +228,7 @@
                                     </div>
                                     <button type="button" class="btn btn-default show-windows-modal"
                                         data-app="<?= htmlspecialchars($appName) ?>"
-                                        data-windows='<?= json_encode($appData['windows']) ?>'>
+                                        data-windows='<?= htmlspecialchars(json_encode($appData['windows']), ENT_QUOTES, 'UTF-8') ?>'>
                                         <i class="bi bi-window-stack mr-5"></i>
                                         Windows (<?= count($appData['windows']) ?>)
                                     </button>
@@ -268,11 +284,10 @@
             </div>
         </div>
     </div>
-
     <script>
         $(document).ready(function() {
             // 🔹 Auto-submit form when filters change
-            $(document).on('change', '#employee_search, #datePicker, #sortOrder', function() {
+            $(document).on('change', '#employee_search, #startdatepicker,#enddatepicker, #sortOrder', function() {
                 $('.user_filter_form').submit();
             });
 
