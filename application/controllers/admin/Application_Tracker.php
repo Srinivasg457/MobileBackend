@@ -37,19 +37,24 @@ class Application_Tracker extends Home_Controller
             $employee_id = get_random_employee_id();
         }
 
-        $date  = $this->input->post('date', true) ?? date('Y-m-d');
-        $order = $this->input->post('order', true) ?? "descending";
+        $start_date = $this->input->post('start_date', true) ?: date('Y-m-d');
+        $end_date   = $this->input->post('end_date', true) ?: date('Y-m-d');
+        $order      = $this->input->post('order', true) ?: 'ascending';
+
+        // $date  = $this->input->post('date', true) ?? date('Y-m-d');
+        // $order = $this->input->post('order', true) ?? "descending";
 
         $data['employee_id'] = $employee_id;
-        $data['date']        = $date;
+        $data['start_date']     = $start_date;
+        $data['end_date '] = $end_date;
         $data['order']       = $order;
         $data['can_edit']    = $this->auth_model->get_permission(2);
 
         // Only fetch response if employee exists
         if (!empty($employee_id)) {
             // Get productive and unproductive usage data
-            $data['productive_usage'] = $this->get_app_productive_usage($employee_id, $date, $order);
-            $data['unproductive_usage'] = $this->get_app_unproductive_usage($employee_id, $date, $order);
+            $data['productive_usage'] = $this->get_app_productive_usage($employee_id, $start_date, $end_date, $order);
+            $data['unproductive_usage'] = $this->get_app_unproductive_usage($employee_id, $start_date, $end_date, $order);
 
             // Calculate overall combined data
             $data['overall_usage'] = [
@@ -57,8 +62,8 @@ class Application_Tracker extends Home_Controller
                 'data' => [
                     'total_applications' => $data['productive_usage']['data']['total_applications'] + $data['unproductive_usage']['data']['total_applications'],
                     'total_usage_time' => $this->seconds_to_time(
-                        $this->time_to_seconds($data['productive_usage']['data']['total_usage_time']) +
-                            $this->time_to_seconds($data['unproductive_usage']['data']['total_usage_time'])
+                        $data['productive_usage']['data']['raw_total_usage_seconds'] +
+                            $data['unproductive_usage']['data']['raw_total_usage_seconds']
                     ),
                     'raw_total_usage_seconds' => $data['productive_usage']['data']['raw_total_usage_seconds'] + $data['unproductive_usage']['data']['raw_total_usage_seconds'],
                 ]
@@ -96,18 +101,50 @@ public function time_to_seconds($time) {
     {
         $employee_id = $this->session->userdata('employee_id');  // temporary static
         $data['page_title'] = "employee_application_tracker";
-        $date  = $this->input->post('date', true) ?? $this->input->get('date') ?? date('Y-m-d');
-        $order = $this->input->post('order', true) ?? $this->input->get('order') ?? "descending";
+        $start_date = $this->input->post('start_date', true) ?: date('Y-m-d');
+        $end_date   = $this->input->post('end_date', true) ?: date('Y-m-d');
+        $order      = $this->input->post('order', true) ?: 'ascending';
 
-        $data['date']        = $date;
+        // $date  = $this->input->post('date', true) ?? date('Y-m-d');
+        // $order = $this->input->post('order', true) ?? "descending";
+
+        $data['employee_id'] = $employee_id;
+        $data['start_date']     = $start_date;
+        $data['end_date '] = $end_date;
         $data['order']       = $order;
-        $data['response'] = $this->get_application_usage_grouped_by_app($employee_id, $date, $order);
-        // Example empty data (replace with model call later)
-        $data['data'] = [
-            'total_applications' => 0,
-            'total_usage_time'   => '0s',
-            'applications'       => []
-        ];
+
+        if (!empty($employee_id)) {
+            // Get productive and unproductive usage data
+            $data['productive_usage'] = $this->get_app_productive_usage($employee_id, $start_date, $end_date, $order);
+            $data['unproductive_usage'] = $this->get_app_unproductive_usage($employee_id, $start_date, $end_date, $order);
+
+            // Calculate overall combined data
+            $data['overall_usage'] = [
+                'status' => 'success',
+                'data' => [
+                    'total_applications' => $data['productive_usage']['data']['total_applications'] + $data['unproductive_usage']['data']['total_applications'],
+                    'total_usage_time' => $this->seconds_to_time(
+                        $data['productive_usage']['data']['raw_total_usage_seconds'] +
+                            $data['unproductive_usage']['data']['raw_total_usage_seconds']
+                    ),
+                    'raw_total_usage_seconds' => $data['productive_usage']['data']['raw_total_usage_seconds'] + $data['unproductive_usage']['data']['raw_total_usage_seconds'],
+                ]
+            ];
+        } else {
+            // If no employee_id is provided, set default responses for both productive and unproductive data
+            $data['productive_usage'] = $data['unproductive_usage'] = [
+                'status' => 'success',
+                'data' => [
+                    'total_applications' => 0,
+                    'total_usage_time'   => '0s',
+                    'raw_total_usage_seconds' => 0,
+                    'applications'       => []
+                ]
+            ];
+
+            // Overall usage will also be empty in this case
+            $data['overall_usage'] = $data['productive_usage']; // Same as productive usage as no data is available
+        }
 
         // make sure this view exists: application/views/employee/application_tracker.php
         $data['main_content'] = $this->load->view('admin/employee/application_tracker', $data, TRUE);
@@ -248,15 +285,15 @@ public function time_to_seconds($time) {
 
 
     // productive usage
-    public function get_app_productive_usage($employee_id, $date, $listOrder)
+    public function get_app_productive_usage($employee_id, $start_date, $end_date,  $listOrder)
     {
         try {
             // --- Get inputs (POST or GET) ---
             $order = $listOrder == "descending" ? true : false;
             $user_id = $this->session->userdata('id') ?? $this->session->userdata('employee_org_id');
 
-            $start_date_raw = $this->input->get_post('start_date');
-            $end_date_raw = $this->input->get_post('end_date');
+            // $start_date_raw = $this->input->get_post('start_date');
+            // $end_date_raw = $this->input->get_post('end_date');
             $application_name = $this->input->get_post('application_name');
 
             $limit = (int) $this->input->get_post('limit', TRUE) ?: 2000;
@@ -276,8 +313,8 @@ public function time_to_seconds($time) {
             }
 
             // --- Normalize / parse date filters ---
-            $start_date = $this->normalize_date_filter($start_date_raw, 'start');
-            $end_date = $this->normalize_date_filter($end_date_raw, 'end');
+            // $start_date = $this->normalize_date_filter($start_date_raw, 'start');
+            // $end_date = $this->normalize_date_filter($end_date_raw, 'end');
 
             // Define productive applications and browser work-related keywords
             $productive_apps = [
@@ -546,15 +583,15 @@ public function time_to_seconds($time) {
 
 
 
-    public function get_app_unproductive_usage($employee_id, $date, $listOrder)
+    public function get_app_unproductive_usage($employee_id, $start_date, $end_date, $listOrder)
     {
         try {
             // --- Get inputs (POST or GET) ---
             $order = $listOrder == "descending" ? true : false;
             $user_id = $this->session->userdata('id') ?? $this->session->userdata('employee_org_id');
 
-            $start_date_raw = $this->input->get_post('start_date');
-            $end_date_raw = $this->input->get_post('end_date');
+            // $start_date_raw = $this->input->get_post('start_date');
+            // $end_date_raw = $this->input->get_post('end_date');
             $application_name = $this->input->get_post('application_name');
 
             $limit = (int) $this->input->get_post('limit', TRUE) ?: 2000;
@@ -574,8 +611,8 @@ public function time_to_seconds($time) {
             }
 
             // --- Normalize / parse date filters ---
-            $start_date = $this->normalize_date_filter($start_date_raw, 'start');
-            $end_date = $this->normalize_date_filter($end_date_raw, 'end');
+            // $start_date = $this->normalize_date_filter($start_date_raw, 'start');
+            // $end_date = $this->normalize_date_filter($end_date_raw, 'end');
 
             // Define productive applications and browser work-related keywords
             $productive_apps = [
