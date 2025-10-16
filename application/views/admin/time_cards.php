@@ -17,16 +17,16 @@
                     $min_date = '';
                     $help_text = '';
 
-                    if (is_pack_trial()) {
-                        $min_date = date('Y-m-d', strtotime('-1 day'));
-                        $help_text = 'Trial plan only allows selecting today or yesterday\'s date.';
-                    } elseif (is_plan_basic()) {
-                        $min_date = date('Y-m-d', strtotime('-7 days'));
-                        $help_text = 'Basic Package allows selecting dates from the last 7 days only.';
-                    } elseif (is_plan_standard()) {
-                        $min_date = date('Y-m-d', strtotime('-1 month'));
-                        $help_text = 'Standard plan allows selecting dates from the last one month only.';
-                    }
+                        if ($plan == "free") {
+                            $min_date = date('Y-m-d', strtotime('-1 day'));
+                            $help_text = 'You can select dates up to one day in the past.';
+                        } elseif ($plan == "basic") {
+                            $min_date = date('Y-m-d', strtotime('-7 days'));
+                            $help_text = 'You can select dates from the last 7 days.';
+                        } elseif ($plan == "standard") {
+                            $min_date = date('Y-m-d', strtotime('-1 month'));
+                            $help_text = 'You can select dates from the last one month.';
+                        }
                     ?>
 
                     <input type="date" id="datePicker" class="form-control"

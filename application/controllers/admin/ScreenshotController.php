@@ -15,8 +15,8 @@ class ScreenshotController extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(6);
         $data = array();
+        $data['plan'] = get_plan_by_feature(6);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'User Screenshots';
         $data['can_edit'] = $this->auth_model->get_permission(6);
@@ -32,7 +32,6 @@ class ScreenshotController extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(7);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
@@ -40,6 +39,7 @@ class ScreenshotController extends Home_Controller
             redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
+        $data['plan'] = get_plan_by_feature(7);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Webcam screenshots';
         $data['can_edit'] = $this->auth_model->get_permission(7);

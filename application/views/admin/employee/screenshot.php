@@ -298,11 +298,11 @@
                                 $('#screenshot-modal').fadeIn();
 
                                 // Auto-refresh if current date
-                                setTimeout(function() {
-                                    if (date === new Date().toISOString().split('T')[0]) {
-                                        loadScreenshots()
-                                    }
-                                }, 60000);
+                                // setTimeout(function() {
+                                //     if (date === new Date().toISOString().split('T')[0]) {
+                                //         loadScreenshots()
+                                //     }
+                                // }, 60000);
                             });
                         } else {
                             $(".card-container").html(

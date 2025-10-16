@@ -329,13 +329,13 @@
                                 $('#screenshot-modal').fadeIn();
 
                                 // Auto-refresh
-                                setTimeout(function() {
-                                    let date = $('#datePicker').val();
-                                    let id = $('#employeeSelect').val();
-                                    if (date === new Date().toISOString().split('T')[0]) {
-                                        loadScreenshots(id, date);
-                                    }
-                                }, 6000);
+                                // setTimeout(function() {
+                                //     let date = $('#datePicker').val();
+                                //     let id = $('#employeeSelect').val();
+                                //     if (date === new Date().toISOString().split('T')[0]) {
+                                //         loadScreenshots(id, date);
+                                //     }
+                                // }, 6000);
                             });
                         } else {
                             $(".card-container").html(`
