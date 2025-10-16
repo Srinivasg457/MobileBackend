@@ -117,10 +117,10 @@ class Navbar_Redirection extends Home_Controller
         } elseif (in_array(10, $allowed)) {
             redirect('admin/hrm/employees');
         } elseif (in_array(11, $allowed)) {
-            redirect('admin/roles_permissions');
+            redirect('admin/application_tracker');
         } else {
             // Fallback to dashboard if no permissions
-            redirect('admin/dashboard');
+            redirect('admin/roles_permissions');
         }
     }
 

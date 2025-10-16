@@ -38,22 +38,50 @@ class Admin_model extends CI_Model {
                 10 => 'no_of_employees_feature',
                 11 => 'application_usage_feature'
             ];
+            $flag_map = [
+                1  => 'activity_log_flag',
+                2  => 'time_cards_flag',
+                3  => 'notification_flag',
+                4  => 'organization_settings_flag',
+                5  => 'employee_settings_flag',
+                6  => 'screenshots_flag',
+                7  => 'webcam_screenshots_flag',
+                8  => 'live_monitoring_flag',
+                9  => 'time_approval_flag',
+                10 => 'no_of_employees_flag',
+                11 => 'application_usage_flag'
+            ];
 
-            if (!isset($feature_map[$feature_id])) {
+            if (!isset($feature_map[$feature_id]) || !isset($flag_map[$feature_id])) {
                 return null; // feature ID not found
             }
 
-            $plan_name   = $feature_map[$feature_id];
-            if ($plan_name) {
-                // Select the slug column dynamically from package_features table
-                $this->db->select($plan_name);
+            $feature_name = $feature_map[$feature_id];
+            $flag_name = $flag_map[$feature_id];
+
+            if ($feature_name && $flag_name) {
+                $this->db->select($flag_name, $feature_name);
                 $this->db->from('custom_plan_feature');
                 $this->db->where('customer_id', $user_id);
                 $this->db->order_by('id', 'DESC');
                 $this->db->limit(1);
                 $query = $this->db->get();
 
-                return $query->row()->$plan_name; // return a single row
+                $result = $query->row();
+
+                if ($result) {
+                    $flag_value = $result->$flag_name;
+
+                    // ✅ if flag = 1 → return feature name; if flag = 0 → return null
+                    if ($flag_value == 1) {
+                        return $feature_name;  // feature enabled → return name
+                    } else {
+                        // redirect('error-404');
+                        return -1;        // feature disabled → return null
+                    }
+                }
+
+                return -1; // no record found
             }
         } else {
             // Get the user's payment
@@ -74,12 +102,108 @@ class Admin_model extends CI_Model {
                 return $plan->slug; // return a single row
             }
 
-            return null; // if package not found
+            return -1; // if package not found
 
         }
-        return null; // if package not found
+        return -1; // if package not found
     }
-    
+
+
+    // custom plan
+    public function get_flag($feature_id)
+    {
+        $user_id = $this->session->userdata('id');
+        if (is_custom_plan_user()) {
+
+            // Get the user's payment
+            $payment = $this->common_model->get_user_payment();
+            $pack_id = $payment->package;
+
+            // Map feature IDs to custom plan columns
+            $feature_map = [
+                1  => 'activity_log_feature',
+                2  => 'time_cards_feature',
+                3  => 'notification_feature',
+                4  => 'organization_settings_feature',
+                5  => 'employee_settings_feature',
+                6  => 'screenshots_feature',
+                7  => 'webcam_screenshots_feature',
+                8  => 'live_monitoring_feature',
+                9  => 'time_approval_feature',
+                10 => 'no_of_employees_feature',
+                11 => 'application_usage_feature'
+            ];
+            $flag_map = [
+                1  => 'activity_log_flag',
+                2  => 'time_cards_flag',
+                3  => 'notification_flag',
+                4  => 'organization_settings_flag',
+                5  => 'employee_settings_flag',
+                6  => 'screenshots_flag',
+                7  => 'webcam_screenshots_flag',
+                8  => 'live_monitoring_flag',
+                9  => 'time_approval_flag',
+                10 => 'no_of_employees_flag',
+                11 => 'application_usage_flag'
+            ];
+
+            if (!isset($feature_map[$feature_id]) || !isset($flag_map[$feature_id])) {
+                return null; // feature ID not found
+            }
+
+            $feature_name = $feature_map[$feature_id];
+            $flag_name = $flag_map[$feature_id];
+
+            if ($feature_name && $flag_name) {
+                $this->db->select($flag_name, $feature_name);
+                $this->db->from('custom_plan_feature');
+                $this->db->where('customer_id', $user_id);
+                $this->db->order_by('id', 'DESC');
+                $this->db->limit(1);
+                $query = $this->db->get();
+
+                $result = $query->row();
+
+                if ($result) {
+                    $flag_value = $result->$flag_name;
+
+                    // ✅ if flag = 1 → return feature name; if flag = 0 → return null
+                    if ($flag_value == 1) {
+                        return $feature_name;  // feature enabled → return name
+                    } else {
+                        // redirect('error-404');
+                        return -1;        // feature disabled → return null
+                    }
+                }
+
+                return -1; // no record found
+            }
+        } else {
+            // Get the user's payment
+            $payment = $this->common_model->get_user_payment();
+            $pack_id = $payment->package;
+
+            // Get the package
+            $query = $this->db->get_where('package', ['id' => $pack_id]);
+            $plan = $query->row(); // use row() since it's a single row
+
+            if ($plan) {
+                // Select the slug column dynamically from package_features table
+                // $this->db->select('name, ' . $plan->slug);
+                // $this->db->from('package_features');
+                // $this->db->where('id', $feature_id);
+                // $query = $this->db->get();
+
+                return $plan->slug; // return a single row
+            }
+
+            return -1; // if package not found
+
+        }
+        return -1; // if package not found
+    }
+
+
     // employee edit function
     function edit_option_employee($action, $id, $user_id, $table)
     {

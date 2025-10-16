@@ -16,12 +16,11 @@ class Application_Tracker extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        
-        require_feature(11);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
+        $data['plan'] = get_plan_by_feature(11);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'application_tracker';
 

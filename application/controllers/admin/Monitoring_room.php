@@ -15,14 +15,15 @@ class Monitoring_room extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(8);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
-        if (is_plan_basic()) {
-            redirect('/admin/subscription/upgrade_plan');
-        }
+
         $data = array();
+        $data['plan'] = get_plan_by_feature(8);
+        if($data['plan'] == 'basic'){
+            // redirect('/admin/subscription/upgrade_plan');
+        }
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Live Monitoring';
         $data['can_edit'] = $this->auth_model->get_permission(8);

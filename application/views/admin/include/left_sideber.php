@@ -429,78 +429,97 @@
               </a>
             </li>
 
-            <li class="treeview <?php if (isset($main_page) && $main_page == "Analytics") {
-                                  echo "active";
-                                } ?>">
+            <?php
+            // Pre-check which features are enabled
+            $features = [
+              get_flag(6), // Screenshots
+              get_flag(7), // Webcam Screenshots
+              get_flag(1), // Activity Log
+              get_flag(2)  // Time Cards
+            ];
 
-              <a href="#"><i class="bi bi-graph-up-arrow mr-5"></i>
-                <span><?php echo "Employee Metrics" ?></span>
-                <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
-              </a>
-              <ul class="treeview-menu">
-                <li class="<?php if (isset($page_title) && $page_title == "User Screenshots") {
-                              echo "active";
-                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/view_screenshots') ?>">
-                    <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
-                  </a>
-                </li>
-                <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") {
-                              echo "active";
-                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/webcam_screenshots') ?>">
-                    <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
-                  </a>
-                </li>
-                <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") {
-                              echo "active";
-                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/activity_logs') ?>">
-                    <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Logs" ?></span>
-                  </a>
-                </li>
-                <li class="<?php if (isset($page_title) && $page_title == "employee_activity") {
-                              echo "active";
-                            } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-                  <a href="<?php echo base_url('admin/time_cards') ?>">
-                    <i class="bi bi-clock mr-5"></i> <span><?php echo "Time Cards" ?></span>
-                  </a>
-                </li>
+            // Only show parent if at least one feature is enabled
+            if (count(array_filter($features, fn($f) => $f !== -1)) > 0): ?>
+              <li class="treeview <?php if (isset($main_page) && $main_page == "Analytics") echo "active"; ?>">
+                <a href="#"><i class="bi bi-graph-up-arrow mr-5"></i>
+                  <span><?php echo "Employee Metrics" ?></span>
+                  <span class="pull-right-container"><i class="fa fa-angle-right pull-right mr-5"></i></span>
+                </a>
+                <ul class="treeview-menu">
+                  <?php if ($features[0] !== -1): ?>
+                    <li class="<?php if (isset($page_title) && $page_title == "User Screenshots") echo "active"; ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                      <a href="<?php echo base_url('admin/view_screenshots') ?>">
+                        <i class="bi bi-camera mr-5"></i> <span><?php echo "View Screenshots" ?></span>
+                      </a>
+                    </li>
+                  <?php endif; ?>
+                  <?php if ($features[1] !== -1): ?>
+                    <li class="<?php if (isset($page_title) && $page_title == "Webcam screenshots") echo "active"; ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                      <a href="<?php echo base_url('admin/webcam_screenshots') ?>">
+                        <i class="bi bi-webcam mr-5"></i> <span><?php echo "Webcam screenshots" ?></span>
+                      </a>
+                    </li>
+                  <?php endif; ?>
+                  <?php if ($features[2] !== -1): ?>
+                    <li class="<?php if (isset($page_title) && $page_title == "Activity Log Admin") echo "active"; ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                      <a href="<?php echo base_url('admin/activity_logs') ?>">
+                        <i class="bi bi-file-bar-graph mr-5"></i> <span><?php echo "Activity Logs" ?></span>
+                      </a>
+                    </li>
+                  <?php endif; ?>
+                  <?php if ($features[3] !== -1): ?>
+                    <li class="<?php if (isset($page_title) && $page_title == "employee_activity") echo "active"; ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                      <a href="<?php echo base_url('admin/time_cards') ?>">
+                        <i class="bi bi-clock mr-5"></i> <span><?php echo "Time Cards" ?></span>
+                      </a>
+                    </li>
+                  <?php endif; ?>
+                </ul>
+              </li>
+            <?php endif; ?>
 
-              </ul>
-            </li>
-            <!-- Application Tracker -->
 
-            <li class="<?php if (isset($page_title) && $page_title == "application_tracker") {
-                          echo "active";
-                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('admin/application_tracker') ?>">
-                <i class="bi bi-window-stack mr-5"></i> <span><?php echo "Application Tracker" ?></span>
-              </a>
-            </li>
-            <!-- Live Monitoring -->
-            <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
-                          echo "active";
-                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('admin/live_monitoring') ?>">
-                <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
-              </a>
-            </li>
-            <!-- Time Approval -->
-            <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
-                          echo "active";
-                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('admin/time_approval') ?>">
-                <i class="bi-clipboard-check mr-5"></i> <span><?php echo "Time Approval" ?></span>
-              </a>
-            </li>
-            <li class="<?php if (isset($page_title) && $page_title == "Notification") {
-                          echo "active";
-                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('admin/notification/webcam') ?>">
-                <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
-              </a>
-            </li>
+            <?php if (get_flag(11) !== -1): ?>
+              <!-- Application Tracker -->
+
+              <li class="<?php if (isset($page_title) && $page_title == "application_tracker") {
+                            echo "active";
+                          } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                <a href="<?php echo base_url('admin/application_tracker') ?>">
+                  <i class="bi bi-window-stack mr-5"></i> <span><?php echo "Application Tracker" ?></span>
+                </a>
+              </li>
+            <?php endif; ?>
+            <?php if (get_flag(8) !== -1): ?>
+              <!-- Live Monitoring -->
+              <li class="<?php if (isset($page_title) && $page_title == "Live Monitoring") {
+                            echo "active";
+                          } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                <a href="<?php echo base_url('admin/live_monitoring') ?>">
+                  <i class="bi bi-eye mr-5"></i> <span><?php echo "Live Monitoring" ?></span>
+                </a>
+              </li>
+            <?php endif; ?>
+
+            <?php if (get_flag(9) !== -1): ?>
+              <!-- Time Approval -->
+              <li class="<?php if (isset($page_title) && $page_title == "Time_Approval") {
+                            echo "active";
+                          } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                <a href="<?php echo base_url('admin/time_approval') ?>">
+                  <i class="bi-clipboard-check mr-5"></i> <span><?php echo "Time Approval" ?></span>
+                </a>
+              </li>
+            <?php endif; ?>
+            <?php if (get_flag(3) !== -1): ?>
+              <li class="<?php if (isset($page_title) && $page_title == "Notification") {
+                            echo "active";
+                          } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                <a href="<?php echo base_url('admin/notification/webcam') ?>">
+                  <i class="bi bi-chat-left-dots mr-5"></i> <span><?php echo "Notification" ?></span>
+                </a>
+              </li>
+            <?php endif; ?>
 
             <!-- Employees -->
             <li class="<?php if (isset($page_title) && $page_title == "Employee") {
@@ -526,23 +545,27 @@
                 <i class="bi bi-shield-lock mr-5"></i> <span><?php echo "Roles & Permissions" ?></span>
               </a>
             </li>
-            <!-- Organization Settings -->
-            <li class="<?php if (isset($page_title) && $page_title == "Edit") {
-                          echo "active";
-                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('admin/organization_settings') ?>">
-                <i class="bi bi-toggle-on mr-5"></i> <span><?php echo "Organization settings" ?></span>
-              </a>
-            </li>
-            <!-- Employee Settings -->
-            <li class="<?php if (isset($page_title) && $page_title == "Ex Organization settings") {
-                          echo "active";
-                        } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
-              <a href="<?php echo base_url('admin/employee_settings/assigned') ?>">
-                <i class="bi bi-tools mr-5"></i> <span><?php echo "Employee settings" ?></span>
-              </a>
-            </li>
 
+            <?php if (get_flag(4) !== -1): ?>
+              <!-- Organization Settings -->
+              <li class="<?php if (isset($page_title) && $page_title == "Edit") {
+                            echo "active";
+                          } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                <a href="<?php echo base_url('admin/organization_settings') ?>">
+                  <i class="bi bi-toggle-on mr-5"></i> <span><?php echo "Organization settings" ?></span>
+                </a>
+              </li>
+            <?php endif; ?>
+            <?php if (get_flag(5) !== -1): ?>
+              <!-- Employee Settings -->
+              <li class="<?php if (isset($page_title) && $page_title == "Ex Organization settings") {
+                            echo "active";
+                          } ?>" <?= !is_subscribed() ? 'data-toggle="tooltip" data-placement="right" title="Please subscribe to access this feature"' : '' ?>>
+                <a href="<?php echo base_url('admin/employee_settings/assigned') ?>">
+                  <i class="bi bi-tools mr-5"></i> <span><?php echo "Employee settings" ?></span>
+                </a>
+              </li>
+            <?php endif; ?>
 
 
             <li class="<?php if (isset($page) && $page == "Settings") {
