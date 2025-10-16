@@ -84,11 +84,11 @@ if (!function_exists('require_feature')) {
 		return $ci->auth_model->require_feature($featureId);
 	}
 }
-if (!function_exists('custom_plans')) {
-	function custom_plans($featureId)
+if (!function_exists('get_plan_by_feature')) {
+	function get_plan_by_feature($featureId)
 	{
 		$ci = &get_instance();
-		return $ci->admin_model->custom_plans($featureId);
+		return $ci->admin_model->get_plan_by_feature($featureId);
 	}
 }
 
