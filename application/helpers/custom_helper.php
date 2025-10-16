@@ -92,6 +92,14 @@ if (!function_exists('get_plan_by_feature')) {
 		return $ci->admin_model->get_plan_by_feature($featureId);
 	}
 }
+if (!function_exists('get_flag')) {
+	function get_flag($featureId)
+	{
+		require_feature($featureId);
+		$ci = &get_instance();
+		return $ci->admin_model->get_flag($featureId);
+	}
+}
 
 if (!function_exists('get_random_employee_id')) {
 	function get_random_employee_id()
