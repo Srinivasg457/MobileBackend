@@ -59,6 +59,7 @@ class Navbar_Redirection extends Home_Controller
             'email'     => $orgUser->email ?? $this->session->userdata('employee_email'),
             'role'      => 'user',          // treat as regular org user
             'parent'    => $orgUser->id,
+            'is_employee_admin' => true,
             'is_org_admin' => true,
             'logged_in' => true
         ];
@@ -82,6 +83,7 @@ class Navbar_Redirection extends Home_Controller
             'role',
             'parent',
             'is_org_admin',
+            'is_employee_admin',
             'logged_in'
         ]);
     }

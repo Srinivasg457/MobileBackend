@@ -100,7 +100,7 @@ class Auth_model extends CI_Model
             redirect('login');
         }
 
-        if (!$this->session->userdata('is_org_admin')) {
+        if ($this->session->userdata('is_employee_admin')) {
 
             $CI = &get_instance();
             $allowed = get_allowed_feature_ids();   // <- your existing helper
