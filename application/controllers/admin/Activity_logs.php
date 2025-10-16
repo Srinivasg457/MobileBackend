@@ -373,11 +373,11 @@ public function Time_Cards()
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(2);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
+        $data['plan'] = get_plan_by_feature(2);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'employee_activity';
         $data['can_edit'] = $this->auth_model->get_permission(2);

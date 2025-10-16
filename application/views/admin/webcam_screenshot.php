@@ -277,14 +277,14 @@
                             }
 
                             // Auto-refresh if current date
-                            setTimeout(function() {
-                                // $('#screenshot-modal').fadeOut();
-                                let date = $('#datePicker').val();
-                                let id = $('#employeeSelect').val();
-                                if (date === new Date().toISOString().split('T')[0]) {
-                                    loadScreenshots(id, date)
-                                }
-                            }, 60000);
+                            // setTimeout(function() {
+                            //     // $('#screenshot-modal').fadeOut();
+                            //     let date = $('#datePicker').val();
+                            //     let id = $('#employeeSelect').val();
+                            //     if (date === new Date().toISOString().split('T')[0]) {
+                            //         loadScreenshots(id, date)
+                            //     }
+                            // }, 60000);
 
                         } else {
                             $(".card-container").html(`
