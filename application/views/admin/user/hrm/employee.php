@@ -217,7 +217,7 @@
         <?php else: ?>
 
           <h3 class="box-title"><?php echo ('Employees') ?>
-            <?php if (is_pack_trial()): ?>
+            <?php if ($plan == "free"): ?>
               <span class="text-danger pull-right  mx-5" data-toggle="tooltip" data-placement="top" title="Upgrade your plan to enable employee bulk upload.">
                 <i class="fa fa-lock"></i> Bulk upload is disabled.
               </span>

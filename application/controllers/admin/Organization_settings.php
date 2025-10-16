@@ -33,11 +33,11 @@ class Organization_settings extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(4);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
+        $data['plan'] = get_plan_by_feature(4);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Edit';
         $data['can_edit'] = $this->auth_model->get_permission(4);
@@ -53,11 +53,11 @@ class Organization_settings extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(5);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
+        $data['plan'] = get_plan_by_feature(5);
         $data['is_employee_admin'] = true;
         $data['navbar'] = 'own_settings';
         $data['page_title'] = 'Ex Organization settings';
@@ -73,11 +73,11 @@ class Organization_settings extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(5);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
+        $data['plan'] = get_plan_by_feature(5);
         $data['is_employee_admin'] = true;
         $data['navbar'] = 'no_own_settings';
         $data['page_title'] = 'Ex Organization settings';
@@ -91,8 +91,8 @@ class Organization_settings extends Home_Controller
 
     public function index111()
     {
-        require_feature(3);
         $data = array();
+        $data['plan'] = get_plan_by_feature(3);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Notification';
         $data['navbar'] = 'webcam';

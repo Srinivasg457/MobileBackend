@@ -22,8 +22,8 @@ class Hrm extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(12);
         $data = array();
+        $data['plan'] = get_plan_by_feature(12);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Department';
         $data['can_edit'] = $this->auth_model->get_permission(12);
@@ -160,11 +160,11 @@ class Hrm extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(10);
         if (!is_subscribed()) {
             redirect('/admin/subscription/upgrade_plan');
         }
         $data = array();
+        $data['plan'] = get_plan_by_feature(10);
         $data['page_title'] = 'Employee';
         $data['is_employee_admin'] = true;
         $data['can_edit'] = $this->auth_model->get_permission(10);

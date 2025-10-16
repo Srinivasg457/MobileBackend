@@ -17,7 +17,7 @@ class Timecards_manual extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(9);
+        $data['plan'] = get_plan_by_feature(9);
         $data['page_title'] = 'Time_Approval';
         $data['can_edit'] = $this->auth_model->get_permission(9);
         $data['is_employee_admin'] = true;
@@ -35,7 +35,7 @@ class Timecards_manual extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(9);
+        $data['plan'] = get_plan_by_feature(9);
         $data['page_title'] = 'Time_Approval';
         $data['can_edit'] = $this->auth_model->get_permission(9);
         $data['is_employee_admin'] = true;
