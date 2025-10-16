@@ -87,6 +87,7 @@ if (!function_exists('require_feature')) {
 if (!function_exists('get_plan_by_feature')) {
 	function get_plan_by_feature($featureId)
 	{
+		require_feature($featureId);
 		$ci = &get_instance();
 		return $ci->admin_model->get_plan_by_feature($featureId);
 	}

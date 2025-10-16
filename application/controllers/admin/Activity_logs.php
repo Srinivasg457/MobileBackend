@@ -14,9 +14,8 @@ class Activity_logs extends Home_Controller
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(1);
         $data = array();
-        $data['custom'] = custom_plans(1);
+        $data['plan'] = get_plan_by_feature(1);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Activity Log Admin';
         $data['can_edit'] = $this->auth_model->get_permission(1);
