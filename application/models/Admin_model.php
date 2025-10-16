@@ -15,7 +15,7 @@ class Admin_model extends CI_Model {
     } 
 
     // custom plan
-    public function custom_plans($feature_id)
+    public function get_plan_by_feature($feature_id)
     {
         $user_id = $this->session->userdata('id');
         if (is_custom_plan_user()) {
