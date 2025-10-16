@@ -11,7 +11,7 @@
                 </h3>
             <?php else: ?>
                 <h3 class="">Organization Settings
-                    <?php if (is_pack_trial()): ?>
+                    <?php if ($plan == "free"): ?>
                         <span class="text-danger pull-right mt-2" data-toggle="tooltip" data-placement="top" title="Upgrade your plan to enable editing.">
                             <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
                         </span>
@@ -68,8 +68,8 @@
                                 <?php if ($is_edit_mode): ?>
                                     <select name="screenshot_time_interval" class="form-control" id="screenshot_time_interval">
                                         <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <?php if (is_plan_basic() && $val != 10) continue; ?>
-                                            <?php if (is_plan_standard() && $val != 10 && $val != 5) continue; ?>
+                                            <?php if ($plan == "basic" && $val != 10) continue; ?>
+                                            <?php if ($plan == "standard" && $val != 10 && $val != 5) continue; ?>
 
                                             <option value="<?= $val ?>" <?= (isset($settings['screenshot_time_interval']) && $settings['screenshot_time_interval'] == $val) ? 'selected' : '' ?>>
                                                 <?= $val ?>
@@ -85,9 +85,9 @@
                             <div class="col-md-4 mb-5 form-group">
                                 <label class="control-label">Webcam Flag:</label>
                                 <div>
-                                    <label class="toggle-switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
+                                    <label class="toggle-switch" <?= $plan == "basic" ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
                                         <input type="checkbox" class="toggle-flag" name="webcam_flag" value="1" <?= isset($settings['webcam_flag']) && $settings['webcam_flag'] ? 'checked' : '' ?> data-target="webcam_time_interval" data-toggle="toggle" data-onstyle="info" data-width="100"
-                                            <?= ($is_edit_mode && !is_plan_basic()) ? '' : 'disabled' ?>>
+                                            <?= ($is_edit_mode && !$plan == "basic") ? '' : 'disabled' ?>>
                                     </label>
                                 </div>
                             </div>
@@ -98,9 +98,9 @@
 
                                 <?php if ($is_edit_mode): ?>
 
-                                    <select name="webcam_time_interval" class="form-control" id="webcam_time_interval" <?php echo is_plan_basic() ? 'disabled' : ''; ?>>
+                                    <select name="webcam_time_interval" class="form-control" id="webcam_time_interval" <?php echo $plan == "free" ? 'disabled' : ''; ?>>
                                         <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <?php if (is_plan_standard() && $val != 10 && $val != 5) continue; ?>
+                                            <?php if ($plan == "standard" && $val != 10 && $val != 5) continue; ?>
                                             <option value="<?= $val ?>" <?= (isset($settings['webcam_time_interval']) && $settings['webcam_time_interval'] == $val) ? 'selected' : '' ?>>
                                                 <?= $val ?>
                                             </option>
@@ -109,10 +109,10 @@
 
                                 <?php else: ?>
                                     <input type="text" class="form-control"
-                                        value="<?= is_plan_basic() ? 'Disabled' : (isset($settings['webcam_time_interval']) ? $settings['webcam_time_interval'] : '') ?>"
+                                        value="<?= $plan == "basic" ? 'Disabled' : (isset($settings['webcam_time_interval']) ? $settings['webcam_time_interval'] : '') ?>"
                                         readonly>
                                 <?php endif; ?>
-                                <?php if (is_plan_basic()): ?>
+                                <?php if ($plan == "basic"): ?>
                                     <small class="text-danger">Webcam feature not available in Basic plan</small>
                                 <?php endif; ?>
                             </div>
@@ -183,7 +183,7 @@
                                 <?php if ($is_edit_mode): ?>
                                     <select name="timecards_time_interval" class="form-control" id="timecards_time_interval">
                                         <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <?php if (is_plan_standard() && $val != 10 && $val != 5) continue; ?>
+                                            <?php if ($plan == "standard" && $val != 10 && $val != 5) continue; ?>
                                             <option value="<?= $val ?>" <?= (isset($settings['timecards_time_interval']) && $settings['timecards_time_interval'] == $val) ? 'selected' : '' ?>>
                                                 <?= $val ?>
                                             </option>
@@ -199,7 +199,7 @@
 
                         <?php if ($is_edit_mode): ?>
                             <div class="">
-                                <?php if (is_pack_trial()): ?>
+                                <?php if ($plan == "free"): ?>
                                     <span class="text-danger pull-left mt-2" data-toggle="tooltip" data-placement="top" title="Upgrade your plan to enable editing.">
                                         <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
                                     </span>

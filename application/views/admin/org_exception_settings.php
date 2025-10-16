@@ -237,9 +237,9 @@
                                 <div class="col-md-6 mb-5 form-group">
                                     <label>Screenshot Interval (mins):</label>
                                     <select name="screenshot_time_interval" class="form-control interval-field">
-                                        <?php if (is_plan_basic()): ?>
+                                        <?php if ($plan == "basic"): ?>
                                             <option value="10">10</option>
-                                        <?php elseif (is_plan_standard()): ?>
+                                        <?php elseif ($plan == "standard"): ?>
                                             <option value="5">5</option>
                                             <option value="10">10</option>
                                         <?php else: ?>
@@ -255,17 +255,17 @@
                                 <div class="col-md-4 mb-5 form-group">
                                     <label>Webcam Flag:</label><br>
                                     <div>
-                                        <label class="toggle-switch" <?= is_plan_basic() ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
+                                        <label class="toggle-switch" <?= $plan == "basic" ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
                                             <input type="checkbox" class="toggle-flag" name="webcam_flag" value="1" data-toggle="toggle" data-onstyle="info" data-width="100"
-                                                <?= (!is_plan_basic()) ? 'checked' : 'disabled' ?>>
+                                                <?= (!$plan == "basic") ? 'checked' : 'disabled' ?>>
                                         </label>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-5 form-group">
                                     <label>Webcam Interval (mins):</label>
                                     <select name="webcam_time_interval" class="form-control interval-field"
-                                        <?php echo is_plan_basic() ? 'disabled' : ''; ?>>
-                                        <?php if (is_plan_standard()): ?>
+                                        <?php echo $plan == "basic" ? 'disabled' : ''; ?>>
+                                        <?php if ($plan == "standard"): ?>
                                             <option value="5" selected>5</option>
                                             <option value="10">10</option>
                                         <?php else: ?>
@@ -276,7 +276,7 @@
                                         <?php endif; ?>
                                     </select>
 
-                                    <?php if (is_plan_basic()): ?>
+                                    <?php if ($plan == "basic"): ?>
                                         <small class="text-danger">Webcam feature not available in Basic plan</small>
                                     <?php endif; ?>
                                 </div>
@@ -322,9 +322,9 @@
                                 <div class="col-md-6 mb-5 form-group">
                                     <label>Timecards Interval (mins):</label>
                                     <select name="timecards_time_interval" class="form-control interval-field">
-                                        <?php if (is_plan_basic()): ?>
+                                        <?php if ($plan == "basic"): ?>
                                             <option value="10">10</option>
-                                        <?php elseif (is_plan_standard()): ?>
+                                        <?php elseif ($plan == "standard"): ?>
                                             <option value="5">5</option>
                                             <option value="10">10</option>
                                         <?php else: ?>
@@ -347,7 +347,7 @@
 
 
                                 <div class="col-12 form-group">
-                                    <?php if (is_pack_trial()): ?>
+                                    <?php if ($plan == "free"): ?>
                                         <span class="text-danger pull-left " data-toggle="tooltip" data-placement="bottom" title="Upgrade your plan to enable editing.">
                                             <i class="fa fa-lock"></i> Editing is disabled in Trial plan.
                                         </span>

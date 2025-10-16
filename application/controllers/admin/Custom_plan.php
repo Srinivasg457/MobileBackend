@@ -449,22 +449,24 @@ class Custom_plan extends Home_Controller {
 
     private function save_custom_plan_features($user_id, $features)
     {
-        if (empty($features) || !is_array($features)) return;
+        if (!is_array($features)) return;
 
-        // Initialize all columns with default values
+        // Initialize base data
         $data = [
             'customer_id' => $user_id,
             'created_at' => my_date_now(),
             'updated_at' => my_date_now(),
         ];
 
-        // Map features based on feature name
-        foreach ($features as $feature_id => $feature_data) {
+        // Loop through all possible feature IDs (1–11)
+        for ($i = 1; $i <= 11; $i++) {
+            $feature_data = isset($features[$i]) ? $features[$i] : [];
 
+            // ✅ Always set flag to 0 if not provided
             $flag = isset($feature_data['flag']) ? 1 : 0;
-            $option = isset($feature_data['option']) ? $feature_data['option'] : '';
+            $option = isset($feature_data['option']) ? $feature_data['option'] : null ;
 
-            switch (strtolower($feature_id)) {
+            switch ($i) {
                 case 1:
                     $data['activity_log_flag'] = $flag;
                     $data['activity_log_feature'] = $option;
@@ -508,13 +510,13 @@ class Custom_plan extends Home_Controller {
                 case 11:
                     $data['application_usage_flag'] = $flag;
                     $data['application_usage_feature'] = $option;
-                   break;
+                    break;
                 default:
-                    // Add extra columns if new features are added later
                     break;
             }
         }
-        // Save to DB
+
+        // ✅ Always insert with all flags (even 0)
         $this->db->insert('custom_plan_feature', $data);
     }
 }

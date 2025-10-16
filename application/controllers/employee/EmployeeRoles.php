@@ -13,8 +13,8 @@ class EmployeeRoles extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(13);
         $data = array();
+        $data['plan'] = get_plan_by_feature(13);
         $data['is_employee_admin'] = true;
         $data['can_edit'] = $this->auth_model->get_permission(13);
         $data['page_title'] = 'Create Roles & Permission';
@@ -30,8 +30,8 @@ class EmployeeRoles extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(13);
         $data = array();
+        $data['plan'] = get_plan_by_feature(13);
         $data['is_employee_admin'] = true;
         $data['can_edit'] = $this->auth_model->get_permission(13);
         $data['page_title'] = 'Roles & Permission';
@@ -48,8 +48,8 @@ class EmployeeRoles extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(13);
         $data = array();
+        $data['plan'] = get_plan_by_feature(13);
         $data['is_employee_admin'] = true;
         $data['can_edit'] = $this->auth_model->get_permission(13);
         $data['page_title'] = 'Edit';

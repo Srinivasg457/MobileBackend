@@ -16,8 +16,8 @@ class Notification extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(3);
         $data = array();
+        $data['plan'] = get_plan_by_feature(3);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Notification';
         $data['navbar'] = 'webcam';
@@ -35,8 +35,8 @@ class Notification extends Home_Controller {
         if (!is_org_admin()) {
             redirect(base_url());
         }
-        require_feature(3);
         $data = array();
+        $data['plan'] = get_plan_by_feature(3);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Notification';
         $data['navbar'] = 'desktop';
