@@ -4,8 +4,8 @@
             <div class="col-10 col-md-6">
                 <!-- Custom Plan -->
                 <?php if (isset($custom_plan) && $custom_plan !== null): ?>
-                    <div class="box add_area">
-                        <div class="box-header flex-between">
+                    <div class="box add_area shadow border-1 bg-contrast p-5 rounded">
+                        <div class="box-header flex-between with-border">
                             <div>
                                 <h3 class="box-title"><?php echo "Custom Plan" ?></h3>
                             </div>
@@ -20,7 +20,7 @@
                                         <?php foreach ($custom_plan as $feature => $value): ?>
                                             <li class="d-flex justify-content-between py-2 text-light">
                                                 <span><?php echo ucfirst(str_replace('_', ' ', $feature)); ?></span>
-                                                <span class="bold"><?php echo html_escape($value); ?></span>
+                                                <span class="bold text-dark"><?php echo html_escape($value); ?></span>
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>
@@ -85,6 +85,5 @@
                 <?php endif; ?>
             </div>
         </div>
-</div>
-</section>
+    </section>
 </div>

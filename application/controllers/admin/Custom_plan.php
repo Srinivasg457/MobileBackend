@@ -307,7 +307,7 @@ class Custom_plan extends Home_Controller {
             // }
         }
     }
-    public function add_org_settings($user_id, $features, $tz)
+    public function add_org_settings($user_id, $features, $tz = null)
     {
         // Default organization settings
         $flags = [
@@ -322,8 +322,13 @@ class Custom_plan extends Home_Controller {
             'key_stroke_threshold'     => 40,
             'idle_time_flag'           => 1,
             'timecards_time_interval'  => 5,
-            'time_zone'                => $tz,
+            // 'time_zone' will be set only if $tz is not null
         ];
+
+        // Only set timezone if provided
+        if ($tz !== null) {
+            $flags['time_zone'] = $tz;
+        }
 
         $flags = $this->security->xss_clean($flags);
 
@@ -561,7 +566,7 @@ class Custom_plan extends Home_Controller {
             $data['created_at'] = my_date_now();
             $this->db->insert('custom_plan_feature', $data);
         }
-
+        $this->add_org_settings($user_id, $features, null);
         $this->session->set_flashdata('msg', 'Updated Successfully.');
         redirect(base_url('admin/users'));
     }
