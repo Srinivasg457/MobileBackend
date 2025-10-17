@@ -38,6 +38,8 @@ class Organization_settings extends Home_Controller
         }
         $data = array();
         $data['plan'] = get_plan_by_feature(4);
+        $data['screenshot_plan'] = get_plan_by_feature(6);
+        $data['webcam_plan'] = get_plan_by_feature(7);
         $data['is_employee_admin'] = true;
         $data['page_title'] = 'Edit';
         $data['can_edit'] = $this->auth_model->get_permission(4);
@@ -58,6 +60,8 @@ class Organization_settings extends Home_Controller
         }
         $data = array();
         $data['plan'] = get_plan_by_feature(5);
+        $data['screenshot_plan'] = get_plan_by_feature(6);
+        $data['webcam_plan'] = get_plan_by_feature(7);
         $data['is_employee_admin'] = true;
         $data['navbar'] = 'own_settings';
         $data['page_title'] = 'Ex Organization settings';
@@ -78,6 +82,8 @@ class Organization_settings extends Home_Controller
         }
         $data = array();
         $data['plan'] = get_plan_by_feature(5);
+        $data['screenshot_plan'] = get_plan_by_feature(6);
+        $data['webcam_plan'] = get_plan_by_feature(7);
         $data['is_employee_admin'] = true;
         $data['navbar'] = 'no_own_settings';
         $data['page_title'] = 'Ex Organization settings';
