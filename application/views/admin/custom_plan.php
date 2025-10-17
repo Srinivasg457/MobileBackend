@@ -47,7 +47,7 @@
                                     <div class="form-group">
                                         <label><?php echo trans('name') ?> <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" required name="name" value="<?php echo html_escape($user[0]['name']); ?>"
-                                            <?php if (isset($page_title) && $page_title == "Edit"): ?>Disabled<?php endif; ?>>
+                                           >
                                     </div>
 
                                     <div class="form-group">
@@ -121,8 +121,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label><?php echo trans('country') ?></label>
-                                        <select class="selectfield textfield--grey single_select col-sm-12" required name="country" id="country" style="width: 100%"
-                                            <?php if (isset($page_title) && $page_title == "Edit"): ?>Disabled<?php endif; ?>>
+                                        <select class="selectfield textfield--grey single_select col-sm-12" required name="country" id="country" style="width: 100%">
                                             <option value=""><?php echo trans('select') ?></option>
                                             <?php foreach ($countries as $country): ?>
                                                 <option value="<?php echo html_escape($country->id); ?>" <?php if (isset($user[0]['country']) && $user[0]['country'] == $country->id) echo "selected"; ?>>
@@ -134,8 +133,7 @@
 
                                     <div class="form-group">
                                         <label class="form-label">Select Timezone:</label>
-                                        <select name="time_zone" id="timezone_select" required class="selectfield textfield--grey single_select col-sm-12 wd-100"
-                                            <?php if (isset($page_title) && $page_title == "Edit"): ?>Disabled<?php endif; ?>>
+                                        <select name="time_zone" id="timezone_select" required class="selectfield textfield--grey single_select col-sm-12 wd-100">
                                             <option value="<?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : ''; ?>">
                                                 <?php echo isset($user[0]['timezone']) ? $user[0]['timezone'] : 'Select'; ?>
                                             </option>

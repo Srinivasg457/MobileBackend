@@ -220,19 +220,22 @@ class Custom_plan extends Home_Controller {
                 // }
 
                 $package = 5; // Always Custom Plan
-                // $user_type = 'registered';
-                // $trial_expire = date('Y-m-d');
+                $user_type = 'registered';
+                $trial_expire = date('Y-m-d');
 
                 // Create user record
                 $udata = array(
-                    // 'name' => $this->input->post('name', true),
-                    // 'user_name' => str_slug($this->input->post('name', true)),
-                    // 'slug' => str_slug($this->input->post('name', true)),
-                    // 'email' => $mail,
-                    // 'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
-                    // 'status' => $this->input->post('status', true),
-                    // 'country' => $this->input->post('country', true),
-                    // 'timezone' => $this->input->post('time_zone', true),
+                    'name' => $this->input->post('name', true),
+                    'user_name' => str_slug($this->input->post('name', true)),
+                    'slug' => str_slug($this->input->post('name', true)),
+                // 'email' => $mail,
+                // 'referral_id' => substr(random_string('alnum', 5) . mt_rand(), 0, 10),
+                // 'status' => $this->input->post('status', true),
+                    'user_type' => $user_type,
+                    'trial_expire' => $trial_expire,
+                    'status' => $this->input->post('status', true),
+                    'country' => $this->input->post('country', true),
+                    'timezone' => $this->input->post('time_zone', true),
                 );
                     // $this->admin_model->edit_option($udata, $id, 'users');
                     $this->session->set_flashdata('msg', 'Updated Successfully.');
@@ -313,124 +316,89 @@ class Custom_plan extends Home_Controller {
 
         $flags = $this->security->xss_clean($flags);
 
-        // Safely extract features from numeric keys
-        $screenshot_feature = isset($features[6]) ? $features[6] : null; // Screenshots
-        $webcam_feature     = isset($features[7]) ? $features[7] : null; // Webcam screenshots
+        // Extract features by ID
+        $screenshot_feature = $features[6] ?? null; // Screenshots
+        $webcam_feature     = $features[7] ?? null; // Webcam screenshots
 
         $this->db->trans_start();
 
         // Check if org_settings already exist
         $exists = $this->db->get_where('org_settings', ['user_id' => $user_id])->row();
-
-        // Handle screenshot feature (ID = 6)
-
-        // Always set timestamps
         $now = get_user_datetime_only($user_id);
         $flags['updated_at'] = $now;
 
-        if ($exists) {
-            // Handle Screenshot feature (ID = 6)
-            if ($screenshot_feature) {
-                $flag = isset($screenshot_feature['flag']) ? (int)$screenshot_feature['flag'] : 0;
-                $option = isset($screenshot_feature['option']) ? strtolower($screenshot_feature['option']) : '';
+        // 🔹 Handle Screenshot Feature (ID = 6)
+        if ($screenshot_feature) {
+            $flag = isset($screenshot_feature['flag']) ? (int)$screenshot_feature['flag'] : 1;
 
+            if ($flag == 0) {
+                // If flag is OFF
+                $flags['screenshot_flag'] = 0;
+                $flags['screenshot_time_interval'] = 10;
+            } else {
+                // If flag is ON
+                $option = strtolower($screenshot_feature['option'] ?? '');
                 switch ($option) {
                     case 'basic':
-                        // Always set to 10 for basic
+                        $flags['screenshot_flag'] = 1;
                         $flags['screenshot_time_interval'] = 10;
                         break;
 
                     case 'standard':
-                        // Only change if current interval is 2
-                        if ($exists->screenshot_time_interval == 2) {
+                        if ($exists && $exists->screenshot_time_interval == 2) {
                             $flags['screenshot_time_interval'] = 5;
                         } else {
-                            // Keep existing interval (no change)
                             unset($flags['screenshot_time_interval']);
                         }
                         break;
 
                     case 'premium':
-                        // No changes for premium
                         unset($flags['screenshot_time_interval']);
-                        break;
-
-                    default:
                         break;
                 }
             }
+        } else {
+            // If screenshot feature data not sent at all → store as OFF
+            $flags['screenshot_flag'] = 0;
+            $flags['screenshot_time_interval'] = 10;
+        }
 
-            if ($webcam_feature) {
+        // 🔹 Handle Webcam Feature (ID = 7)
+        if ($webcam_feature) {
+            $flag = isset($webcam_feature['flag']) ? (int)$webcam_feature['flag'] : 1;
+
+            if ($flag == 0) {
+                $flags['webcam_flag'] = 0;
+                $flags['webcam_time_interval'] = 10;
+            } else {
                 $option = strtolower($webcam_feature['option'] ?? '');
                 switch ($option) {
                     case 'basic':
                         $flags['webcam_flag'] = 0;
                         $flags['webcam_time_interval'] = 10;
                         break;
-
                     case 'standard':
-                        // Do not modify webcam settings (keep existing)
                         unset($flags['webcam_flag'], $flags['webcam_time_interval']);
                         break;
-
                     case 'premium':
                         $flags['webcam_flag'] = 1;
                         $flags['webcam_time_interval'] = 10;
                         break;
                 }
             }
-            unset($flags['idle_time_flag'], $flags['timecards_time_interval']);
+        } else {
+            // If webcam feature data not sent → store as OFF
+            $flags['webcam_flag'] = 0;
+            $flags['webcam_time_interval'] = 10;
+        }
 
+        unset($flags['idle_time_flag'], $flags['timecards_time_interval']);
 
-            // Update existing settings
+        // 🔹 Save or Update org_settings
+        if ($exists) {
             $this->db->where('user_id', $user_id)->update('org_settings', $flags);
             log_message('info', "Org settings updated for user {$user_id}");
         } else {
-            if ($screenshot_feature) {
-                $flag = isset($screenshot_feature['flag']) ? (int)$screenshot_feature['flag'] : 0;
-                $option = isset($screenshot_feature['option']) ? strtolower($screenshot_feature['option']) : '';
-
-                switch ($option) {
-                    case 'basic':
-                        $flags['screenshot_flag'] = 1;
-                        $flags['screenshot_time_interval'] = 10;
-                        break;
-                    case 'standard':
-                        $flags['screenshot_flag'] = 1;
-                        $flags['screenshot_time_interval'] = 10;
-                        break;
-                    case 'premium':
-                        $flags['screenshot_flag'] = 1;
-                        $flags['screenshot_time_interval'] = 10;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            // Handle webcam feature (ID = 7)
-            if ($webcam_feature) {
-                $flag = isset($webcam_feature['flag']) ? (int)$webcam_feature['flag'] : 0;
-                $option = isset($webcam_feature['option']) ? strtolower($webcam_feature['option']) : '';
-
-                switch ($option) {
-                    case 'basic':
-                        $flags['webcam_flag'] = 0;
-                        $flags['webcam_time_interval'] = 10;
-                        break;
-                    case 'standard':
-                        $flags['webcam_flag'] = 0;
-                        $flags['webcam_time_interval'] = 10;
-                        break;
-                    case 'premium':
-                        $flags['webcam_flag'] = 1;
-                        $flags['webcam_time_interval'] = 10;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            // Insert new settings
             $flags['created_at'] = $now;
             $this->db->insert('org_settings', $flags);
             log_message('info', "Org settings inserted for user {$user_id}");
@@ -445,6 +413,8 @@ class Custom_plan extends Home_Controller {
 
         return true;
     }
+
+
 
 
     private function save_custom_plan_features($user_id, $features)

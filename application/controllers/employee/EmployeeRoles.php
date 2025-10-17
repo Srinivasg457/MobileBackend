@@ -246,33 +246,102 @@ class EmployeeRoles extends Home_Controller {
         return $this->input->post() ?: [];
     }
 
-    public function get_app_features() {
+    public function get_app_features()
+    {
         try {
-            $this->db->select('id, name');
-            $this->db->order_by('name', 'asc');
-            $query = $this->db->get('app_features');
+            $user_id = $this->session->userdata('id');
 
-            if ($query === FALSE) {
-                log_message('error', 'Database error: ' . $this->db->error()['message']);
-                throw new Exception('Database query failed', 500);
+            if (is_custom_plan_user()) {
+                // Fetch all features including 12 and 13
+                $this->db->select('id, name');
+                $this->db->order_by('name', 'asc');
+                $features_query = $this->db->get('app_features');
+
+                if ($features_query === FALSE) {
+                    log_message('error', 'Database error fetching app_features: ' . $this->db->error()['message']);
+                    throw new Exception('Database query failed', 500);
+                }
+
+                $all_features = $features_query->result();
+
+                // Map feature IDs to their corresponding flag column names
+                $flag_map = [
+                    1  => 'activity_log_flag',
+                    2  => 'time_cards_flag',
+                    3  => 'notification_flag',
+                    4  => 'organization_settings_flag',
+                    5  => 'employee_settings_flag',
+                    6  => 'screenshots_flag',
+                    7  => 'webcam_screenshots_flag',
+                    8  => 'live_monitoring_flag',
+                    9  => 'time_approval_flag',
+                    10 => 'no_of_employees_flag',
+                    11 => 'application_usage_flag'
+                ];
+
+                // Fetch the latest custom plan record for this user
+                $this->db->where('customer_id', $user_id);
+                $this->db->order_by('id', 'DESC');
+                $this->db->limit(1);
+                $custom_query = $this->db->get('custom_plan_feature');
+
+                if ($custom_query === FALSE) {
+                    log_message('error', 'Database error fetching custom_plan_feature: ' . $this->db->error()['message']);
+                    throw new Exception('Database query failed', 500);
+                }
+
+                $custom_plan = $custom_query->row();
+                $enabled_features = [];
+
+                // Include features based on flags + always include 12 & 13
+                foreach ($all_features as $feature) {
+                    $feature_id = $feature->id;
+
+                    // For features 12 and 13 → include directly without flag check
+                    if (in_array($feature_id, [12, 13])) {
+                        $enabled_features[] = $feature;
+                        continue;
+                    }
+
+                    // For features 1–11 → check flag in custom plan
+                    if (isset($flag_map[$feature_id])) {
+                        $flag_column = $flag_map[$feature_id];
+                        if (isset($custom_plan->$flag_column) && $custom_plan->$flag_column == 1) {
+                            $enabled_features[] = $feature;
+                        }
+                    }
+                }
+
+                $features = $enabled_features;
+            } else {
+                // Default users - show all app features
+                $this->db->select('id, name');
+                $this->db->order_by('name', 'asc');
+                $query = $this->db->get('app_features');
+
+                if ($query === FALSE) {
+                    log_message('error', 'Database error fetching app_features: ' . $this->db->error()['message']);
+                    throw new Exception('Database query failed', 500);
+                }
+
+                $features = $query->result();
             }
-    
-            $features = $query->result();
-            
+
             if (empty($features)) {
-                log_message('error', 'No features found in the database');
+                log_message('error', 'No features found for user ID: ' . $user_id);
                 return $this->json_response(404, 'No features found');
             }
-    
+
             return $this->json_response(200, 'Features fetched successfully', [
                 'features' => $features
             ]);
-    
         } catch (Exception $e) {
-            log_message('error', 'Exception: ' . $e->getMessage());
+            log_message('error', 'Exception in get_app_features: ' . $e->getMessage());
             return $this->json_response($e->getCode(), $e->getMessage());
         }
     }
+
+
 
     public function get_roles_dropdown() {
         $input = $this->get_input_data();

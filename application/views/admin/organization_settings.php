@@ -49,14 +49,28 @@
                                 </div>
                             </div>
 
+                            <?php
+                            $flag_status = get_flag(6); // -1 if not available, otherwise feature name
+                            $is_disabled = ($flag_status == -1);
+                            $tooltip = $is_disabled ? 'Screenshot feature is not available' : '';
+                            ?>
+
                             <!-- Screenshot Flag -->
                             <div class="col-md-4 mb-5 form-group">
 
                                 <label class="control-label">Screenshot Flag:</label>
                                 <div>
-                                    <label class="toggle-switch ">
-                                        <input type="checkbox" class="toggle-flag" name="screenshot_flag" value="1" <?= isset($settings['screenshot_flag']) && $settings['screenshot_flag'] ? 'checked' : '' ?> data-target="screenshot_time_interval" data-toggle="toggle" data-onstyle="info" data-width="100"
-                                            <?= $is_edit_mode ? '' : 'disabled' ?>>
+                                    <label class="toggle-switch" data-toggle="tooltip" data-placement="top" title="<?= $tooltip ?>">
+                                        <input type="checkbox"
+                                            class="toggle-flag"
+                                            name="screenshot_flag"
+                                            value="1"
+                                            <?= isset($settings['screenshot_flag']) && $settings['screenshot_flag'] ? 'checked' : '' ?>
+                                            data-target="screenshot_time_interval"
+                                            data-toggle="toggle"
+                                            data-onstyle="info"
+                                            data-width="100"
+                                            <?= ($is_disabled || !$is_edit_mode) ? 'disabled' : '' ?>>
                                     </label>
                                 </div>
                             </div>
@@ -65,29 +79,49 @@
                             <div class="col-md-6 mb-5 form-group">
                                 <label class="control-label">Screenshot Interval (mins):</label>
 
-                                <?php if ($is_edit_mode): ?>
+                                <?php if ($is_edit_mode && !$is_disabled): ?>
                                     <select name="screenshot_time_interval" class="form-control" id="screenshot_time_interval">
                                         <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <?php if ($plan == "basic" && $val != 10) continue; ?>
-                                            <?php if ($plan == "standard" && $val != 10 && $val != 5) continue; ?>
+                                            <?php if ($screenshot_plan == "basic" && $val != 10) continue; ?>
+                                            <?php if ($screenshot_plan == "standard" && $val != 10 && $val != 5) continue; ?>
 
                                             <option value="<?= $val ?>" <?= (isset($settings['screenshot_time_interval']) && $settings['screenshot_time_interval'] == $val) ? 'selected' : '' ?>>
                                                 <?= $val ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-
                                 <?php else: ?>
-                                    <input type="text" class="form-control" value="<?= isset($settings['screenshot_time_interval']) ? $settings['screenshot_time_interval'] : '' ?>" readonly>
+                                    <input type="text"
+                                        class="form-control"
+                                        value="<?= isset($settings['screenshot_time_interval']) ? $settings['screenshot_time_interval'] : '' ?>"
+                                        readonly
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="<?= $tooltip ?>">
                                 <?php endif; ?>
                             </div>
+
+                            <?php
+                            $webcam_flag_status = get_flag(7); // -1 if not available, otherwise feature name
+                            $is_webcam_disabled = ($webcam_flag_status == -1);
+                            $webcam_tooltip = $is_webcam_disabled ? 'Webcam feature is not available' : '';
+                            ?>
+
                             <!-- Webcam Flag -->
                             <div class="col-md-4 mb-5 form-group">
                                 <label class="control-label">Webcam Flag:</label>
                                 <div>
-                                    <label class="toggle-switch" <?= $plan == "basic" ? 'data-toggle="tooltip" data-placement="top" title="Webcam feature not available in Basic plan"'  : '' ?>>
-                                        <input type="checkbox" class="toggle-flag" name="webcam_flag" value="1" <?= isset($settings['webcam_flag']) && $settings['webcam_flag'] ? 'checked' : '' ?> data-target="webcam_time_interval" data-toggle="toggle" data-onstyle="info" data-width="100"
-                                            <?= ($is_edit_mode && !$plan == "basic") ? '' : 'disabled' ?>>
+                                    <label class="toggle-switch" data-toggle="tooltip" data-placement="top" title="<?= $webcam_tooltip ?>">
+                                        <input type="checkbox"
+                                            class="toggle-flag"
+                                            name="webcam_flag"
+                                            value="1"
+                                            <?= isset($settings['webcam_flag']) && $settings['webcam_flag'] ? 'checked' : '' ?>
+                                            data-target="webcam_time_interval"
+                                            data-toggle="toggle"
+                                            data-onstyle="info"
+                                            data-width="100"
+                                            <?= ($is_edit_mode && !$is_webcam_disabled) ? '' : 'disabled' ?>>
                                     </label>
                                 </div>
                             </div>
@@ -96,26 +130,26 @@
                             <div class="col-md-6 mb-5 form-group">
                                 <label class="control-label">Webcam Interval (mins):</label>
 
-                                <?php if ($is_edit_mode): ?>
-
-                                    <select name="webcam_time_interval" class="form-control" id="webcam_time_interval" <?php echo $plan == "free" ? 'disabled' : ''; ?>>
+                                <?php if ($is_edit_mode && !$is_webcam_disabled): ?>
+                                    <select name="webcam_time_interval" class="form-control" id="webcam_time_interval">
                                         <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <?php if ($plan == "standard" && $val != 10 && $val != 5) continue; ?>
+                                            <?php if ($webcam_plan == "standard" && $val != 10 && $val != 5) continue; ?>
                                             <option value="<?= $val ?>" <?= (isset($settings['webcam_time_interval']) && $settings['webcam_time_interval'] == $val) ? 'selected' : '' ?>>
                                                 <?= $val ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-
                                 <?php else: ?>
-                                    <input type="text" class="form-control"
-                                        value="<?= $plan == "basic" ? 'Disabled' : (isset($settings['webcam_time_interval']) ? $settings['webcam_time_interval'] : '') ?>"
-                                        readonly>
-                                <?php endif; ?>
-                                <?php if ($plan == "basic"): ?>
-                                    <small class="text-danger">Webcam feature not available in Basic plan</small>
+                                    <input type="text"
+                                        class="form-control"
+                                        value="<?= isset($settings['webcam_time_interval']) ? $settings['webcam_time_interval'] : '' ?>"
+                                        readonly
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="<?= $webcam_tooltip ?>">
                                 <?php endif; ?>
                             </div>
+
 
                             <!-- Mouse Movement Flag -->
                             <div class="col-md-4 mb-5 form-group">
@@ -183,7 +217,7 @@
                                 <?php if ($is_edit_mode): ?>
                                     <select name="timecards_time_interval" class="form-control" id="timecards_time_interval">
                                         <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <?php if ($plan == "standard" && $val != 10 && $val != 5) continue; ?>
+                                            <!-- <?php if ($plan == "standard" && $val != 10 && $val != 5) continue; ?> -->
                                             <option value="<?= $val ?>" <?= (isset($settings['timecards_time_interval']) && $settings['timecards_time_interval'] == $val) ? 'selected' : '' ?>>
                                                 <?= $val ?>
                                             </option>
