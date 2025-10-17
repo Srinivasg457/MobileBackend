@@ -2763,19 +2763,29 @@ class Admin_model extends CI_Model {
     } 
 
     //get latest users
-    function get_latest_users($lilmit){
-        $this->db->select('u.*, p.status as payment_status, p.package,p.expire_on, pk.name as package_name');
+    function get_latest_users($limit)
+    {
+        $this->db->select('u.*, p.status as payment_status, p.package, p.expire_on, pk.name as package_name');
         $this->db->from('users u');
         $this->db->join('payment p', 'p.user_id = u.id', 'LEFT');
         $this->db->join('package pk', 'pk.id = p.package', 'LEFT');
         $this->db->where('u.role', 'user');
-        $this->db->order_by('u.id','DESC');
+        $this->db->order_by('u.id', 'DESC');
         $this->db->group_by('u.id');
-        $this->db->limit($lilmit);
+        $this->db->limit($limit);
         $this->db->query('SET SQL_BIG_SELECTS=1');
+
         $query = $this->db->get();
-        $query = $query->result();
-        return $query;
+        $result = $query->result();
+
+        // Update package name dynamically
+        foreach ($result as &$row) {
+            if ($row->package == 5) {
+                $row->package_name = 'Custom';
+            }
+        }
+
+        return $result;
     }
 
     // count active, inactive and total user
