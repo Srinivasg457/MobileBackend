@@ -198,7 +198,7 @@ class Users extends Home_Controller {
                 $package = $this->common_model->get_by_id($plan, 'package');
                 if ($billing == 'week') {
                     $price = $package->monthly_price;
-                    $expire_on = date('Y-m-d', strtotime('+1 week'));
+                    $expire_on = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
                 } elseif ($billing == 'monthly') {
                     $price = $package->monthly_price;
                     $expire_on = date('Y-m-d', strtotime('+1 month'));
@@ -762,7 +762,7 @@ class Users extends Home_Controller {
                 $package = $this->common_model->get_by_id($plan, 'package');
                 if ($billing == 'week') {
                     $price = $package->monthly_price;
-                    $expire_on = date('Y-m-d', strtotime('+1 week'));
+                    $expire_on = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
                 } elseif ($billing == 'monthly') {
                     $price = $package->monthly_price;
                     $expire_on = date('Y-m-d', strtotime('+1 month'));
@@ -1031,7 +1031,7 @@ class Users extends Home_Controller {
                 $package = $this->common_model->get_by_id($plan, 'package');
                 if ($billing == 'week') {
                     $price = $package->monthly_price;
-                    $expire_on = date('Y-m-d', strtotime('+1 week'));
+                    $expire_on = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
                 } elseif ($billing == 'monthly') {
                     $price = $package->monthly_price;
                     $expire_on = date('Y-m-d', strtotime('+1 month'));
