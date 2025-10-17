@@ -586,7 +586,7 @@ class Auth extends Home_Controller
             } else {
                 $amount = round($package->weekly_price);
             }
-            $expire_on = date('Y-m-d', strtotime('+1 week'));
+            $expire_on = date('Y-m-d', strtotime('+' . $this->settings->trial_days . ' days'));
 
         elseif ($billing_type == 'monthly'):
             if (settings()->enable_discount == 1) {
