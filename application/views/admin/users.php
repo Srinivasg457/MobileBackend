@@ -377,6 +377,7 @@
                           <li class=""><a href="<?php echo base_url('admin/users/edit/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-pencil"></i> <?php echo "Edit Plan" ?></a></li>
                         <?php endif; ?>
 
+                        <li class=""><a href="<?php echo base_url('admin/customize_feature/' . $user->id) ?>" class="dropdown-item"> <i class="fa fa-puzzle-piece"></i> <?php echo "Customize Features" ?></a></li>
                         <li class=""><a href="<?php echo base_url('admin/users/offline_payment/' . $user->id) ?>" class="dropdown-item"><i class="fa fa-money"></i> <?php echo trans('offline-payment') ?></a></li>
 
                         <li><a class="dropdown-item delete_item" data-val="User" data-id="<?php echo html_escape($user->id); ?>" href="<?php echo base_url('admin/users/delete/' . $user->id); ?>" class="on-defaults remove-row delete_item"><i class="fa fa-trash-o"></i> <?php echo trans('delete') ?></a></li>

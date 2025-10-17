@@ -56,6 +56,17 @@ class Custom_plan extends Home_Controller {
         $data['main_content'] = $this->load->view('admin/custom_plan', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
+
+    public function customize_feature($id)
+    {
+        $data = array();
+        $data['page_title'] = 'Customize Feature';
+        $data['user'] = $this->admin_model->select_option($id, 'users');
+        $data['current_feature'] = $this->admin_model->get_feature_by_id($id, 'custom_plan_feature');
+        $data['features'] = $this->admin_model->select_asc('package_features');
+        $data['main_content'] = $this->load->view('admin/customize_feature', $data, TRUE);
+        $this->load->view('admin/index', $data);
+    }
     public function add()
     {
         if ($_POST) {
@@ -488,5 +499,70 @@ class Custom_plan extends Home_Controller {
 
         // ✅ Always insert with all flags (even 0)
         $this->db->insert('custom_plan_feature', $data);
+    }
+
+    public function save_customize_features()
+    {
+        // Get features and user_id from POST
+        $features = $this->input->post('features', true);
+        $user_id = $this->input->post('id', true);
+
+        // Validate input
+        if (empty($features) || !is_array($features) || empty($user_id)) {
+            $this->session->set_flashdata('error', "Features not updated");
+            redirect(base_url('admin/users'));
+            return;
+        }
+
+        // Initialize base data
+        $data = [
+            'updated_at' => my_date_now(), // only update timestamp
+        ];
+
+        // Map features to table columns
+        $feature_columns = [
+            1 => 'activity_log',
+            2 => 'time_cards',
+            3 => 'notification',
+            4 => 'organization_settings',
+            5 => 'employee_settings',
+            6 => 'screenshots',
+            7 => 'webcam_screenshots',
+            8 => 'live_monitoring',
+            9 => 'time_approval',
+            10 => 'no_of_employees',
+            11 => 'application_usage',
+        ];
+
+        // Loop through all possible features
+        for ($i = 1; $i <= 11; $i++) {
+            $feature_data = isset($features[$i]) ? $features[$i] : [];
+            $flag = isset($feature_data['flag']) ? 1 : 0;
+            $option = isset($feature_data['option']) ? $feature_data['option'] : null;
+
+            $col_prefix = $feature_columns[$i];
+
+            $data[$col_prefix . '_flag'] = $flag;
+            $data[$col_prefix . '_feature'] = $option;
+        }
+
+        // Check if a record already exists for this customer_id
+        $existing = $this->db->order_by('id', 'DESC')
+            ->get_where('custom_plan_feature', ['customer_id' => $user_id])
+            ->row();
+
+        if ($existing) {
+            // Update existing record
+            $this->db->where('id', $existing->id)
+                ->update('custom_plan_feature', $data);
+        } else {
+            // Insert new record if none exists
+            $data['customer_id'] = $user_id;
+            $data['created_at'] = my_date_now();
+            $this->db->insert('custom_plan_feature', $data);
+        }
+
+        $this->session->set_flashdata('msg', 'Updated Successfully.');
+        redirect(base_url('admin/users'));
     }
 }

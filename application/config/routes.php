@@ -103,6 +103,7 @@ $route['admin/subscription/upgrade_plan'] = 'admin/subscription';
 $route['admin/time_approval/history'] = 'admin/Timecards_manual/Time_Approval_History';
 $route['admin/time_approval'] = 'admin/Timecards_manual/Time_Approval';
 $route['admin/custom_plan'] = 'admin/Custom_plan';
+$route['admin/customize_feature/(:num)'] = 'admin/Custom_plan/customize_feature/$1';
 
 
 
