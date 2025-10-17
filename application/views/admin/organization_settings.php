@@ -103,7 +103,7 @@
 
                             <?php
                             $webcam_flag_status = get_flag(7); // -1 if not available, otherwise feature name
-                            $is_webcam_disabled = ($webcam_flag_status == -1);
+                            $is_webcam_disabled = ($webcam_flag_status == -1 || $webcam_plan == "basic");
                             $webcam_tooltip = $is_webcam_disabled ? 'Webcam feature is not available' : '';
                             ?>
 
@@ -111,7 +111,10 @@
                             <div class="col-md-4 mb-5 form-group">
                                 <label class="control-label">Webcam Flag:</label>
                                 <div>
-                                    <label class="toggle-switch" data-toggle="tooltip" data-placement="top" title="<?= $webcam_tooltip ?>">
+                                    <label class="toggle-switch"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="<?= $webcam_tooltip ?>">
                                         <input type="checkbox"
                                             class="toggle-flag"
                                             name="webcam_flag"
@@ -121,7 +124,7 @@
                                             data-toggle="toggle"
                                             data-onstyle="info"
                                             data-width="100"
-                                            <?= ($is_edit_mode && !$is_webcam_disabled) ? '' : 'disabled' ?>>
+                                            <?= $is_webcam_disabled ? 'disabled' : '' ?>>
                                     </label>
                                 </div>
                             </div>
@@ -130,25 +133,27 @@
                             <div class="col-md-6 mb-5 form-group">
                                 <label class="control-label">Webcam Interval (mins):</label>
 
-                                <?php if ($is_edit_mode && !$is_webcam_disabled): ?>
-                                    <select name="webcam_time_interval" class="form-control" id="webcam_time_interval">
-                                        <?php foreach ([1, 2, 5, 10] as $val): ?>
-                                            <?php if ($webcam_plan == "standard" && $val != 10 && $val != 5) continue; ?>
-                                            <option value="<?= $val ?>" <?= (isset($settings['webcam_time_interval']) && $settings['webcam_time_interval'] == $val) ? 'selected' : '' ?>>
-                                                <?= $val ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else: ?>
+                                <?php if ($is_webcam_disabled): ?>
                                     <input type="text"
+                                        name="webcam_time_interval"
                                         class="form-control"
                                         value="<?= isset($settings['webcam_time_interval']) ? $settings['webcam_time_interval'] : '' ?>"
                                         readonly
                                         data-toggle="tooltip"
                                         data-placement="top"
                                         title="<?= $webcam_tooltip ?>">
+                                <?php else: ?>
+                                    <select name="webcam_time_interval" class="form-control" id="webcam_time_interval">
+                                        <?php foreach ([1, 2, 5, 10] as $val): ?>
+                                            <?php if ($webcam_plan == "standard" && !in_array($val, [5, 10])) continue; ?>
+                                            <option value="<?= $val ?>" <?= (isset($settings['webcam_time_interval']) && $settings['webcam_time_interval'] == $val) ? 'selected' : '' ?>>
+                                                <?= $val ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 <?php endif; ?>
                             </div>
+
 
 
                             <!-- Mouse Movement Flag -->
