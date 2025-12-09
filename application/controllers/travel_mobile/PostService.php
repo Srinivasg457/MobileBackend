@@ -29,9 +29,12 @@ class PostService extends Home_Controller
         $desc      = $this->input->post('description');
 
         // Upload Image
-        $path = "uploads/posts/";
-        if (!is_dir($path)) mkdir($path, 0755, true);
-
+        $path =  FCPATH . "uploads/posts/";
+        if (!is_dir($path)) {
+            mkdir($$path, 0755, true);
+            chown($path, 'www-data');
+            chgrp($path, 'www-data');
+        }
         $fileName = time() . "_" . $_FILES['image']['name'];
         move_uploaded_file($_FILES['image']['tmp_name'], $path . $fileName);
 
