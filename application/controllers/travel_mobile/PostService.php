@@ -29,20 +29,35 @@ class PostService extends Home_Controller
         $desc      = $this->input->post('description');
 
         // Upload Image
-        $path =  FCPATH . "uploads/posts/";
-        if (!is_dir($path)) {
-            mkdir($$path, 0755, true);
-            chown($path, 'www-data');
-            chgrp($path, 'www-data');
+        // $path =  FCPATH . "uploads/posts/";
+        // if (!is_dir($path)) {
+        //     mkdir($$path, 0755, true);
+        //     chown($path, 'www-data');
+        //     chgrp($path, 'www-data');
+        // }
+        // $fileName = time() . "_" . $_FILES['image']['name'];
+        // move_uploaded_file($_FILES['image']['tmp_name'], $path . $fileName);
+
+        $uploadPath = FCPATH . 'uploads/posts/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+            chown($uploadPath, 'www-data');
+            chgrp($uploadPath, 'www-data');
         }
-        $fileName = time() . "_" . $_FILES['image']['name'];
-        move_uploaded_file($_FILES['image']['tmp_name'], $path . $fileName);
+        $fileName = time() . '_' . $_FILES['image']['name'];
+
+        move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath . $fileName);
+
+        // ✅ store RELATIVE path
+        $imagePath = 'uploads/posts/' . $fileName;
+
+
 
         $data = [
             "user_id" => $user_id,
             "username" => $username,
             "user_image" => $userImage,
-            "image_url" => $path . $fileName,
+            "image_url" => $imagePath,
             "description" => $desc,
             "likes" => json_encode([]),
             "comments" => json_encode([]),
@@ -61,6 +76,7 @@ class PostService extends Home_Controller
     {
         $posts = $this->db
             ->order_by('created_at', 'DESC')
+            ->where('status', 1)
             ->get("posts")
             ->result_array();
 
@@ -160,6 +176,128 @@ class PostService extends Home_Controller
         return $this->jsonSuccess('Post deleted');
     }
 
+    // Get paginated posts
+    public function getPosts()
+    {
+        $limit  = $this->input->get('limit') ?? 10;
+        $lastId = $this->input->get('lastId');
+
+        if ($lastId) {
+            $lastPost = $this->db
+                ->select('created_at')
+                ->where('post_id', $lastId)
+                >where('status', 1)
+                ->get('posts')
+                ->row_array();
+
+            if ($lastPost) {
+                $this->db->where('created_at <', $lastPost['created_at']);
+            }
+        }
+
+        $this->db->order_by('created_at', 'DESC');
+        $posts = $this->db->get('posts', $limit)->result_array();
+
+        // ✅ Add base_url to image paths
+        $posts = $this->formatPostImages($posts);
+
+        echo json_encode([
+            'status' => 'success',
+            'posts'  => $posts
+        ]);
+    }
+
+
+
+    // Get a single post by ID
+    public function getPost($postId)
+    {
+        $post = $this->db->get_where('posts', [
+            'post_id' => $postId,
+            'status'  => 1
+        ])->row_array();
+
+        if ($post) {
+            if (!empty($post['image_url']) && strpos($post['image_url'], 'http') !== 0) {
+                $post['image_url'] = base_url($post['image_url']);
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'post'   => $post
+            ]);
+        } else {
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Post not found'
+            ]);
+        }
+    }
+
+
+    // Get posts by user
+    public function getUserPosts($userId)
+    {
+        $this->db->where('user_id', $userId);
+        $this->db->where('status', 1);
+        $this->db->order_by('created_at', 'DESC');
+
+        $posts = $this->db->get('posts')->result_array();
+
+        // ✅ Add base_url
+        $posts = $this->formatPostImages($posts);
+
+        echo json_encode([
+            'status' => 'success',
+            'posts'  => $posts
+        ]);
+    }
+    public function deleteAllPosts()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
+            show_error('Invalid Method', 405);
+        }
+
+        $type = $this->input->get('type') ?? 'soft';
+
+        if ($type === 'soft') {
+
+            // ✅ Soft delete (status = 0)
+            $this->db->update('posts', [
+                'status'     => 0,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+            return $this->jsonSuccess("All posts soft deleted");
+        } elseif ($type === 'hard') {
+
+            // ✅ Fetch posts to delete images
+            $posts = $this->db->select('image_url')->get('posts')->result_array();
+
+            foreach ($posts as $p) {
+                if (!empty($p['image_url'])) {
+                    $filePath = FCPATH . str_replace(base_url(), '', $p['image_url']);
+
+                    // Handle relative paths safely
+                    if (!file_exists($filePath)) {
+                        $filePath = FCPATH . $p['image_url'];
+                    }
+
+                    if (file_exists($filePath)) {
+                        unlink($filePath);
+                    }
+                }
+            }
+
+            // ✅ Hard delete from DB
+            $this->db->empty_table('posts');
+
+            return $this->jsonSuccess("All posts permanently deleted");
+        } else {
+            return $this->jsonError("Invalid delete type. Use soft or hard");
+        }
+    }
+
 
     // 🔹 HELPERS
     private function jsonSuccess($msg, $data = [])
@@ -182,5 +320,18 @@ class PostService extends Home_Controller
                 "status" => "error",
                 "message" => $msg
             ]));
+    }
+
+    private function formatPostImages(array $posts)
+    {
+        foreach ($posts as &$p) {
+            if (!empty($p['image_url'])) {
+                // ✅ prevent double base_url
+                if (strpos($p['image_url'], 'http') !== 0) {
+                    $p['image_url'] = base_url($p['image_url']);
+                }
+            }
+        }
+        return $posts;
     }
 }
