@@ -10,7 +10,7 @@ class PostService extends Home_Controller
         $this->load->database();
         $this->load->helper(['url', 'form']);
     }
-    
+
 
     // ✅ CREATE POST
     public function create()
@@ -19,8 +19,8 @@ class PostService extends Home_Controller
             show_error('Invalid Method', 405);
         }
 
-        if (empty($_FILES['image']['tmp_name'])) {
-            return $this->jsonError("Image required");
+        if (empty($_FILES['images']['name'][0])) {
+            return $this->jsonError("At least one image is required");
         }
 
         $user_id   = $this->input->post('user_id');
@@ -28,36 +28,65 @@ class PostService extends Home_Controller
         $userImage = $this->input->post('user_image');
         $desc      = $this->input->post('description');
 
+        /* ---------- UPLOAD DIRECTORY ---------- */
         $uploadPath = FCPATH . 'uploads/posts/';
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
-            chown($uploadPath, 'www-data');
-            chgrp($uploadPath, 'www-data');
         }
-        $fileName = time() . '_' . $_FILES['image']['name'];
 
-        move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath . $fileName);
-
-        // ✅ store RELATIVE path
-        $imagePath = 'uploads/posts/' . $fileName;
-
-        $data = [
-            "user_id" => $user_id,
-            "username" => $username,
-            "user_image" => $userImage,
-            "image_url" => $imagePath,
+        /* ---------- INSERT POST ---------- */
+        $postData = [
+            "user_id"     => $user_id,
+            "username"    => $username,
+            "user_image"  => $userImage,
             "description" => $desc,
-            "likes" => json_encode([]),
-            "comments" => json_encode([]),
-            "created_at" => date('Y-m-d H:i:s'),
-            "updated_at" => date('Y-m-d H:i:s')
+            "likes"       => json_encode([]),
+            "comments"    => json_encode([]),
+            "created_at"  => date('Y-m-d H:i:s'),
+            "updated_at"  => date('Y-m-d H:i:s')
         ];
 
-        $this->db->insert("posts", $data);
-        $data['post_id'] = $this->db->insert_id();
+        $this->db->insert("posts", $postData);
+        $post_id = $this->db->insert_id();
 
-        return $this->jsonSuccess("Post created", $data);
+        /* ---------- UPLOAD IMAGES ---------- */
+        foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
+
+            if ($tmpName == '') continue;
+
+            $fileName = time() . '_' . uniqid() . '_' . $_FILES['images']['name'][$key];
+            move_uploaded_file($tmpName, $uploadPath . $fileName);
+
+            $this->db->insert("post_images", [
+                "post_id"    => $post_id,
+                "image_url"  => 'uploads/posts/' . $fileName,
+                "position"   => $key,
+                "created_at" => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        /* ---------- FETCH FULL POST ---------- */
+        $post = $this->db->get_where('posts', [
+            'post_id' => $post_id
+        ])->row_array();
+
+        // Decode JSON fields
+        $post['likes']    = json_decode($post['likes'], true) ?: [];
+        $post['comments'] = json_decode($post['comments'], true) ?: [];
+
+        // Attach images
+        $images = $this->db
+            ->order_by('position', 'ASC')
+            ->get_where('post_images', ['post_id' => $post_id])
+            ->result_array();
+
+        $post['images'] = array_map(function ($img) {
+            return base_url($img['image_url']);
+        }, $images);
+
+        return $this->jsonSuccess("Post created", $post);
     }
+
 
     // ✅ UPDATE POST
     // Allowed: Post owner only
@@ -71,92 +100,94 @@ class PostService extends Home_Controller
         $user_id     = $this->input->post('user_id', true);
         $description = $this->input->post('description', true);
 
-        if (empty($user_id)) {
+        if (!$user_id) {
             return $this->jsonError("user_id is required");
         }
 
-        // ✅ Fetch existing post
         $post = $this->db->get_where('posts', [
             'post_id' => $post_id,
             'status'  => 1
         ])->row_array();
 
         if (!$post) {
-            return $this->jsonError("Post not found or inactive");
+            return $this->jsonError("Post not found");
         }
 
-        // ✅ Permission check (only post owner)
         if ((string)$post['user_id'] !== (string)$user_id) {
-            return $this->jsonError("Not allowed to update this post");
+            return $this->jsonError("Not allowed");
         }
 
-        $updateData = [
+        // ✅ Update description
+        $this->db->update('posts', [
             'description' => $description,
             'updated_at'  => date('Y-m-d H:i:s')
-        ];
+        ], ['post_id' => $post_id]);
 
-        // ✅ If new image is uploaded
-        if (!empty($_FILES['image']['tmp_name'])) {
+        /* ---------- OPTIONAL IMAGE UPDATE ---------- */
+        if (!empty($_FILES['images']['name'][0])) {
 
             $uploadPath = FCPATH . 'uploads/posts/';
             if (!is_dir($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
 
-            $fileName = time() . '_' . $_FILES['image']['name'];
-            move_uploaded_file(
-                $_FILES['image']['tmp_name'],
-                $uploadPath . $fileName
-            );
+            // ✅ delete existing images (optional behavior)
+            $oldImages = $this->db
+                ->get_where('post_images', ['post_id' => $post_id])
+                ->result_array();
 
-            $newImagePath = 'uploads/posts/' . $fileName;
-
-            // ✅ Delete old image
-            if (!empty($post['image_url'])) {
-                $oldImagePath = FCPATH . $post['image_url'];
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
+            foreach ($oldImages as $img) {
+                $file = FCPATH . $img['image_url'];
+                if (file_exists($file)) unlink($file);
             }
 
-            $updateData['image_url'] = $newImagePath;
+            $this->db->delete('post_images', ['post_id' => $post_id]);
+
+            // ✅ insert new images
+            foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
+
+                if ($tmpName == '') continue;
+
+                $fileName = time() . '_' . uniqid() . '_' . $_FILES['images']['name'][$key];
+                move_uploaded_file($tmpName, $uploadPath . $fileName);
+
+                $this->db->insert('post_images', [
+                    'post_id'    => $post_id,
+                    'image_url'  => 'uploads/posts/' . $fileName,
+                    'position'   => $key,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
         }
 
-        // ✅ Update DB
-        $this->db->update('posts', $updateData, [
-            'post_id' => $post_id
-        ]);
-
-        // ✅ Prepare response
-        if (!empty($updateData['image_url'])) {
-            $updateData['image_url'] = base_url($updateData['image_url']);
-        }
-
-        return $this->jsonSuccess("Post updated successfully", $updateData);
+        return $this->jsonSuccess("Post updated successfully");
     }
-    
+
+
     // ✅ LIST POSTS
     public function list()
     {
         $posts = $this->db
-            ->order_by('created_at', 'DESC')
             ->where('status', 1)
-            ->get("posts")
+            ->order_by('created_at', 'DESC')
+            ->get('posts')
             ->result_array();
 
         foreach ($posts as &$p) {
-            $p['likes'] = json_decode($p['likes'], true) ?: [];
+            $p['likes']    = json_decode($p['likes'], true) ?: [];
             $p['comments'] = json_decode($p['comments'], true) ?: [];
 
-            // ✅ convert image path to full URL
-            if (!empty($p['image_url'])) {
-                $p['image_url'] = base_url($p['image_url']);
-            }
+            $images = $this->db
+                ->order_by('position', 'ASC')
+                ->get_where('post_images', ['post_id' => $p['post_id']])
+                ->result_array();
 
+            $p['images'] = array_map(fn($img) => base_url($img['image_url']), $images);
         }
 
         return $this->jsonSuccess("Posts fetched", $posts);
     }
+
 
 
     // ✅ LIKE / UNLIKE
@@ -230,15 +261,36 @@ class PostService extends Home_Controller
             show_error('Invalid Method', 405);
         }
 
-        $post = $this->db->get_where('posts', ['post_id' => $post_id])->row_array();
+        // ✅ Check post exists
+        $post = $this->db->get_where('posts', [
+            'post_id' => $post_id
+        ])->row_array();
+
         if (!$post) {
             return $this->jsonError('Post not found');
         }
 
+        // ✅ 1. Fetch images for this post
+        $images = $this->db
+            ->select('image_url')
+            ->get_where('post_images', ['post_id' => $post_id])
+            ->result_array();
+
+        // ✅ 2. Delete image files
+        foreach ($images as $img) {
+            $filePath = FCPATH . $img['image_url'];
+
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        // ✅ 3. Delete post (CASCADE deletes post_images rows)
         $this->db->delete('posts', ['post_id' => $post_id]);
 
-        return $this->jsonSuccess('Post deleted');
+        return $this->jsonSuccess('Post deleted successfully');
     }
+
 
     // Get paginated posts for pagenation
     public function getPosts()
@@ -246,11 +298,12 @@ class PostService extends Home_Controller
         $limit  = $this->input->get('limit') ?? 10;
         $lastId = $this->input->get('lastId');
 
+        /* ---------- PAGINATION ---------- */
         if ($lastId) {
             $lastPost = $this->db
                 ->select('created_at')
                 ->where('post_id', $lastId)
-                >where('status', 1)
+                ->where('status', 1)   // ✅ FIXED TYPO
                 ->get('posts')
                 ->row_array();
 
@@ -259,17 +312,36 @@ class PostService extends Home_Controller
             }
         }
 
-        $this->db->order_by('created_at', 'DESC');
-        $posts = $this->db->get('posts', $limit)->result_array();
+        /* ---------- FETCH POSTS ---------- */
+        $posts = $this->db
+            ->where('status', 1)
+            ->order_by('created_at', 'DESC')
+            ->limit($limit)
+            ->get('posts')
+            ->result_array();
 
-        // ✅ Add base_url to image paths
-        $posts = $this->formatPostImages($posts);
+        /* ---------- ATTACH IMAGES ---------- */
+        foreach ($posts as &$p) {
 
-        echo json_encode([
-            'status' => 'success',
-            'posts'  => $posts
-        ]);
+            $p['likes']    = json_decode($p['likes'], true) ?: [];
+            $p['comments'] = json_decode($p['comments'], true) ?: [];
+
+            $images = $this->db
+                ->order_by('position', 'ASC')
+                ->get_where('post_images', [
+                    'post_id' => $p['post_id']
+                ])
+                ->result_array();
+
+            // ✅ convert to full URLs
+            $p['images'] = array_map(function ($img) {
+                return base_url($img['image_url']);
+            }, $images);
+        }
+
+        return $this->jsonSuccess('Posts fetched', $posts);
     }
+
 
 
 
@@ -281,41 +353,47 @@ class PostService extends Home_Controller
             'status'  => 1
         ])->row_array();
 
-        if ($post) {
-            if (!empty($post['image_url']) && strpos($post['image_url'], 'http') !== 0) {
-                $post['image_url'] = base_url($post['image_url']);
-            }
-
-            echo json_encode([
-                'status' => 'success',
-                'post'   => $post
-            ]);
-        } else {
-            echo json_encode([
-                'status'  => 'error',
-                'message' => 'Post not found'
-            ]);
+        if (!$post) {
+            return $this->jsonError("Post not found");
         }
+
+        $post['likes']    = json_decode($post['likes'], true) ?: [];
+        $post['comments'] = json_decode($post['comments'], true) ?: [];
+
+        $images = $this->db
+            ->order_by('position', 'ASC')
+            ->get_where('post_images', ['post_id' => $postId])
+            ->result_array();
+
+        $post['images'] = array_map(fn($img) => base_url($img['image_url']), $images);
+
+        return $this->jsonSuccess("Post fetched", $post);
     }
+
 
 
     // Get posts by user
     public function getUserPosts($userId)
     {
-        $this->db->where('user_id', $userId);
-        $this->db->where('status', 1);
-        $this->db->order_by('created_at', 'DESC');
+        $posts = $this->db
+            ->where('user_id', $userId)
+            ->where('status', 1)
+            ->order_by('created_at', 'DESC')
+            ->get('posts')
+            ->result_array();
 
-        $posts = $this->db->get('posts')->result_array();
+        foreach ($posts as &$p) {
+            $images = $this->db
+                ->order_by('position', 'ASC')
+                ->get_where('post_images', ['post_id' => $p['post_id']])
+                ->result_array();
 
-        // ✅ Add base_url
-        $posts = $this->formatPostImages($posts);
+            $p['images'] = array_map(fn($img) => base_url($img['image_url']), $images);
+        }
 
-        echo json_encode([
-            'status' => 'success',
-            'posts'  => $posts
-        ]);
+        return $this->jsonSuccess("User posts fetched", $posts);
     }
+
 
     //perform soft and hard delete by specifing the type "soft" or "hard"
     public function deleteAllPosts()
@@ -326,43 +404,44 @@ class PostService extends Home_Controller
 
         $type = $this->input->get('type') ?? 'soft';
 
+        /* ---------- SOFT DELETE ---------- */
         if ($type === 'soft') {
 
-            // ✅ Soft delete (status = 0)
             $this->db->update('posts', [
                 'status'     => 0,
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
 
             return $this->jsonSuccess("All posts soft deleted");
-        } elseif ($type === 'hard') {
+        }
 
-            // ✅ Fetch posts to delete images
-            $posts = $this->db->select('image_url')->get('posts')->result_array();
+        /* ---------- HARD DELETE ---------- */
+        if ($type === 'hard') {
 
-            foreach ($posts as $p) {
-                if (!empty($p['image_url'])) {
-                    $filePath = FCPATH . str_replace(base_url(), '', $p['image_url']);
+            // ✅ 1. Fetch ALL image paths from post_images
+            $images = $this->db
+                ->select('image_url')
+                ->get('post_images')
+                ->result_array();
 
-                    // Handle relative paths safely
-                    if (!file_exists($filePath)) {
-                        $filePath = FCPATH . $p['image_url'];
-                    }
+            // ✅ 2. Delete image files from storage
+            foreach ($images as $img) {
+                $filePath = FCPATH . $img['image_url'];
 
-                    if (file_exists($filePath)) {
-                        unlink($filePath);
-                    }
+                if (file_exists($filePath)) {
+                    unlink($filePath);
                 }
             }
 
-            // ✅ Hard delete from DB
+            // ✅ 3. Hard delete posts (CASCADE deletes post_images rows)
             $this->db->empty_table('posts');
 
             return $this->jsonSuccess("All posts permanently deleted");
-        } else {
-            return $this->jsonError("Invalid delete type. Use soft or hard");
         }
+
+        return $this->jsonError("Invalid delete type. Use soft or hard");
     }
+
 
     // Allowed delete scenarios
     // Comment owner deletes their comment
