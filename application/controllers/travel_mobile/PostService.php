@@ -397,6 +397,9 @@ class PostService extends Home_Controller
             ->result_array();
 
         foreach ($posts as &$p) {
+            $p['likes']    = json_decode($p['likes'], true) ?: [];
+            $p['comments'] = json_decode($p['comments'], true) ?: [];
+
             $images = $this->db
                 ->order_by('position', 'ASC')
                 ->get_where('post_images', ['post_id' => $p['post_id']])
