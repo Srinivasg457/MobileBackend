@@ -9,6 +9,18 @@ class PostService extends Home_Controller
         parent::__construct();
         $this->load->database();
         $this->load->helper(['url', 'form']);
+
+        date_default_timezone_set('Asia/Kolkata');
+        $this->db->query("SET time_zone = '+05:30'");
+        $this->db->query("SET NAMES 'utf8mb4'");
+        $this->db->query("SET CHARACTER SET utf8mb4");
+    }
+
+
+    // 🔹 CLEAN user_id (ONLY trim, keep as string)
+    private function cleanUserId($id)
+    {
+        return trim((string)$id);
     }
 
 
@@ -23,7 +35,7 @@ class PostService extends Home_Controller
             return $this->jsonError("At least one image is required");
         }
 
-        $user_id   = $this->input->post('user_id');
+        $user_id   = $this->cleanUserId($this->input->post('user_id'));
         $username  = $this->input->post('username');
         $userImage = $this->input->post('user_image');
         $desc      = $this->input->post('description');
@@ -97,7 +109,7 @@ class PostService extends Home_Controller
             show_error('Invalid Method', 405);
         }
 
-        $user_id     = $this->input->post('user_id', true);
+        $user_id     = $this->cleanUserId($this->input->post('user_id', true));
         $description = $this->input->post('description', true);
 
         if (!$user_id) {
@@ -197,9 +209,7 @@ class PostService extends Home_Controller
             show_error('Invalid Method', 405);
         }
 
-        // ✅ THIS WORKS WITH form-data
-        $user_id = $this->input->post('user_id', true);
-
+        $user_id = $this->cleanUserId($this->input->post('user_id', true));
         if (!$user_id) {
             return $this->jsonError("user_id is required");
         }
@@ -229,9 +239,11 @@ class PostService extends Home_Controller
     // ✅ ADD COMMENT
     public function comment($post_id)
     {
-        $user_id  = $this->input->post('user_id');
+        $user_id  = $this->cleanUserId($this->input->post('user_id'));
         $username = $this->input->post('username');
         $text     = $this->input->post('text');
+
+        if (!$user_id) return $this->jsonError("user_id is required");
 
         $post = $this->db->get_where("posts", ["post_id" => $post_id])->row_array();
         if (!$post) return $this->jsonError("Post not found");
@@ -375,6 +387,8 @@ class PostService extends Home_Controller
     // Get posts by user
     public function getUserPosts($userId)
     {
+        $userId = $this->cleanUserId($userId);
+
         $posts = $this->db
             ->where('user_id', $userId)
             ->where('status', 1)
@@ -535,18 +549,5 @@ class PostService extends Home_Controller
                 "status" => "error",
                 "message" => $msg
             ]));
-    }
-
-    private function formatPostImages(array $posts)
-    {
-        foreach ($posts as &$p) {
-            if (!empty($p['image_url'])) {
-                // ✅ prevent double base_url
-                if (strpos($p['image_url'], 'http') !== 0) {
-                    $p['image_url'] = base_url($p['image_url']);
-                }
-            }
-        }
-        return $posts;
     }
 }

@@ -6,3 +6,4 @@ application/config/database.php
 /uploads/webcam/
 /uploads/webcam_compressed/
 /uploads/posts/*
+/uploads/garage/*
