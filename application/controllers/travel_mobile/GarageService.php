@@ -509,6 +509,69 @@ class GarageService extends Home_Controller
 
         return $this->jsonSuccess("All garage items fetched", $items);
     }
+
+    public function getGarageItemsPaginated($user_id)
+    {
+        $user_id = trim($user_id);   // TRIM ADDED
+        $limit   = $this->input->get('limit') ?? 10;
+        $lastId  = $this->input->get('lastId'); // now this is item_id from garage_items
+
+        $itemQuery = $this->db
+            ->where('user_id', $user_id)
+            ->where('status', 1)
+            ->order_by('created_at', 'DESC');
+
+        if ($lastId) {
+            $lastItem = $this->db
+                ->select('created_at')
+                ->where('item_id', $lastId)
+                ->get('garage_items')
+                ->row_array();
+
+            if ($lastItem) {
+                $itemQuery->where('created_at <', $lastItem['created_at']);
+            }
+        }
+
+        $items = $itemQuery
+            ->limit($limit)
+            ->get('garage_items')
+            ->result_array();
+
+        foreach ($items as &$item) {
+            if ($item['item_type'] === 'vehicle') {
+                $data = $this->db
+                    ->get_where('garage_vehicles', ['vehicle_id' => $item['reference_id']])
+                    ->row_array();
+
+                if ($data) {
+                    $imgs = $this->db
+                        ->order_by('position', 'ASC')
+                        ->get_where('garage_vehicle_images', ['vehicle_id' => $data['vehicle_id']])
+                        ->result_array();
+
+                    $item = array_merge($item, $data);
+                    $item['images'] = array_map(fn($i) => base_url($i['image_url']), $imgs);
+                }
+            } elseif ($item['item_type'] === 'accessory') {
+                $data = $this->db
+                    ->get_where('garage_accessories', ['accessory_id' => $item['reference_id']])
+                    ->row_array();
+
+                if ($data) {
+                    $imgs = $this->db
+                        ->get_where('garage_accessory_images', ['accessory_id' => $data['accessory_id']])
+                        ->result_array();
+
+                    $item = array_merge($item, $data);
+                    $item['images'] = array_map(fn($i) => base_url($i['image_url']), $imgs);
+                }
+            }
+        }
+
+        return $this->jsonSuccess("Garage items fetched", $items);
+    }
+
     public function getUserVehicles($user_id)
     {
         $user_id = trim($user_id);   //  TRIM ADDED
