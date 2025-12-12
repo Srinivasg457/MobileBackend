@@ -59,9 +59,9 @@ class GarageService extends Home_Controller
             // Insert images
             if (!empty($_FILES['images']['name'][0])) {
 
-                $uploadPath = './uploads/garage/';
-                if (!file_exists($uploadPath)) {
-                    mkdir($uploadPath, 0777, true);
+                $uploadPath = FCPATH . 'uploads/garage/';
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
                 }
 
                 foreach ($_FILES['images']['tmp_name'] as $key => $tmp) {
@@ -113,7 +113,7 @@ class GarageService extends Home_Controller
             // Insert images
             if (!empty($_FILES['images']['name'][0])) {
 
-                $uploadPath = FCPATH . 'uploads/posts/';
+                $uploadPath = FCPATH . 'uploads/garage/';
                 if (!is_dir($uploadPath)) {
                     mkdir($uploadPath, 0755, true);
                 }
