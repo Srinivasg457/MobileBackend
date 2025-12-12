@@ -160,6 +160,142 @@ class GarageService extends Home_Controller
         ]);
     }
 
+
+    // public function createGarageItem()
+    // {
+    //     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    //         show_error('Invalid Method', 405);
+    //     }
+
+    //     $user_id = trim($this->input->post('user_id'));
+    //     $item_type = $this->input->post('item_type'); // vehicle / accessory
+
+    //     if (!$user_id || !$item_type) {
+    //         return $this->jsonError("user_id and item_type are required");
+    //     }
+
+    //     if (!in_array($item_type, ['vehicle', 'accessory'])) {
+    //         return $this->jsonError("Invalid item_type. Allowed: vehicle, accessory");
+    //     }
+
+    //     // Start transaction
+    //     $this->db->trans_start();
+
+    //     $reference_id = null;
+
+    //     /* =====================================================
+    //  * CREATE VEHICLE
+    //  * ===================================================== */
+    //     if ($item_type === 'vehicle') {
+
+    //         $vehicleData = [
+    //             'user_id' => $user_id,
+    //             'brand'   => $this->input->post('brand'),
+    //             'model'   => $this->input->post('model'),
+    //             'cc' => $this->input->post('cc'),
+    //             'mileage'  => $this->input->post('mileage'),
+    //             'model_year' => $this->input->post('model_year'),
+    //             'created_at' => date('Y-m-d H:i:s'),
+    //             'status' => 1
+    //         ];
+
+    //         $this->db->insert('garage_vehicles', $vehicleData);
+    //         $reference_id = $this->db->insert_id();
+
+    //         // ---------- IMAGE UPLOAD (SINGLE) ----------
+    //         if (!empty($_FILES['image']['name'])) {
+
+    //             $uploadPath = FCPATH . 'uploads/garage/';
+    //             if (!is_dir($uploadPath)) mkdir($uploadPath, 0755, true);
+
+    //             $fileName = time() . '_' . uniqid() . '_' . $_FILES['image']['name'];
+    //             move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath . $fileName);
+
+    //             $this->db->insert('garage_vehicle_images', [
+    //                 'vehicle_id' => $reference_id,
+    //                 'image_url'  => 'uploads/garage/' . $fileName,
+    //                 'created_at' => date('Y-m-d H:i:s')
+    //             ]);
+    //         }
+    //     }
+
+    //     /* =====================================================
+    //  * CREATE ACCESSORY
+    //  * ===================================================== */
+    //     if ($item_type === 'accessory') {
+
+    //         $connected_vehicle_id = $this->input->post('connected_vehicle_id');
+
+    //         // Validate if user links to vehicle
+    //         if ($connected_vehicle_id) {
+    //             $vehicleExists = $this->db->get_where('garage_vehicles', [
+    //                 'vehicle_id' => $connected_vehicle_id,
+    //                 'status'     => 1
+    //             ])->row_array();
+
+    //             if (!$vehicleExists) {
+    //                 return $this->jsonError("Connected vehicle ID is not present");
+    //             }
+    //         }
+
+    //         $accData = [
+    //             'user_id' => $user_id,
+    //             'brand'   => $this->input->post('brand'),
+    //             'model'   => $this->input->post('model'),
+    //             'modelYear' => $this->input->post('modelYear'),
+    //             'connected_vehicle_id' => $connected_vehicle_id ?: null,
+    //             'created_at' => date('Y-m-d H:i:s'),
+    //             'status' => 1
+    //         ];
+
+    //         $this->db->insert('garage_accessories', $accData);
+    //         $reference_id = $this->db->insert_id();
+
+    //         // ---------- IMAGE UPLOAD (SINGLE) ----------
+    //         if (!empty($_FILES['image']['name'])) {
+
+    //             $uploadPath = FCPATH . 'uploads/garage/';
+    //             if (!is_dir($uploadPath)) mkdir($uploadPath, 0755, true);
+
+    //             $fileName = time() . '_' . uniqid() . '_' . $_FILES['image']['name'];
+    //             move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath . $fileName);
+
+    //             $this->db->insert('garage_accessory_images', [
+    //                 'accessory_id' => $reference_id,
+    //                 'image_url'    => 'uploads/garage/' . $fileName,
+    //                 'created_at'   => date('Y-m-d H:i:s')
+    //             ]);
+    //         }
+    //     }
+
+    //     /* =====================================================
+    //  * INSERT MASTER TABLE
+    //  * ===================================================== */
+    //     $this->db->insert('garage_items', [
+    //         'user_id'      => $user_id,
+    //         'item_type'    => $item_type,
+    //         'reference_id' => $reference_id,
+    //         'created_at'   => date('Y-m-d H:i:s'),
+    //         'status'       => 1
+    //     ]);
+
+    //     $item_id = $this->db->insert_id();
+
+    //     // Complete transaction
+    //     $this->db->trans_complete();
+
+    //     if (!$this->db->trans_status()) {
+    //         return $this->jsonError("Failed to create item");
+    //     }
+
+    //     return $this->jsonSuccess("Garage item created successfully", [
+    //         'item_id'      => $item_id,
+    //         'reference_id' => $reference_id,
+    //         'item_type'    => $item_type
+    //     ]);
+    // }
+
+
     /* =====================================================
      * GET SINGLE ITEM
      * ===================================================== */
