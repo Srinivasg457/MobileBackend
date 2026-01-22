@@ -26,7 +26,7 @@ jobs:
       run: |
         echo "Starting Docker deployment..."
         
-        ssh -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
+        ssh -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'SSH_EOF'
           echo "=== DOCKER DEPLOYMENT ==="
           cd /var/www/html
           
@@ -40,38 +40,41 @@ jobs:
           cd MobileBackend
           
           # Create Dockerfile
-          cat > Dockerfile << 'DOCKERFILE'
-          FROM php:8.2-apache
-          WORKDIR /var/www/html
-          COPY . .
+          cat > Dockerfile << 'DOCKER_EOF'
+FROM php:8.2-apache
+WORKDIR /var/www/html
+COPY . .
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \\
+    git \\
+    curl \\
+    libpng-dev \\
+    libzip-dev \\
+    zip \\
+    unzip \\
+    && docker-php-ext-install pdo_mysql gd zip \\
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
+    && composer install --no-dev --ignore-platform-reqs \\
+    && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 80
+CMD ["apache2-foreground"]
+DOCKER_EOF
           
-          # Install dependencies
-          RUN apt-get update && apt-get install -y \
-              git \
-              curl \
-              libpng-dev \
-              libzip-dev \
-              zip \
-              unzip \
-              && docker-php-ext-install pdo_mysql gd zip \
-              && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-              && composer install --no-dev --ignore-platform-reqs \
-              && rm -rf /var/lib/apt/lists/*
-          
-          EXPOSE 80
-          CMD ["apache2-foreground"]
-          DOCKERFILE
+          echo "Dockerfile created. Contents:"
+          head -20 Dockerfile
           
           # Build and run Docker container
           echo "Building Docker image..."
           docker build -t mobilebackend:latest .
           
           echo "Starting Docker container..."
-          docker run -d \
-            --name mobilebackend \
-            -p 8080:80 \
-            -v /var/www/html/uploads:/var/www/html/uploads \
-            --restart always \
+          docker run -d \\
+            --name mobilebackend \\
+            -p 8080:80 \\
+            -v /var/www/html/uploads:/var/www/html/uploads \\
+            --restart always \\
             mobilebackend:latest
           
           echo "✅ Docker deployment completed!"
@@ -81,8 +84,8 @@ jobs:
           # Test if container is running
           sleep 3
           echo "🔍 Testing container..."
-          docker exec mobilebackend php --version || echo "Container not ready yet"
-        EOF
+          docker exec mobilebackend php --version 2>/dev/null || echo "Container not ready yet"
+        SSH_EOF
         
         echo "status=success" >> $GITHUB_OUTPUT
     
@@ -97,7 +100,6 @@ jobs:
           echo "🖥️ Server: ${{ secrets.SERVER_HOST }}"
           echo "🚪 Port: 8080"
           echo "🔗 Access: http://${{ secrets.SERVER_HOST }}:8080"
-          echo "📁 Path: /var/www/html/MobileBackend (inside container)"
         else
           echo "❌ DOCKER DEPLOYMENT FAILED"
           echo "Check workflow logs for details"
