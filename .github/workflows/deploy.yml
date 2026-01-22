@@ -36,6 +36,6 @@ jobs:
 notifications:
   email:
     recipients:
-      - srinivasg457@gmail.com  # Change to your email
+      - shreelimitscale@gmail.com  # Change to your email
     on_success: change
     on_failure: always
