@@ -4,15 +4,6 @@ on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
-
-# Email notifications - MUST be at top level, not inside jobs
-notifications:
-  email:
-    recipients:
-      - shreelimitscale@gmail.com  # Your email
-    on_success: change
-    on_failure: always
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
