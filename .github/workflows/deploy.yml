@@ -3,7 +3,7 @@ name: Deploy to Ubuntu Server
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # Allow manual triggers
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -15,43 +15,44 @@ jobs:
       
     - name: Setup SSH with PEM
       run: |
-        # Create SSH directory
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
         
-        # Write PEM private key
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/healthykid.pem
         chmod 600 ~/.ssh/healthykid.pem
         
-        # Add server to known_hosts
         ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
         
     - name: Deploy to Server
       run: |
-        echo "Deploying to server: ${{ secrets.SERVER_HOST }}"
+        echo "Deploying to: ${{ secrets.SERVER_HOST }}"
         
-        # Use -i flag with PEM file and disable host key checking
         ssh -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
             -i ~/.ssh/healthykid.pem \
             ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
           
           echo "Connected to server $(hostname)"
+          echo "Current directory: $(pwd)"
           
-          cd /var/www/html/MobileBackend
+          # Navigate to /var/www/html
+          cd /var/www/html
           
-          if [ -d .git ]; then
-            echo "Pulling latest changes..."
-            git pull origin main
-          else
-            echo "Cloning repository..."
-            cd ..
-            sudo rm -rf MobileBackend 2>/dev/null || true
-            git clone https://github.com/${{ github.repository }}.git MobileBackend
-            cd MobileBackend
-          fi
-          
-          echo "Listing deployed files:"
+          echo "Contents of /var/www/html:"
           ls -la
-          echo "Deployment completed successfully!"
+          
+          # Remove existing MobileBackend if it exists
+          rm -rf MobileBackend 2>/dev/null || true
+          
+          # Clone YOUR repository (MobileBackend)
+          echo "Cloning MobileBackend repository..."
+          git clone https://github.com/Srinivasg457/MobileBackend.git MobileBackend
+          
+          # Go into the cloned directory
+          cd MobileBackend
+          
+          echo "=== Deployment Successful! ==="
+          echo "Files deployed to: /var/www/html/MobileBackend/"
+          echo "Total files: $(find . -type f | wc -l)"
+          echo "Listing contents:"
+          ls -la
         EOF
