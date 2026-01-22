@@ -1,0 +1,54 @@
+name: Deploy to Ubuntu Server
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+        
+    - name: Deploy to Server
+      run: |
+        ssh ubuntu@${{ secrets.SERVER_HOST }} << 'EOF'
+          cd /var/www/html/MobileBackend
+          
+          # Pull latest changes or clone if doesn't exist
+          if [ -d .git ]; then
+            git pull origin main
+          else
+            cd ..
+            rm -rf MobileBackend
+            git clone ${{ github.repositoryUrl }} MobileBackend
+            cd MobileBackend
+          fi
+          
+          # Install dependencies (if using Node.js, Python, etc.)
+          # Example for Node.js:
+          # if [ -f package.json ]; then
+          #   npm install
+          # fi
+          
+          # Example for Python:
+          # if [ -f requirements.txt ]; then
+          #   pip install -r requirements.txt
+          # fi
+          
+          # Restart service if needed
+          # Example for systemd service:
+          # sudo systemctl restart mobile-backend.service
+          
+          echo "Deployment completed successfully!"
+        EOF
