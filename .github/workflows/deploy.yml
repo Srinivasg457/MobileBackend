@@ -117,4 +117,3 @@ jobs:
         rm -f mobilebackend.tar.gz
         rm -f ~/.ssh/healthykid.pem
         rm -f ~/.ssh/known_hosts
-EOF
