@@ -6,51 +6,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v3
       
-    - name: 🐳 Build Docker Image
-      id: build
-      run: |
-        echo "Building Docker image..."
-        DEPLOYMENT_TIME=$(date)
-        
-        # Create Dockerfile for PHP 8.2
-        cat > Dockerfile << 'DOCKERFILE'
-        FROM php:8.2-apache
-        WORKDIR /var/www/html
-        COPY . .
-        
-        # Install system dependencies
-        RUN apt-get update && apt-get install -y \
-            git \
-            nodejs \
-            npm \
-            libpng-dev \
-            libzip-dev \
-            zip \
-            unzip \
-            && docker-php-ext-install pdo_mysql gd zip \
-            && npm install \
-            && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-            && composer install --no-dev \
-            && rm -rf /var/lib/apt/lists/*
-        
-        EXPOSE 80
-        CMD ["apache2-foreground"]
-        DOCKERFILE
-        
-        # Build the image
-        docker build -t mobilebackend:${{ github.sha }} .
-        docker tag mobilebackend:${{ github.sha }} mobilebackend:latest
-        
-        echo "image_size=$(docker images mobilebackend:latest --format "{{.Size}}")" >> $GITHUB_OUTPUT
-        echo "deployment_time=$DEPLOYMENT_TIME" >> $GITHUB_OUTPUT
-        
     - name: 🔑 Setup SSH
       run: |
         mkdir -p ~/.ssh
@@ -59,36 +21,67 @@ jobs:
         chmod 600 ~/.ssh/healthykid.pem
         ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
         
-    - name: 🚀 Deploy Docker Container
+    - name: 🚀 Deploy via Git on Server
       id: deploy
       run: |
-        echo "Deploying Docker container..."
+        echo "Starting Docker deployment..."
         
-        # Save Docker image as tar
-        docker save mobilebackend:latest | gzip > mobilebackend.tar.gz
-        
-        # Transfer and load on server
-        scp -i ~/.ssh/healthykid.pem mobilebackend.tar.gz ubuntu@${{ secrets.SERVER_HOST }}:/tmp/
-        
-        ssh -i ~/.ssh/healthykid.pem ubuntu@${{ secrets.SERVER_HOST }} << 'EOF'
-          echo "Loading Docker image on server..."
-          docker load -i /tmp/mobilebackend.tar.gz
+        ssh -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
+          echo "=== DOCKER DEPLOYMENT ==="
+          cd /var/www/html
           
-          echo "Stopping old container..."
-          docker stop mobilebackend-container 2>/dev/null || true
-          docker rm mobilebackend-container 2>/dev/null || true
+          # Clean up old
+          docker stop mobilebackend 2>/dev/null || true
+          docker rm mobilebackend 2>/dev/null || true
+          rm -rf MobileBackend 2>/dev/null || true
           
-          echo "Starting new container..."
+          # Clone fresh code
+          git clone https://github.com/Srinivasg457/MobileBackend.git MobileBackend
+          cd MobileBackend
+          
+          # Create Dockerfile
+          cat > Dockerfile << 'DOCKERFILE'
+          FROM php:8.2-apache
+          WORKDIR /var/www/html
+          COPY . .
+          
+          # Install dependencies
+          RUN apt-get update && apt-get install -y \
+              git \
+              curl \
+              libpng-dev \
+              libzip-dev \
+              zip \
+              unzip \
+              && docker-php-ext-install pdo_mysql gd zip \
+              && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+              && composer install --no-dev --ignore-platform-reqs \
+              && rm -rf /var/lib/apt/lists/*
+          
+          EXPOSE 80
+          CMD ["apache2-foreground"]
+          DOCKERFILE
+          
+          # Build and run Docker container
+          echo "Building Docker image..."
+          docker build -t mobilebackend:latest .
+          
+          echo "Starting Docker container..."
           docker run -d \
-            --name mobilebackend-container \
+            --name mobilebackend \
             -p 8080:80 \
             -v /var/www/html/uploads:/var/www/html/uploads \
             --restart always \
             mobilebackend:latest
           
-          echo "✅ Docker container deployed on port 8080!"
-          echo "Container details:"
-          docker ps --filter "name=mobilebackend-container" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          echo "✅ Docker deployment completed!"
+          echo "📊 Container status:"
+          docker ps --filter "name=mobilebackend" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          
+          # Test if container is running
+          sleep 3
+          echo "🔍 Testing container..."
+          docker exec mobilebackend php --version || echo "Container not ready yet"
         EOF
         
         echo "status=success" >> $GITHUB_OUTPUT
@@ -101,19 +94,18 @@ jobs:
         echo "=========================================="
         if [ "${{ job.status }}" = "success" ]; then
           echo "🐳 ✅ DOCKER DEPLOYMENT DONE SUCCESSFULLY"
-          echo "📦 Image: mobilebackend:${{ github.sha }}"
           echo "🖥️ Server: ${{ secrets.SERVER_HOST }}"
           echo "🚪 Port: 8080"
           echo "🔗 Access: http://${{ secrets.SERVER_HOST }}:8080"
-          echo "🐘 PHP: 8.2 (Inside Docker)"
+          echo "📁 Path: /var/www/html/MobileBackend (inside container)"
         else
           echo "❌ DOCKER DEPLOYMENT FAILED"
+          echo "Check workflow logs for details"
         fi
         echo "=========================================="
     
     - name: 🧹 Cleanup
       if: always()
       run: |
-        rm -f mobilebackend.tar.gz
         rm -f ~/.ssh/healthykid.pem
         rm -f ~/.ssh/known_hosts
