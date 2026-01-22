@@ -17,42 +17,25 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
-        
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/healthykid.pem
         chmod 600 ~/.ssh/healthykid.pem
-        
         ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
         
     - name: Deploy to Server
       run: |
-        echo "Deploying to: ${{ secrets.SERVER_HOST }}"
-        
-        ssh -o StrictHostKeyChecking=no \
-            -i ~/.ssh/healthykid.pem \
-            ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
-          
-          echo "Connected to server $(hostname)"
-          echo "Current directory: $(pwd)"
-          
-          # Navigate to /var/www/html
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
           cd /var/www/html
-          
-          echo "Contents of /var/www/html:"
-          ls -la
-          
-          # Remove existing MobileBackend if it exists
           rm -rf MobileBackend 2>/dev/null || true
-          
-          # Clone YOUR repository (MobileBackend)
-          echo "Cloning MobileBackend repository..."
           git clone https://github.com/Srinivasg457/MobileBackend.git MobileBackend
-          
-          # Go into the cloned directory
           cd MobileBackend
-          
-          echo "=== Deployment Successful! ==="
-          echo "Files deployed to: /var/www/html/MobileBackend/"
-          echo "Total files: $(find . -type f | wc -l)"
-          echo "Listing contents:"
+          echo "✅ Deployment successful!"
           ls -la
         EOF
+
+# Email notifications
+notifications:
+  email:
+    recipients:
+      - srinivasg457@gmail.com  # Change to your email
+    on_success: change
+    on_failure: always
