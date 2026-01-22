@@ -13,42 +13,45 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Setup SSH
+    - name: Setup SSH with PEM
       run: |
+        # Create SSH directory
         mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+        chmod 700 ~/.ssh
+        
+        # Write PEM private key
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/healthykid.pem
+        chmod 600 ~/.ssh/healthykid.pem
+        
+        # Add server to known_hosts
+        ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
         
     - name: Deploy to Server
       run: |
-        ssh ubuntu@${{ secrets.SERVER_HOST }} << 'EOF'
+        echo "Deploying to server: ${{ secrets.SERVER_HOST }}"
+        
+        # Use -i flag with PEM file and disable host key checking
+        ssh -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -i ~/.ssh/healthykid.pem \
+            ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
+          
+          echo "Connected to server $(hostname)"
+          
           cd /var/www/html/MobileBackend
           
-          # Pull latest changes or clone if doesn't exist
           if [ -d .git ]; then
+            echo "Pulling latest changes..."
             git pull origin main
           else
+            echo "Cloning repository..."
             cd ..
-            rm -rf MobileBackend
-            git clone ${{ github.repositoryUrl }} MobileBackend
+            sudo rm -rf MobileBackend 2>/dev/null || true
+            git clone https://github.com/${{ github.repository }}.git MobileBackend
             cd MobileBackend
           fi
           
-          # Install dependencies (if using Node.js, Python, etc.)
-          # Example for Node.js:
-          # if [ -f package.json ]; then
-          #   npm install
-          # fi
-          
-          # Example for Python:
-          # if [ -f requirements.txt ]; then
-          #   pip install -r requirements.txt
-          # fi
-          
-          # Restart service if needed
-          # Example for systemd service:
-          # sudo systemctl restart mobile-backend.service
-          
+          echo "Listing deployed files:"
+          ls -la
           echo "Deployment completed successfully!"
         EOF
