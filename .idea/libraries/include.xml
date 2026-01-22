@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="include">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/application/views/admin/user/include/include.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
