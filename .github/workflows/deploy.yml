@@ -1,4 +1,4 @@
-name: 🚀 Deploy to Ubuntu Server
+name: 🐳 Deploy with Docker
 
 on:
   push:
@@ -6,54 +6,52 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-    # 1. Checkout Code
     - name: 📥 Checkout code
       uses: actions/checkout@v3
       
-    # 2. Setup Docker (if needed)
-    - name: 🐳 Setup Docker
-      if: contains(github.event.head_commit.message, '[docker]')
-      run: |
-        echo "Setting up Docker..."
-        # You can pull required Docker images here
-        # docker pull node:18-alpine
-        # docker pull nginx:alpine
-        # docker pull mysql:8.0
-      
-    # 3. Build Docker Image (Optional)
     - name: 🐳 Build Docker Image
-      if: contains(github.event.head_commit.message, '[docker-build]')
+      id: build
       run: |
         echo "Building Docker image..."
-        # docker build -t mobilebackend:${{ github.sha }} .
-        # docker tag mobilebackend:${{ github.sha }} mobilebackend:latest
-      
-    # 4. Run Tests (if you have tests)
-    - name: ✅ Run Tests
-      if: always()
-      run: |
-        echo "Running tests..."
-        # Example for Node.js:
-        # npm test
-        # Example for Python:
-        # python -m pytest
+        DEPLOYMENT_TIME=$(date)
         
-    # 5. Code Quality Checks
-    - name: 🔍 Code Quality
-      if: always()
-      run: |
-        echo "Checking code quality..."
-        # Example checks:
-        # echo "Checking for syntax errors..."
-        # echo "Checking file permissions..."
-        # echo "Validating configuration files..."
-      
-    # 6. Setup SSH
-    - name: 🔑 Setup SSH with PEM
+        # Create Dockerfile for PHP 8.2
+        cat > Dockerfile << 'DOCKERFILE'
+        FROM php:8.2-apache
+        WORKDIR /var/www/html
+        COPY . .
+        
+        # Install system dependencies
+        RUN apt-get update && apt-get install -y \
+            git \
+            nodejs \
+            npm \
+            libpng-dev \
+            libzip-dev \
+            zip \
+            unzip \
+            && docker-php-ext-install pdo_mysql gd zip \
+            && npm install \
+            && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+            && composer install --no-dev \
+            && rm -rf /var/lib/apt/lists/*
+        
+        EXPOSE 80
+        CMD ["apache2-foreground"]
+        DOCKERFILE
+        
+        # Build the image
+        docker build -t mobilebackend:${{ github.sha }} .
+        docker tag mobilebackend:${{ github.sha }} mobilebackend:latest
+        
+        echo "image_size=$(docker images mobilebackend:latest --format "{{.Size}}")" >> $GITHUB_OUTPUT
+        echo "deployment_time=$DEPLOYMENT_TIME" >> $GITHUB_OUTPUT
+        
+    - name: 🔑 Setup SSH
       run: |
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
@@ -61,147 +59,62 @@ jobs:
         chmod 600 ~/.ssh/healthykid.pem
         ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
         
-    # 7. Deploy to Server
-    - name: 🚀 Deploy to Server
+    - name: 🚀 Deploy Docker Container
       id: deploy
       run: |
-        echo "🚀 Starting deployment..."
-        DEPLOYMENT_TIME=$(date)
+        echo "Deploying Docker container..."
         
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
-          echo "=== SERVER DEPLOYMENT SCRIPT ==="
-          cd /var/www/html
+        # Save Docker image as tar
+        docker save mobilebackend:latest | gzip > mobilebackend.tar.gz
+        
+        # Transfer and load on server
+        scp -i ~/.ssh/healthykid.pem mobilebackend.tar.gz ubuntu@${{ secrets.SERVER_HOST }}:/tmp/
+        
+        ssh -i ~/.ssh/healthykid.pem ubuntu@${{ secrets.SERVER_HOST }} << 'EOF'
+          echo "Loading Docker image on server..."
+          docker load -i /tmp/mobilebackend.tar.gz
           
-          # Backup existing (optional)
-          if [ -d "MobileBackend" ]; then
-            echo "📦 Creating backup..."
-            tar -czf MobileBackend-backup-$(date +%Y%m%d-%H%M%S).tar.gz MobileBackend
-          fi
+          echo "Stopping old container..."
+          docker stop mobilebackend-container 2>/dev/null || true
+          docker rm mobilebackend-container 2>/dev/null || true
           
-          # Remove old and clone new
-          rm -rf MobileBackend 2>/dev/null || true
-          echo "⬇️ Cloning repository..."
-          git clone https://github.com/Srinivasg457/MobileBackend.git MobileBackend
+          echo "Starting new container..."
+          docker run -d \
+            --name mobilebackend-container \
+            -p 8080:80 \
+            -v /var/www/html/uploads:/var/www/html/uploads \
+            --restart always \
+            mobilebackend:latest
           
-          cd MobileBackend
-          
-          # Install dependencies (example for different languages)
-          echo "📦 Installing dependencies..."
-          
-          # Node.js
-          if [ -f "package.json" ]; then
-            echo "📦 Installing Node.js dependencies..."
-            npm install --only=production
-          fi
-          
-          # Python
-          if [ -f "requirements.txt" ]; then
-            echo "📦 Installing Python dependencies..."
-            pip install -r requirements.txt
-          fi
-          
-          # PHP
-          if [ -f "composer.json" ]; then
-            echo "📦 Installing PHP dependencies..."
-            composer install --no-dev
-          fi
-          
-          # Set permissions
-          echo "🔒 Setting permissions..."
-          chmod -R 755 .
-          chmod -R 777 storage/ 2>/dev/null || true  # For Laravel
-          chmod -R 777 uploads/ 2>/dev/null || true  # For upload directories
-          
-          # Restart services (if needed)
-          echo "🔄 Restarting services..."
-          # sudo systemctl restart nginx 2>/dev/null || true
-          # sudo systemctl restart apache2 2>/dev/null || true
-          # sudo systemctl restart mobilebackend.service 2>/dev/null || true
-          
-          # Docker commands (if using Docker on server)
-          # echo "🐳 Managing Docker containers..."
-          # docker-compose down 2>/dev/null || true
-          # docker-compose up -d 2>/dev/null || true
-          
-          echo "✅ Deployment successful at: $(date)"
-          echo "📊 Deployment Summary:"
-          echo "   Files: $(find . -type f | wc -l)"
-          echo "   Size: $(du -sh . | cut -f1)"
-          echo "   Location: $(pwd)"
-          ls -la
+          echo "✅ Docker container deployed on port 8080!"
+          echo "Container details:"
+          docker ps --filter "name=mobilebackend-container" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
         EOF
         
-        # Set outputs
-        echo "deployment_time=$DEPLOYMENT_TIME" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
     
-    # 8. Verify Deployment
-    - name: 🔍 Verify Deployment
-      if: success()
+    - name: 📊 Deployment Summary
+      if: always()
       run: |
-        echo "🔍 Verifying deployment..."
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
-          echo "=== VERIFICATION ==="
-          cd /var/www/html/MobileBackend
-          
-          # Check if key files exist
-          echo "📁 Checking essential files:"
-          [ -f "index.php" ] && echo "✅ index.php exists" || echo "⚠️ index.php missing"
-          [ -f "package.json" ] && echo "✅ package.json exists" || echo "ℹ️ package.json not found"
-          [ -f "requirements.txt" ] && echo "✅ requirements.txt exists" || echo "ℹ️ requirements.txt not found"
-          
-          # Check if application is running (example)
-          echo "🌐 Checking if application is accessible..."
-          # curl -s -o /dev/null -w "%{http_code}" http://localhost/ || echo "curl not available"
-          
-          echo "✅ Verification completed"
-        EOF
+        echo "=========================================="
+        echo "        DOCKER DEPLOYMENT SUMMARY        "
+        echo "=========================================="
+        if [ "${{ job.status }}" = "success" ]; then
+          echo "🐳 ✅ DOCKER DEPLOYMENT DONE SUCCESSFULLY"
+          echo "📦 Image: mobilebackend:${{ github.sha }}"
+          echo "🖥️ Server: ${{ secrets.SERVER_HOST }}"
+          echo "🚪 Port: 8080"
+          echo "🔗 Access: http://${{ secrets.SERVER_HOST }}:8080"
+          echo "🐘 PHP: 8.2 (Inside Docker)"
+        else
+          echo "❌ DOCKER DEPLOYMENT FAILED"
+        fi
+        echo "=========================================="
     
-    # 9. Cleanup
     - name: 🧹 Cleanup
       if: always()
       run: |
-        echo "🧹 Cleaning up..."
-        # Remove sensitive files
+        rm -f mobilebackend.tar.gz
         rm -f ~/.ssh/healthykid.pem
         rm -f ~/.ssh/known_hosts
-    
-    # 10. Success Email
-    - name: 📧 Send Success Email
-      if: success()
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.gmail.com
-        server_port: 465
-        username: ${{ secrets.EMAIL_USERNAME }}
-        password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "✅ DEPLOYMENT SUCCESS: ${{ github.repository }}"
-        to: shreelimitscale@gmail.com
-        from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
-        html_body: |
-          <h2>🎉 Deployment Successful!</h2>
-          <p><strong>Status:</strong> <span style="color: green; font-weight: bold;">✅ SUCCESS</span></p>
-          <h3>Details:</h3>
-          <ul>
-            <li><strong>Repository:</strong> ${{ github.repository }}</li>
-            <li><strong>Server:</strong> ${{ secrets.SERVER_HOST }}</li>
-            <li><strong>Path:</strong> /var/www/html/MobileBackend</li>
-            <li><strong>Time:</strong> ${{ steps.deploy.outputs.deployment_time }}</li>
-          </ul>
-          <p><a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow</a></p>
-    
-    # 11. Failure Email
-    - name: 📧 Send Failure Email
-      if: failure()
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.gmail.com
-        server_port: 465
-        username: ${{ secrets.EMAIL_USERNAME }}
-        password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "❌ DEPLOYMENT FAILED: ${{ github.repository }}"
-        to: shreelimitscale@gmail.com
-        from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
-        html_body: |
-          <h2>❌ Deployment Failed!</h2>
-          <p><a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">Check logs</a></p>
+EOF
