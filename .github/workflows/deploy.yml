@@ -1,4 +1,4 @@
-name: 🐳 Deploy with Docker
+name: 🚀 Deploy to Server
 
 on:
   push:
@@ -21,102 +21,35 @@ jobs:
         chmod 600 ~/.ssh/healthykid.pem
         ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
         
-    - name: 🚀 Deploy via Git on Server
-      id: deploy
+    - name: 🚀 Deploy to Server
       run: |
-        echo "Starting Docker deployment..."
-        
-        # Use a script file instead of complex heredoc
-        cat > deploy-script.sh << 'SCRIPT_EOF'
-#!/bin/bash
-echo "=== DOCKER DEPLOYMENT ==="
-cd /var/www/html
-
-# Clean up old
-docker stop mobilebackend 2>/dev/null || true
-docker rm mobilebackend 2>/dev/null || true
-rm -rf MobileBackend 2>/dev/null || true
-
-# Clone fresh code
-git clone https://github.com/Srinivasg457/MobileBackend.git MobileBackend
-cd MobileBackend
-
-# Create Dockerfile
-cat > Dockerfile << 'EOF'
-FROM php:8.2-apache
-WORKDIR /var/www/html
-COPY . .
-
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    && docker-php-ext-install pdo_mysql gd zip \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer install --no-dev --ignore-platform-reqs \
-    && rm -rf /var/lib/apt/lists/*
-
-EXPOSE 80
-CMD ["apache2-foreground"]
-EOF
-
-echo "Dockerfile created. Contents:"
-head -20 Dockerfile
-
-# Build and run Docker container
-echo "Building Docker image..."
-docker build -t mobilebackend:latest .
-
-echo "Starting Docker container..."
-docker run -d \
-  --name mobilebackend \
-  -p 8080:80 \
-  -v /var/www/html/uploads:/var/www/html/uploads \
-  --restart always \
-  mobilebackend:latest
-
-echo "✅ Docker deployment completed!"
-echo "📊 Container status:"
-docker ps --filter "name=mobilebackend" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
-# Test if container is running
-sleep 3
-echo "🔍 Testing container..."
-docker exec mobilebackend php --version 2>/dev/null || echo "Container not ready yet"
-SCRIPT_EOF
-
-        chmod +x deploy-script.sh
-        
-        # Copy and run script on server
-        scp -i ~/.ssh/healthykid.pem deploy-script.sh ubuntu@${{ secrets.SERVER_HOST }}:/tmp/
-        ssh -i ~/.ssh/healthykid.pem ubuntu@${{ secrets.SERVER_HOST }} "bash /tmp/deploy-script.sh"
-        
-        echo "status=success" >> $GITHUB_OUTPUT
+        ssh -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
+          cd /var/www/html
+          rm -rf MobileBackend 2>/dev/null || true
+          git clone https://github.com/Srinivasg457/MobileBackend.git MobileBackend
+          cd MobileBackend
+          echo "✅ DEPLOYMENT DONE SUCCESSFULLY"
+          echo "📊 Files deployed: $(find . -type f | wc -l)"
+        EOF
     
     - name: 📊 Deployment Summary
       if: always()
       run: |
         echo "=========================================="
-        echo "        DOCKER DEPLOYMENT SUMMARY        "
+        echo "        DEPLOYMENT SUMMARY               "
         echo "=========================================="
         if [ "${{ job.status }}" = "success" ]; then
-          echo "🐳 ✅ DOCKER DEPLOYMENT DONE SUCCESSFULLY"
+          echo "✅ DEPLOYMENT DONE SUCCESSFULLY"
           echo "🖥️ Server: ${{ secrets.SERVER_HOST }}"
-          echo "🚪 Port: 8080"
-          echo "🔗 Access: http://${{ secrets.SERVER_HOST }}:8080"
+          echo "📁 Path: /var/www/html/MobileBackend"
+          echo "🔗 Access: http://${{ secrets.SERVER_HOST }}/MobileBackend"
         else
-          echo "❌ DOCKER DEPLOYMENT FAILED"
-          echo "Check workflow logs for details"
+          echo "❌ DEPLOYMENT FAILED"
         fi
         echo "=========================================="
     
     - name: 🧹 Cleanup
       if: always()
       run: |
-        rm -f deploy-script.sh
         rm -f ~/.ssh/healthykid.pem
         rm -f ~/.ssh/known_hosts
