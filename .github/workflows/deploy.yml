@@ -1,18 +1,19 @@
-name: Deploy to Ubuntu Server
+name: 🚀 Deploy to Ubuntu Server
 
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
+    - name: 📥 Checkout code
       uses: actions/checkout@v3
       
-    - name: Setup SSH with PEM
+    - name: 🔑 Setup SSH with PEM
       run: |
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
@@ -20,13 +21,95 @@ jobs:
         chmod 600 ~/.ssh/healthykid.pem
         ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
         
-    - name: Deploy to Server
+    - name: 🚀 Deploy to Server
+      id: deploy
       run: |
+        echo "🚀 Starting deployment..."
+        DEPLOYMENT_TIME=$(date)
+        
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
           cd /var/www/html
           rm -rf MobileBackend 2>/dev/null || true
           git clone https://github.com/Srinivasg457/MobileBackend.git MobileBackend
           cd MobileBackend
-          echo "✅ Deployment successful!"
+          echo "✅ Deployment successful at: $(date)"
           ls -la
         EOF
+        
+        # Set outputs for email
+        echo "deployment_time=$DEPLOYMENT_TIME" >> $GITHUB_OUTPUT
+        echo "status=success" >> $GITHUB_OUTPUT
+    
+    # Send Email on Success
+    - name: 📧 Send Success Email
+      if: success()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "✅ DEPLOYMENT SUCCESS: ${{ github.repository }}"
+        to: shreelimitscale@gmail.com
+        from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+        html_body: |
+          <h2>🎉 Deployment Successful!</h2>
+          
+          <p><strong>Status:</strong> <span style="color: green; font-weight: bold;">✅ SUCCESS</span></p>
+          
+          <h3>Deployment Details:</h3>
+          <ul>
+            <li><strong>Repository:</strong> ${{ github.repository }}</li>
+            <li><strong>Branch:</strong> ${{ github.ref_name }}</li>
+            <li><strong>Commit:</strong> <a href="https://github.com/${{ github.repository }}/commit/${{ github.sha }}">${{ github.sha }}</a></li>
+            <li><strong>Author:</strong> ${{ github.actor }}</li>
+            <li><strong>Server:</strong> ${{ secrets.SERVER_HOST }}</li>
+            <li><strong>Deployment Path:</strong> /var/www/html/MobileBackend</li>
+            <li><strong>Deployment Time:</strong> ${{ steps.deploy.outputs.deployment_time }}</li>
+          </ul>
+          
+          <h3>Access Links:</h3>
+          <ul>
+            <li><a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a></li>
+            <li><a href="https://github.com/${{ github.repository }}/commit/${{ github.sha }}">View Commit</a></li>
+            <li><a href="http://${{ secrets.SERVER_HOST }}/MobileBackend">Access Application</a></li>
+          </ul>
+          
+          <hr>
+          <p><em>This is an automated deployment notification from GitHub Actions.</em></p>
+    
+    # Send Email on Failure
+    - name: 📧 Send Failure Email
+      if: failure()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "❌ DEPLOYMENT FAILED: ${{ github.repository }}"
+        to: shreelimitscale@gmail.com
+        from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+        html_body: |
+          <h2>❌ Deployment Failed!</h2>
+          
+          <p><strong>Status:</strong> <span style="color: red; font-weight: bold;">❌ FAILED</span></p>
+          
+          <h3>Details:</h3>
+          <ul>
+            <li><strong>Repository:</strong> ${{ github.repository }}</li>
+            <li><strong>Branch:</strong> ${{ github.ref_name }}</li>
+            <li><strong>Commit:</strong> <a href="https://github.com/${{ github.repository }}/commit/${{ github.sha }}">${{ github.sha }}</a></li>
+            <li><strong>Author:</strong> ${{ github.actor }}</li>
+            <li><strong>Error Time:</strong> $(date)</li>
+          </ul>
+          
+          <p><strong>Error Details:</strong> Check the workflow run for more information.</p>
+          
+          <h3>Links:</h3>
+          <ul>
+            <li><a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Failed Workflow Run</a></li>
+          </ul>
+          
+          <hr>
+          <p><em>This is an automated deployment notification from GitHub Actions.</em></p>
