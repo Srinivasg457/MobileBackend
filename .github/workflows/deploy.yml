@@ -21,7 +21,7 @@ jobs:
         chmod 600 ~/.ssh/healthykid.pem
         ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
         
-    - name: 🚀 Deploy to Server
+    - name: 🚀 Deploy to server
       run: |
         ssh -i ~/.ssh/healthykid.pem ubuntu@"${{ secrets.SERVER_HOST }}" << 'EOF'
           cd /var/www/html
